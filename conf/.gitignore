@@ -1,0 +1,3 @@
+#过滤本地证书文件
+vpn_cert.key
+vpn_cert.pem

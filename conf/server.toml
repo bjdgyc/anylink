@@ -1,0 +1,48 @@
+#服务配置信息
+
+#其他配置文件,可以使用绝对路径
+#或者相对于server.toml的路径
+user_file = "./user.toml"
+#证书文件
+cert_file = "./vpn_cert.pem"
+cert_key = "./vpn_cert.key"
+
+#服务监听的地址
+server_addr = ":443"
+debug_addr = "127.0.0.1:8800"
+
+#用户组
+link_groups = ["one", "two"]
+#默认选择的组
+default_group = "one"
+
+#登陆成功的欢迎语
+banner = "您已接入公司网络，请按照公司规定使用。\n请勿进行非工作下载及视频行为！"
+
+#客户端失效检测时间(秒) dpd > keepalive
+cstp_dpd = 30
+cstp_keepalive = 20
+#session过期时间，用于断线重连，0永不过期
+session_timeout = 3600
+auth_timeout = 0
+
+
+#最大客户端数量
+max_client = 300
+#单个用户同时在线数量
+max_user_client = 3
+
+#客户端分配的ip地址池
+ipv4_network = "192.168.10.0"
+ipv4_netmask = "255.255.255.0"
+#需加密传输的ip规则
+#include = ["10.10.10.0/255.255.255.0"]
+#非加密传输的ip规则
+#exclude = ["192.168.5.0/255.255.255.0"]
+#客户端使用的dns
+client_dns = ["114.114.114.114"]
+#是否允许本地LAN访问vpn网络
+allow_lan = true
+
+
+
