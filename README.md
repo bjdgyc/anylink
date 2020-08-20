@@ -8,7 +8,7 @@ AnyLink 基于 [ietf-openconnect](https://tools.ietf.org/html/draft-mavrogiannop
 
 AnyLink 使用TLS/DTLS进行数据加密，因此需要RSA或ECC证书，可以通过 Let's Encrypt 和 TrustAsia 申请免费的SSL证书。
 
-AnyLink 服务端仅在CentOs7测试通过，如需要安装在其他系统，需要服务端支持tun功能、ip设置命令。
+AnyLink 服务端仅在CentOS7测试通过，如需要安装在其他系统，需要服务端支持tun功能、ip设置命令。
 
 ## Installation
 
@@ -26,6 +26,7 @@ sudo ./anylink -conf="conf/server.toml"
 - [x] TLS-TCP通道
 - [x] 兼容AnyConnect
 - [x] 多用户支持
+- [x] 支持 [proxy protocol v1](http://www.haproxy.org/download/2.2/doc/proxy-protocol.txt) 协议
 - [ ] DTLS-UDP通道
 - [ ] 后台管理界面
 - [ ] 用户组支持

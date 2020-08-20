@@ -3,11 +3,13 @@ package handler
 import (
 	"crypto/tls"
 	"fmt"
+	"github.com/bjdgyc/anylink/proxyproto"
 	"log"
 	"net"
 	"net/http"
 	"net/http/httputil"
 	_ "net/http/pprof"
+	"time"
 
 	"github.com/bjdgyc/anylink/common"
 	"github.com/julienschmidt/httprouter"
@@ -40,13 +42,18 @@ func startTls() {
 		TLSConfig: tlsConfig,
 	}
 
+	var ln net.Listener
+
 	ln, err := net.Listen("tcp", addr)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer ln.Close()
 
-	srv.SetKeepAlivesEnabled(true)
+	if common.ServerCfg.ProxyProtocol {
+		ln = &proxyproto.Listener{Listener: ln, ProxyHeaderTimeout: time.Second * 5}
+	}
+
 	fmt.Println("listen ", addr)
 	err = srv.ServeTLS(ln, certFile, keyFile)
 	if err != nil {

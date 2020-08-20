@@ -2,6 +2,7 @@ package handler
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 
@@ -19,7 +20,7 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	// TODO 调试信息输出
 	// hd, _ := httputil.DumpRequest(r, true)
 	// fmt.Println("DumpRequest: ", string(hd))
-	// fmt.Println(r.RemoteAddr)
+	fmt.Println("LinkTunnel", r.RemoteAddr)
 
 	// 判断session-token的值
 	cookie, err := r.Cookie("webvpn")
@@ -35,8 +36,9 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 开启link
-	sess.StartLink()
-	if sess.NetIp == nil {
+	cSess := sess.StartConn()
+	if cSess == nil {
+		log.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -44,14 +46,14 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	// 客户端信息
 	cstp_mtu := r.Header.Get("X-CSTP-MTU")
 	master_Secret := r.Header.Get("X-DTLS-Master-Secret")
-	sess.MasterSecret = master_Secret
-	sess.Mtu = cstp_mtu
-	sess.RemoteAddr = r.RemoteAddr
+	cSess.MasterSecret = master_Secret
+	cSess.Mtu = cstp_mtu
+	cSess.RemoteAddr = r.RemoteAddr
 
 	w.Header().Set("Server", fmt.Sprintf("%s %s", common.APP_NAME, common.APP_VER))
 	w.Header().Set("X-CSTP-Version", "1")
 	w.Header().Set("X-CSTP-Protocol", "Copyright (c) 2004 Cisco Systems, Inc.")
-	w.Header().Set("X-CSTP-Address", sess.NetIp.String())          // 分配的ip地址
+	w.Header().Set("X-CSTP-Address", cSess.NetIp.String())    // 分配的ip地址
 	w.Header().Set("X-CSTP-Netmask", common.ServerCfg.Ipv4Netmask) // 子网掩码
 	w.Header().Set("X-CSTP-Hostname", hn)                          // 机器名称
 	for _, v := range common.ServerCfg.ClientDns {
@@ -115,6 +117,6 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 开始数据处理
-	go LinkTun(sess)
-	go LinkCstp(conn, sess)
+	go LinkTun(cSess)
+	go LinkCstp(conn, cSess)
 }

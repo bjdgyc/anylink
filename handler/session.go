@@ -17,25 +17,31 @@ var (
 	sessions = make(map[string]*Session) // session_token -> SessUser
 )
 
-type Session struct {
-	Sid     string // auth返回的 session-id
-	Token   string // session信息的唯一token
-	DtlsSid string // dtls协议的 session_id
-	MacAddr string // 客户端mac地址
-
-	// 开启link需要设置的参数
+// 连接sess
+type ConnSession struct {
+	Sess         *Session
 	MasterSecret string // dtls协议的 master_secret
 	NetIp        net.IP // 分配的ip地址
-	UserName     string // 用户名
 	RemoteAddr   string
 	Mtu          string
 	TunName      string
-	IsActive     bool
-	LastLogin    time.Time
 	closeOnce    sync.Once
 	Closed       chan struct{}
 	PayloadIn    chan *Payload
 	PayloadOut   chan *Payload
+}
+
+type Session struct {
+	Sid       string // auth返回的 session-id
+	Token     string // session信息的唯一token
+	DtlsSid   string // dtls协议的 session_id
+	MacAddr   string // 客户端mac地址
+	UserName  string // 用户名
+	LastLogin time.Time
+	IsActive  bool
+
+	// 开启link需要设置的参数
+	CSess *ConnSession
 }
 
 func init() {
@@ -86,28 +92,37 @@ func NewSession() *Session {
 	return sess
 }
 
-func (s *Session) StartLink() {
+func (s *Session) StartConn() *ConnSession {
+	if s.IsActive == true {
+		s.CSess.Close()
+	}
+
 	limit := common.LimitClient(s.UserName, false)
 	if limit == false {
-		s.NetIp = nil
-		return
+		// s.NetIp = nil
+		return nil
 	}
-	s.NetIp = common.AcquireIp(s.MacAddr)
 	s.IsActive = true
-	s.closeOnce = sync.Once{}
-	s.Closed = make(chan struct{})
-	s.PayloadIn = make(chan *Payload)
-	s.PayloadOut = make(chan *Payload)
+	cSess := &ConnSession{
+		Sess:       s,
+		NetIp:      common.AcquireIp(s.MacAddr),
+		closeOnce:  sync.Once{},
+		Closed:     make(chan struct{}),
+		PayloadIn:  make(chan *Payload),
+		PayloadOut: make(chan *Payload),
+	}
+	s.CSess = cSess
+	return cSess
 }
 
-func (s *Session) Close() {
-	s.closeOnce.Do(func() {
+func (cs *ConnSession) Close() {
+	cs.closeOnce.Do(func() {
 		log.Println("closeOnce")
-		close(s.Closed)
-		s.IsActive = false
-		s.LastLogin = time.Now()
-		common.ReleaseIp(s.NetIp, s.MacAddr)
-		common.LimitClient(s.UserName, true)
+		close(cs.Closed)
+		cs.Sess.IsActive = false
+		cs.Sess.LastLogin = time.Now()
+		common.ReleaseIp(cs.NetIp, cs.Sess.MacAddr)
+		common.LimitClient(cs.Sess.UserName, true)
 	})
 }
 

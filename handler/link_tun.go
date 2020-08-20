@@ -29,10 +29,10 @@ func testTun() {
 }
 
 // 创建tun网卡
-func LinkTun(sess *Session) {
+func LinkTun(sess *ConnSession) {
 	defer func() {
-		sess.Close()
 		log.Println("LinkTun return")
+		sess.Close()
 	}()
 
 	cfg := water.Config{
@@ -84,7 +84,11 @@ func LinkTun(sess *Session) {
 
 }
 
-func tunRead(ifce *water.Interface, sess *Session) {
+func tunRead(ifce *water.Interface, sess *ConnSession) {
+	defer func() {
+		log.Println("tunRead return")
+		ifce.Close()
+	}()
 	var (
 		err error
 		n   int

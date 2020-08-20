@@ -47,6 +47,7 @@ func checkVpnClient(h httprouter.Handle) httprouter.Handle {
 		// TODO 调试信息输出
 		// hd, _ := httputil.DumpRequest(r, true)
 		// fmt.Println("DumpRequest: ", string(hd))
+		fmt.Println(r.RemoteAddr)
 
 		user_Agent := strings.ToLower(r.UserAgent())
 		x_Aggregate_Auth := r.Header.Get("X-Aggregate-Auth")

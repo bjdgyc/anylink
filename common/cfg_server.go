@@ -27,6 +27,7 @@ type ServerConfig struct {
 	UserFile       string   `toml:"user_file"`
 	ServerAddr     string   `toml:"server_addr"`
 	DebugAddr      string   `toml:"debug_addr"`
+	ProxyProtocol  bool     `toml:"proxy_protocol"`
 	CertFile       string   `toml:"cert_file"`
 	CertKey        string   `toml:"cert_key"`
 	LinkGroups     []string `toml:"link_groups"`

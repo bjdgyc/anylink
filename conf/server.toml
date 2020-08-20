@@ -10,6 +10,8 @@ cert_key = "./vpn_cert.key"
 #服务监听的地址
 server_addr = ":443"
 debug_addr = "127.0.0.1:8800"
+#开启tcp proxy protocol协议
+proxy_protocol = false
 
 #用户组
 link_groups = ["one", "two"]

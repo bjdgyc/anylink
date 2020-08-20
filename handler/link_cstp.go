@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/binary"
+	"fmt"
 	"log"
 	"net"
 	"time"
@@ -9,12 +10,12 @@ import (
 	"github.com/bjdgyc/anylink/common"
 )
 
-func LinkCstp(conn net.Conn, sess *Session) {
+func LinkCstp(conn net.Conn, sess *ConnSession) {
 	// fmt.Println("HandlerCstp")
 	defer func() {
+		log.Println("LinkCstp return")
 		conn.Close()
 		sess.Close()
-		log.Println("LinkCstp return")
 	}()
 
 	var (
@@ -47,7 +48,7 @@ func LinkCstp(conn net.Conn, sess *Session) {
 			// fmt.Println("DISCONNECT")
 			return
 		case 0x03: // DPD-REQ
-			// fmt.Println("DPD-REQ")
+			fmt.Println("DPD-REQ")
 			payload := &Payload{
 				ptype: 0x04, // DPD-RESP
 			}
@@ -73,11 +74,11 @@ func LinkCstp(conn net.Conn, sess *Session) {
 	}
 }
 
-func cstpWrite(conn net.Conn, sess *Session) {
+func cstpWrite(conn net.Conn, sess *ConnSession) {
 	defer func() {
+		log.Println("cstpWrite return")
 		conn.Close()
 		sess.Close()
-		log.Println("cstpWrite return")
 	}()
 
 	var (
