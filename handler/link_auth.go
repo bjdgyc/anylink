@@ -9,10 +9,10 @@ import (
 	"text/template"
 
 	"github.com/bjdgyc/anylink/common"
-	"github.com/julienschmidt/httprouter"
+	"github.com/bjdgyc/anylink/sessdata"
 )
 
-func LinkAuth(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -32,7 +32,7 @@ func LinkAuth(w http.ResponseWriter, r *http.Request, params httprouter.Params) 
 	if cr.Type == "logout" {
 		// 退出删除session信息
 		if cr.SessionToken != "" {
-			DelSessByStoken(cr.SessionToken)
+			sessdata.DelSessByStoken(cr.SessionToken)
 		}
 		w.WriteHeader(http.StatusOK)
 		return
@@ -40,29 +40,30 @@ func LinkAuth(w http.ResponseWriter, r *http.Request, params httprouter.Params) 
 
 	if cr.Type == "init" {
 		w.WriteHeader(http.StatusOK)
-		data := RequestData{Group: cr.GroupSelect, Groups: common.ServerCfg.LinkGroups}
+		data := RequestData{Group: cr.GroupSelect, Groups: common.ServerCfg.UserGroups}
 		tplRequest(tpl_request, w, data)
 		return
 	}
 
 	// 登陆参数判断
-	if cr.Type != "auth-reply" || cr.Auth.Username == "" || cr.Auth.Password == "" {
+	if cr.Type != "auth-reply" {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	// TODO 用户密码校验
-	if !common.CheckUser(cr.Auth.Username, cr.Auth.Password, cr.GroupSelect) {
+	if !CheckUser(cr.Auth.Username, cr.Auth.Password, cr.GroupSelect) {
 		w.WriteHeader(http.StatusOK)
-		data := RequestData{Group: cr.GroupSelect, Groups: common.ServerCfg.LinkGroups, Error: true}
+		data := RequestData{Group: cr.GroupSelect, Groups: common.ServerCfg.UserGroups, Error: true}
 		tplRequest(tpl_request, w, data)
 		return
 	}
 
 	// 创建新的session信息
-	sess := NewSession()
+	sess := sessdata.NewSession()
 	sess.UserName = cr.Auth.Username
 	sess.MacAddr = strings.ToLower(cr.MacAddressList.MacAddress)
+	sess.UniqueIdGlobal = cr.DeviceId.UniqueIdGlobal
 	cd := RequestData{SessionId: sess.Sid, SessionToken: sess.Sid + "@" + sess.Token,
 		Banner: common.ServerCfg.Banner}
 	w.WriteHeader(http.StatusOK)

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -13,6 +14,7 @@ import (
 var COMMIT_ID string
 
 func main() {
+	log.Println("start")
 	common.CommitId = COMMIT_ID
 	common.InitConfig()
 	handler.Start()
@@ -33,6 +35,7 @@ func signalWatch() {
 			fmt.Println("reload")
 		default:
 			// stop
+			handler.Stop()
 			return
 		}
 	}

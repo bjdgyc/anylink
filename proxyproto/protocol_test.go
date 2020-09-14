@@ -484,5 +484,3 @@ func TestCopyFromWrappedConnectionToWrappedConnection(t *testing.T) {
 	}
 
 }
-
-

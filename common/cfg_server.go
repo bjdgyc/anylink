@@ -8,6 +8,11 @@ import (
 	"github.com/pelletier/go-toml"
 )
 
+const (
+	LinkModeTUN = "tun"
+	LinkModeTAP = "tap"
+)
+
 var (
 	ServerCfg = &ServerConfig{}
 )
@@ -24,28 +29,34 @@ var (
 // rekey-method = ssl
 
 type ServerConfig struct {
-	UserFile       string   `toml:"user_file"`
-	ServerAddr     string   `toml:"server_addr"`
-	DebugAddr      string   `toml:"debug_addr"`
-	ProxyProtocol  bool     `toml:"proxy_protocol"`
-	CertFile       string   `toml:"cert_file"`
-	CertKey        string   `toml:"cert_key"`
-	LinkGroups     []string `toml:"link_groups"`
+	ServerAddr    string `toml:"server_addr"`
+	AdminAddr     string `toml:"admin_addr"`
+	ProxyProtocol bool   `toml:"proxy_protocol"`
+	DbFile        string `toml:"db_file"`
+	CertFile      string `toml:"cert_file"`
+	CertKey       string `toml:"cert_key"`
+	LogLevel      string `toml:"log_level"`
+
+	LinkMode      string   `toml:"link_mode"`    // tun tap
+	Ipv4Network   string   `toml:"ipv4_network"` // 192.168.1.0
+	Ipv4Netmask   string   `toml:"ipv4_netmask"` // 255.255.255.0
+	Ipv4Gateway   string   `toml:"ipv4_gateway"`
+	Ipv4Pool      []string `toml:"ipv4_pool"`  // Pool[0]=192.168.1.100 Pool[1]=192.168.1.200
+	Include       []string `toml:"include"`    // 10.10.10.0/255.255.255.0
+	Exclude       []string `toml:"exclude"`    // 192.168.5.0/255.255.255.0
+	ClientDns     []string `toml:"client_dns"` // 114.114.114.114
+	AllowLan      bool     `toml:"allow_lan"`  // 允许本地LAN访问vpn网络
+	MaxClient     int      `toml:"max_client"`
+	MaxUserClient int      `toml:"max_user_client"`
+
+	UserGroups     []string `toml:"user_groups"`
 	DefaultGroup   string   `toml:"default_group"`
-	Banner         string   `toml:"banner"`          // 欢迎语
-	CstpDpd        int      `toml:"cstp_dpd"`        // Dead peer detection in seconds
+	Banner         string   `toml:"banner"`   // 欢迎语
+	CstpDpd        int      `toml:"cstp_dpd"` // Dead peer detection in seconds
+	MobileDpd      int      `toml:"mobile_dpd"`
 	CstpKeepalive  int      `toml:"cstp_keepalive"`  // in seconds
 	SessionTimeout int      `toml:"session_timeout"` // in seconds
 	AuthTimeout    int      `toml:"auth_timeout"`    // in seconds
-	MaxClient      int      `toml:"max_client"`
-	MaxUserClient  int      `toml:"max_user_client"`
-	Ipv4Network    string   `toml:"ipv4_network"` // 192.168.1.0
-	Ipv4Netmask    string   `toml:"ipv4_netmask"` // 255.255.255.0
-	Ipv4GateWay    string   `toml:"-"`
-	Include        []string `toml:"include"`    // 10.10.10.0/255.255.255.0
-	Exclude        []string `toml:"exclude"`    // 192.168.5.0/255.255.255.0
-	ClientDns      []string `toml:"client_dns"` // 114.114.114.114
-	AllowLan       bool     `toml:"allow_lan"`  // 允许本地LAN访问vpn网络
 }
 
 func loadServer() {
@@ -62,7 +73,7 @@ func loadServer() {
 	base := filepath.Dir(sf)
 
 	// 转换成绝对路径
-	ServerCfg.UserFile = getAbsPath(base, ServerCfg.UserFile)
+	ServerCfg.DbFile = getAbsPath(base, ServerCfg.DbFile)
 	ServerCfg.CertFile = getAbsPath(base, ServerCfg.CertFile)
 	ServerCfg.CertKey = getAbsPath(base, ServerCfg.CertKey)
 

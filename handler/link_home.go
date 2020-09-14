@@ -5,17 +5,16 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"strings"
-
-	"github.com/julienschmidt/httprouter"
 )
 
-func LinkHome(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+func LinkHome(w http.ResponseWriter, r *http.Request) {
 	hu, _ := httputil.DumpRequest(r, true)
 	fmt.Println("DumpHome: ", string(hu))
 	fmt.Println(r.RemoteAddr)
 
 	connection := strings.ToLower(r.Header.Get("Connection"))
-	if connection == "close" {
+	userAgent := strings.ToLower(r.UserAgent())
+	if connection == "close" && strings.Contains(userAgent, "anyconnect") {
 		w.Header().Set("Connection", "close")
 		w.WriteHeader(http.StatusBadRequest)
 		return

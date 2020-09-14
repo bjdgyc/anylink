@@ -3,27 +3,32 @@ package handler
 import (
 	"crypto/tls"
 	"fmt"
-	"github.com/bjdgyc/anylink/proxyproto"
 	"log"
 	"net"
 	"net/http"
-	"net/http/httputil"
-	_ "net/http/pprof"
+	"net/http/pprof"
 	"time"
 
 	"github.com/bjdgyc/anylink/common"
-	"github.com/julienschmidt/httprouter"
+	"github.com/bjdgyc/anylink/proxyproto"
+	"github.com/bjdgyc/anylink/router"
 )
 
-func Start() {
-	testTun()
-	go startDebug()
-	go startDtls()
-	go startTls()
-}
+func startAdmin() {
+	mux := router.NewHttpMux()
+	mux.HandleFunc(router.ANY, "/", notFound)
+	// mux.ServeFile(router.ANY, "/static/*", http.Dir("./static"))
 
-func startDebug() {
-	http.ListenAndServe(common.ServerCfg.DebugAddr, nil)
+	// pprof
+	mux.HandleFunc(router.ANY, "/debug/pprof/*", pprof.Index)
+	mux.HandleFunc(router.ANY, "/debug/pprof/cmdline", pprof.Cmdline)
+	mux.HandleFunc(router.ANY, "/debug/pprof/profile", pprof.Profile)
+	mux.HandleFunc(router.ANY, "/debug/pprof/symbol", pprof.Symbol)
+	mux.HandleFunc(router.ANY, "/debug/pprof/trace", pprof.Trace)
+
+	fmt.Println("Listen admin", common.ServerCfg.AdminAddr)
+	err := http.ListenAndServe(common.ServerCfg.AdminAddr, mux)
+	fmt.Println(err)
 }
 
 func startTls() {
@@ -62,17 +67,18 @@ func startTls() {
 }
 
 func initRoute() http.Handler {
-	router := httprouter.New()
-	router.GET("/", checkVpnClient(LinkHome))
-	router.POST("/", checkVpnClient(LinkAuth))
-	router.HandlerFunc("CONNECT", "/CSCOSSLC/tunnel", LinkTunnel)
-	router.NotFound = http.HandlerFunc(notFound)
-	return router
+	mux := router.NewHttpMux()
+	mux.HandleFunc("GET", "/", checkLinkClient(LinkHome))
+	mux.HandleFunc("POST", "/", checkLinkClient(LinkAuth))
+	mux.HandleFunc("CONNECT", "/CSCOSSLC/tunnel", LinkTunnel)
+	mux.SetNotFound(http.HandlerFunc(notFound))
+	return mux
 }
 
 func notFound(w http.ResponseWriter, r *http.Request) {
-	hu, _ := httputil.DumpRequest(r, true)
-	fmt.Println("NotFound: ", string(hu))
+	// fmt.Println(r.RemoteAddr)
+	// hu, _ := httputil.DumpRequest(r, true)
+	// fmt.Println("NotFound: ", string(hu))
 
 	w.WriteHeader(http.StatusNotFound)
 	fmt.Fprintln(w, "404 page not found")

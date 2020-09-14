@@ -1,8 +1,16 @@
-package handler
+package sessdata
+
+type LType int8
+
+const (
+	LTypeEthernet LType = 1
+	LTypeIPData   LType = 2
+)
 
 type Payload struct {
-	ptype byte
-	data  []byte
+	PType byte  // payload types
+	LType LType // LinkType
+	Data  []byte
 }
 
 /*

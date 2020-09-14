@@ -3,11 +3,13 @@ package handler
 import (
 	"encoding/xml"
 	"fmt"
+	"log"
 	"net/http"
+	"os/exec"
 	"strings"
-
-	"github.com/julienschmidt/httprouter"
 )
+
+const BufferSize = 2048
 
 type ClientRequest struct {
 	XMLName              xml.Name       `xml:"config-auth"`
@@ -42,19 +44,19 @@ type macAddressList struct {
 }
 
 // 判断anyconnect客户端
-func checkVpnClient(h httprouter.Handle) httprouter.Handle {
-	return func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func checkLinkClient(h http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
 		// TODO 调试信息输出
 		// hd, _ := httputil.DumpRequest(r, true)
 		// fmt.Println("DumpRequest: ", string(hd))
-		fmt.Println(r.RemoteAddr)
+		// fmt.Println(r.RemoteAddr)
 
-		user_Agent := strings.ToLower(r.UserAgent())
+		userAgent := strings.ToLower(r.UserAgent())
 		x_Aggregate_Auth := r.Header.Get("X-Aggregate-Auth")
 		x_Transcend_Version := r.Header.Get("X-Transcend-Version")
-		if strings.Contains(user_Agent, "anyconnect") &&
+		if strings.Contains(userAgent, "anyconnect") &&
 			x_Aggregate_Auth == "1" && x_Transcend_Version == "1" {
-			h(w, r, ps)
+			h(w, r)
 		} else {
 			w.WriteHeader(http.StatusForbidden)
 			fmt.Fprintf(w, "error request")
@@ -72,4 +74,16 @@ func setCommonHeader(w http.ResponseWriter) {
 	w.Header().Set("X-Frame-Options", "SAMEORIGIN")
 	w.Header().Set("X-Aggregate-Auth", "1")
 	w.Header().Set("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+}
+
+func execCmd(cmdStrs []string) error {
+	for _, cmdStr := range cmdStrs {
+		cmd := exec.Command("bash", "-c", cmdStr)
+		b, err := cmd.CombinedOutput()
+		if err != nil {
+			log.Println(string(b), err)
+			return err
+		}
+	}
+	return nil
 }

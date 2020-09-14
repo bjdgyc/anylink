@@ -284,6 +284,3 @@ func (p *Conn) checkPrefix() error {
 
 	return nil
 }
-
-
-

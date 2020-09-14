@@ -3,13 +3,13 @@ package handler
 import (
 	"fmt"
 	"log"
-	"os/exec"
 
 	"github.com/bjdgyc/anylink/common"
+	"github.com/bjdgyc/anylink/sessdata"
 	"github.com/songgao/water"
 )
 
-func testTun() {
+func checkTun() {
 	// 测试tun
 	cfg := water.Config{
 		DeviceType: water.TUN,
@@ -19,17 +19,18 @@ func testTun() {
 	if err != nil {
 		log.Fatal("open tun err: ", err)
 	}
+	defer ifce.Close()
+
 	// 测试ip命令
 	cmdstr := fmt.Sprintf("ip link set dev %s up mtu %s multicast off", ifce.Name(), "1399")
 	err = execCmd([]string{cmdstr})
 	if err != nil {
-		log.Fatal("ip cmd err: ", err)
+		log.Fatal("testTun err: ", err)
 	}
-	ifce.Close()
 }
 
 // 创建tun网卡
-func LinkTun(sess *ConnSession) {
+func LinkTun(sess *sessdata.ConnSession) {
 	defer func() {
 		log.Println("LinkTun return")
 		sess.Close()
@@ -48,10 +49,9 @@ func LinkTun(sess *ConnSession) {
 	sess.TunName = ifce.Name()
 	defer ifce.Close()
 
-	// arp on
-	cmdstr1 := fmt.Sprintf("ip link set dev %s up mtu %s multicast off", ifce.Name(), sess.Mtu)
+	cmdstr1 := fmt.Sprintf("ip link set dev %s up mtu %d multicast off", ifce.Name(), sess.Mtu)
 	cmdstr2 := fmt.Sprintf("ip addr add dev %s local %s peer %s/32",
-		ifce.Name(), common.ServerCfg.Ipv4GateWay, sess.NetIp)
+		ifce.Name(), common.ServerCfg.Ipv4Gateway, sess.Ip)
 	cmdstr3 := fmt.Sprintf("sysctl -w net.ipv6.conf.%s.disable_ipv6=1", ifce.Name())
 	cmdStrs := []string{cmdstr1, cmdstr2, cmdstr3}
 	err = execCmd(cmdStrs)
@@ -61,21 +61,16 @@ func LinkTun(sess *ConnSession) {
 
 	go tunRead(ifce, sess)
 
-	var payload *Payload
+	var payload *sessdata.Payload
 
 	for {
 		select {
 		case payload = <-sess.PayloadIn:
-		case <-sess.Closed:
+		case <-sess.CloseChan:
 			return
 		}
 
-		// ip_src := waterutil.IPv4Source(payload.data)
-		// ip_des := waterutil.IPv4Destination(payload.data)
-		// ip_port := waterutil.IPv4DestinationPort(payload.data)
-		// fmt.Println("write: ", ip_src, ip_des.String(), ip_port, len(payload.data))
-
-		_, err = ifce.Write(payload.data)
+		_, err = ifce.Write(payload.Data)
 		if err != nil {
 			log.Println("tun Write err", err)
 			return
@@ -84,7 +79,7 @@ func LinkTun(sess *ConnSession) {
 
 }
 
-func tunRead(ifce *water.Interface, sess *ConnSession) {
+func tunRead(ifce *water.Interface, sess *sessdata.ConnSession) {
 	defer func() {
 		log.Println("tunRead return")
 		ifce.Close()
@@ -95,34 +90,25 @@ func tunRead(ifce *water.Interface, sess *ConnSession) {
 	)
 
 	for {
-		packet := make([]byte, 1500)
-		n, err = ifce.Read(packet)
+		data := make([]byte, BufferSize)
+		n, err = ifce.Read(data)
 		if err != nil {
 			log.Println("tun Read err", n, err)
 			return
 		}
 
-		payload := &Payload{
-			ptype: 0x00,
-			data:  packet[:n],
-		}
+		data = data[:n]
 
-		select {
-		case sess.PayloadOut <- payload:
-		case <-sess.Closed:
+		// ip_src := waterutil.IPv4Source(data)
+		// ip_dst := waterutil.IPv4Destination(data)
+		// ip_port := waterutil.IPv4DestinationPort(data)
+		// fmt.Println("sent:", ip_src, ip_dst, ip_port)
+		// packet := gopacket.NewPacket(data, layers.LayerTypeIPv4, gopacket.Default)
+		// fmt.Println("read:", packet)
+
+		if payloadOut(sess, sessdata.LTypeIPData, 0x00, data) {
 			return
 		}
-	}
-}
 
-func execCmd(cmdStrs []string) error {
-	for _, cmdStr := range cmdStrs {
-		cmd := exec.Command("bash", "-c", cmdStr)
-		b, err := cmd.CombinedOutput()
-		if err != nil {
-			log.Println(string(b), err)
-			return err
-		}
 	}
-	return nil
 }
