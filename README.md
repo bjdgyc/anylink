@@ -39,8 +39,8 @@ cd $rootPath/anylink
 go build -o anylink -ldflags "-X main.COMMIT_ID=`git rev-parse HEAD`"
 
 #整理部署文件
-mkdir $linkPath/anylink-deploy
-cd $linkPath/anylink-deploy
+mkdir $rootPath/anylink-deploy
+cd $rootPath/anylink-deploy
 cp -r $rootPath/anylink-web/ui .
 cp -r $rootPath/anylink/anylink .
 cp -r $rootPath/anylink/conf .
