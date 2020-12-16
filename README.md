@@ -19,6 +19,10 @@ AnyLink 使用TLS/DTLS进行数据加密，因此需要RSA或ECC证书，可以�
 
 AnyLink 服务端仅在CentOS7测试通过，如需要安装在其他系统，需要服务端支持tun/tap功能、ip设置命令。
 
+## Screenshot
+
+![online](https://raw.githubusercontent.com/bjdgyc/anylink/master/screenshot/online.jpg)
+
 ## Installation
 
 ```
@@ -34,8 +38,9 @@ npm run build
 cd $rootPath/anylink
 go build -o anylink -ldflags "-X main.COMMIT_ID=`git rev-parse HEAD`"
 
+#整理部署文件
 mkdir $linkPath/anylink-deploy
-$linkPath/anylink-deploy
+cd $linkPath/anylink-deploy
 cp -r $rootPath/anylink-web/ui .
 cp -r $rootPath/anylink/anylink .
 cp -r $rootPath/anylink/conf .
@@ -114,6 +119,14 @@ sudo ./anylink -conf="conf/server.toml"
     ```
     sh bridge.sh
     ```
+
+## Other Screenshot
+
+![system.jpg](https://raw.githubusercontent.com/bjdgyc/anylink/master/screenshot/system.jpg)
+![setting.jpg](https://raw.githubusercontent.com/bjdgyc/anylink/master/screenshot/setting.jpg)
+![users.jpg](https://raw.githubusercontent.com/bjdgyc/anylink/master/screenshot/users.jpg)
+![ip_map.jpg](https://raw.githubusercontent.com/bjdgyc/anylink/master/screenshot/ip_map.jpg)
+![group.jpg](https://raw.githubusercontent.com/bjdgyc/anylink/master/screenshot/group.jpg)
 
 ## License
 
