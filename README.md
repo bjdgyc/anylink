@@ -120,6 +120,10 @@ sudo ./anylink -conf="conf/server.toml"
     sh bridge.sh
     ```
 
+## Soft
+
+相关软件下载： https://gitee.com/bjdgyc/anylink-soft
+
 ## Other Screenshot
 
 ![system.jpg](https://raw.githubusercontent.com/bjdgyc/anylink/master/screenshot/system.jpg)
