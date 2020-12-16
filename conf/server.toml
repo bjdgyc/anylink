@@ -8,11 +8,26 @@ db_file = "./data.db"
 #证书文件
 cert_file = "./vpn_cert.pem"
 cert_key = "./vpn_cert.key"
+ui_path = "../ui"
+files_path = "../downfiles"
+
 log_level = "info"
 
-#服务监听的地址
+#系统名称
+issuer = "XX公司VPN"
+#后台管理用户
+admin_user = "admin"
+#pass 123456
+admin_pass = "$2a$10$UQ7C.EoPifDeJh6d8.31TeSPQU7hM/NOM2nixmBucJpAuXDQNqNke"
+jwt_secret = "7IrsKW3JuDJ68TPPrdsfweDFYJrO1Xg7JcdsfasMv3P3"
+
+
+#vpn服务对外地址
+link_addr = "vpn.xx.com"
+
+#前台服务监听地址
 server_addr = ":443"
-#一般设置 本机地址
+#后台服务监听地址
 admin_addr = ":8800"
 #开启tcp proxy protocol协议
 proxy_protocol = false
@@ -25,33 +40,21 @@ ipv4_netmask = "255.255.255.0"
 ipv4_gateway = "192.168.10.1"
 ipv4_pool = ["192.168.10.100", "192.168.10.200"]
 
-#需加密传输的ip规则
-#include = ["10.10.10.0/255.255.255.0"]
-#非加密传输的ip规则
-#exclude = ["192.168.5.0/255.255.255.0"]
-#客户端使用的dns ios客户端必须配置
-client_dns = ["114.114.114.114"]
-#是否允许本地LAN访问vpn网络
-allow_lan = true
-
 #最大客户端数量
-max_client = 300
+max_client = 100
 #单个用户同时在线数量
 max_user_client = 3
+#IP租期(秒)
+ip_lease = 1209600
 
-
-#用户组
-user_groups = ["one", "two"]
 #默认选择的组
-default_group = "two"
-
-#登陆成功的欢迎语
-banner = "您已接入公司网络，请按照公司规定使用。\n请勿进行非工作下载及视频行为！"
+default_group = "one"
 
 #客户端失效检测时间(秒) dpd > keepalive
-cstp_dpd = 30
 cstp_keepalive = 20
-mobile_dpd = 300
+cstp_dpd = 30
+mobile_keepalive = 50
+mobile_dpd = 60
 #session过期时间，用于断线重连，0永不过期
 session_timeout = 3600
 auth_timeout = 0

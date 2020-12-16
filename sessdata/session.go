@@ -12,26 +12,29 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/bjdgyc/anylink/common"
+	"github.com/bjdgyc/anylink/base"
+	"github.com/bjdgyc/anylink/dbdata"
 )
-
-const BandwidthPeriodSec = 2 // 流量速率统计周期(秒)
 
 var (
 	// session_token -> SessUser
-	sessions = sync.Map{} // make(map[string]*Session)
+	sessions = make(map[string]*Session)
+	sessMux  sync.Mutex
 )
 
 // 连接sess
 type ConnSession struct {
 	Sess                *Session
 	MasterSecret        string // dtls协议的 master_secret
-	Ip                  net.IP // 分配的ip地址
+	IpAddr              net.IP // 分配的ip地址
 	LocalIp             net.IP
 	MacHw               net.HardwareAddr // 客户端mac地址,从Session取出
 	RemoteAddr          string
 	Mtu                 int
 	TunName             string
+	Client              string // 客户端  mobile pc
+	CstpDpd             int
+	Group               *dbdata.Group
 	Limit               *LimitRater
 	BandwidthUp         uint32 // 使用上行带宽 Byte
 	BandwidthDown       uint32 // 使用下行带宽 Byte
@@ -43,7 +46,6 @@ type ConnSession struct {
 	CloseChan           chan struct{}
 	PayloadIn           chan *Payload
 	PayloadOut          chan *Payload
-	PayloadArp          chan *Payload
 }
 
 type Session struct {
@@ -53,7 +55,10 @@ type Session struct {
 	DtlsSid        string // dtls协议的 session_id
 	MacAddr        string // 客户端mac地址
 	UniqueIdGlobal string // 客户端唯一标示
-	UserName       string // 用户名
+	Username       string // 用户名
+	Group          string
+	AuthStep       string
+	AuthPass       string
 
 	LastLogin time.Time
 	IsActive  bool
@@ -67,45 +72,48 @@ func init() {
 }
 
 func checkSession() {
-
 	// 检测过期的session
 	go func() {
-		if common.ServerCfg.SessionTimeout == 0 {
+		if base.Cfg.SessionTimeout == 0 {
 			return
 		}
-		timeout := time.Duration(common.ServerCfg.SessionTimeout) * time.Second
+		timeout := time.Duration(base.Cfg.SessionTimeout) * time.Second
 		tick := time.Tick(time.Second * 60)
 		for range tick {
+			sessMux.Lock()
 			t := time.Now()
-
-			sessions.Range(func(key, value interface{}) bool {
-				v := value.(*Session)
+			for k, v := range sessions {
 				v.mux.Lock()
-				defer v.mux.Unlock()
-
-				if v.IsActive == true {
-					return true
+				if v.IsActive != true {
+					if t.Sub(v.LastLogin) > timeout {
+						delete(sessions, k)
+					}
 				}
-				if t.Sub(v.LastLogin) > timeout {
-					sessions.Delete(key)
-				}
-				return true
-			})
-
+				v.mux.Unlock()
+			}
+			sessMux.Unlock()
 		}
 	}()
 }
 
-func NewSession() *Session {
+func GenToken() string {
 	// 生成32位的 token
 	btoken := make([]byte, 32)
 	rand.Read(btoken)
+	return fmt.Sprintf("%x", btoken)
+}
+
+func NewSession(token string) *Session {
+	if token == "" {
+		btoken := make([]byte, 32)
+		rand.Read(btoken)
+		token = fmt.Sprintf("%x", btoken)
+	}
 
 	// 生成 dtlsn session_id
 	dtlsid := make([]byte, 32)
 	rand.Read(dtlsid)
 
-	token := fmt.Sprintf("%x", btoken)
 	sess := &Session{
 		Sid:       fmt.Sprintf("%d", time.Now().Unix()),
 		Token:     token,
@@ -113,7 +121,9 @@ func NewSession() *Session {
 		LastLogin: time.Now(),
 	}
 
-	sessions.Store(token, sess)
+	sessMux.Lock()
+	sessions[token] = sess
+	sessMux.Unlock()
 	return sess
 }
 
@@ -121,12 +131,13 @@ func (s *Session) NewConn() *ConnSession {
 	s.mux.Lock()
 	active := s.IsActive
 	macAddr := s.MacAddr
+	username := s.Username
 	s.mux.Unlock()
 	if active == true {
 		s.CSess.Close()
 	}
 
-	limit := LimitClient(s.UserName, false)
+	limit := LimitClient(username, false)
 	if limit == false {
 		return nil
 	}
@@ -138,21 +149,34 @@ func (s *Session) NewConn() *ConnSession {
 		macHw = append([]byte{0x00}, macHw...)
 		macAddr = macHw.String()
 	}
-	ip := AcquireIp(macAddr)
+	ip := AcquireIp(username, macAddr)
 	if ip == nil {
+		LimitClient(username, true)
 		return nil
 	}
 
 	cSess := &ConnSession{
 		Sess:       s,
 		MacHw:      macHw,
-		Ip:         ip,
+		IpAddr:     ip,
 		closeOnce:  sync.Once{},
 		CloseChan:  make(chan struct{}),
 		PayloadIn:  make(chan *Payload),
 		PayloadOut: make(chan *Payload),
-		PayloadArp: make(chan *Payload, 1000),
-		// Limit:      NewLimitRater(1024 * 1024),
+	}
+
+	// 查询group信息
+	group := &dbdata.Group{}
+	err = dbdata.One("Name", s.Group, group)
+	if err != nil {
+		base.Error(err)
+		cSess.Close()
+		return nil
+	}
+	cSess.Group = group
+	if group.Bandwidth > 0 {
+		// 限流设置
+		cSess.Limit = NewLimitRater(group.Bandwidth, group.Bandwidth)
 	}
 
 	go cSess.ratePeriod()
@@ -167,7 +191,7 @@ func (s *Session) NewConn() *ConnSession {
 
 func (cs *ConnSession) Close() {
 	cs.closeOnce.Do(func() {
-		log.Println("closeOnce:", cs.Ip)
+		log.Println("closeOnce:", cs.IpAddr)
 		cs.Sess.mux.Lock()
 		defer cs.Sess.mux.Unlock()
 
@@ -176,10 +200,12 @@ func (cs *ConnSession) Close() {
 		cs.Sess.LastLogin = time.Now()
 		cs.Sess.CSess = nil
 
-		ReleaseIp(cs.Ip, cs.Sess.MacAddr)
-		LimitClient(cs.Sess.UserName, true)
+		ReleaseIp(cs.IpAddr, cs.Sess.MacAddr)
+		LimitClient(cs.Sess.Username, true)
 	})
 }
+
+const BandwidthPeriodSec = 2 // 流量速率统计周期(秒)
 
 func (cs *ConnSession) ratePeriod() {
 	tick := time.Tick(time.Second * BandwidthPeriodSec)
@@ -193,9 +219,9 @@ func (cs *ConnSession) ratePeriod() {
 		// 实时流量清零
 		rtUp := atomic.SwapUint32(&cs.BandwidthUp, 0)
 		rtDown := atomic.SwapUint32(&cs.BandwidthDown, 0)
-		// 设置上一周期的流量
-		atomic.SwapUint32(&cs.BandwidthUpPeriod, rtUp)
-		atomic.SwapUint32(&cs.BandwidthDownPeriod, rtDown)
+		// 设置上一周期每秒的流量
+		atomic.SwapUint32(&cs.BandwidthUpPeriod, rtUp/BandwidthPeriodSec)
+		atomic.SwapUint32(&cs.BandwidthDownPeriod, rtDown/BandwidthPeriodSec)
 		// 累加所有流量
 		atomic.AddUint32(&cs.BandwidthUpAll, rtUp)
 		atomic.AddUint32(&cs.BandwidthDownAll, rtDown)
@@ -217,6 +243,12 @@ func (cs *ConnSession) SetMtu(mtu string) {
 	}
 }
 
+func (cs *ConnSession) SetTunName(name string) {
+	cs.Sess.mux.Lock()
+	defer cs.Sess.mux.Unlock()
+	cs.TunName = name
+}
+
 func (cs *ConnSession) RateLimit(byt int, isUp bool) error {
 	if isUp {
 		atomic.AddUint32(&cs.BandwidthUp, uint32(byt))
@@ -235,11 +267,13 @@ func SToken2Sess(stoken string) *Session {
 	sarr := strings.Split(stoken, "@")
 	token := sarr[1]
 
-	if sess, ok := sessions.Load(token); ok {
-		return sess.(*Session)
-	}
+	return Token2Sess(token)
+}
 
-	return nil
+func Token2Sess(token string) *Session {
+	sessMux.Lock()
+	defer sessMux.Unlock()
+	return sessions[token]
 }
 
 func Dtls2Sess(dtlsid []byte) *Session {
@@ -250,9 +284,23 @@ func DelSess(token string) {
 	// sessions.Delete(token)
 }
 
+func CloseSess(token string) {
+	sessMux.Lock()
+	defer sessMux.Unlock()
+	sess, ok := sessions[token]
+	if !ok {
+		return
+	}
+
+	delete(sessions, token)
+	sess.CSess.Close()
+}
+
 func DelSessByStoken(stoken string) {
 	stoken = strings.TrimSpace(stoken)
 	sarr := strings.Split(stoken, "@")
 	token := sarr[1]
-	sessions.Delete(token)
+	sessMux.Lock()
+	delete(sessions, token)
+	sessMux.Unlock()
 }

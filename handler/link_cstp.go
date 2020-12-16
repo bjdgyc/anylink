@@ -2,72 +2,67 @@ package handler
 
 import (
 	"encoding/binary"
-	"log"
 	"net"
 	"time"
 
-	"github.com/bjdgyc/anylink/common"
+	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/sessdata"
 )
 
-func LinkCstp(conn net.Conn, sess *sessdata.ConnSession) {
-	log.Println("HandlerCstp")
-	sessdata.Sess = sess
+func LinkCstp(conn net.Conn, cSess *sessdata.ConnSession) {
 	defer func() {
-		log.Println("LinkCstp return")
+		// log.Println("LinkCstp return")
 		conn.Close()
-		sess.Close()
+		cSess.Close()
 	}()
 
 	var (
 		err     error
 		n       int
 		dataLen uint16
-		dead    = time.Duration(common.ServerCfg.CstpDpd+2) * time.Second
+		dead    = time.Duration(cSess.CstpDpd*2) * time.Second
 	)
 
-	go cstpWrite(conn, sess)
+	go cstpWrite(conn, cSess)
 
 	for {
 
 		// 设置超时限制
 		err = conn.SetReadDeadline(time.Now().Add(dead))
 		if err != nil {
-			log.Println("SetDeadline: ", err)
+			base.Error("SetDeadline: ", err)
 			return
 		}
 		hdata := make([]byte, BufferSize)
 		n, err = conn.Read(hdata)
 		if err != nil {
-			log.Println("read hdata: ", err)
+			base.Error("read hdata: ", err)
 			return
 		}
 
 		// 限流设置
-		err = sess.RateLimit(n, true)
+		err = cSess.RateLimit(n, true)
 		if err != nil {
-			log.Println(err)
+			base.Error(err)
 		}
 
 		switch hdata[6] {
 		case 0x07: // KEEPALIVE
 			// do nothing
-			// log.Println("recv keepalive")
+			base.Debug("recv keepalive", cSess.IpAddr)
 		case 0x05: // DISCONNECT
-			// log.Println("DISCONNECT")
+			base.Debug("DISCONNECT", cSess.IpAddr)
 			return
 		case 0x03: // DPD-REQ
-			// log.Println("recv DPD-REQ")
-			if payloadOut(sess, sessdata.LTypeIPData, 0x04, nil) {
+			base.Debug("recv DPD-REQ", cSess.IpAddr)
+			if payloadOut(cSess, sessdata.LTypeIPData, 0x04, nil) {
 				return
 			}
 		case 0x04:
 			// log.Println("recv DPD-RESP")
 		case 0x00: // DATA
 			dataLen = binary.BigEndian.Uint16(hdata[4:6]) // 4,5
-			data := hdata[8 : 8+dataLen]
-
-			if payloadIn(sess, sessdata.LTypeIPData, 0x00, data) {
+			if payloadIn(cSess, sessdata.LTypeIPData, 0x00, hdata[8:8+dataLen]) {
 				return
 			}
 
@@ -75,11 +70,11 @@ func LinkCstp(conn net.Conn, sess *sessdata.ConnSession) {
 	}
 }
 
-func cstpWrite(conn net.Conn, sess *sessdata.ConnSession) {
+func cstpWrite(conn net.Conn, cSess *sessdata.ConnSession) {
 	defer func() {
-		log.Println("cstpWrite return")
+		// log.Println("cstpWrite return")
 		conn.Close()
-		sess.Close()
+		cSess.Close()
 	}()
 
 	var (
@@ -91,8 +86,8 @@ func cstpWrite(conn net.Conn, sess *sessdata.ConnSession) {
 
 	for {
 		select {
-		case payload = <-sess.PayloadOut:
-		case <-sess.CloseChan:
+		case payload = <-cSess.PayloadOut:
+		case <-cSess.CloseChan:
 			return
 		}
 
@@ -107,14 +102,14 @@ func cstpWrite(conn net.Conn, sess *sessdata.ConnSession) {
 		}
 		n, err = conn.Write(header)
 		if err != nil {
-			log.Println("write err", err)
+			base.Error("write err", err)
 			return
 		}
 
 		// 限流设置
-		err = sess.RateLimit(n, false)
+		err = cSess.RateLimit(n, false)
 		if err != nil {
-			log.Println(err)
+			base.Error(err)
 		}
 	}
 }

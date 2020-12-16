@@ -1,7 +1,8 @@
 package handler
 
 import (
-	"github.com/bjdgyc/anylink/common"
+	"github.com/bjdgyc/anylink/admin"
+	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/dbdata"
 	"github.com/bjdgyc/anylink/sessdata"
 )
@@ -11,10 +12,10 @@ func Start() {
 	sessdata.Start()
 
 	checkTun()
-	if common.ServerCfg.LinkMode == common.LinkModeTAP {
+	if base.Cfg.LinkMode == base.LinkModeTAP {
 		checkTap()
 	}
-	go startAdmin()
+	go admin.StartAdmin()
 	go startTls()
 	go startDtls()
 }

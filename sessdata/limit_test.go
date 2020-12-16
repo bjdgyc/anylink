@@ -6,12 +6,12 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/bjdgyc/anylink/common"
+	"github.com/bjdgyc/anylink/base"
 )
 
 // func TestCheckUser(t *testing.T) {
-// 	users["user1"] = User{Password: "7c4a8d09ca3762af61e59520943dc26494f8941b"}
-// 	users["user2"] = User{Password: "7c4a8d09ca3762af61e59520943dc26494f8941c"}
+// 	user["user1"] = User{Password: "7c4a8d09ca3762af61e59520943dc26494f8941b"}
+// 	user["user2"] = User{Password: "7c4a8d09ca3762af61e59520943dc26494f8941c"}
 //
 // 	var res bool
 // 	res = CheckUser("user1", "123456", "")
@@ -23,8 +23,8 @@ import (
 
 func TestLimitClient(t *testing.T) {
 	assert := assert.New(t)
-	common.ServerCfg.MaxClient = 2
-	common.ServerCfg.MaxUserClient = 1
+	base.Cfg.MaxClient = 2
+	base.Cfg.MaxUserClient = 1
 
 	res1 := LimitClient("user1", false)
 	res2 := LimitClient("user1", false)

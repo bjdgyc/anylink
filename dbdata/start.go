@@ -2,8 +2,9 @@ package dbdata
 
 func Start() {
 	initDb()
+	initData()
 }
 
 func Stop() error {
-	return db.Close()
+	return sdb.Close()
 }

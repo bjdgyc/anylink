@@ -1,137 +1,90 @@
 package dbdata
 
 import (
-	"encoding/json"
-	"errors"
-	"log"
+	"time"
 
-	"github.com/bjdgyc/anylink/common"
+	"github.com/asdine/storm/v3"
+	"github.com/asdine/storm/v3/codec/json"
+	"github.com/bjdgyc/anylink/base"
 	bolt "go.etcd.io/bbolt"
 )
 
-const pageSize = 10
-
 var (
-	db       *bolt.DB
-	ErrNoKey = errors.New("db no this key")
+	sdb *storm.DB
 )
 
 func initDb() {
 	var err error
-	db, err = bolt.Open(common.ServerCfg.DbFile, 0666, nil)
+	sdb, err = storm.Open(base.Cfg.DbFile, storm.Codec(json.Codec),
+		storm.BoltOptions(0600, &bolt.Options{Timeout: 10 * time.Second}))
 	if err != nil {
-		log.Fatal(err)
+		base.Fatal(err)
 	}
 
-	// 创建bucket
-	err = db.Update(func(tx *bolt.Tx) error {
-		var err error
-		_, err = tx.CreateBucketIfNotExists([]byte(BucketUser))
-		if err != nil {
-			return err
-		}
-		_, err = tx.CreateBucketIfNotExists([]byte(BucketGroup))
-		if err != nil {
-			return err
-		}
-		_, err = tx.CreateBucketIfNotExists([]byte(BucketMacIp))
-		if err != nil {
-			return err
-		}
-		return nil
-	})
-
+	// 初始化数据库
+	err = sdb.Init(&User{})
 	if err != nil {
-		log.Fatal(err)
+		base.Fatal(err)
 	}
+
+	// fmt.Println("s1")
 }
 
-func NextId(bucket string) int {
-	var i int
-	db.Update(func(tx *bolt.Tx) error {
-		b := tx.Bucket([]byte(bucket))
-		id, err := b.NextSequence()
-		i = int(id)
-		// discard error
-		return err
-	})
-	return i
+func initData() {
+	var (
+		err     error
+		install bool
+	)
+
+	// 判断是否初次使用
+	err = Get(SettingBucket, Installed, &install)
+	if err == nil && install {
+		// 已经安装过
+		return
+	}
+
+	defer Set(SettingBucket, Installed, true)
+
+	smtp := &SettingSmtp{
+		Host: "127.0.0.1",
+		Port: 25,
+		From: "vpn@xx.com",
+	}
+	SettingSet(smtp)
+
+	other := &SettingOther{
+		Banner:      "您已接入公司网络，请按照公司规定使用。\n请勿进行非工作下载及视频行为！",
+		AccountMail: accountMail,
+	}
+	SettingSet(other)
+
 }
 
-func GetCount(bucket string) int {
-	count := 0
-	db.View(func(tx *bolt.Tx) error {
-		bkt := tx.Bucket([]byte(bucket))
-		s := bkt.Stats()
-		// fmt.Printf("%+v \n", s)
-		count = s.KeyN
-		return nil
-	})
-	return count
+func CheckErrNotFound(err error) bool {
+	if err == storm.ErrNotFound {
+		return true
+	}
+	return false
 }
 
-func Set(bucket, key string, v interface{}) error {
-	return db.Update(func(tx *bolt.Tx) error {
-		bkt := tx.Bucket([]byte(bucket))
-		b, err := json.Marshal(v)
-		if err != nil {
-			return err
-		}
-		return bkt.Put([]byte(key), b)
-	})
-}
-
-func Del(bucket, key string) error {
-	return db.Update(func(tx *bolt.Tx) error {
-		bkt := tx.Bucket([]byte(bucket))
-		return bkt.Delete([]byte(key))
-	})
-}
-
-func Get(bucket, key string, v interface{}) error {
-	return db.View(func(tx *bolt.Tx) error {
-		bkt := tx.Bucket([]byte(bucket))
-		b := bkt.Get([]byte(key))
-		if b == nil {
-			return ErrNoKey
-		}
-		return json.Unmarshal(b, v)
-	})
-}
-
-// 分页获取
-func getList(bucket, lastKey string, prev bool) [][]byte {
-	res := make([][]byte, 0)
-	db.View(func(tx *bolt.Tx) error {
-		c := tx.Bucket([]byte(bucket)).Cursor()
-		size := pageSize
-		k, b := c.Seek([]byte(lastKey))
-
-		if prev {
-			for i := 0; i < size; i++ {
-				k, b = c.Prev()
-				if k == nil {
-					break
-				}
-				res = append(res, b)
-			}
-			return nil
-		}
-
-		// next
-		if string(k) != lastKey {
-			// 不相同，说明找出其他的
-			size -= 1
-			res = append(res, b)
-		}
-		for i := 0; i < size; i++ {
-			k, b = c.Next()
-			if k == nil {
-				break
-			}
-			res = append(res, b)
-		}
-		return nil
-	})
-	return res
-}
+const accountMail = `<p>您好:</p>
+<p>&nbsp;&nbsp;您的{{.Issuer}}账号已经审核开通。</p>
+<p>
+    登陆地址: <b>{{.LinkAddr}}</b> <br/>
+    用户组: <b>{{.Group}}</b> <br/>
+    用户名: <b>{{.Username}}</b> <br/>
+    用户PIN码: <b>{{.PinCode}}</b> <br/>
+    用户动态码(3天后失效):<br/>
+    <img src="{{.OtpImg}}"/>
+</p>
+<div>
+    使用说明:
+    <ul>
+        <li>请使用OTP软件扫描动态码二维码</li>
+        <li>然后使用anyconnect客户端进行登陆</li>
+        <li>登陆密码为 【PIN码+动态码】</li>
+    </ul>
+</div>
+<p>
+    软件下载地址: https://gitee.com/bjdgyc/anylink-soft/blob/master/README.md
+</p>`

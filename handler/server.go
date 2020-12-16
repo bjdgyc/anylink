@@ -6,35 +6,17 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"net/http/pprof"
 	"time"
 
-	"github.com/bjdgyc/anylink/common"
-	"github.com/bjdgyc/anylink/proxyproto"
-	"github.com/bjdgyc/anylink/router"
+	"github.com/bjdgyc/anylink/base"
+	"github.com/bjdgyc/anylink/pkg/proxyproto"
+	"github.com/gorilla/mux"
 )
 
-func startAdmin() {
-	mux := router.NewHttpMux()
-	mux.HandleFunc(router.ANY, "/", notFound)
-	// mux.ServeFile(router.ANY, "/static/*", http.Dir("./static"))
-
-	// pprof
-	mux.HandleFunc(router.ANY, "/debug/pprof/*", pprof.Index)
-	mux.HandleFunc(router.ANY, "/debug/pprof/cmdline", pprof.Cmdline)
-	mux.HandleFunc(router.ANY, "/debug/pprof/profile", pprof.Profile)
-	mux.HandleFunc(router.ANY, "/debug/pprof/symbol", pprof.Symbol)
-	mux.HandleFunc(router.ANY, "/debug/pprof/trace", pprof.Trace)
-
-	fmt.Println("Listen admin", common.ServerCfg.AdminAddr)
-	err := http.ListenAndServe(common.ServerCfg.AdminAddr, mux)
-	fmt.Println(err)
-}
-
 func startTls() {
-	addr := common.ServerCfg.ServerAddr
-	certFile := common.ServerCfg.CertFile
-	keyFile := common.ServerCfg.CertKey
+	addr := base.Cfg.ServerAddr
+	certFile := base.Cfg.CertFile
+	keyFile := base.Cfg.CertKey
 
 	// 设置tls信息
 	tlsConfig := &tls.Config{
@@ -55,24 +37,30 @@ func startTls() {
 	}
 	defer ln.Close()
 
-	if common.ServerCfg.ProxyProtocol {
+	if base.Cfg.ProxyProtocol {
 		ln = &proxyproto.Listener{Listener: ln, ProxyHeaderTimeout: time.Second * 5}
 	}
 
-	fmt.Println("listen ", addr)
+	base.Info("listen server", addr)
 	err = srv.ServeTLS(ln, certFile, keyFile)
 	if err != nil {
-		log.Fatal(err)
+		base.Fatal(err)
 	}
 }
 
 func initRoute() http.Handler {
-	mux := router.NewHttpMux()
-	mux.HandleFunc("GET", "/", checkLinkClient(LinkHome))
-	mux.HandleFunc("POST", "/", checkLinkClient(LinkAuth))
-	mux.HandleFunc("CONNECT", "/CSCOSSLC/tunnel", LinkTunnel)
-	mux.SetNotFound(http.HandlerFunc(notFound))
-	return mux
+	r := mux.NewRouter()
+	// r.HandleFunc("/", checkLinkClient(LinkHome)).Methods(http.MethodGet)
+	r.HandleFunc("/", checkLinkClient(LinkAuth)).Methods(http.MethodPost)
+	r.HandleFunc("/CSCOSSLC/tunnel", LinkTunnel).Methods(http.MethodConnect)
+	r.HandleFunc("/otp_qr", LinkOtpQr).Methods(http.MethodGet)
+	r.PathPrefix("/files/").Handler(
+		http.StripPrefix("/files/",
+			http.FileServer(http.Dir(base.Cfg.FilesPath)),
+		),
+	)
+	r.NotFoundHandler = http.HandlerFunc(notFound)
+	return r
 }
 
 func notFound(w http.ResponseWriter, r *http.Request) {

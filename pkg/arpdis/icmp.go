@@ -6,49 +6,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/google/gopacket"
-	"github.com/google/gopacket/layers"
 	"golang.org/x/net/icmp"
 	"golang.org/x/net/ipv4"
 )
-
-var (
-	ipv4Id  uint16 = 1
-	icmpSeq uint16 = 1
-)
-
-func NewIPv4Unreachable(src *Addr, dst *Addr) ([]byte, error) {
-	ipv4Id++
-	icmpSeq++
-
-	ipv4 := layers.IPv4{
-		Version: 4,
-		IHL:     5,
-		TOS:     0,
-		// Length  :   uint16,
-		Id:         ipv4Id,
-		Flags:      0,
-		FragOffset: 0,
-		TTL:        10,
-		Protocol:   layers.IPProtocolICMPv4,
-		// Checksum :  uint16,
-		SrcIP:   src.IP.To4(),
-		DstIP:   dst.IP.To4(),
-		Options: nil,
-		Padding: nil,
-	}
-
-	icmp := layers.ICMPv4{
-		TypeCode: layers.CreateICMPv4TypeCode(layers.ICMPv4TypeDestinationUnreachable, layers.ICMPv4CodeNet),
-		Id:       uint16(os.Getpid()),
-		Seq:      icmpSeq,
-	}
-
-	buf := gopacket.NewSerializeBuffer()
-	err := gopacket.SerializeLayers(buf, defaultSerializeOpts, &ipv4, &icmp)
-
-	return buf.Bytes(), err
-}
 
 const (
 	ProtocolICMP     = 1

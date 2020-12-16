@@ -1,7 +1,5 @@
 // Currently only Darwin and Linux support this.
 
-// +build darwin linux
-
 package arpdis
 
 import (

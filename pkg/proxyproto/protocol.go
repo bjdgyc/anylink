@@ -1,5 +1,7 @@
 // copy from: https://github.com/armon/go-proxyproto/blob/master/protocol.go
 // design: http://www.haproxy.org/download/2.2/doc/proxy-protocol.txt
+
+// HAProxy proxy proto v1
 package proxyproto
 
 import (

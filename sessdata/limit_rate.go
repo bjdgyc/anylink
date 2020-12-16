@@ -2,31 +2,9 @@ package sessdata
 
 import (
 	"context"
-	"fmt"
-	"time"
-
-	"github.com/bjdgyc/anylink/common"
 
 	"golang.org/x/time/rate"
 )
-
-var Sess = &ConnSession{}
-
-func init() {
-	return
-	tick := time.Tick(time.Second * 2)
-	go func() {
-		for range tick {
-			uP := common.HumanByte(float64(Sess.BandwidthUpPeriod / BandwidthPeriodSec))
-			dP := common.HumanByte(float64(Sess.BandwidthDownPeriod / BandwidthPeriodSec))
-			uA := common.HumanByte(float64(Sess.BandwidthUpAll))
-			dA := common.HumanByte(float64(Sess.BandwidthDownAll))
-
-			fmt.Printf("rateUp:%s rateDown:%s allUp %s allDown %s \n",
-				uP, dP, uA, dA)
-		}
-	}()
-}
 
 type LimitRater struct {
 	limit *rate.Limiter

@@ -1,7 +1,6 @@
 package sessdata
 
 import (
-	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -9,10 +8,10 @@ import (
 
 func TestNewSession(t *testing.T) {
 	assert := assert.New(t)
-	sessions = sync.Map{}
-	sess := NewSession()
+	sessions = make(map[string]*Session)
+	sess := NewSession("")
 	token := sess.Token
-	v, ok := sessions.Load(token)
+	v, ok := sessions[token]
 	assert.True(ok)
 	assert.Equal(sess, v)
 }
@@ -21,7 +20,7 @@ func TestConnSession(t *testing.T) {
 	assert := assert.New(t)
 	preIpData()
 	defer closeIpdata()
-	sess := NewSession()
+	sess := NewSession("")
 	cSess := sess.NewConn()
 	cSess.RateLimit(100, true)
 	assert.Equal(cSess.BandwidthUp, uint32(100))

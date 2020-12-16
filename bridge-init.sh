@@ -16,10 +16,10 @@ tap="tap0"
 # with TAP interface(s) above.
 
 eth="eth0"
-eth_ip="192.168.1.4"
+eth_ip="192.168.10.4"
 eth_netmask="255.255.255.0"
-eth_broadcast="192.168.1.255"
-eth_gateway="192.168.1.1"
+eth_broadcast="192.168.10.255"
+eth_gateway="192.168.10.1"
 
 
 brctl addbr $br

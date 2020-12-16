@@ -3,7 +3,7 @@ package sessdata
 import (
 	"sync"
 
-	"github.com/bjdgyc/anylink/common"
+	"github.com/bjdgyc/anylink/base"
 )
 
 const limitAllKey = "__ALL__"
@@ -16,7 +16,6 @@ var (
 func LimitClient(user string, close bool) bool {
 	limitMux.Lock()
 	defer limitMux.Unlock()
-	// defer fmt.Println(limitClient)
 
 	_all := limitClient[limitAllKey]
 	c, ok := limitClient[user]
@@ -31,12 +30,12 @@ func LimitClient(user string, close bool) bool {
 	}
 
 	// 全局判断
-	if _all >= common.ServerCfg.MaxClient {
+	if _all >= base.Cfg.MaxClient {
 		return false
 	}
 
 	// 超出同一个用户限制
-	if c >= common.ServerCfg.MaxUserClient {
+	if c >= base.Cfg.MaxUserClient {
 		return false
 	}
 

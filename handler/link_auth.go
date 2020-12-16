@@ -8,7 +8,8 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/bjdgyc/anylink/common"
+	"github.com/bjdgyc/anylink/base"
+	"github.com/bjdgyc/anylink/dbdata"
 	"github.com/bjdgyc/anylink/sessdata"
 )
 
@@ -40,7 +41,7 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 
 	if cr.Type == "init" {
 		w.WriteHeader(http.StatusOK)
-		data := RequestData{Group: cr.GroupSelect, Groups: common.ServerCfg.UserGroups}
+		data := RequestData{Group: cr.GroupSelect, Groups: dbdata.GetGroupNames()}
 		tplRequest(tpl_request, w, data)
 		return
 	}
@@ -52,22 +53,33 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO 用户密码校验
-	if !CheckUser(cr.Auth.Username, cr.Auth.Password, cr.GroupSelect) {
+	err = dbdata.CheckUser(cr.Auth.Username, cr.Auth.Password, cr.GroupSelect)
+	if err != nil {
+		base.Info(err)
 		w.WriteHeader(http.StatusOK)
-		data := RequestData{Group: cr.GroupSelect, Groups: common.ServerCfg.UserGroups, Error: true}
+		data := RequestData{Group: cr.GroupSelect, Groups: dbdata.GetGroupNames(), Error: "用户名或密码错误"}
 		tplRequest(tpl_request, w, data)
 		return
 	}
+	// if !ok {
+	//	w.WriteHeader(http.StatusOK)
+	//	data := RequestData{Group: cr.GroupSelect, Groups: base.Cfg.UserGroups, Error: "请先激活用户"}
+	//	tplRequest(tpl_request, w, data)
+	//	return
+	// }
 
 	// 创建新的session信息
-	sess := sessdata.NewSession()
-	sess.UserName = cr.Auth.Username
+	sess := sessdata.NewSession("")
+	sess.Username = cr.Auth.Username
+	sess.Group = cr.GroupSelect
 	sess.MacAddr = strings.ToLower(cr.MacAddressList.MacAddress)
 	sess.UniqueIdGlobal = cr.DeviceId.UniqueIdGlobal
-	cd := RequestData{SessionId: sess.Sid, SessionToken: sess.Sid + "@" + sess.Token,
-		Banner: common.ServerCfg.Banner}
+	other := &dbdata.SettingOther{}
+	dbdata.SettingGet(other)
+	rd := RequestData{SessionId: sess.Sid, SessionToken: sess.Sid + "@" + sess.Token,
+		Banner: other.Banner}
 	w.WriteHeader(http.StatusOK)
-	tplRequest(tpl_complete, w, cd)
+	tplRequest(tpl_complete, w, rd)
 }
 
 const (
@@ -94,7 +106,8 @@ func tplRequest(typ int, w io.Writer, data RequestData) {
 type RequestData struct {
 	Groups []string
 	Group  string
-	Error  bool
+	Error  string
+
 	// complete
 	SessionId    string
 	SessionToken string
@@ -116,7 +129,7 @@ var auth_request = `<?xml version="1.0" encoding="UTF-8"?>
         <message>请输入你的用户名和密码</message>
         <banner></banner>
         {{if .Error}}
-        <error id="88" param1="用户名或密码错误" param2="">登陆失败:  %s</error>
+        <error id="88" param1="{{.Error}}" param2="">登陆失败:  %s</error>
         {{end}}
         <form>
             <input type="text" name="username" label="Username:"></input>
