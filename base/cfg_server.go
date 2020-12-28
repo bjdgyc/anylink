@@ -3,6 +3,7 @@ package base
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"reflect"
 	"strings"
@@ -38,8 +39,7 @@ type ServerConfig struct {
 	DbFile        string `toml:"db_file" info:"数据库地址"`
 	CertFile      string `toml:"cert_file" info:"证书文件"`
 	CertKey       string `toml:"cert_key" info:"证书密钥"`
-	UiPath        string `toml:"ui_path" info:"ui文件路径"`
-	FilesPath     string `toml:"files_path" info:"外部下载文件路径"`
+	DownFilesPath string `json:"down_files_path" info:"外部下载文件路径"`
 	LogLevel      string `toml:"log_level" info:"日志等级"`
 	Issuer        string `toml:"issuer" info:"系统名称"`
 	AdminUser     string `toml:"admin_user" info:"管理用户名"`
@@ -82,8 +82,12 @@ func initServerCfg() {
 	Cfg.DbFile = getAbsPath(base, Cfg.DbFile)
 	Cfg.CertFile = getAbsPath(base, Cfg.CertFile)
 	Cfg.CertKey = getAbsPath(base, Cfg.CertKey)
-	Cfg.UiPath = getAbsPath(base, Cfg.UiPath)
-	Cfg.FilesPath = getAbsPath(base, Cfg.FilesPath)
+	Cfg.DownFilesPath = getAbsPath(base, Cfg.DownFilesPath)
+
+	if len(Cfg.JwtSecret) < 20 {
+		fmt.Println("请设置 jwt_secret 长度20位以上")
+		os.Exit(0)
+	}
 
 	fmt.Printf("ServerCfg: %+v \n", Cfg)
 }

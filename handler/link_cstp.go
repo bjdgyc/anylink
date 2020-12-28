@@ -20,7 +20,7 @@ func LinkCstp(conn net.Conn, cSess *sessdata.ConnSession) {
 		err     error
 		n       int
 		dataLen uint16
-		dead    = time.Duration(cSess.CstpDpd*2) * time.Second
+		dead    = time.Duration(cSess.CstpDpd+5) * time.Second
 	)
 
 	go cstpWrite(conn, cSess)

@@ -18,7 +18,7 @@ const (
 var (
 	baseLog   *log.Logger
 	baseLevel int
-	level     map[int]string
+	levels    map[int]string
 )
 
 func initLog() {
@@ -27,7 +27,7 @@ func initLog() {
 }
 
 func logLevel2Int(l string) int {
-	level = map[int]string{
+	levels = map[int]string{
 		_Debug: "Debug",
 		_Info:  "Info",
 		_Warn:  "Warn",
@@ -35,7 +35,7 @@ func logLevel2Int(l string) int {
 		_Fatal: "Fatal",
 	}
 	lvl := _Info
-	for k, v := range level {
+	for k, v := range levels {
 		if strings.ToLower(l) == strings.ToLower(v) {
 			lvl = k
 		}
@@ -44,7 +44,7 @@ func logLevel2Int(l string) int {
 }
 
 func output(l int, s ...interface{}) {
-	lvl := fmt.Sprintf("[%s] ", level[l])
+	lvl := fmt.Sprintf("[%s] ", levels[l])
 	baseLog.Output(3, lvl+fmt.Sprintln(s...))
 }
 

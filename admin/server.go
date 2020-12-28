@@ -2,6 +2,7 @@
 package admin
 
 import (
+	"embed"
 	"net/http"
 	"net/http/pprof"
 
@@ -9,10 +10,19 @@ import (
 	"github.com/gorilla/mux"
 )
 
+var UiPath embed.FS
+
 // 开启服务
 func StartAdmin() {
+
 	r := mux.NewRouter()
 	r.Use(authMiddleware)
+
+	r.Handle("/", http.RedirectHandler("/ui/", http.StatusFound)).
+		Name("static")
+	r.PathPrefix("/ui/").Handler(http.FileServer(
+		http.FS(UiPath),
+	)).Name("static")
 
 	r.HandleFunc("/base/login", Login).Name("login")
 	r.HandleFunc("/set/home", SetHome)
@@ -48,8 +58,6 @@ func StartAdmin() {
 	r.HandleFunc("/debug/pprof/trace", pprof.Trace)
 	r.HandleFunc("/debug/pprof", location("/debug/pprof/"))
 	r.PathPrefix("/debug/pprof/").HandlerFunc(pprof.Index)
-
-	r.PathPrefix("/").Handler(http.FileServer(http.Dir(base.Cfg.UiPath))).Name("static")
 
 	base.Info("Listen admin", base.Cfg.AdminAddr)
 	err := http.ListenAndServe(base.Cfg.AdminAddr, r)

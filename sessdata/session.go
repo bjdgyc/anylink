@@ -145,8 +145,8 @@ func (s *Session) NewConn() *ConnSession {
 	macHw, err := net.ParseMAC(macAddr)
 	if err != nil {
 		sum := md5.Sum([]byte(s.UniqueIdGlobal))
-		macHw = sum[8:13] // 5个byte
-		macHw = append([]byte{0x00}, macHw...)
+		macHw = sum[0:5] // 5个byte
+		macHw = append([]byte{0x02}, macHw...)
 		macAddr = macHw.String()
 	}
 	ip := AcquireIp(username, macAddr)

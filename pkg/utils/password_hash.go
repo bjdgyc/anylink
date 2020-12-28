@@ -25,8 +25,8 @@ const (
 	delmiter = "$"
 )
 
-func saltSecret() (string, error) {
-	rb := make([]byte, randInt(10, 100))
+func RandSecret(min int, max int) (string, error) {
+	rb := make([]byte, randInt(min, max))
 	_, err := rand.Read(rb)
 	if err != nil {
 		return "", err

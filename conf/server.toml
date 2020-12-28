@@ -8,8 +8,7 @@ db_file = "./data.db"
 #证书文件
 cert_file = "./vpn_cert.pem"
 cert_key = "./vpn_cert.key"
-ui_path = "../ui"
-files_path = "../downfiles"
+down_files_path = "../down_files"
 
 log_level = "info"
 
@@ -19,7 +18,7 @@ issuer = "XX公司VPN"
 admin_user = "admin"
 #pass 123456
 admin_pass = "$2a$10$UQ7C.EoPifDeJh6d8.31TeSPQU7hM/NOM2nixmBucJpAuXDQNqNke"
-jwt_secret = "7IrsKW3JuDJ68TPPrdsfweDFYJrO1Xg7JcdsfasMv3P3"
+jwt_secret = ""
 
 
 #vpn服务对外地址

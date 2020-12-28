@@ -2,6 +2,8 @@ package dbdata
 
 import (
 	"errors"
+	"fmt"
+	"sync"
 	"time"
 
 	"github.com/bjdgyc/anylink/pkg/utils"
@@ -21,44 +23,6 @@ type User struct {
 	SendEmail bool      `json:"send_email"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
-}
-
-// 验证用户登陆信息
-func CheckUser(name, pwd, group string) error {
-	// return nil
-
-	pl := len(pwd)
-	if name == "" || pl < 6 {
-		return errors.New("密码错误")
-	}
-	v := &User{}
-	err := One("Username", name, v)
-	if err != nil || v.Status != 1 {
-		return errors.New("用户名错误")
-	}
-	pass := pwd[:pl-6]
-	// if !utils.PasswordVerify(pass, v.Password) {
-	if pass != v.PinCode {
-		return errors.New("密码错误")
-	}
-	otp := pwd[pl-6:]
-	totp := gotp.NewDefaultTOTP(v.OtpSecret)
-	unix := time.Now().Unix()
-	verify := totp.Verify(otp, int(unix))
-	if !verify {
-		return errors.New("动态码错误")
-	}
-
-	// 判断用户组信息
-	if !utils.InArrStr(v.Groups, group) {
-		return errors.New("用户组错误")
-	}
-	groupData := &Group{}
-	err = One("Name", group, groupData)
-	if err != nil || groupData.Status != 1 {
-		return errors.New("用户组错误")
-	}
-	return nil
 }
 
 func SetUser(v *User) error {
@@ -95,4 +59,85 @@ func SetUser(v *User) error {
 	err = Save(v)
 
 	return err
+}
+
+// 验证用户登陆信息
+func CheckUser(name, pwd, group string) error {
+	// return nil
+
+	pl := len(pwd)
+	if name == "" || pl < 6 {
+		return fmt.Errorf("%s %s", name, "密码错误")
+	}
+	v := &User{}
+	err := One("Username", name, v)
+	if err != nil || v.Status != 1 {
+		return fmt.Errorf("%s %s", name, "用户名错误")
+	}
+	// 判断用户组信息
+	if !utils.InArrStr(v.Groups, group) {
+		return fmt.Errorf("%s %s", name, "用户组错误")
+	}
+	groupData := &Group{}
+	err = One("Name", group, groupData)
+	if err != nil || groupData.Status != 1 {
+		return fmt.Errorf("%s %s", name, "用户组错误")
+	}
+
+	// 判断otp信息
+	otp := pwd[pl-6:]
+	if !checkOtp(name, otp) {
+		return fmt.Errorf("%s %s", name, "动态码错误")
+	}
+	totp := gotp.NewDefaultTOTP(v.OtpSecret)
+	unix := time.Now().Unix()
+	verify := totp.Verify(otp, int(unix))
+	if !verify {
+		return fmt.Errorf("%s %s", name, "动态码错误")
+	}
+
+	pinCode := pwd[:pl-6]
+	if pinCode != v.PinCode {
+		return fmt.Errorf("%s %s", name, "密码错误")
+	}
+
+	return nil
+}
+
+var (
+	userOtpMux = sync.Mutex{}
+	userOtp    = map[string]time.Time{}
+)
+
+func init() {
+	go func() {
+		expire := time.Second * 60
+
+		for range time.Tick(time.Second * 10) {
+			tnow := time.Now()
+			userOtpMux.Lock()
+			for k, v := range userOtp {
+				if tnow.After(v.Add(expire)) {
+					delete(userOtp, k)
+				}
+			}
+			userOtpMux.Unlock()
+		}
+	}()
+}
+
+// 令牌只能使用一次
+func checkOtp(username, otp string) bool {
+	key := fmt.Sprintf("%s:%s", username, otp)
+
+	userOtpMux.Lock()
+	defer userOtpMux.Unlock()
+
+	if _, ok := userOtp[key]; ok {
+		// 已经存在
+		return false
+	}
+
+	userOtp[key] = time.Now()
+	return true
 }

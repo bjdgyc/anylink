@@ -21,11 +21,13 @@ AnyLink 服务端仅在CentOS7测试通过，如需要安装在其他系统，�
 
 ## Screenshot
 
-![online](https://raw.githubusercontent.com/bjdgyc/anylink/master/screenshot/online.jpg)
+![online](https://gitee.com/bjdgyc/anylink/raw/master/screenshot/online.jpg)
 
 ## Installation
 
-```
+> 升级 go version >= 1.16
+
+```shell
 rootPath=`pwd`
 
 git clone https://github.com/bjdgyc/anylink.git
@@ -36,12 +38,13 @@ npm install
 npm run build
 
 cd $rootPath/anylink
+cp -r $rootPath/anylink-web/ui .
 go build -o anylink -ldflags "-X main.COMMIT_ID=`git rev-parse HEAD`"
 
 #整理部署文件
 mkdir $rootPath/anylink-deploy
 cd $rootPath/anylink-deploy
-cp -r $rootPath/anylink-web/ui .
+
 cp -r $rootPath/anylink/anylink .
 cp -r $rootPath/anylink/conf .
 cp -r $rootPath/anylink/downfiles .
@@ -71,7 +74,15 @@ sudo ./anylink -conf="conf/server.toml"
 
 默认配置文件内有详细的注释，根据注释填写配置即可。
 
-- [conf/server.toml](https://github.com/bjdgyc/anylink/blob/master/conf/server.toml)
+```shell
+# 生成后台密码
+./anylink -passwd 123456
+
+# 生成jwt密钥
+./anylink -secret
+```
+
+[conf/server.toml](https://github.com/bjdgyc/anylink/blob/master/conf/server.toml)
 
 ## Setting
 
@@ -82,43 +93,48 @@ sudo ./anylink -conf="conf/server.toml"
 ### tun设置
 
 1. 开启服务器转发
-    ```
-    # flie: /etc/sysctl.conf
-    net.ipv4.ip_forward = 1
 
-    #执行如下命令
-    sysctl -w net.ipv4.ip_forward=1
-    ```
+ ```shell
+ # flie: /etc/sysctl.conf
+ net.ipv4.ip_forward = 1
+
+ #执行如下命令
+ sysctl -w net.ipv4.ip_forward=1
+ ```
 
 2. 设置nat转发规则
-    ```
-    # eth0为服务器内网网卡
-    iptables -t nat -A POSTROUTING -s 192.168.10.0/255.255.255.0 -o eth0 -j MASQUERADE
-    ```
+
+```shell
+# eth0为服务器内网网卡
+iptables -t nat -A POSTROUTING -s 192.168.10.0/255.255.255.0 -o eth0 -j MASQUERADE
+```
 
 3. 使用AnyConnect客户端连接即可
 
 ### tap设置
 
 1. 创建桥接网卡
-    ```
-    注意 server.toml 的ip参数，需要与 bridge.sh 的配置参数一致
-    ```
+
+```
+注意 server.toml 的ip参数，需要与 bridge.sh 的配置参数一致
+```
 
 2. 修改 bridge.sh 内的参数
-    ```
-    # file: ./bridge.sh
-    eth="eth0"
-    eth_ip="192.168.1.4"
-    eth_netmask="255.255.255.0"
-    eth_broadcast="192.168.1.255"
-    eth_gateway="192.168.1.1"
-    ```
+
+```
+# file: ./bridge.sh
+eth="eth0"
+eth_ip="192.168.1.4"
+eth_netmask="255.255.255.0"
+eth_broadcast="192.168.1.255"
+eth_gateway="192.168.1.1"
+```
 
 3. 执行 bridge.sh 文件
-    ```
-    sh bridge.sh
-    ```
+
+```
+sh bridge.sh
+```
 
 ## Soft
 
@@ -126,11 +142,11 @@ sudo ./anylink -conf="conf/server.toml"
 
 ## Other Screenshot
 
-![system.jpg](https://raw.githubusercontent.com/bjdgyc/anylink/master/screenshot/system.jpg)
-![setting.jpg](https://raw.githubusercontent.com/bjdgyc/anylink/master/screenshot/setting.jpg)
-![users.jpg](https://raw.githubusercontent.com/bjdgyc/anylink/master/screenshot/users.jpg)
-![ip_map.jpg](https://raw.githubusercontent.com/bjdgyc/anylink/master/screenshot/ip_map.jpg)
-![group.jpg](https://raw.githubusercontent.com/bjdgyc/anylink/master/screenshot/group.jpg)
+![system.jpg](https://gitee.com/bjdgyc/anylink/raw/master/screenshot/system.jpg)
+![setting.jpg](https://gitee.com/bjdgyc/anylink/raw/master/screenshot/setting.jpg)
+![users.jpg](https://gitee.com/bjdgyc/anylink/raw/master/screenshot/users.jpg)
+![ip_map.jpg](https://gitee.com/bjdgyc/anylink/raw/master/screenshot/ip_map.jpg)
+![group.jpg](https://gitee.com/bjdgyc/anylink/raw/master/screenshot/group.jpg)
 
 ## License
 

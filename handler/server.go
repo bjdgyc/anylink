@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/bjdgyc/anylink/base"
@@ -18,6 +19,7 @@ func startTls() {
 	certFile := base.Cfg.CertFile
 	keyFile := base.Cfg.CertKey
 
+	logger := log.New(os.Stdout, "[SERVER]", log.Lshortfile|log.Ldate)
 	// 设置tls信息
 	tlsConfig := &tls.Config{
 		NextProtos: []string{"http/1.1"},
@@ -27,6 +29,7 @@ func startTls() {
 		Addr:      addr,
 		Handler:   initRoute(),
 		TLSConfig: tlsConfig,
+		ErrorLog:  logger,
 	}
 
 	var ln net.Listener
@@ -50,13 +53,13 @@ func startTls() {
 
 func initRoute() http.Handler {
 	r := mux.NewRouter()
-	// r.HandleFunc("/", checkLinkClient(LinkHome)).Methods(http.MethodGet)
-	r.HandleFunc("/", checkLinkClient(LinkAuth)).Methods(http.MethodPost)
+	r.HandleFunc("/", LinkHome).Methods(http.MethodGet)
+	r.HandleFunc("/", LinkAuth).Methods(http.MethodPost)
 	r.HandleFunc("/CSCOSSLC/tunnel", LinkTunnel).Methods(http.MethodConnect)
 	r.HandleFunc("/otp_qr", LinkOtpQr).Methods(http.MethodGet)
-	r.PathPrefix("/files/").Handler(
-		http.StripPrefix("/files/",
-			http.FileServer(http.Dir(base.Cfg.FilesPath)),
+	r.PathPrefix("/down_files/").Handler(
+		http.StripPrefix("/down_files/",
+			http.FileServer(http.Dir(base.Cfg.DownFilesPath)),
 		),
 	)
 	r.NotFoundHandler = http.HandlerFunc(notFound)

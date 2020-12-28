@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/xml"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -14,6 +15,17 @@ import (
 )
 
 func LinkAuth(w http.ResponseWriter, r *http.Request) {
+	// 判断anyconnect客户端
+	userAgent := strings.ToLower(r.UserAgent())
+	x_Aggregate_Auth := r.Header.Get("X-Aggregate-Auth")
+	x_Transcend_Version := r.Header.Get("X-Transcend-Version")
+	if !(strings.Contains(userAgent, "anyconnect") &&
+		x_Aggregate_Auth == "1" && x_Transcend_Version == "1") {
+		w.WriteHeader(http.StatusForbidden)
+		fmt.Fprintf(w, "error request")
+		return
+	}
+
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)

@@ -8,7 +8,6 @@ import (
 	"os"
 
 	"github.com/bjdgyc/anylink/base"
-	"github.com/bjdgyc/anylink/dbdata"
 	"github.com/bjdgyc/anylink/sessdata"
 )
 
@@ -51,7 +50,7 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	masterSecret := r.Header.Get("X-DTLS-Master-Secret")
 	localIp := r.Header.Get("X-Cstp-Local-Address-Ip4")
 	mobile := r.Header.Get("X-Cstp-License")
-	platform := r.Header.Get("X-AnyConnect-Identifier-Platform")
+
 	cSess.SetMtu(cstpMtu)
 	cSess.MasterSecret = masterSecret
 	cSess.RemoteAddr = r.RemoteAddr
@@ -66,12 +65,6 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 		cSess.Client = "mobile"
 	}
 	cSess.CstpDpd = cstpDpd
-
-	// iPhone手机需要最少一个dns
-	if platform == "apple-ios" && len(cSess.Group.ClientDns) == 0 {
-		dnsVal := dbdata.ValData{Val: "114.114.114.114"}
-		cSess.Group.ClientDns = append(cSess.Group.ClientDns, dnsVal)
-	}
 
 	base.Debug(cSess.IpAddr, cSess.MacHw, sess.Username, mobile)
 

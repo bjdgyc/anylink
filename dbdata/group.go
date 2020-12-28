@@ -69,6 +69,9 @@ func SetGroup(g *Group) error {
 			clientDns = append(clientDns, v)
 		}
 	}
+	if len(clientDns) == 0 {
+		return errors.New("DNS错误")
+	}
 	g.ClientDns = clientDns
 
 	routeInclude := []ValData{}
