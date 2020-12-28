@@ -28,28 +28,13 @@ AnyLink 服务端仅在CentOS7测试通过，如需要安装在其他系统，�
 > 升级 go version = 1.16
 
 ```shell
-rootPath=`pwd`
-
 git clone https://github.com/bjdgyc/anylink.git
-git clone https://github.com/bjdgyc/anylink-web.git
 
-cd $rootPath/anylink-web
-npm install
-npm run build
-
-cd $rootPath/anylink
-cp -r $rootPath/anylink-web/ui .
-go build -o anylink -ldflags "-X main.COMMIT_ID=`git rev-parse HEAD`"
-
-#整理部署文件
-mkdir $rootPath/anylink-deploy
-cd $rootPath/anylink-deploy
-
-cp -r $rootPath/anylink/anylink .
-cp -r $rootPath/anylink/conf .
-cp -r $rootPath/anylink/downfiles .
+cd anylink
+sh deploy.sh
 
 #注意使用root权限运行
+cd anylink-deploy
 sudo ./anylink -conf="conf/server.toml"
 ```
 
