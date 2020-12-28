@@ -25,7 +25,7 @@ AnyLink 服务端仅在CentOS7测试通过，如需要安装在其他系统，�
 
 ## Installation
 
-> 升级 go version >= 1.16
+> 升级 go version = 1.16
 
 ```shell
 rootPath=`pwd`
