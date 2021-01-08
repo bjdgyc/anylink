@@ -39,7 +39,8 @@ type ServerConfig struct {
 	DbFile        string `toml:"db_file" info:"数据库地址"`
 	CertFile      string `toml:"cert_file" info:"证书文件"`
 	CertKey       string `toml:"cert_key" info:"证书密钥"`
-	DownFilesPath string `json:"down_files_path" info:"外部下载文件路径"`
+	UiPath        string `toml:"ui_path" info:"ui文件路径"`
+	DownFilesPath string `toml:"down_files_path" info:"外部下载文件路径"`
 	LogLevel      string `toml:"log_level" info:"日志等级"`
 	Issuer        string `toml:"issuer" info:"系统名称"`
 	AdminUser     string `toml:"admin_user" info:"管理用户名"`

@@ -2,15 +2,12 @@
 package admin
 
 import (
-	"embed"
 	"net/http"
 	"net/http/pprof"
 
 	"github.com/bjdgyc/anylink/base"
 	"github.com/gorilla/mux"
 )
-
-var UiPath embed.FS
 
 // 开启服务
 func StartAdmin() {
@@ -21,7 +18,7 @@ func StartAdmin() {
 	r.Handle("/", http.RedirectHandler("/ui/", http.StatusFound)).
 		Name("static")
 	r.PathPrefix("/ui/").Handler(http.FileServer(
-		http.FS(UiPath),
+		http.Dir(base.Cfg.UiPath),
 	)).Name("static")
 
 	r.HandleFunc("/base/login", Login).Name("login")

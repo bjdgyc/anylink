@@ -8,6 +8,7 @@ db_file = "./data.db"
 #证书文件
 cert_file = "./vpn_cert.pem"
 cert_key = "./vpn_cert.key"
+ui_path = "../ui"
 down_files_path = "../down_files"
 
 log_level = "info"

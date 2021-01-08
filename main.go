@@ -2,25 +2,19 @@
 package main
 
 import (
-	"embed"
 	"os"
 	"os/signal"
 	"syscall"
 
-	"github.com/bjdgyc/anylink/admin"
 	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/handler"
 )
-
-//go:embed ui/*
-var UiPath embed.FS
 
 // 程序版本
 var COMMIT_ID string
 
 func main() {
 	base.CommitId = COMMIT_ID
-	admin.UiPath = UiPath
 
 	base.Start()
 	handler.Start()
