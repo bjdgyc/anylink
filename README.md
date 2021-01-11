@@ -25,7 +25,7 @@ AnyLink 服务端仅在CentOS7测试通过，如需要安装在其他系统，�
 
 ## Installation
 
-> 升级 go version = 1.16
+> 升级 go version = 1.15
 
 ```shell
 git clone https://github.com/bjdgyc/anylink.git
@@ -101,13 +101,12 @@ iptables -t nat -A POSTROUTING -s 192.168.10.0/255.255.255.0 -o eth0 -j MASQUERA
 1. 创建桥接网卡
 
 ```
-注意 server.toml 的ip参数，需要与 bridge.sh 的配置参数一致
+注意 server.toml 的ip参数，需要与 bridge-init.sh 的配置参数一致
 ```
 
-2. 修改 bridge.sh 内的参数
+2. 修改 bridge-init.sh 内的参数
 
 ```
-# file: ./bridge.sh
 eth="eth0"
 eth_ip="192.168.1.4"
 eth_netmask="255.255.255.0"
@@ -115,10 +114,10 @@ eth_broadcast="192.168.1.255"
 eth_gateway="192.168.1.1"
 ```
 
-3. 执行 bridge.sh 文件
+3. 执行 bridge-init.sh 文件
 
 ```
-sh bridge.sh
+sh bridge-init.sh
 ```
 
 ## Soft

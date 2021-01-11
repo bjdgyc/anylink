@@ -15,13 +15,12 @@ func StartAdmin() {
 	r := mux.NewRouter()
 	r.Use(authMiddleware)
 
-	r.Handle("/", http.RedirectHandler("/ui/", http.StatusFound)).
-		Name("static")
-	r.PathPrefix("/ui/").Handler(http.FileServer(
-		http.Dir(base.Cfg.UiPath),
-	)).Name("static")
-
+	r.Handle("/", http.RedirectHandler("/ui/", http.StatusFound)).Name("index")
+	r.PathPrefix("/ui/").Handler(
+		http.StripPrefix("/ui/", http.FileServer(http.Dir(base.Cfg.UiPath))),
+	).Name("static")
 	r.HandleFunc("/base/login", Login).Name("login")
+
 	r.HandleFunc("/set/home", SetHome)
 	r.HandleFunc("/set/system", SetSystem)
 	r.HandleFunc("/set/soft", SetSoft)

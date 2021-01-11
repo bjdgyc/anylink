@@ -83,6 +83,7 @@ func initServerCfg() {
 	Cfg.DbFile = getAbsPath(base, Cfg.DbFile)
 	Cfg.CertFile = getAbsPath(base, Cfg.CertFile)
 	Cfg.CertKey = getAbsPath(base, Cfg.CertKey)
+	Cfg.UiPath = getAbsPath(base, Cfg.UiPath)
 	Cfg.DownFilesPath = getAbsPath(base, Cfg.DownFilesPath)
 
 	if len(Cfg.JwtSecret) < 20 {

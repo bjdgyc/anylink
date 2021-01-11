@@ -56,7 +56,7 @@ func authMiddleware(next http.Handler) http.Handler {
 		route := mux.CurrentRoute(r)
 		name := route.GetName()
 		// fmt.Println("bb", r.URL.Path, name)
-		if name == "login" || name == "static" {
+		if utils.InArrStr([]string{"login", "index", "static"}, name) {
 			// 不进行鉴权
 			next.ServeHTTP(w, r)
 			return
