@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"net"
@@ -86,11 +87,11 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	}
 	// 允许的路由
 	for _, v := range cSess.Group.RouteInclude {
-		w.Header().Add("X-CSTP-Split-Include", v.Val)
+		w.Header().Add("X-CSTP-Split-Include", v.IpMask)
 	}
 	// 不允许的路由
 	for _, v := range cSess.Group.RouteExclude {
-		w.Header().Add("X-CSTP-Split-Exclude", v.Val)
+		w.Header().Add("X-CSTP-Split-Exclude", v.IpMask)
 	}
 
 	w.Header().Set("X-CSTP-Lease-Duration", fmt.Sprintf("%d", base.Cfg.IpLease)) // ip地址租期
@@ -130,8 +131,11 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	// w.Header().Set("X-CSTP-Post-Auth-XML", ``)
 	w.WriteHeader(http.StatusOK)
 
-	// h := w.Header().Clone()
-	// h.Write(os.Stdout)
+	h := w.Header().Clone()
+	headers := make([]byte, 0)
+	buf := bytes.NewBuffer(headers)
+	h.Write(buf)
+	base.Debug(string(buf.Bytes()))
 
 	hj := w.(http.Hijacker)
 	conn, _, err := hj.Hijack()

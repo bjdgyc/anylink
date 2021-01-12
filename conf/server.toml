@@ -22,7 +22,7 @@ admin_pass = "$2a$10$UQ7C.EoPifDeJh6d8.31TeSPQU7hM/NOM2nixmBucJpAuXDQNqNke"
 jwt_secret = ""
 
 
-#vpn服务对外地址
+#vpn服务对外地址,影响开通邮件二维码
 link_addr = "vpn.xx.com"
 
 #前台服务监听地址

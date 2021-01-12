@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"net"
-	"strings"
 	"time"
 
 	"github.com/bjdgyc/anylink/base"
@@ -20,11 +19,12 @@ type GroupLinkAcl struct {
 	Action string     `json:"action"` // allow、deny
 	Val    string     `json:"val"`
 	Port   uint8      `json:"port"`
-	IpNet  *net.IPNet `json:"-"`
+	IpNet  *net.IPNet `json:"ip_net"`
 }
 
 type ValData struct {
-	Val string `json:"val"`
+	Val    string `json:"val"`
+	IpMask string `json:"ip_mask"`
 }
 
 type Group struct {
@@ -70,15 +70,18 @@ func SetGroup(g *Group) error {
 		}
 	}
 	if len(clientDns) == 0 {
-		return errors.New("DNS错误")
+		return errors.New("DNS 错误")
 	}
 	g.ClientDns = clientDns
 
 	routeInclude := []ValData{}
 	for _, v := range g.RouteInclude {
 		if v.Val != "" {
-			v1, _ := parseIpNet(v.Val)
-			vn := ValData{Val: v1}
+			ipMask, _, err := parseIpNet(v.Val)
+			if err != nil {
+				return errors.New("RouteInclude 错误" + err.Error())
+			}
+			vn := ValData{Val: v.Val, IpMask: ipMask}
 			routeInclude = append(routeInclude, vn)
 		}
 	}
@@ -86,8 +89,11 @@ func SetGroup(g *Group) error {
 	routeExclude := []ValData{}
 	for _, v := range g.RouteExclude {
 		if v.Val != "" {
-			v1, _ := parseIpNet(v.Val)
-			vn := ValData{Val: v1}
+			ipMask, _, err := parseIpNet(v.Val)
+			if err != nil {
+				return errors.New("RouteExclude 错误" + err.Error())
+			}
+			vn := ValData{Val: v.Val, IpMask: ipMask}
 			routeExclude = append(routeExclude, vn)
 		}
 	}
@@ -96,13 +102,13 @@ func SetGroup(g *Group) error {
 	linkAcl := []GroupLinkAcl{}
 	for _, v := range g.LinkAcl {
 		if v.Val != "" {
-			v1, v2 := parseIpNet(v.Val)
-			if v2 != nil {
-				vn := v
-				vn.Val = v1
-				vn.IpNet = v2
-				linkAcl = append(linkAcl, vn)
+			_, ipNet, err := parseIpNet(v.Val)
+			if err != nil {
+				return errors.New("GroupLinkAcl 错误" + err.Error())
 			}
+			vn := v
+			vn.IpNet = ipNet
+			linkAcl = append(linkAcl, vn)
 		}
 	}
 	g.LinkAcl = linkAcl
@@ -113,24 +119,14 @@ func SetGroup(g *Group) error {
 	return err
 }
 
-func parseIpNet(s string) (string, *net.IPNet) {
-	ips := strings.Split(s, "/")
-	if len(ips) != 2 {
-		return "", nil
-	}
-	ip := net.ParseIP(ips[0])
-	mask := net.ParseIP(ips[1])
-
-	if strings.Contains(ips[0], ".") {
-		ip = ip.To4()
-		mask = mask.To4()
+func parseIpNet(s string) (string, *net.IPNet, error) {
+	ip, ipNet, err := net.ParseCIDR(s)
+	if err != nil {
+		return "", nil, err
 	}
 
-	ipmask := net.IPMask(mask)
-	ip0 := ip.Mask(ipmask)
+	mask := net.IP(ipNet.Mask)
+	ipMask := fmt.Sprintf("%s/%s", ip, mask)
 
-	ipNetS := fmt.Sprintf("%s/%s", ip0, mask)
-	ipNet := &net.IPNet{IP: ip0, Mask: ipmask}
-
-	return ipNetS, ipNet
+	return ipMask, ipNet, nil
 }

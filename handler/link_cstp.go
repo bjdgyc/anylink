@@ -49,12 +49,12 @@ func LinkCstp(conn net.Conn, cSess *sessdata.ConnSession) {
 		switch hdata[6] {
 		case 0x07: // KEEPALIVE
 			// do nothing
-			base.Debug("recv keepalive", cSess.IpAddr)
+			// base.Debug("recv keepalive", cSess.IpAddr)
 		case 0x05: // DISCONNECT
 			base.Debug("DISCONNECT", cSess.IpAddr)
 			return
 		case 0x03: // DPD-REQ
-			base.Debug("recv DPD-REQ", cSess.IpAddr)
+			// base.Debug("recv DPD-REQ", cSess.IpAddr)
 			if payloadOut(cSess, sessdata.LTypeIPData, 0x04, nil) {
 				return
 			}
