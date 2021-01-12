@@ -100,7 +100,11 @@ func UserSet(w http.ResponseWriter, r *http.Request) {
 
 	// 发送邮件
 	if data.SendEmail {
-		userAccountMail(data)
+		err = userAccountMail(data)
+		if err != nil {
+			RespError(w, RespInternalErr, err)
+			return
+		}
 	}
 
 	RespSucess(w, nil)
