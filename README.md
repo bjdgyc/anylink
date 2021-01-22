@@ -124,6 +124,13 @@ sh bridge-init.sh
 
 相关软件下载： https://gitee.com/bjdgyc/anylink-soft
 
+## Discussion
+
+![qq.png](https://gitee.com/bjdgyc/anylink/raw/master/screenshot/qq.png)
+
+添加QQ群: 567510628
+
+
 ## Other Screenshot
 
 ![system.jpg](https://gitee.com/bjdgyc/anylink/raw/master/screenshot/system.jpg)

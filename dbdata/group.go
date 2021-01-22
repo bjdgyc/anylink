@@ -18,13 +18,15 @@ type GroupLinkAcl struct {
 	// 自上而下匹配 默认 allow * *
 	Action string     `json:"action"` // allow、deny
 	Val    string     `json:"val"`
-	Port   uint8      `json:"port"`
+	Port   uint16     `json:"port"`
 	IpNet  *net.IPNet `json:"ip_net"`
+	Note   string     `json:"note"`
 }
 
 type ValData struct {
 	Val    string `json:"val"`
 	IpMask string `json:"ip_mask"`
+	Note   string `json:"note"`
 }
 
 type Group struct {

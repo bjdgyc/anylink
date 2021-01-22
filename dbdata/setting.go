@@ -38,6 +38,7 @@ type SettingSmtp struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 	From     string `json:"from"`
+	UseSSl   bool   `json:"use_ssl"`
 }
 
 type SettingOther struct {

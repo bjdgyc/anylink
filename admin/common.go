@@ -68,7 +68,9 @@ func SendMail(subject, to, htmlBody string) error {
 	server.Port = dataSmtp.Port
 	server.Username = dataSmtp.Username
 	server.Password = dataSmtp.Password
-	// server.Encryption = mail.EncryptionTLS
+	if dataSmtp.UseSSl {
+		server.Encryption = mail.EncryptionSSL
+	}
 
 	// Since v2.3.0 you can specified authentication type:
 	// - PLAIN (default)
