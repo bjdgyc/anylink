@@ -175,6 +175,13 @@ func UserOffline(w http.ResponseWriter, r *http.Request) {
 	RespSucess(w, nil)
 }
 
+func UserReline(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	token := r.FormValue("token")
+	sessdata.CloseCSess(token)
+	RespSucess(w, nil)
+}
+
 type userAccountMailData struct {
 	Issuer   string
 	LinkAddr string

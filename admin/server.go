@@ -35,6 +35,7 @@ func StartAdmin() {
 	r.HandleFunc("/user/del", UserDel)
 	r.HandleFunc("/user/online", UserOnline)
 	r.HandleFunc("/user/offline", UserOffline)
+	r.HandleFunc("/user/reline", UserReline)
 	r.HandleFunc("/user/otp_qr", UserOtpQr)
 	r.HandleFunc("/user/ip_map/list", UserIpMapList)
 	r.HandleFunc("/user/ip_map/detail", UserIpMapDetail)

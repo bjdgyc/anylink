@@ -296,6 +296,17 @@ func CloseSess(token string) {
 	sess.CSess.Close()
 }
 
+func CloseCSess(token string) {
+	sessMux.Lock()
+	defer sessMux.Unlock()
+	sess, ok := sessions[token]
+	if !ok {
+		return
+	}
+
+	sess.CSess.Close()
+}
+
 func DelSessByStoken(stoken string) {
 	stoken = strings.TrimSpace(stoken)
 	sarr := strings.Split(stoken, "@")

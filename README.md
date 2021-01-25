@@ -130,6 +130,9 @@ sh bridge-init.sh
 
 添加QQ群: 567510628
 
+## Contribution
+
+欢迎提交 PR、Issues，感谢为AnyLink做出贡献
 
 ## Other Screenshot
 
