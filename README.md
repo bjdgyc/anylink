@@ -51,8 +51,8 @@ sudo ./anylink -conf="conf/server.toml"
 - [x] TOTP令牌支持
 - [x] 流量控制
 - [x] 后台管理界面
+- [x] 访问权限管理
 
-- [ ] 访问权限管理
 - [ ] DTLS-UDP通道
 
 ## Config
