@@ -122,7 +122,7 @@ sh bridge-init.sh
 
 ## Soft
 
-相关软件下载： https://gitee.com/bjdgyc/anylink-soft
+相关软件下载： QQ群共享文件: 567510628
 
 ## Discussion
 

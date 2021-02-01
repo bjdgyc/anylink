@@ -83,8 +83,9 @@ func SetGroup(g *Group) error {
 			if err != nil {
 				return errors.New("RouteInclude 错误" + err.Error())
 			}
-			vn := ValData{Val: v.Val, IpMask: ipMask}
-			routeInclude = append(routeInclude, vn)
+
+			v.IpMask = ipMask
+			routeInclude = append(routeInclude, v)
 		}
 	}
 	g.RouteInclude = routeInclude
@@ -95,8 +96,8 @@ func SetGroup(g *Group) error {
 			if err != nil {
 				return errors.New("RouteExclude 错误" + err.Error())
 			}
-			vn := ValData{Val: v.Val, IpMask: ipMask}
-			routeExclude = append(routeExclude, vn)
+			v.IpMask = ipMask
+			routeExclude = append(routeExclude, v)
 		}
 	}
 	g.RouteExclude = routeExclude
@@ -108,9 +109,8 @@ func SetGroup(g *Group) error {
 			if err != nil {
 				return errors.New("GroupLinkAcl 错误" + err.Error())
 			}
-			vn := v
-			vn.IpNet = ipNet
-			linkAcl = append(linkAcl, vn)
+			v.IpNet = ipNet
+			linkAcl = append(linkAcl, v)
 		}
 	}
 	g.LinkAcl = linkAcl
