@@ -1,0 +1,12 @@
+language: go
+
+go:
+  - 1.15
+  - master
+os:
+  - centos
+      
+script: >-
+  go test -v ./...
+  go build ./...
+    
