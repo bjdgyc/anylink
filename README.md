@@ -1,6 +1,8 @@
 # AnyLink
 
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/bjdgyc/anylink)](https://pkg.go.dev/github.com/bjdgyc/anylink)
+[![Go Report Card](https://goreportcard.com/badge/github.com/bjdgyc/anylink)](https://goreportcard.com/report/github.com/bjdgyc/anylink)
+[![codecov](https://codecov.io/gh/bjdgyc/anylink/branch/master/graph/badge.svg)](https://codecov.io/gh/bjdgyc/anylink)
 
 AnyLink 是一个企业级远程办公ssl vpn软件，可以支持多人同时在线使用。
 
@@ -52,7 +54,7 @@ sudo ./anylink -conf="conf/server.toml"
 - [x] 流量控制
 - [x] 后台管理界面
 - [x] 访问权限管理
-
+  
 - [ ] DTLS-UDP通道
 
 ## Config

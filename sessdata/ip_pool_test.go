@@ -12,27 +12,35 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func preIpData() {
+func preData(tmpDir string) {
+	tmpDb := path.Join(tmpDir, "test.db")
+	base.Cfg.DbFile = tmpDb
 	base.Cfg.Ipv4Network = "192.168.3.0"
 	base.Cfg.Ipv4Netmask = "255.255.255.0"
 	base.Cfg.Ipv4Pool = []string{"192.168.3.1", "192.168.3.199"}
-	tmpDb := path.Join(os.TempDir(), "anylink_test.db")
-	base.Cfg.DbFile = tmpDb
+	base.Cfg.MaxClient = 100
+	base.Cfg.MaxUserClient = 3
+
 	dbdata.Start()
+	group := dbdata.Group{
+		Name:      "group1",
+		Bandwidth: 1000,
+	}
+	dbdata.Save(&group)
+	initIpPool()
 }
 
-func closeIpdata() {
+func cleardata(tmpDir string) {
 	dbdata.Stop()
-	tmpDb := path.Join(os.TempDir(), "anylink_test.db")
+	tmpDb := path.Join(tmpDir, "test.db")
 	os.Remove(tmpDb)
 }
 
 func TestIpPool(t *testing.T) {
 	assert := assert.New(t)
-	preIpData()
-	defer closeIpdata()
-
-	initIpPool()
+	tmp := t.TempDir()
+	preData(tmp)
+	defer cleardata(tmp)
 
 	var ip net.IP
 
@@ -50,7 +58,7 @@ func TestIpPool(t *testing.T) {
 
 	ReleaseIp(net.IPv4(192, 168, 3, 88), "mac-88")
 	ReleaseIp(net.IPv4(192, 168, 3, 77), "mac-77")
-	// 最早过期的ip
+	// 从头循环获取可用ip
 	ip = AcquireIp("user", "mac-release-new")
-	assert.True(net.IPv4(192, 168, 3, 88).Equal(ip))
+	assert.True(net.IPv4(192, 168, 3, 77).Equal(ip))
 }
