@@ -1,8 +1,9 @@
 # AnyLink
 
+[![Go](https://github.com/bjdgyc/anylink/workflows/Go/badge.svg?branch=master)](https://github.com/bjdgyc/anylink/actions)
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/bjdgyc/anylink)](https://pkg.go.dev/github.com/bjdgyc/anylink)
 [![Go Report Card](https://goreportcard.com/badge/github.com/bjdgyc/anylink)](https://goreportcard.com/report/github.com/bjdgyc/anylink)
-[![codecov](https://codecov.io/gh/bjdgyc/anylink/branch/master/graph/badge.svg)](https://codecov.io/gh/bjdgyc/anylink)
+[![codecov](https://codecov.io/gh/bjdgyc/anylink/branch/master/graph/badge.svg?token=JTFLIIIBQ0)](https://codecov.io/gh/bjdgyc/anylink)
 
 AnyLink 是一个企业级远程办公ssl vpn软件，可以支持多人同时在线使用。
 
@@ -138,11 +139,16 @@ sh bridge-init.sh
 
 ## Other Screenshot
 
+<details>
+<summary>展开查看</summary>
+
 ![system.jpg](https://gitee.com/bjdgyc/anylink/raw/master/screenshot/system.jpg)
 ![setting.jpg](https://gitee.com/bjdgyc/anylink/raw/master/screenshot/setting.jpg)
 ![users.jpg](https://gitee.com/bjdgyc/anylink/raw/master/screenshot/users.jpg)
 ![ip_map.jpg](https://gitee.com/bjdgyc/anylink/raw/master/screenshot/ip_map.jpg)
 ![group.jpg](https://gitee.com/bjdgyc/anylink/raw/master/screenshot/group.jpg)
+
+</details>
 
 ## License
 
