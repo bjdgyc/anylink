@@ -19,7 +19,7 @@ import (
 )
 
 func UserList(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	_ = r.ParseForm()
 	prefix := r.FormValue("prefix")
 	pageS := r.FormValue("page")
 	page, _ := strconv.Atoi(pageS)
@@ -58,7 +58,7 @@ func UserList(w http.ResponseWriter, r *http.Request) {
 }
 
 func UserDetail(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	_ = r.ParseForm()
 	idS := r.FormValue("id")
 	id, _ := strconv.Atoi(idS)
 	if id < 1 {
@@ -77,7 +77,7 @@ func UserDetail(w http.ResponseWriter, r *http.Request) {
 }
 
 func UserSet(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	_ = r.ParseForm()
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -111,7 +111,7 @@ func UserSet(w http.ResponseWriter, r *http.Request) {
 }
 
 func UserDel(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	_ = r.ParseForm()
 	idS := r.FormValue("id")
 	id, _ := strconv.Atoi(idS)
 
@@ -130,7 +130,7 @@ func UserDel(w http.ResponseWriter, r *http.Request) {
 }
 
 func UserOtpQr(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	_ = r.ParseForm()
 	b64 := r.FormValue("b64")
 	idS := r.FormValue("id")
 	id, _ := strconv.Atoi(idS)
@@ -148,11 +148,16 @@ func UserOtpQr(w http.ResponseWriter, r *http.Request) {
 	if b64 == "1" {
 		data, _ := qr.PNG(300)
 		s := base64.StdEncoding.EncodeToString(data)
-		fmt.Fprint(w, s)
-	} else {
-		qr.Write(300, w)
+		_, err = fmt.Fprint(w, s)
+		if err != nil {
+			base.Error(err)
+		}
+		return
 	}
-
+	err = qr.Write(300, w)
+	if err != nil {
+		base.Error(err)
+	}
 }
 
 // 在线用户
@@ -169,14 +174,14 @@ func UserOnline(w http.ResponseWriter, r *http.Request) {
 }
 
 func UserOffline(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	_ = r.ParseForm()
 	token := r.FormValue("token")
 	sessdata.CloseSess(token)
 	RespSucess(w, nil)
 }
 
 func UserReline(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	_ = r.ParseForm()
 	token := r.FormValue("token")
 	sessdata.CloseCSess(token)
 	RespSucess(w, nil)
@@ -231,7 +236,10 @@ func userAccountMail(user *dbdata.User) error {
 	}
 	w := bytes.NewBufferString("")
 	t, _ := template.New("auth_complete").Parse(htmlBody)
-	t.Execute(w, data)
+	err = t.Execute(w, data)
+	if err != nil {
+		return err
+	}
 	// fmt.Println(w.String())
 	return SendMail(base.Cfg.Issuer+"平台通知", user.Email, w.String())
 }

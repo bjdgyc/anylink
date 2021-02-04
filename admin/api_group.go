@@ -10,7 +10,7 @@ import (
 )
 
 func GroupList(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	_ = r.ParseForm()
 	pageS := r.FormValue("page")
 	page, _ := strconv.Atoi(pageS)
 	if page < 1 {
@@ -48,7 +48,7 @@ func GroupNames(w http.ResponseWriter, r *http.Request) {
 }
 
 func GroupDetail(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	_ = r.ParseForm()
 	idS := r.FormValue("id")
 	id, _ := strconv.Atoi(idS)
 	if id < 1 {
@@ -90,7 +90,7 @@ func GroupSet(w http.ResponseWriter, r *http.Request) {
 }
 
 func GroupDel(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	_ = r.ParseForm()
 	idS := r.FormValue("id")
 	id, _ := strconv.Atoi(idS)
 	if id < 1 {

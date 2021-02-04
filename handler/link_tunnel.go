@@ -73,9 +73,9 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Server", fmt.Sprintf("%s %s", base.APP_NAME, base.APP_VER))
 	w.Header().Set("X-CSTP-Version", "1")
 	w.Header().Set("X-CSTP-Protocol", "Copyright (c) 2004 Cisco Systems, Inc.")
-	w.Header().Set("X-CSTP-Address", cSess.IpAddr.String()) // 分配的ip地址
-	w.Header().Set("X-CSTP-Netmask", base.Cfg.Ipv4Netmask)  // 子网掩码
-	w.Header().Set("X-CSTP-Hostname", hn)                   // 机器名称
+	w.Header().Set("X-CSTP-Address", cSess.IpAddr.String())             // 分配的ip地址
+	w.Header().Set("X-CSTP-Netmask", sessdata.IpPool.Ipv4Mask.String()) // 子网掩码
+	w.Header().Set("X-CSTP-Hostname", hn)                               // 机器名称
 
 	// 允许本地LAN访问vpn网络，必须放在路由的第一个
 	if cSess.Group.AllowLan {
@@ -131,11 +131,11 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	// w.Header().Set("X-CSTP-Post-Auth-XML", ``)
 	w.WriteHeader(http.StatusOK)
 
-	h := w.Header().Clone()
+	hClone := w.Header().Clone()
 	headers := make([]byte, 0)
 	buf := bytes.NewBuffer(headers)
-	h.Write(buf)
-	base.Debug(string(buf.Bytes()))
+	_ = hClone.Write(buf)
+	base.Debug(buf.String())
 
 	hj := w.(http.Hijacker)
 	conn, _, err := hj.Hijack()

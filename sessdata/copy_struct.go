@@ -45,8 +45,6 @@ func CopyStruct(a interface{}, b interface{}, fields ...string) (err error) {
 		// a中有同名的字段并且类型一致才复制
 		if f.IsValid() && f.Kind() == bValue.Kind() {
 			f.Set(bValue)
-		} else {
-			// fmt.Printf("no such field or different kind, fieldName: %s\n", name)
 		}
 	}
 	return

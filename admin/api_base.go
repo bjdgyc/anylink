@@ -16,7 +16,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	// hd, _ := httputil.DumpRequest(r, true)
 	// fmt.Println("DumpRequest: ", string(hd))
 
-	r.ParseForm()
+	_ = r.ParseForm()
 	admin_user := r.PostFormValue("admin_user")
 	admin_pass := r.PostFormValue("admin_pass")
 

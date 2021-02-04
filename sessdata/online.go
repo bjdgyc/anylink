@@ -34,10 +34,7 @@ func (o Onlines) Len() int {
 }
 
 func (o Onlines) Less(i, j int) bool {
-	if bytes.Compare(o[i].Ip, o[j].Ip) < 0 {
-		return true
-	}
-	return false
+	return bytes.Compare(o[i].Ip, o[j].Ip) < 0
 }
 
 func (o Onlines) Swap(i, j int) {

@@ -11,7 +11,7 @@ import (
 )
 
 func UserIpMapList(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	_ = r.ParseForm()
 	pageS := r.FormValue("page")
 	page, _ := strconv.Atoi(pageS)
 	if page < 1 {
@@ -39,7 +39,7 @@ func UserIpMapList(w http.ResponseWriter, r *http.Request) {
 }
 
 func UserIpMapDetail(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	_ = r.ParseForm()
 	idS := r.FormValue("id")
 	id, _ := strconv.Atoi(idS)
 	if id < 1 {
@@ -58,7 +58,7 @@ func UserIpMapDetail(w http.ResponseWriter, r *http.Request) {
 }
 
 func UserIpMapSet(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	_ = r.ParseForm()
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -92,7 +92,7 @@ func UserIpMapSet(w http.ResponseWriter, r *http.Request) {
 }
 
 func UserIpMapDel(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	_ = r.ParseForm()
 	idS := r.FormValue("id")
 	id, _ := strconv.Atoi(idS)
 

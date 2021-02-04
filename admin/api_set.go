@@ -1,7 +1,6 @@
 package admin
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"runtime"
@@ -84,9 +83,8 @@ func SetSystem(w http.ResponseWriter, r *http.Request) {
 }
 
 func SetSoft(w http.ResponseWriter, r *http.Request) {
-	datas := base.ServerCfg2Slice()
-	b, _ := json.Marshal(datas)
-	w.Write(b)
+	data := base.ServerCfg2Slice()
+	RespSucess(w, data)
 }
 
 func decimal(f float64) float64 {

@@ -29,6 +29,9 @@ func checkTap() {
 	bridgeHw = brFace.HardwareAddr
 
 	addrs, err := brFace.Addrs()
+	if err != nil {
+		base.Fatal("testTap err: ", err)
+	}
 	for _, addr := range addrs {
 		ip, _, err := net.ParseCIDR(addr.String())
 		if err != nil || ip.To4() == nil {

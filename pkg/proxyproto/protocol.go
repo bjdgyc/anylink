@@ -198,8 +198,10 @@ func (p *Conn) checkPrefixOnce() {
 func (p *Conn) checkPrefix() error {
 	if p.proxyHeaderTimeout != 0 {
 		readDeadLine := time.Now().Add(p.proxyHeaderTimeout)
-		p.conn.SetReadDeadline(readDeadLine)
-		defer p.conn.SetReadDeadline(time.Time{})
+		_ = p.conn.SetReadDeadline(readDeadLine)
+		defer func() {
+			_ = p.conn.SetReadDeadline(time.Time{})
+		}()
 	}
 
 	// Incrementally check each byte of the prefix

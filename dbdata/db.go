@@ -43,28 +43,27 @@ func initData() {
 		return
 	}
 
-	defer Set(SettingBucket, Installed, true)
+	defer func() {
+		_ = Set(SettingBucket, Installed, true)
+	}()
 
 	smtp := &SettingSmtp{
 		Host: "127.0.0.1",
 		Port: 25,
 		From: "vpn@xx.com",
 	}
-	SettingSet(smtp)
+	_ = SettingSet(smtp)
 
 	other := &SettingOther{
 		Banner:      "您已接入公司网络，请按照公司规定使用。\n请勿进行非工作下载及视频行为！",
 		AccountMail: accountMail,
 	}
-	SettingSet(other)
+	_ = SettingSet(other)
 
 }
 
 func CheckErrNotFound(err error) bool {
-	if err == storm.ErrNotFound {
-		return true
-	}
-	return false
+	return err == storm.ErrNotFound
 }
 
 const accountMail = `<p>您好:</p>

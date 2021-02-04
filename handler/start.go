@@ -21,5 +21,5 @@ func Start() {
 }
 
 func Stop() {
-	dbdata.Stop()
+	_ = dbdata.Stop()
 }

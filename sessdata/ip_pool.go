@@ -19,7 +19,8 @@ type ipPoolConfig struct {
 	mux sync.Mutex
 	// 计算动态ip
 	Ipv4Gateway net.IP
-	Ipv4IPNet   net.IPNet
+	Ipv4Mask    net.IP
+	Ipv4IPNet   *net.IPNet
 	IpLongMin   uint32
 	IpLongMax   uint32
 }
@@ -27,11 +28,12 @@ type ipPoolConfig struct {
 func initIpPool() {
 
 	// 地址处理
-	// ip地址
-	ip := net.ParseIP(base.Cfg.Ipv4Network)
-	// 子网掩码
-	maskIp := net.ParseIP(base.Cfg.Ipv4Netmask).To4()
-	IpPool.Ipv4IPNet = net.IPNet{IP: ip, Mask: net.IPMask(maskIp)}
+	_, ipNet, err := net.ParseCIDR(base.Cfg.Ipv4CIDR)
+	if err != nil {
+		panic(err)
+	}
+	IpPool.Ipv4IPNet = ipNet
+	IpPool.Ipv4Mask = net.IP(ipNet.Mask)
 	IpPool.Ipv4Gateway = net.ParseIP(base.Cfg.Ipv4Gateway)
 
 	// 网络地址零值
@@ -74,11 +76,11 @@ func AcquireIp(username, macAddr string) net.IP {
 			mi.Username = username
 			mi.LastLogin = tNow
 			// 回写db数据
-			dbdata.Save(mi)
+			_ = dbdata.Save(mi)
 			ipActive[ipStr] = true
 			return ip
 		} else {
-			dbdata.Del(mi)
+			_ = dbdata.Del(mi)
 		}
 	}
 
@@ -92,7 +94,7 @@ func AcquireIp(username, macAddr string) net.IP {
 		if err != nil && dbdata.CheckErrNotFound(err) {
 			// 该ip没有被使用
 			mi := &dbdata.IpMap{IpAddr: ip, MacAddr: macAddr, Username: username, LastLogin: tNow}
-			dbdata.Save(mi)
+			_ = dbdata.Save(mi)
 			ipActive[ipStr] = true
 			return ip
 		}
@@ -121,10 +123,10 @@ func AcquireIp(username, macAddr string) net.IP {
 
 		// 已经超过租期
 		if tNow.Sub(v.LastLogin) > time.Duration(base.Cfg.IpLease)*time.Second {
-			dbdata.Del(v)
+			_ = dbdata.Del(v)
 			mi := &dbdata.IpMap{IpAddr: ip, MacAddr: macAddr, Username: username, LastLogin: tNow}
 			// 重写db数据
-			dbdata.Save(mi)
+			_ = dbdata.Save(mi)
 			ipActive[ipStr] = true
 			return ip
 		}
@@ -145,7 +147,7 @@ func AcquireIp(username, macAddr string) net.IP {
 	ipStr := ip.String()
 	mi = &dbdata.IpMap{IpAddr: ip, MacAddr: macAddr, Username: username, LastLogin: tNow}
 	// 回写db数据
-	dbdata.Save(mi)
+	_ = dbdata.Save(mi)
 	ipActive[ipStr] = true
 	return ip
 }
@@ -160,6 +162,6 @@ func ReleaseIp(ip net.IP, macAddr string) {
 	err := dbdata.One("IpAddr", ip, mi)
 	if err == nil {
 		mi.LastLogin = time.Now()
-		dbdata.Save(mi)
+		_ = dbdata.Save(mi)
 	}
 }

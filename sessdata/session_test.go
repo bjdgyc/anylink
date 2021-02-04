@@ -28,9 +28,11 @@ func TestConnSession(t *testing.T) {
 
 	cSess := sess.NewConn()
 
-	cSess.RateLimit(100, true)
+	err := cSess.RateLimit(100, true)
+	assert.Nil(err)
 	assert.Equal(cSess.BandwidthUp, uint32(100))
-	cSess.RateLimit(200, false)
+	err = cSess.RateLimit(200, false)
+	assert.Nil(err)
 	assert.Equal(cSess.BandwidthDown, uint32(200))
 	cSess.Close()
 }

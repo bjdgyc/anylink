@@ -26,7 +26,7 @@ func LinkHome(w http.ResponseWriter, r *http.Request) {
 }
 
 func LinkOtpQr(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	_ = r.ParseForm()
 	idS := r.FormValue("id")
 	jwtToken := r.FormValue("jwt")
 	data, err := admin.GetJwtData(jwtToken)

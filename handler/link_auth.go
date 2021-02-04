@@ -87,7 +87,7 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	sess.MacAddr = strings.ToLower(cr.MacAddressList.MacAddress)
 	sess.UniqueIdGlobal = cr.DeviceId.UniqueIdGlobal
 	other := &dbdata.SettingOther{}
-	dbdata.SettingGet(other)
+	_ = dbdata.SettingGet(other)
 	rd := RequestData{SessionId: sess.Sid, SessionToken: sess.Sid + "@" + sess.Token,
 		Banner: other.Banner}
 	w.WriteHeader(http.StatusOK)
@@ -102,7 +102,7 @@ const (
 func tplRequest(typ int, w io.Writer, data RequestData) {
 	if typ == tpl_request {
 		t, _ := template.New("auth_request").Parse(auth_request)
-		t.Execute(w, data)
+		_ = t.Execute(w, data)
 		return
 	}
 
@@ -111,7 +111,7 @@ func tplRequest(typ int, w io.Writer, data RequestData) {
 		data.Banner = strings.ReplaceAll(data.Banner, "\n", "&#x0A;")
 	}
 	t, _ := template.New("auth_complete").Parse(auth_complete)
-	t.Execute(w, data)
+	_ = t.Execute(w, data)
 }
 
 // 设置输出信息

@@ -8,10 +8,6 @@
 # Define Bridge Interface
 br="anylink0"
 
-# Define list of TAP interfaces to be bridged,
-# for example tap="tap0 tap1 tap2".
-tap="tap0"
-
 # Define physical ethernet interface to be bridged
 # with TAP interface(s) above.
 

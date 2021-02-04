@@ -43,9 +43,10 @@ func TestLimitClient(t *testing.T) {
 func TestLimitWait(t *testing.T) {
 	assert := assert.New(t)
 	limit := NewLimitRater(1, 2)
-	limit.Wait(2)
-	start := time.Now()
 	err := limit.Wait(2)
+	assert.Nil(err)
+	start := time.Now()
+	err = limit.Wait(2)
 	assert.Nil(err)
 	err = limit.Wait(1)
 	assert.Nil(err)

@@ -47,9 +47,8 @@ type ServerConfig struct {
 	AdminPass     string `toml:"admin_pass" info:"管理用户密码"`
 	JwtSecret     string `toml:"jwt_secret" info:"JWT密钥"`
 
-	LinkMode    string   `toml:"link_mode" info:"虚拟网络类型"`          // tun tap
-	Ipv4Network string   `toml:"ipv4_network" info:"ipv4_network"` // 192.168.1.0
-	Ipv4Netmask string   `toml:"ipv4_netmask" info:"ipv4_netmask"` // 255.255.255.0
+	LinkMode    string   `toml:"link_mode" info:"虚拟网络类型"` // tun tap
+	Ipv4CIDR    string   `toml:"ipv4_cidr" info:"ip地址网段"` // 192.168.1.0/24
 	Ipv4Gateway string   `toml:"ipv4_gateway" info:"ipv4_gateway"`
 	Ipv4Pool    []string `toml:"ipv4_pool" info:"IPV4起止地址池"` // Pool[0]=192.168.1.100 Pool[1]=192.168.1.200
 	IpLease     int      `toml:"ip_lease"  info:"IP租期(秒)"`
@@ -102,16 +101,17 @@ func getAbsPath(base, cfile string) string {
 	return filepath.Join(base, cfile)
 }
 
-func ServerCfg2Slice() interface{} {
+type SCfg struct {
+	Name string      `json:"name"`
+	Info string      `json:"info"`
+	Data interface{} `json:"data"`
+}
+
+func ServerCfg2Slice() []SCfg {
 	ref := reflect.ValueOf(Cfg)
 	s := ref.Elem()
 
-	type cfg struct {
-		Name string      `json:"name"`
-		Info string      `json:"info"`
-		Data interface{} `json:"data"`
-	}
-	var datas []cfg
+	var datas []SCfg
 
 	typ := s.Type()
 	numFields := s.NumField()
@@ -122,7 +122,7 @@ func ServerCfg2Slice() interface{} {
 		tags := strings.Split(tag, ",")
 		info := field.Tag.Get("info")
 
-		datas = append(datas, cfg{Name: tags[0], Info: info, Data: value.Interface()})
+		datas = append(datas, SCfg{Name: tags[0], Info: info, Data: value.Interface()})
 	}
 
 	return datas

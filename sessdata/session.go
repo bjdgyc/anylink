@@ -78,13 +78,13 @@ func checkSession() {
 			return
 		}
 		timeout := time.Duration(base.Cfg.SessionTimeout) * time.Second
-		tick := time.Tick(time.Second * 60)
-		for range tick {
+		tick := time.NewTicker(time.Second * 60)
+		for range tick.C {
 			sessMux.Lock()
 			t := time.Now()
 			for k, v := range sessions {
 				v.mux.Lock()
-				if v.IsActive != true {
+				if !v.IsActive {
 					if t.Sub(v.LastLogin) > timeout {
 						delete(sessions, k)
 					}
@@ -133,12 +133,12 @@ func (s *Session) NewConn() *ConnSession {
 	macAddr := s.MacAddr
 	username := s.Username
 	s.mux.Unlock()
-	if active == true {
+	if active {
 		s.CSess.Close()
 	}
 
 	limit := LimitClient(username, false)
-	if limit == false {
+	if !limit {
 		return nil
 	}
 	// 获取客户端mac地址
@@ -208,8 +208,10 @@ func (cs *ConnSession) Close() {
 const BandwidthPeriodSec = 2 // 流量速率统计周期(秒)
 
 func (cs *ConnSession) ratePeriod() {
-	tick := time.Tick(time.Second * BandwidthPeriodSec)
-	for range tick {
+	tick := time.NewTicker(time.Second * BandwidthPeriodSec)
+	defer tick.Stop()
+
+	for range tick.C {
 		select {
 		case <-cs.CloseChan:
 			return

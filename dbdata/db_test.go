@@ -27,7 +27,7 @@ func TestDb(t *testing.T) {
 	defer closeIpdata()
 
 	u := User{Username: "a"}
-	Save(&u)
+	_ = Save(&u)
 
 	assert.Equal(u.Id, 1)
 }

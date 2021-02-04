@@ -8,8 +8,8 @@ import (
 	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/dbdata"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/mojocn/base64Captcha"
 	mail "github.com/xhit/go-simple-mail/v2"
+	// "github.com/mojocn/base64Captcha"
 )
 
 func SetJwtData(data map[string]interface{}, expiresAt int64) (string, error) {
@@ -41,15 +41,6 @@ func GetJwtData(jwtToken string) (map[string]interface{}, error) {
 	}
 
 	return claims, nil
-}
-
-func createCaptcha() {
-	var store = base64Captcha.DefaultMemStore
-	var driver base64Captcha.Driver
-	driverString := &base64Captcha.DriverString{}
-	driver = driverString.ConvertFonts()
-	c := base64Captcha.NewCaptcha(driver, store)
-	_ = c
 }
 
 func SendMail(subject, to, htmlBody string) error {

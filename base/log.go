@@ -36,7 +36,7 @@ func logLevel2Int(l string) int {
 	}
 	lvl := _Info
 	for k, v := range levels {
-		if strings.ToLower(l) == strings.ToLower(v) {
+		if strings.EqualFold(strings.ToLower(l), strings.ToLower(v)) {
 			lvl = k
 		}
 	}
@@ -45,7 +45,7 @@ func logLevel2Int(l string) int {
 
 func output(l int, s ...interface{}) {
 	lvl := fmt.Sprintf("[%s] ", levels[l])
-	baseLog.Output(3, lvl+fmt.Sprintln(s...))
+	_ = baseLog.Output(3, lvl+fmt.Sprintln(s...))
 }
 
 func Debug(v ...interface{}) {

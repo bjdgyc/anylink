@@ -48,7 +48,7 @@ func doPing(ip string) error {
 		return err
 	}
 
-	conn.SetReadDeadline(time.Now().Add(time.Second * 2))
+	_ = conn.SetReadDeadline(time.Now().Add(time.Second * 2))
 
 	for {
 		buf := make([]byte, 512)

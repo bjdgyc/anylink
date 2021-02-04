@@ -43,8 +43,10 @@ func respHttp(w http.ResponseWriter, respCode int, data interface{}, errS ...int
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	w.Write(b)
-
+	_, err = w.Write(b)
+	if err != nil {
+		base.Error(err)
+	}
 	// 记录返回数据
 	// logger.Category("response").Debug(string(b))
 }

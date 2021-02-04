@@ -2,11 +2,9 @@ package handler
 
 import (
 	"encoding/xml"
-	"fmt"
 	"log"
 	"net/http"
 	"os/exec"
-	"strings"
 )
 
 const BufferSize = 2048
@@ -41,27 +39,6 @@ type deviceId struct {
 
 type macAddressList struct {
 	MacAddress string `xml:"mac-address"`
-}
-
-// 判断anyconnect客户端
-func checkLinkClient(h http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		// TODO 调试信息输出
-		// hd, _ := httputil.DumpRequest(r, true)
-		// fmt.Println("DumpRequest: ", string(hd))
-		// fmt.Println(r.RemoteAddr)
-
-		userAgent := strings.ToLower(r.UserAgent())
-		x_Aggregate_Auth := r.Header.Get("X-Aggregate-Auth")
-		x_Transcend_Version := r.Header.Get("X-Transcend-Version")
-		if strings.Contains(userAgent, "anyconnect") &&
-			x_Aggregate_Auth == "1" && x_Transcend_Version == "1" {
-			h(w, r)
-		} else {
-			w.WriteHeader(http.StatusForbidden)
-			fmt.Fprintf(w, "error request")
-		}
-	}
 }
 
 func setCommonHeader(w http.ResponseWriter) {

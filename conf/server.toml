@@ -35,8 +35,7 @@ proxy_protocol = false
 link_mode = "tun"
 
 #客户端分配的ip地址池
-ipv4_network = "192.168.10.0"
-ipv4_netmask = "255.255.255.0"
+ipv4_cidr = "192.168.10.0/24"
 ipv4_gateway = "192.168.10.1"
 ipv4_pool = ["192.168.10.100", "192.168.10.200"]
 

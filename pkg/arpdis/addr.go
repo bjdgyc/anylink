@@ -48,7 +48,7 @@ func tableLookup(ip net.IP) *Addr {
 	}
 
 	// 判断老化过期时间
-	tsub := time.Now().Sub(addr.disTime)
+	tsub := time.Since(addr.disTime)
 	switch addr.Type {
 	case TypeNormal:
 		if tsub > StaleTimeNormal {
