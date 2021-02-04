@@ -27,7 +27,9 @@ jobs:
         go get -v -t -d ./...
 
     - name: Build
-      run: go build -v .
+      run: |
+        go build -v -o anylink -ldflags "-X main.COMMIT_ID=`git rev-parse HEAD`"
+        ./anylink -rev
     
     - name: Test coverage
       run: go test -race -coverprofile=coverage.txt -covermode=atomic -v ./...

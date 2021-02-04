@@ -1,0 +1,4 @@
+ignore:
+  - "conf"
+  - "down_files"
+  - "screenshot"
