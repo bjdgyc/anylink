@@ -26,7 +26,7 @@ var (
 )
 
 func initFlag() {
-	flag.StringVar(&serverFile, "conf", "./conf/server.toml", "server config file path")
+	flag.StringVar(&serverFile, "conf", "./conf/server.toml", "server config files path")
 	flag.StringVar(&passwd, "passwd", "", "convert the password plaintext")
 	flag.BoolVar(&secret, "secret", false, "generate a random jwt secret")
 	flag.BoolVar(&rev, "rev", false, "display version info")

@@ -20,7 +20,7 @@ AnyLink 基于 [ietf-openconnect](https://tools.ietf.org/html/draft-mavrogiannop
 
 AnyLink 使用TLS/DTLS进行数据加密，因此需要RSA或ECC证书，可以通过 Let's Encrypt 和 TrustAsia 申请免费的SSL证书。
 
-AnyLink 服务端仅在CentOS7测试通过，如需要安装在其他系统，需要服务端支持tun/tap功能、ip设置命令。
+AnyLink 服务端仅在CentOS7、Ubuntu测试通过，如需要安装在其他系统，需要服务端支持tun/tap功能、ip设置命令。
 
 ## Screenshot
 
@@ -36,9 +36,12 @@ git clone https://github.com/bjdgyc/anylink.git
 cd anylink
 sh deploy.sh
 
-#注意使用root权限运行
+# 注意使用root权限运行
 cd anylink-deploy
 sudo ./anylink -conf="conf/server.toml"
+
+# 默认管理后台访问地址
+# http://host:8800
 ```
 
 ## Feature
@@ -155,8 +158,9 @@ sh bridge-init.sh
 本项目采用 MIT 开源授权许可证，完整的授权说明已放置在 LICENSE 文件中。
 
 
+## Thank
 
-
+[![jetbrains.png](https://gitee.com/bjdgyc/anylink/raw/master/screenshot/jetbrains.png)](https://www.jetbrains.com)
 
 
 

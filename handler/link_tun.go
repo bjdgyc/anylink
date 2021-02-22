@@ -51,7 +51,7 @@ func LinkTun(cSess *sessdata.ConnSession) error {
 	err = execCmd(cmdStrs)
 	if err != nil {
 		base.Error(err)
-		ifce.Close()
+		_ = ifce.Close()
 		return err
 	}
 
@@ -62,9 +62,9 @@ func LinkTun(cSess *sessdata.ConnSession) error {
 
 func tunWrite(ifce *water.Interface, cSess *sessdata.ConnSession) {
 	defer func() {
-		// log.Println("LinkTun return")
+		base.Debug("LinkTun return", cSess.IpAddr)
 		cSess.Close()
-		ifce.Close()
+		_ = ifce.Close()
 	}()
 
 	var (
@@ -89,8 +89,8 @@ func tunWrite(ifce *water.Interface, cSess *sessdata.ConnSession) {
 
 func tunRead(ifce *water.Interface, cSess *sessdata.ConnSession) {
 	defer func() {
-		// log.Println("tunRead return")
-		ifce.Close()
+		base.Debug("tunRead return", cSess.IpAddr)
+		_ = ifce.Close()
 	}()
 	var (
 		err error

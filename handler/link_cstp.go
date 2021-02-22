@@ -11,8 +11,8 @@ import (
 
 func LinkCstp(conn net.Conn, cSess *sessdata.ConnSession) {
 	defer func() {
-		// log.Println("LinkCstp return")
-		conn.Close()
+		base.Debug("LinkCstp return", cSess.IpAddr)
+		_ = conn.Close()
 		cSess.Close()
 	}()
 
@@ -72,8 +72,8 @@ func LinkCstp(conn net.Conn, cSess *sessdata.ConnSession) {
 
 func cstpWrite(conn net.Conn, cSess *sessdata.ConnSession) {
 	defer func() {
-		// log.Println("cstpWrite return")
-		conn.Close()
+		base.Debug("cstpWrite return", cSess.IpAddr)
+		_ = conn.Close()
 		cSess.Close()
 	}()
 

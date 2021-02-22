@@ -70,7 +70,7 @@ func LinkTap(cSess *sessdata.ConnSession) error {
 	err = execCmd(cmdStrs)
 	if err != nil {
 		base.Error(err)
-		ifce.Close()
+		_ = ifce.Close()
 		return err
 	}
 
@@ -81,9 +81,9 @@ func LinkTap(cSess *sessdata.ConnSession) error {
 
 func tapWrite(ifce *water.Interface, cSess *sessdata.ConnSession) {
 	defer func() {
-		// log.Println("LinkTap return")
+		base.Debug("LinkTap return", cSess.IpAddr)
 		cSess.Close()
-		ifce.Close()
+		_ = ifce.Close()
 	}()
 
 	var (
@@ -153,8 +153,8 @@ func tapWrite(ifce *water.Interface, cSess *sessdata.ConnSession) {
 
 func tapRead(ifce *water.Interface, cSess *sessdata.ConnSession) {
 	defer func() {
-		// log.Println("tapRead return")
-		ifce.Close()
+		base.Debug("tapRead return", cSess.IpAddr)
+		_ = ifce.Close()
 	}()
 
 	var (

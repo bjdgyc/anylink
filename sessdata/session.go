@@ -3,7 +3,6 @@ package sessdata
 import (
 	"crypto/md5"
 	"fmt"
-	"log"
 	"math/rand"
 	"net"
 	"strconv"
@@ -191,7 +190,7 @@ func (s *Session) NewConn() *ConnSession {
 
 func (cs *ConnSession) Close() {
 	cs.closeOnce.Do(func() {
-		log.Println("closeOnce:", cs.IpAddr)
+		base.Info("closeOnce:", cs.IpAddr)
 		cs.Sess.mux.Lock()
 		defer cs.Sess.mux.Unlock()
 

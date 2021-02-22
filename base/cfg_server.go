@@ -40,7 +40,8 @@ type ServerConfig struct {
 	CertFile      string `toml:"cert_file" info:"证书文件"`
 	CertKey       string `toml:"cert_key" info:"证书密钥"`
 	UiPath        string `toml:"ui_path" info:"ui文件路径"`
-	DownFilesPath string `toml:"down_files_path" info:"外部下载文件路径"`
+	FilesPath     string `toml:"files_path" info:"外部下载文件路径"`
+	LogPath       string `toml:"log_path" info:"日志文件路径"`
 	LogLevel      string `toml:"log_level" info:"日志等级"`
 	Issuer        string `toml:"issuer" info:"系统名称"`
 	AdminUser     string `toml:"admin_user" info:"管理用户名"`
@@ -83,7 +84,8 @@ func initServerCfg() {
 	Cfg.CertFile = getAbsPath(base, Cfg.CertFile)
 	Cfg.CertKey = getAbsPath(base, Cfg.CertKey)
 	Cfg.UiPath = getAbsPath(base, Cfg.UiPath)
-	Cfg.DownFilesPath = getAbsPath(base, Cfg.DownFilesPath)
+	Cfg.FilesPath = getAbsPath(base, Cfg.FilesPath)
+	Cfg.LogPath = getAbsPath(base, Cfg.LogPath)
 
 	if len(Cfg.JwtSecret) < 20 {
 		fmt.Println("请设置 jwt_secret 长度20位以上")
@@ -94,6 +96,10 @@ func initServerCfg() {
 }
 
 func getAbsPath(base, cfile string) string {
+	if cfile == "" {
+		return ""
+	}
+
 	abs := filepath.IsAbs(cfile)
 	if abs {
 		return cfile

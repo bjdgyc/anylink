@@ -10,26 +10,26 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// 登陆接口
+// Login 登陆接口
 func Login(w http.ResponseWriter, r *http.Request) {
 	// TODO 调试信息输出
 	// hd, _ := httputil.DumpRequest(r, true)
 	// fmt.Println("DumpRequest: ", string(hd))
 
 	_ = r.ParseForm()
-	admin_user := r.PostFormValue("admin_user")
-	admin_pass := r.PostFormValue("admin_pass")
+	adminUser := r.PostFormValue("admin_user")
+	adminPass := r.PostFormValue("admin_pass")
 
 	// 认证错误
-	if !(admin_user == base.Cfg.AdminUser &&
-		utils.PasswordVerify(admin_pass, base.Cfg.AdminPass)) {
+	if !(adminUser == base.Cfg.AdminUser &&
+		utils.PasswordVerify(adminPass, base.Cfg.AdminPass)) {
 		RespError(w, RespUserOrPassErr)
 		return
 	}
 
 	// token有效期
 	expiresAt := time.Now().Unix() + 3600*3
-	jwtData := map[string]interface{}{"admin_user": admin_user}
+	jwtData := map[string]interface{}{"admin_user": adminUser}
 	tokenString, err := SetJwtData(jwtData, expiresAt)
 	if err != nil {
 		RespError(w, 1, err)
@@ -38,7 +38,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	data := make(map[string]interface{})
 	data["token"] = tokenString
-	data["admin_user"] = admin_user
+	data["admin_user"] = adminUser
 	data["expires_at"] = expiresAt
 
 	RespSucess(w, data)

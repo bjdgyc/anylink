@@ -16,6 +16,7 @@ cd ../
 
 #整理部署文件
 mkdir anylink-deploy
+mkdir anylink-deploy/log
 
 cp -r anylink anylink-deploy
 cp -r anylink-web/ui anylink-deploy

@@ -67,7 +67,7 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	// TODO 用户密码校验
 	err = dbdata.CheckUser(cr.Auth.Username, cr.Auth.Password, cr.GroupSelect)
 	if err != nil {
-		base.Info(err)
+		base.Warn(err)
 		w.WriteHeader(http.StatusOK)
 		data := RequestData{Group: cr.GroupSelect, Groups: dbdata.GetGroupNames(), Error: "用户名或密码错误"}
 		tplRequest(tpl_request, w, data)
@@ -92,6 +92,7 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 		Banner: other.Banner}
 	w.WriteHeader(http.StatusOK)
 	tplRequest(tpl_complete, w, rd)
+	base.Debug("login", cr.Auth.Username)
 }
 
 const (

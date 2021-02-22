@@ -6,7 +6,6 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/bjdgyc/anylink/base"
@@ -14,22 +13,28 @@ import (
 	"github.com/gorilla/mux"
 )
 
+func GetCertificate(*tls.ClientHelloInfo) (*tls.Certificate, error) {
+	cert, err := tls.LoadX509KeyPair(base.Cfg.CertFile, base.Cfg.CertKey)
+	return &cert, err
+}
+
 func startTls() {
 	addr := base.Cfg.ServerAddr
 	certFile := base.Cfg.CertFile
 	keyFile := base.Cfg.CertKey
 
-	logger := log.New(os.Stdout, "[SERVER]", log.Lshortfile|log.Ldate)
 	// 设置tls信息
 	tlsConfig := &tls.Config{
-		NextProtos: []string{"http/1.1"},
-		MinVersion: tls.VersionTLS12,
+		NextProtos:         []string{"http/1.1"},
+		MinVersion:         tls.VersionTLS12,
+		InsecureSkipVerify: true,
+		GetCertificate:     GetCertificate,
 	}
 	srv := &http.Server{
 		Addr:      addr,
 		Handler:   initRoute(),
 		TLSConfig: tlsConfig,
-		ErrorLog:  logger,
+		ErrorLog:  base.GetBaseLog(),
 	}
 
 	var ln net.Listener
@@ -57,9 +62,9 @@ func initRoute() http.Handler {
 	r.HandleFunc("/", LinkAuth).Methods(http.MethodPost)
 	r.HandleFunc("/CSCOSSLC/tunnel", LinkTunnel).Methods(http.MethodConnect)
 	r.HandleFunc("/otp_qr", LinkOtpQr).Methods(http.MethodGet)
-	r.PathPrefix("/down_files/").Handler(
-		http.StripPrefix("/down_files/",
-			http.FileServer(http.Dir(base.Cfg.DownFilesPath)),
+	r.PathPrefix("/files/").Handler(
+		http.StripPrefix("/files/",
+			http.FileServer(http.Dir(base.Cfg.FilesPath)),
 		),
 	)
 	r.NotFoundHandler = http.HandlerFunc(notFound)

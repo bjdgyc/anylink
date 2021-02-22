@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path"
 	"strings"
+	"time"
 )
 
 const (
@@ -19,11 +21,65 @@ var (
 	baseLog   *log.Logger
 	baseLevel int
 	levels    map[int]string
+
+	dateFormat = "2006-01-02"
+	logName    = "anylink.log"
 )
 
+// 实现 os.Writer 接口
+type logWriter struct {
+	UseStdout bool
+	FileName  string
+	File      *os.File
+	NowDate   string
+}
+
+// 实现日志文件的切割
+func (lw *logWriter) Write(p []byte) (n int, err error) {
+	if !lw.UseStdout {
+		return lw.File.Write(p)
+	}
+
+	date := time.Now().Format(dateFormat)
+	if lw.NowDate != date {
+		_ = lw.File.Close()
+		_ = os.Rename(lw.FileName, lw.FileName+"."+lw.NowDate)
+		lw.NowDate = date
+		lw.newFile()
+	}
+	return lw.File.Write(p)
+}
+
+// 创建新文件
+func (lw *logWriter) newFile() {
+	if lw.UseStdout {
+		lw.File = os.Stdout
+		return
+	}
+
+	f, err := os.OpenFile(lw.FileName, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		panic(err)
+	}
+	lw.File = f
+}
+
 func initLog() {
-	baseLog = log.New(os.Stderr, "", log.LstdFlags|log.Lshortfile)
+	// 初始化 baseLog
+	baseLw := &logWriter{
+		UseStdout: Cfg.LogPath == "",
+		FileName:  path.Join(Cfg.LogPath, logName),
+		NowDate:   time.Now().Format(dateFormat),
+	}
+
+	baseLw.newFile()
 	baseLevel = logLevel2Int(Cfg.LogLevel)
+	baseLog = log.New(baseLw, "", log.LstdFlags|log.Lshortfile)
+}
+
+// 获取 log.Logger
+func GetBaseLog() *log.Logger {
+	return baseLog
 }
 
 func logLevel2Int(l string) int {

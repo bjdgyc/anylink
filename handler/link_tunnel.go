@@ -140,6 +140,7 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	hj := w.(http.Hijacker)
 	conn, _, err := hj.Hijack()
 	if err != nil {
+		base.Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
