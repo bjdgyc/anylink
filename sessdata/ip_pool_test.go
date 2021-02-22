@@ -13,6 +13,7 @@ import (
 )
 
 func preData(tmpDir string) {
+	base.Test()
 	tmpDb := path.Join(tmpDir, "test.db")
 	base.Cfg.DbFile = tmpDb
 	base.Cfg.Ipv4CIDR = "192.168.3.0/24"

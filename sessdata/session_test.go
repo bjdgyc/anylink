@@ -7,17 +7,17 @@ import (
 )
 
 func TestNewSession(t *testing.T) {
-	assert := assert.New(t)
+	ast := assert.New(t)
 	sessions = make(map[string]*Session)
 	sess := NewSession("")
 	token := sess.Token
 	v, ok := sessions[token]
-	assert.True(ok)
-	assert.Equal(sess, v)
+	ast.True(ok)
+	ast.Equal(sess, v)
 }
 
 func TestConnSession(t *testing.T) {
-	assert := assert.New(t)
+	ast := assert.New(t)
 	tmp := t.TempDir()
 	preData(tmp)
 	defer cleardata(tmp)
@@ -29,10 +29,10 @@ func TestConnSession(t *testing.T) {
 	cSess := sess.NewConn()
 
 	err := cSess.RateLimit(100, true)
-	assert.Nil(err)
-	assert.Equal(cSess.BandwidthUp, uint32(100))
+	ast.Nil(err)
+	ast.Equal(cSess.BandwidthUp, uint32(100))
 	err = cSess.RateLimit(200, false)
-	assert.Nil(err)
-	assert.Equal(cSess.BandwidthDown, uint32(200))
+	ast.Nil(err)
+	ast.Equal(cSess.BandwidthDown, uint32(200))
 	cSess.Close()
 }

@@ -5,3 +5,7 @@ func Start() {
 	initServerCfg()
 	initLog()
 }
+
+func Test()  {
+	initLog()
+}
