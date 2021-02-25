@@ -24,7 +24,7 @@ AnyLink 服务端仅在CentOS7、Ubuntu 18.04测试通过，如需要安装在�
 
 ## Screenshot
 
-![online](https://gitee.com/bjdgyc/anylink/raw/master/screenshot/online.jpg)
+![online](screenshot/online.jpg)
 
 ## Installation
 
@@ -58,7 +58,7 @@ sudo ./anylink -conf="conf/server.toml"
 - [x] 流量控制
 - [x] 后台管理界面
 - [x] 访问权限管理
-  
+
 - [ ] DTLS-UDP通道
 
 ## Config
@@ -132,7 +132,7 @@ sh bridge-init.sh
 
 ## Discussion
 
-![qq.png](https://gitee.com/bjdgyc/anylink/raw/master/screenshot/qq.png)
+![qq.png](screenshot/qq.png)
 
 添加QQ群: 567510628
 
@@ -145,11 +145,11 @@ sh bridge-init.sh
 <details>
 <summary>展开查看</summary>
 
-![system.jpg](https://gitee.com/bjdgyc/anylink/raw/master/screenshot/system.jpg)
-![setting.jpg](https://gitee.com/bjdgyc/anylink/raw/master/screenshot/setting.jpg)
-![users.jpg](https://gitee.com/bjdgyc/anylink/raw/master/screenshot/users.jpg)
-![ip_map.jpg](https://gitee.com/bjdgyc/anylink/raw/master/screenshot/ip_map.jpg)
-![group.jpg](https://gitee.com/bjdgyc/anylink/raw/master/screenshot/group.jpg)
+![system.jpg](screenshot/system.jpg)
+![setting.jpg](screenshot/setting.jpg)
+![users.jpg](screenshot/users.jpg)
+![ip_map.jpg](screenshot/ip_map.jpg)
+![group.jpg](screenshot/group.jpg)
 
 </details>
 
@@ -157,11 +157,11 @@ sh bridge-init.sh
 
 本项目采用 MIT 开源授权许可证，完整的授权说明已放置在 LICENSE 文件中。
 
-
 ## Thank
 
-<img src="screenshot/jetbrains.png" width="200" height="200" alt="jetbrains.png" />
-
+<a href="https://www.jetbrains.com">
+    <img src="screenshot/jetbrains.png" width="200" height="200" alt="jetbrains.png" />
+</a>
 
 
 
