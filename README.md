@@ -20,7 +20,7 @@ AnyLink 基于 [ietf-openconnect](https://tools.ietf.org/html/draft-mavrogiannop
 
 AnyLink 使用TLS/DTLS进行数据加密，因此需要RSA或ECC证书，可以通过 Let's Encrypt 和 TrustAsia 申请免费的SSL证书。
 
-AnyLink 服务端仅在CentOS7、Ubuntu测试通过，如需要安装在其他系统，需要服务端支持tun/tap功能、ip设置命令。
+AnyLink 服务端仅在CentOS7、Ubuntu 18.04测试通过，如需要安装在其他系统，需要服务端支持tun/tap功能、ip设置命令。
 
 ## Screenshot
 
@@ -160,7 +160,8 @@ sh bridge-init.sh
 
 ## Thank
 
-[![jetbrains.png](https://gitee.com/bjdgyc/anylink/raw/master/screenshot/jetbrains.png)](https://www.jetbrains.com)
+<img src="screenshot/jetbrains.png" width="200" height="200" alt="jetbrains.png" />
+
 
 
 
