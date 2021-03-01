@@ -19,11 +19,11 @@ jobs:
           go-version: 1.15
         id: go
 
-      - name: Switch path
-        run: cd server
-
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2
+        
+      - name: Switch path
+        run: cd server
 
       - name: Get dependencies
         run: |
