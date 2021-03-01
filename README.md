@@ -55,6 +55,7 @@ sudo ./anylink -conf="conf/server.toml"
 - [x] 用户组支持
 - [x] 多用户支持
 - [x] TOTP令牌支持
+- [x] TOTP令牌开关
 - [x] 流量控制
 - [x] 后台管理界面
 - [x] 访问权限管理

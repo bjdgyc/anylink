@@ -1,0 +1,5 @@
+ignore:
+  - "screenshot"
+  - "web"
+  - "server/conf"
+  - "server/files"
