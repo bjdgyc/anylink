@@ -34,7 +34,7 @@ AnyLink 服务端仅在CentOS 7、Ubuntu 18.04测试通过，如需要安装在�
 git clone https://github.com/bjdgyc/anylink.git
 
 cd anylink
-sh deploy.sh
+sh build.sh
 
 # 注意使用root权限运行
 cd anylink-deploy
@@ -73,7 +73,7 @@ sudo ./anylink -conf="conf/server.toml"
 ./anylink -secret
 ```
 
-[conf/server.toml](https://github.com/bjdgyc/anylink/blob/master/conf/server.toml)
+[conf/server.toml](server/conf/server.toml)
 
 ## Setting
 

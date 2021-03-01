@@ -16,13 +16,14 @@ type User struct {
 	Nickname string `json:"nickname"`
 	Email    string `json:"email"`
 	// Password  string    `json:"password"`
-	PinCode   string    `json:"pin_code"`
-	OtpSecret string    `json:"otp_secret"`
-	Groups    []string  `json:"groups"`
-	Status    int8      `json:"status"` // 1正常
-	SendEmail bool      `json:"send_email"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	PinCode    string    `json:"pin_code"`
+	OtpSecret  string    `json:"otp_secret"`
+	DisableOtp bool      `json:"disable_otp"` // 禁用otp
+	Groups     []string  `json:"groups"`
+	Status     int8      `json:"status"` // 1正常
+	SendEmail  bool      `json:"send_email"`
+	CreatedAt  time.Time `json:"created_at"`
+	UpdatedAt  time.Time `json:"updated_at"`
 }
 
 func SetUser(v *User) error {
@@ -39,7 +40,7 @@ func SetUser(v *User) error {
 	v.PinCode = planPass
 
 	if v.OtpSecret == "" {
-		v.OtpSecret = gotp.RandomSecret(24)
+		v.OtpSecret = gotp.RandomSecret(32)
 	}
 
 	// 判断组是否有效
@@ -85,19 +86,16 @@ func CheckUser(name, pwd, group string) error {
 	}
 
 	// 判断otp信息
-	otp := pwd[pl-6:]
-	if !checkOtp(name, otp) {
-		return fmt.Errorf("%s %s", name, "动态码错误")
-	}
-	totp := gotp.NewDefaultTOTP(v.OtpSecret)
-	unix := time.Now().Unix()
-	verify := totp.Verify(otp, int(unix))
-	if !verify {
-		return fmt.Errorf("%s %s", name, "动态码错误")
+	if !v.DisableOtp {
+		pwd = pwd[:pl-6]
+		otp := pwd[pl-6:]
+		if !checkOtp(name, otp, v.OtpSecret) {
+			return fmt.Errorf("%s %s", name, "动态码错误")
+		}
 	}
 
-	pinCode := pwd[:pl-6]
-	if pinCode != v.PinCode {
+	// 判断用户密码
+	if pwd != v.PinCode {
 		return fmt.Errorf("%s %s", name, "密码错误")
 	}
 
@@ -126,18 +124,23 @@ func init() {
 	}()
 }
 
-// 令牌只能使用一次
-func checkOtp(username, otp string) bool {
-	key := fmt.Sprintf("%s:%s", username, otp)
+// 判断令牌信息
+func checkOtp(name, otp, secret string) bool {
+	key := fmt.Sprintf("%s:%s", name, otp)
 
 	userOtpMux.Lock()
 	defer userOtpMux.Unlock()
 
+	// 令牌只能使用一次
 	if _, ok := userOtp[key]; ok {
 		// 已经存在
 		return false
 	}
-
 	userOtp[key] = time.Now()
-	return true
+
+	totp := gotp.NewDefaultTOTP(secret)
+	unix := time.Now().Unix()
+	verify := totp.Verify(otp, int(unix))
+
+	return verify
 }

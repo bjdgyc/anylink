@@ -2,5 +2,5 @@ package base
 
 const (
 	APP_NAME = "AnyLink"
-	APP_VER  = "0.1.5"
+	APP_VER  = "0.1.6"
 )

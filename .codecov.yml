@@ -1,4 +1,5 @@
 ignore:
-  - "conf"
-  - "down_files"
   - "screenshot"
+  - "web"
+  - "server/conf"
+  - "server/files"
