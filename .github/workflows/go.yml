@@ -21,24 +21,24 @@ jobs:
 
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2
-        
-      - name: Switch path
-        run: |
-          cd server
-          ls
 
       - name: Get dependencies
         run: |
-          ls
+          cd server
           go get -v -t -d ./...
 
       - name: Build
         run: |
+          cd server
           go build -v -o anylink -ldflags "-X main.COMMIT_ID=`git rev-parse HEAD`"
           ./anylink -rev
 
       - name: Test coverage
-        run: go test -race -coverprofile=coverage.txt -covermode=atomic -v ./...
+        run: |
+          cd server
+          go test -race -coverprofile=coverage.txt -covermode=atomic -v ./...
 
       - name: Upload coverage to Codecov
-        run: bash <(curl -s https://codecov.io/bash)
+        run: |
+          cd server
+          bash <(curl -s https://codecov.io/bash)
