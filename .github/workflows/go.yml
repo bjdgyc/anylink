@@ -29,6 +29,7 @@ jobs:
 
       - name: Get dependencies
         run: |
+          ls
           go get -v -t -d ./...
 
       - name: Build
