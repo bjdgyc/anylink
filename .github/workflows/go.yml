@@ -23,7 +23,9 @@ jobs:
         uses: actions/checkout@v2
         
       - name: Switch path
-        run: cd server
+        run: |
+          cd server
+          ls
 
       - name: Get dependencies
         run: |
