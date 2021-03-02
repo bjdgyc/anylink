@@ -34,7 +34,7 @@ AnyLink 服务端仅在CentOS 7、Ubuntu 18.04测试通过，如需要安装在�
 git clone https://github.com/bjdgyc/anylink.git
 
 cd anylink
-sh build.sh
+sh -x build.sh
 
 # 注意使用root权限运行
 cd anylink-deploy
@@ -42,6 +42,8 @@ sudo ./anylink -conf="conf/server.toml"
 
 # 默认管理后台访问地址
 # http://host:8800
+# 默认日志文件
+# log/anylink.log
 ```
 
 ## Feature

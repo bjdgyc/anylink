@@ -86,8 +86,9 @@ func CheckUser(name, pwd, group string) error {
 	}
 
 	// 判断otp信息
+	pinCode := pwd
 	if !v.DisableOtp {
-		pwd = pwd[:pl-6]
+		pinCode = pwd[:pl-6]
 		otp := pwd[pl-6:]
 		if !checkOtp(name, otp, v.OtpSecret) {
 			return fmt.Errorf("%s %s", name, "动态码错误")
@@ -95,7 +96,7 @@ func CheckUser(name, pwd, group string) error {
 	}
 
 	// 判断用户密码
-	if pwd != v.PinCode {
+	if pinCode != v.PinCode {
 		return fmt.Errorf("%s %s", name, "密码错误")
 	}
 
