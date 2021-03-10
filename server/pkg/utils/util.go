@@ -61,7 +61,7 @@ func HumanByte(bf interface{}) string {
 	return hb
 }
 
-func RandomNum(length int) string {
+func RandomRunes(length int) string {
 	letterRunes := []rune("abcdefghijklmnpqrstuvwxy1234567890")
 
 	bytes := make([]rune, length)

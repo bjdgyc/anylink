@@ -35,7 +35,7 @@ func SetUser(v *User) error {
 	planPass := v.PinCode
 	// 自动生成密码
 	if len(planPass) < 6 {
-		planPass = utils.RandomNum(8)
+		planPass = utils.RandomRunes(8)
 	}
 	v.PinCode = planPass
 
@@ -82,7 +82,7 @@ func CheckUser(name, pwd, group string) error {
 	groupData := &Group{}
 	err = One("Name", group, groupData)
 	if err != nil || groupData.Status != 1 {
-		return fmt.Errorf("%s %s", name, "用户组错误")
+		return fmt.Errorf("%s - %s", name, "用户组错误")
 	}
 
 	// 判断otp信息

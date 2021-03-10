@@ -22,12 +22,13 @@ func closeIpdata() {
 }
 
 func TestDb(t *testing.T) {
-	assert := assert.New(t)
+	ast := assert.New(t)
 	preIpData()
 	defer closeIpdata()
 
 	u := User{Username: "a"}
-	_ = Save(&u)
+	err := Save(&u)
+	ast.Nil(err)
 
-	assert.Equal(u.Id, 1)
+	ast.Equal(u.Id, 1)
 }
