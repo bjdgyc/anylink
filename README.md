@@ -124,7 +124,7 @@ systemd 脚本放入：
    -e iproute=192.168.10.0/255.255.255.0 \
    -v <your conf path>:/anylink/conf \
    -v <your log path>:/anylink/log \
-   --restart=always
+   --restart=always \
    anylink
    ```
 
