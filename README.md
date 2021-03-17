@@ -119,7 +119,7 @@ systemd 脚本放入：
 4. 启动容器
 
    ```bash
-   docker run -it --privileged \
+   docker run -itd --privileged \
    -e mode=pro \
    -e iproute=192.168.10.0/255.255.255.0 \
    -p 443:443 \
