@@ -92,6 +92,42 @@ systemd 脚本放入：
 * 停止: `systemctl stop anylink`
 * 开机自启: `systemctl enable anylink`
 
+## Docker
+
+1. 构建镜像
+
+   ```bash
+   #获取仓库源码
+   git clone -b dev https://github.com/bjdgyc/anylink.git
+   # 构建镜像
+   cd docker
+   docker build -t anylink .
+   ```
+
+2. 生成密码
+
+   ```bash
+   docker run -it --privileged -e mode=password -e password=< your password > --rm anylink
+   ```
+
+3. 生成jwt token
+
+   ```bash
+   docker run -it --privileged -e mode=jwt --rm anylink
+   ```
+
+4. 启动容器
+
+   ```bash
+   docker run -it --privileged \
+   -e mode=pro \
+   -e iproute=192.168.10.0/255.255.255.0 \
+   -v <your conf path>:/anylink/conf \
+   -v <your log path>:/anylink/log \
+   --restart=always
+   anylink
+   ```
+
 
 
 ## Setting
