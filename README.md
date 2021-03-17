@@ -122,6 +122,8 @@ systemd 脚本放入：
    docker run -it --privileged \
    -e mode=pro \
    -e iproute=192.168.10.0/255.255.255.0 \
+   -p 443:443 \
+   -p 8800:8800 \
    -v <your conf path>:/anylink/conf \
    -v <your log path>:/anylink/log \
    --restart=always \
