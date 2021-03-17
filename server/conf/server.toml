@@ -11,7 +11,8 @@ cert_key = "./vpn_cert.key"
 ui_path = "../ui"
 files_path = "../files"
 #日志目录,为空写入标准输出
-log_path = "../log"
+#log_path = "../log"
+log_path = ""
 log_level = "info"
 
 #系统名称
