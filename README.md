@@ -78,6 +78,22 @@ sudo ./anylink -conf="conf/server.toml"
 
 [conf/server.toml](server/conf/server.toml)
 
+## systemd
+
+添加 systemd脚本
+* anylink 程序目录放入 `/usr/local/anylink-deploy`
+
+systemd 脚本放入：
+* centos: `/usr/lib/systemd/system/`
+* ubuntu: `/lib/systemd/system/`
+
+操作命令:
+* 启动: `systemctl start anylink`
+* 停止: `systemctl stop anylink`
+* 开机自启: `systemctl enable anylink`
+
+
+
 ## Setting
 
 网络模式选择，需要配置 `link_mode` 参数，如 `link_mode="tun"`,`link_mode="tap"` 两种参数。 不同的参数需要对服务器做相应的设置。
