@@ -5,7 +5,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/bjdgyc/anylink)](https://goreportcard.com/report/github.com/bjdgyc/anylink)
 [![codecov](https://codecov.io/gh/bjdgyc/anylink/branch/master/graph/badge.svg?token=JTFLIIIBQ0)](https://codecov.io/gh/bjdgyc/anylink)
 
-AnyLink 是一个企业级远程办公ssl vpn软件，可以支持多人同时在线使用。
+AnyLink 是一个企业级远程办公sslvpn的软件，可以支持多人同时在线使用。
 
 ## Repo
 
