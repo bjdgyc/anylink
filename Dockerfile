@@ -17,7 +17,7 @@ FROM golang:alpine
 LABEL maintainer="www.mrdoc.fun"
 COPY --from=builder /root/anylink/server  /app/
 COPY --from=builder /root/anylink/web/ui  /app/ui/
-COPY  docker/ /app/
+COPY --from=builder /root/anylink/docker /app/
 WORKDIR /app
 RUN apk add --no-cache pwgen bash iptables openssl ca-certificates \
     && rm -f /app/conf/server.toml \
