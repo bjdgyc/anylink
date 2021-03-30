@@ -1,0 +1,61 @@
+#服务配置信息
+
+#其他配置文件,可以使用绝对路径
+#或者相对于server.toml的路径
+
+#数据文件
+db_file = "./data.db"
+#证书文件
+cert_file = "./example.com.crt"
+cert_key = "./example.com.key"
+ui_path = "../ui"
+files_path = "../files"
+#日志目录,为空写入标准输出
+#log_path = "../log"
+log_path = ""
+log_level = "info"
+
+#系统名称
+issuer = "XX公司VPN"
+#后台管理用户
+admin_user = "admin"
+#pass 123456
+admin_pass = "usertoken"
+jwt_secret = "jwttoken"
+
+
+#vpn服务对外地址,影响开通邮件二维码
+link_addr = "test.example.com"
+
+#前台服务监听地址
+server_addr = ":443"
+#后台服务监听地址
+admin_addr = ":8800"
+#开启tcp proxy protocol协议
+proxy_protocol = false
+
+link_mode = "tun"
+
+#客户端分配的ip地址池
+ipv4_cidr = "192.168.10.0/24"
+ipv4_gateway = "192.168.10.1"
+ipv4_pool = ["192.168.10.100", "192.168.10.200"]
+
+#最大客户端数量
+max_client = 100
+#单个用户同时在线数量
+max_user_client = 3
+#IP租期(秒)
+ip_lease = 1209600
+
+#默认选择的组
+default_group = "one"
+
+#客户端失效检测时间(秒) dpd > keepalive
+cstp_keepalive = 20
+cstp_dpd = 30
+mobile_keepalive = 50
+mobile_dpd = 60
+#session过期时间，用于断线重连，0永不过期
+session_timeout = 3600
+auth_timeout = 0
