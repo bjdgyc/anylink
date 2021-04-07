@@ -195,7 +195,8 @@ sh bridge-init.sh
 
 ## Contribution
 
-欢迎提交 PR、Issues，感谢为AnyLink做出贡献
+欢迎提交 PR、Issues，感谢为AnyLink做出贡献。
+注意新建PR，需要提交到dev分支，其他分支暂不会合并。
 
 ## Other Screenshot
 
