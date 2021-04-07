@@ -1,11 +1,11 @@
 package base
 
 func Start() {
-	initFlag()
-	initServerCfg()
+	execute()
+	initCfg()
 	initLog()
 }
 
-func Test()  {
+func Test() {
 	initLog()
 }
