@@ -108,7 +108,7 @@ systemd 脚本放入：
 
    ```bash
    #获取仓库源码
-   git clone -b dev https://github.com/bjdgyc/anylink.git
+   git clone https://github.com/bjdgyc/anylink.git
    # 构建镜像
    docker build -t anylink .
    ```
