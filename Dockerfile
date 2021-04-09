@@ -1,26 +1,43 @@
-FROM golang:alpine as builder
-ENV GOPROXY=https://goproxy.io \
-    GO111MODULE=on \
-    GOOS=linux
-WORKDIR /root/
-RUN apk add --no-cache --update bash git g++ nodejs npm \
-    && git clone https://github.com/bjdgyc/anylink.git \
-    && cd anylink/server \
-    && go build -o anylink -ldflags "-X main.COMMIT_ID=$(git rev-parse HEAD)" \
-    && cd ../web \
+# web
+FROM node:lts-alpine as builder_node
+WORKDIR /web
+COPY ./web /web
+RUN npx browserslist@latest --update-db \
     && npm install \
-    && npx browserslist@latest --update-db \
-    && npm run build
+    && npm run build \
+    && ls /web/ui
 
+# server
+FROM golang:alpine as builder_golang
+ENV GOPROXY=https://goproxy.io \
+    GOOS=linux
+WORKDIR /anylink
+COPY . /anylink
+COPY --from=builder_node /web/ui  /anylink/server/ui
 
-FROM golang:alpine
-LABEL maintainer="www.mrdoc.fun"
-COPY --from=builder /root/anylink/server  /app/
-COPY --from=builder /root/anylink/web/ui  /app/ui/
-COPY --from=builder /root/anylink/docker /app/
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/repositories
+RUN apk add --no-cache git
+RUN cd /anylink/server;go build -o anylink -ldflags "-X main.COMMIT_ID=$(git rev-parse HEAD)" \
+    && /anylink/server/anylink tool -v
+
+# anylink
+FROM alpine
+LABEL maintainer="github.com/bjdgyc"
+
+ENV IPV4_CIDR="192.168.10.0/24"
+
 WORKDIR /app
-RUN apk add --no-cache pwgen bash iptables openssl ca-certificates \
-    && rm -f /app/conf/server.toml \
-    && chmod +x docker_entrypoint.sh
+COPY --from=builder_node /web/ui  /app/ui
+COPY --from=builder_golang /anylink/server/anylink  /app/
+COPY ./server/conf  /app/conf
+COPY ./server/files  /app/files
+COPY docker_entrypoint.sh  /app/
 
-ENTRYPOINT ["./docker_entrypoint.sh"]
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/repositories
+RUN apk add --no-cache bash iptables && ls /app
+
+EXPOSE 443 8800
+
+#CMD ["/app/anylink"]
+ENTRYPOINT ["/app/docker_entrypoint.sh"]
+

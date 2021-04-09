@@ -28,13 +28,19 @@ AnyLink 服务端仅在CentOS 7、Ubuntu 18.04测试通过，如需要安装在�
 
 ## Installation
 
+> 没有编程基础的同学建议直接下载release包，从下面的地址下载 anylink-deploy.tar.gz
+>
+> https://github.com/bjdgyc/anylink/releases
+
 > 升级 go version = 1.15
+>
+> 需要提前安装好 golang 和 nodejs
 
 ```shell
 git clone https://github.com/bjdgyc/anylink.git
 
 cd anylink
-sh -x build.sh
+sh build.sh
 
 # 注意使用root权限运行
 cd anylink-deploy
@@ -42,8 +48,9 @@ sudo ./anylink -conf="conf/server.toml"
 
 # 默认管理后台访问地址
 # http://host:8800
-# 默认日志文件
-# log/anylink.log
+# 默认账号密码
+# admin 123456
+
 ```
 
 ## Feature
@@ -70,24 +77,27 @@ sudo ./anylink -conf="conf/server.toml"
 
 ```shell
 # 生成后台密码
-./anylink -passwd 123456
+./anylink tool -p 123456
 
 # 生成jwt密钥
-./anylink -secret
+./anylink tool -s
 ```
 
 [conf/server.toml](server/conf/server.toml)
 
-## systemd
+## Systemd
 
 添加 systemd脚本
+
 * anylink 程序目录放入 `/usr/local/anylink-deploy`
 
 systemd 脚本放入：
+
 * centos: `/usr/lib/systemd/system/`
 * ubuntu: `/lib/systemd/system/`
 
 操作命令:
+
 * 启动: `systemctl start anylink`
 * 停止: `systemctl stop anylink`
 * 开机自启: `systemctl enable anylink`
@@ -100,37 +110,43 @@ systemd 脚本放入：
    #获取仓库源码
    git clone -b dev https://github.com/bjdgyc/anylink.git
    # 构建镜像
-   cd docker
    docker build -t anylink .
    ```
 
 2. 生成密码
 
    ```bash
-   docker run -it --privileged -e mode=password -e password=< your password > --rm anylink
+   docker run -it --rm anylink tool -p 123456
+   #Passwd:$2a$10$lCWTCcGmQdE/4Kb1wabbLelu4vY/cUwBwN64xIzvXcihFgRzUvH2a
    ```
 
-3. 生成jwt token
+3. 生成jwt secret
 
    ```bash
-   docker run -it --privileged -e mode=jwt --rm anylink
+   docker run -it --rm anylink tool -s
+   #Secret:9qXoIhY01jqhWIeIluGliOS4O_rhcXGGGu422uRZ1JjZxIZmh17WwzW36woEbA
    ```
 
 4. 启动容器
 
    ```bash
    docker run -itd --privileged \
-   -e mode=pro \
-   -e iproute=192.168.10.0/255.255.255.0 \
    -p 443:443 \
    -p 8800:8800 \
-   -v <your conf path>:/anylink/conf \
-   -v <your log path>:/anylink/log \
    --restart=always \
    anylink
    ```
 
-
+5. 使用自定义参数启动容器
+   
+   ```bash
+   docker run -itd --privileged \
+   -e IPV4_CIDR=192.168.10.0/24 \
+   -p 443:443 \
+   -p 8800:8800 \
+   --restart=always \
+   anylink -c=/etc/server.toml --admin_addr=:8080
+   ```
 
 ## Setting
 
@@ -154,7 +170,7 @@ systemd 脚本放入：
 
 ```shell
 # eth0为服务器内网网卡
-iptables -t nat -A POSTROUTING -s 192.168.10.0/255.255.255.0 -o eth0 -j MASQUERADE
+iptables -t nat -A POSTROUTING -s 192.168.10.0/24 -o eth0 -j MASQUERADE
 ```
 
 3. 使用AnyConnect客户端连接即可
@@ -195,7 +211,8 @@ sh bridge-init.sh
 
 ## Contribution
 
-欢迎提交 PR、Issues，感谢为AnyLink做出贡献。
+欢迎提交 PR、Issues，感谢为AnyLink做出贡献。 
+
 注意新建PR，需要提交到dev分支，其他分支暂不会合并。
 
 ## Other Screenshot

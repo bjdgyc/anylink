@@ -1,8 +1,8 @@
 #!/bin/sh
 
-mkdir -p ssl
+mkdir -p /ssl
 
-OUTPUT_FILENAME="example.com"
+OUTPUT_FILENAME="vpn.xx.com"
 
 printf "[req]
 prompt                  = no
@@ -19,9 +19,9 @@ x509_extensions         = req_x509v3_extensions
 C  = CN
 ST = BJ
 L  = BJ
-O  = example.com
-OU = example.com
-CN = example.com
+O  = xx.com
+OU = xx.com
+CN = xx.com
 
 [req_x509v3_extensions]
 basicConstraints        = critical,CA:true
@@ -31,9 +31,11 @@ extendedKeyUsage        = critical,serverAuth #, clientAuth
 subjectAltName          = @alt_names
 
 [alt_names]
-DNS.1 = example.com
-DNS.2 = *.example.com
+DNS.1 = xx.com
+DNS.2 = *.xx.com
 
-">ssl/${OUTPUT_FILENAME}.conf
+">/ssl/${OUTPUT_FILENAME}.conf
 
-openssl req -x509 -newkey rsa:2048 -keyout /app/conf/$OUTPUT_FILENAME.key -out /app/conf/$OUTPUT_FILENAME.crt -days 3600 -nodes -config ssl/${OUTPUT_FILENAME}.conf
+openssl req -x509 -newkey rsa:2048 -keyout /ssl/test_vpn_key.pem -out /ssl/test_vpn_cert.pem \
+-days 3600 -nodes -config /ssl/${OUTPUT_FILENAME}.conf
+
