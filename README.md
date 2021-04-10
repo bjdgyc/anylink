@@ -104,26 +104,23 @@ systemd 脚本放入：
 
 ## Docker
 
-1. 构建镜像
+1. 获取镜像
 
    ```bash
-   #获取仓库源码
-   git clone https://github.com/bjdgyc/anylink.git
-   # 构建镜像
-   docker build -t anylink .
+   docker pull bjdgyc/anylink:latest
    ```
 
 2. 生成密码
 
    ```bash
-   docker run -it --rm anylink tool -p 123456
+   docker run -it --rm bjdgyc/anylink tool -p 123456
    #Passwd:$2a$10$lCWTCcGmQdE/4Kb1wabbLelu4vY/cUwBwN64xIzvXcihFgRzUvH2a
    ```
 
 3. 生成jwt secret
 
    ```bash
-   docker run -it --rm anylink tool -s
+   docker run -it --rm bjdgyc/anylink tool -s
    #Secret:9qXoIhY01jqhWIeIluGliOS4O_rhcXGGGu422uRZ1JjZxIZmh17WwzW36woEbA
    ```
 
@@ -133,7 +130,7 @@ systemd 脚本放入：
    docker run -itd --name anylink --privileged \
    -p 443:443 -p 8800:8800 \
    --restart=always \
-   anylink
+   bjdgyc/anylink
    ```
 
 5. 使用自定义参数启动容器
@@ -143,7 +140,17 @@ systemd 脚本放入：
    -e IPV4_CIDR=192.168.10.0/24 \
    -p 443:443 -p 8800:8800 \
    --restart=always \
-   anylink -c=/etc/server.toml --admin_addr=:8080
+   bjdgyc/anylink \
+   -c=/etc/server.toml --admin_addr=:8080
+   ```
+
+6. 构建镜像
+
+   ```bash
+   #获取仓库源码
+   git clone https://github.com/bjdgyc/anylink.git
+   # 构建镜像
+   docker build -t anylink .
    ```
 
 ## Setting
