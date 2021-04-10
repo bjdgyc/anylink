@@ -43,8 +43,8 @@ func initIpPool() {
 	// max := min | uint32(math.Pow(2, float64(32-one))-1)
 
 	// ip地址池
-	IpPool.IpLongMin = ip2long(net.ParseIP(base.Cfg.Ipv4Pool[0]))
-	IpPool.IpLongMax = ip2long(net.ParseIP(base.Cfg.Ipv4Pool[1]))
+	IpPool.IpLongMin = ip2long(net.ParseIP(base.Cfg.Ipv4Start))
+	IpPool.IpLongMax = ip2long(net.ParseIP(base.Cfg.Ipv4End))
 }
 
 func long2ip(i uint32) net.IP {

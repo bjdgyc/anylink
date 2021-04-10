@@ -17,6 +17,12 @@
         </el-table-column>
 
         <el-table-column
+            prop="env"
+            label="环境变量"
+            width="220">
+        </el-table-column>
+
+        <el-table-column
             prop="data"
             label="数据">
           <template slot-scope="scope">

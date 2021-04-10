@@ -6,8 +6,8 @@
 #数据文件
 db_file = "./data.db"
 #证书文件
-cert_file = "./vpn_cert.pem"
-cert_key = "./vpn_cert.key"
+cert_file = "./test_vpn_cert.pem"
+cert_key = "./test_vpn_key.pem"
 ui_path = "../ui"
 files_path = "../files"
 #日志目录,为空写入标准输出
@@ -21,7 +21,7 @@ issuer = "XX公司VPN"
 admin_user = "admin"
 #pass 123456
 admin_pass = "$2a$10$UQ7C.EoPifDeJh6d8.31TeSPQU7hM/NOM2nixmBucJpAuXDQNqNke"
-jwt_secret = ""
+jwt_secret = "iLmspvOiz*%ovfcs*wersdf#^heR8pNU^4XxBm&mW$aPCjSRMbYH#&"
 
 
 #vpn服务对外地址,影响开通邮件二维码
@@ -39,7 +39,8 @@ link_mode = "tun"
 #客户端分配的ip地址池
 ipv4_cidr = "192.168.10.0/24"
 ipv4_gateway = "192.168.10.1"
-ipv4_pool = ["192.168.10.100", "192.168.10.200"]
+ipv4_start = "192.168.10.100"
+ipv4_end = "192.168.10.200"
 
 #最大客户端数量
 max_client = 100
