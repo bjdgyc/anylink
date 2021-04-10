@@ -37,7 +37,9 @@ COPY docker_entrypoint.sh  /app/
 
 #TODO 本地打包时使用镜像
 #RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/repositories
-RUN apk add --no-cache bash iptables && ls /app
+RUN apk add --no-cache bash iptables \
+    && chmod +x /app/docker_entrypoint.sh \
+    && ls /app
 
 EXPOSE 443 8800
 
