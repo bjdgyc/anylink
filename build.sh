@@ -1,12 +1,12 @@
 #!/bin/env bash
 
 set -x
-function RETVAL(){
-	rt=$1
-	if [ $rt != 0 ]; then
-		echo $rt
-		exit 1
-	fi
+function RETVAL() {
+  rt=$1
+  if [ $rt != 0 ]; then
+    echo $rt
+    exit 1
+  fi
 }
 
 #当前目录
