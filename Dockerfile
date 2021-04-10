@@ -15,7 +15,8 @@ WORKDIR /anylink
 COPY . /anylink
 COPY --from=builder_node /web/ui  /anylink/server/ui
 
-RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/repositories
+#本地打包时使用镜像
+#RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/repositories
 RUN apk add --no-cache git
 RUN cd /anylink/server;go build -o anylink -ldflags "-X main.COMMIT_ID=$(git rev-parse HEAD)" \
     && /anylink/server/anylink tool -v
@@ -33,7 +34,8 @@ COPY ./server/conf  /app/conf
 COPY ./server/files  /app/files
 COPY docker_entrypoint.sh  /app/
 
-RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/repositories
+#本地打包时使用镜像
+#RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/repositories
 RUN apk add --no-cache bash iptables && ls /app
 
 EXPOSE 443 8800
