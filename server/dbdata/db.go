@@ -85,5 +85,5 @@ const accountMail = `<p>您好:</p>
     </ul>
 </div>
 <p>
-    软件下载地址: https://gitee.com/bjdgyc/anylink-soft/blob/master/README.md
+    软件下载地址: https://{{.LinkAddr}}/files/info.txt
 </p>`
