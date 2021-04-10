@@ -130,9 +130,8 @@ systemd 脚本放入：
 4. 启动容器
 
    ```bash
-   docker run -itd --privileged \
-   -p 443:443 \
-   -p 8800:8800 \
+   docker run -itd --name anylink --privileged \
+   -p 443:443 -p 8800:8800 \
    --restart=always \
    anylink
    ```
@@ -140,10 +139,9 @@ systemd 脚本放入：
 5. 使用自定义参数启动容器
    
    ```bash
-   docker run -itd --privileged \
+   docker run -itd --name anylink --privileged \
    -e IPV4_CIDR=192.168.10.0/24 \
-   -p 443:443 \
-   -p 8800:8800 \
+   -p 443:443 -p 8800:8800 \
    --restart=always \
    anylink -c=/etc/server.toml --admin_addr=:8080
    ```

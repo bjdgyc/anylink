@@ -22,7 +22,7 @@ func LinkHome(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintln(w, "hello world")
+	fmt.Fprintln(w, "AnyLink 是一个企业级远程办公 sslvpn 的软件，可以支持多人同时在线使用。")
 }
 
 func LinkOtpQr(w http.ResponseWriter, r *http.Request) {
