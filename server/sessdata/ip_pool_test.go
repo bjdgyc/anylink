@@ -17,7 +17,8 @@ func preData(tmpDir string) {
 	tmpDb := path.Join(tmpDir, "test.db")
 	base.Cfg.DbFile = tmpDb
 	base.Cfg.Ipv4CIDR = "192.168.3.0/24"
-	base.Cfg.Ipv4Pool = []string{"192.168.3.1", "192.168.3.199"}
+	base.Cfg.Ipv4Start = "192.168.3.1"
+	base.Cfg.Ipv4End = "192.168.3.199"
 	base.Cfg.MaxClient = 100
 	base.Cfg.MaxUserClient = 3
 
