@@ -37,6 +37,7 @@ mkdir $deploy/log
 cp -r server/anylink $deploy
 cp -r server/conf $deploy
 cp -r server/files $deploy
+cp -r server/systemd $deploy
 cp -r server/bridge-init.sh $deploy
 
 cp -r web/ui $deploy
