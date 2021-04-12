@@ -204,15 +204,17 @@ eth_gateway="192.168.1.1"
 sh bridge-init.sh
 ```
 
-## Soft
+## 常见问题
 
-相关软件下载： QQ群共享文件: 567510628
+请前往 [问题地址](question.md) 查看具体信息
 
 ## Discussion
 
 ![qq.png](screenshot/qq.png)
 
 添加QQ群: 567510628
+
+QQ群共享文件有相关软件下载
 
 ## Contribution
 
