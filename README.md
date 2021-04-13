@@ -4,6 +4,9 @@
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/bjdgyc/anylink)](https://pkg.go.dev/github.com/bjdgyc/anylink)
 [![Go Report Card](https://goreportcard.com/badge/github.com/bjdgyc/anylink)](https://goreportcard.com/report/github.com/bjdgyc/anylink)
 [![codecov](https://codecov.io/gh/bjdgyc/anylink/branch/master/graph/badge.svg?token=JTFLIIIBQ0)](https://codecov.io/gh/bjdgyc/anylink)
+![GitHub release](https://img.shields.io/github/v/release/bjdgyc/anylink)
+![GitHub downloads)](https://img.shields.io/github/downloads/bjdgyc/anylink/latest/total)
+![LICENSE](https://img.shields.io/github/license/bjdgyc/anylink)
 
 AnyLink 是一个企业级远程办公sslvpn的软件，可以支持多人同时在线使用。
 
