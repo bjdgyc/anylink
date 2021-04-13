@@ -55,6 +55,7 @@ func initData() {
 	_ = SettingSet(smtp)
 
 	other := &SettingOther{
+		LinkAddr:    "vpn.xx.com",
 		Banner:      "您已接入公司网络，请按照公司规定使用。\n请勿进行非工作下载及视频行为！",
 		AccountMail: accountMail,
 	}

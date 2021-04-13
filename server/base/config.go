@@ -16,7 +16,6 @@ type config struct {
 }
 
 var configs = []config{
-	{Typ: cfgStr, Name: "link_addr", Usage: "vpn服务对外地址", ValStr: "vpn.xx.com"},
 	{Typ: cfgStr, Name: "server_addr", Usage: "前台服务监听地址", ValStr: ":443"},
 	{Typ: cfgStr, Name: "admin_addr", Usage: "后台服务监听地址", ValStr: ":8800"},
 	{Typ: cfgBool, Name: "proxy_protocol", Usage: "TCP代理协议", ValBool: false},

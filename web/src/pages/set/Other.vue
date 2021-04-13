@@ -30,6 +30,14 @@
 
       <el-tab-pane label="其他设置" name="dataOther">
         <el-form :model="dataOther" ref="dataOther" :rules="rules" label-width="100px" class="tab-one">
+
+          <el-form-item label="vpn对外地址" prop="link_addr">
+            <el-input
+                placeholder="请输入内容"
+                v-model="dataOther.link_addr">
+            </el-input>
+          </el-form-item>
+
           <el-form-item label="Banner信息" prop="banner">
             <el-input
                 type="textarea"
