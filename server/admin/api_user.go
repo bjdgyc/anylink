@@ -227,12 +227,19 @@ func userAccountMail(user *dbdata.User) error {
 		return err
 	}
 
+	setting := &dbdata.SettingOther{}
+	err = dbdata.SettingGet(setting)
+	if err != nil {
+		base.Error(err)
+		return err
+	}
+
 	data := userAccountMailData{
-		LinkAddr: base.Cfg.LinkAddr,
+		LinkAddr: setting.LinkAddr,
 		Group:    strings.Join(user.Groups, ","),
 		Username: user.Username,
 		PinCode:  user.PinCode,
-		OtpImg:   fmt.Sprintf("https://%s/otp_qr?id=%d&jwt=%s", base.Cfg.LinkAddr, user.Id, tokenString),
+		OtpImg:   fmt.Sprintf("https://%s/otp_qr?id=%d&jwt=%s", setting.LinkAddr, user.Id, tokenString),
 	}
 	w := bytes.NewBufferString("")
 	t, _ := template.New("auth_complete").Parse(htmlBody)

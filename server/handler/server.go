@@ -13,11 +13,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func GetCertificate(*tls.ClientHelloInfo) (*tls.Certificate, error) {
-	cert, err := tls.LoadX509KeyPair(base.Cfg.CertFile, base.Cfg.CertKey)
-	return &cert, err
-}
-
 func startTls() {
 	addr := base.Cfg.ServerAddr
 	certFile := base.Cfg.CertFile
@@ -28,7 +23,6 @@ func startTls() {
 		NextProtos:         []string{"http/1.1"},
 		MinVersion:         tls.VersionTLS12,
 		InsecureSkipVerify: true,
-		GetCertificate:     GetCertificate,
 	}
 	srv := &http.Server{
 		Addr:      addr,

@@ -4,6 +4,9 @@
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/bjdgyc/anylink)](https://pkg.go.dev/github.com/bjdgyc/anylink)
 [![Go Report Card](https://goreportcard.com/badge/github.com/bjdgyc/anylink)](https://goreportcard.com/report/github.com/bjdgyc/anylink)
 [![codecov](https://codecov.io/gh/bjdgyc/anylink/branch/master/graph/badge.svg?token=JTFLIIIBQ0)](https://codecov.io/gh/bjdgyc/anylink)
+![GitHub release](https://img.shields.io/github/v/release/bjdgyc/anylink)
+![GitHub downloads)](https://img.shields.io/github/downloads/bjdgyc/anylink/latest/total)
+![LICENSE](https://img.shields.io/github/license/bjdgyc/anylink)
 
 AnyLink 是一个企业级远程办公sslvpn的软件，可以支持多人同时在线使用。
 
@@ -204,15 +207,17 @@ eth_gateway="192.168.1.1"
 sh bridge-init.sh
 ```
 
-## Soft
+## 常见问题
 
-相关软件下载： QQ群共享文件: 567510628
+请前往 [问题地址](question.md) 查看具体信息
 
 ## Discussion
 
 ![qq.png](screenshot/qq.png)
 
 添加QQ群: 567510628
+
+QQ群共享文件有相关软件下载
 
 ## Contribution
 

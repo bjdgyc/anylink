@@ -30,7 +30,7 @@ var (
 // rekey-method = ssl
 
 type ServerConfig struct {
-	LinkAddr      string `json:"link_addr"`
+	// LinkAddr      string `json:"link_addr"`
 	ServerAddr    string `json:"server_addr"`
 	AdminAddr     string `json:"admin_addr"`
 	ProxyProtocol bool   `json:"proxy_protocol"`

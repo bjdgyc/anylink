@@ -21,11 +21,8 @@ issuer = "XX公司VPN"
 admin_user = "admin"
 #pass 123456
 admin_pass = "$2a$10$UQ7C.EoPifDeJh6d8.31TeSPQU7hM/NOM2nixmBucJpAuXDQNqNke"
-jwt_secret = "iLmspvOiz*%ovfcs*wersdf#^heR8pNU^4XxBm&mW$aPCjSRMbYH#&"
+jwt_secret = "iLmspvOiz*%ovfcs*wersdf#heR8pNU4XxBm&mW$aPCjSRMbYH#&"
 
-
-#vpn服务对外地址,影响开通邮件二维码
-link_addr = "vpn.xx.com"
 
 #前台服务监听地址
 server_addr = ":443"
