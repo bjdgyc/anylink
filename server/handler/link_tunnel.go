@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"net/http/httputil"
 	"os"
 
 	"github.com/bjdgyc/anylink/base"
@@ -21,9 +22,9 @@ func init() {
 
 func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	// TODO 调试信息输出
-	// hd, _ := httputil.DumpRequest(r, true)
-	// fmt.Println("DumpRequest: ", string(hd))
-	// fmt.Println("LinkTunnel", r.RemoteAddr)
+	hd, _ := httputil.DumpRequest(r, true)
+	fmt.Println("DumpRequest: ", string(hd))
+	fmt.Println("LinkTunnel", r.RemoteAddr)
 
 	// 判断session-token的值
 	cookie, err := r.Cookie("webvpn")
@@ -112,6 +113,7 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("X-CSTP-MSIE-Proxy-Lockdown", "true")
 	w.Header().Set("X-CSTP-Smartcard-Removal-Disconnect", "true")
 
+	w.Header().Set("X-MTU", fmt.Sprintf("%d", cSess.Mtu))      // 1399
 	w.Header().Set("X-CSTP-MTU", fmt.Sprintf("%d", cSess.Mtu)) // 1399
 	w.Header().Set("X-DTLS-MTU", fmt.Sprintf("%d", cSess.Mtu))
 

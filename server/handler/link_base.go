@@ -55,7 +55,7 @@ func setCommonHeader(w http.ResponseWriter) {
 
 func execCmd(cmdStrs []string) error {
 	for _, cmdStr := range cmdStrs {
-		cmd := exec.Command("bash", "-c", cmdStr)
+		cmd := exec.Command("sh", "-c", cmdStr)
 		b, err := cmd.CombinedOutput()
 		if err != nil {
 			log.Println(string(b), err)
