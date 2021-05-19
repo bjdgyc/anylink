@@ -46,7 +46,7 @@ func LinkTun(cSess *sessdata.ConnSession) error {
 	cmdstr1 := fmt.Sprintf("ip link set dev %s up mtu %d multicast off", ifce.Name(), cSess.Mtu)
 	cmdstr2 := fmt.Sprintf("ip addr add dev %s local %s peer %s/32",
 		ifce.Name(), base.Cfg.Ipv4Gateway, cSess.IpAddr)
-	cmdstr3 := fmt.Sprintf("sysctl -w net.ipv6.conf.%s.disable_ipv6=1", ifce.Name())
+	cmdstr3 := "true"
 	cmdStrs := []string{cmdstr1, cmdstr2, cmdstr3}
 	err = execCmd(cmdStrs)
 	if err != nil {
