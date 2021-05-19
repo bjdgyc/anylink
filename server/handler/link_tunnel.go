@@ -2,18 +2,23 @@ package handler
 
 import (
 	"bytes"
+	"encoding/hex"
 	"fmt"
 	"log"
 	"net"
 	"net/http"
 	"net/http/httputil"
 	"os"
+	"sync"
 
 	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/sessdata"
+	"github.com/pion/dtls/v2"
 )
 
 var hn string
+
+var ss sync.Map
 
 func init() {
 	// 获取主机名称
@@ -52,6 +57,14 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	masterSecret := r.Header.Get("X-DTLS-Master-Secret")
 	localIp := r.Header.Get("X-Cstp-Local-Address-Ip4")
 	mobile := r.Header.Get("X-Cstp-License")
+
+	preMasterSecret, err := hex.DecodeString(masterSecret)
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	dtls.Sessions.Store(sess.DtlsSid, preMasterSecret)
 
 	cSess.SetMtu(cstpMtu)
 	cSess.MasterSecret = masterSecret
@@ -119,6 +132,7 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("X-DTLS-Session-ID", sess.DtlsSid)
 	w.Header().Set("X-DTLS-Port", "4433")
+	w.Header().Set("X-DTLS-DPD", fmt.Sprintf("%d", cstpDpd))
 	w.Header().Set("X-DTLS-Keepalive", fmt.Sprintf("%d", base.Cfg.CstpKeepalive))
 	w.Header().Set("X-DTLS-Rekey-Time", "5400")
 	w.Header().Set("X-DTLS12-CipherSuite", "ECDHE-ECDSA-AES128-GCM-SHA256")
@@ -158,6 +172,8 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+
+	ss.Store(cSess.Sess.DtlsSid, cSess)
 
 	go LinkCstp(conn, cSess)
 }
