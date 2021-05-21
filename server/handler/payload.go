@@ -35,25 +35,45 @@ func payloadInData(cSess *sessdata.ConnSession, payload *sessdata.Payload) bool 
 }
 
 func payloadOut(cSess *sessdata.ConnSession, lType sessdata.LType, pType byte, data []byte) bool {
+	dSess := cSess.GetDtlsSession()
+	if dSess == nil {
+		return payloadOutCstp(cSess, lType, pType, data)
+	} else {
+		return payloadOutDtls(dSess, lType, pType, data)
+	}
+}
+
+func payloadOutCstp(cSess *sessdata.ConnSession, lType sessdata.LType, pType byte, data []byte) bool {
 	payload := &sessdata.Payload{
 		LType: lType,
 		PType: pType,
 		Data:  data,
 	}
 
-	return payloadOutData(cSess, payload)
-}
-
-func payloadOutData(cSess *sessdata.ConnSession, payload *sessdata.Payload) bool {
 	closed := false
 
 	select {
-	case cSess.PayloadOut <- payload:
+	case cSess.PayloadOutCstp <- payload:
 	case <-cSess.CloseChan:
 		closed = true
 	}
 
 	return closed
+}
+
+func payloadOutDtls(dSess *sessdata.DtlsSession, lType sessdata.LType, pType byte, data []byte) bool {
+	payload := &sessdata.Payload{
+		LType: lType,
+		PType: pType,
+		Data:  data,
+	}
+
+	select {
+	case dSess.CSess.PayloadOutDtls <- payload:
+	case <-dSess.CloseChan:
+	}
+
+	return false
 }
 
 // Acl规则校验

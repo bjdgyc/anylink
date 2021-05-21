@@ -1,59 +1,78 @@
 package handler
 
 import (
+	"context"
 	"crypto/tls"
 	"encoding/hex"
-	"log"
+	"fmt"
 	"net"
 	"time"
-	"os"
 
+	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/sessdata"
 	"github.com/pion/dtls/v2"
 	"github.com/pion/dtls/v2/pkg/crypto/selfsign"
 	"github.com/pion/logging"
 )
 
+// 因本项目对 github.com/pion/dtls 的代码，进行了大量的修改
+// 且短时间内无法合并到上游项目
+// 所以本项目暂时copy了一份代码
+// 最后,感谢 github.com/pion/dtls 对golang生态做出的贡献
+
 func startDtls() {
 	certificate, err := selfsign.GenerateSelfSigned()
-
-	logf := logging.NewDefaultLoggerFactory()
-	logf.DefaultLogLevel = logging.LogLevelTrace
-	f, err := os.OpenFile("/tmp/key.log", os.O_TRUNC|os.O_RDWR, 0600)
 	if err != nil {
 		panic(err)
 	}
+	logf := logging.NewDefaultLoggerFactory()
+	logf.Writer = base.GetBaseLw()
+	// logf.DefaultLogLevel = logging.LogLevelTrace
+	logf.DefaultLogLevel = logging.LogLevelInfo
+
 	config := &dtls.Config{
 		Certificates:         []tls.Certificate{certificate},
 		InsecureSkipVerify:   true,
 		ExtendedMasterSecret: dtls.DisableExtendedMasterSecret,
-		CipherSuites:         []dtls.CipherSuiteID{dtls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256},
+		CipherSuites:         []dtls.CipherSuiteID{dtls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256},
 		LoggerFactory:        logf,
-		KeyLogWriter:         f,
+		MTU:                  BufferSize,
+		CiscoCompat: func(sessid []byte) ([]byte, error) {
+			masterSecret := sessdata.Dtls2MasterSecret(hex.EncodeToString(sessid))
+			if masterSecret == "" {
+				return nil, fmt.Errorf("masterSecret is err")
+			}
+			return hex.DecodeString(masterSecret)
+		},
+		ConnectContextMaker: func() (context.Context, func()) {
+			return context.WithTimeout(context.Background(), 5*time.Second)
+		},
 	}
 
-	addr := &net.UDPAddr{IP: net.ParseIP("0.0.0.0"), Port: 4433}
-
+	addr, err := net.ResolveUDPAddr("udp", base.Cfg.ServerDTLSAddr)
+	if err != nil {
+		panic(err)
+	}
 	ln, err := dtls.Listen("udp", addr, config)
 	if err != nil {
 		panic(err)
 	}
 
+	base.Info("listen DTLS server", addr)
+
 	for {
-		c, err := ln.Accept()
+		conn, err := ln.Accept()
 		if err != nil {
-			log.Println("Accept error", err)
+			base.Error("DTLS Accept error", err)
 			continue
 		}
 
 		go func() {
-			time.Sleep(1 * time.Second)
-			cc := c.(*dtls.Conn)
-			id := hex.EncodeToString(cc.ConnectionState().SessionID)
-			s, ok := ss.Load(id)
-			log.Println("get link", id, ok)
-			cs := s.(*sessdata.ConnSession)
-			LinkDtls(c, cs)
+			// time.Sleep(1 * time.Second)
+			cc := conn.(*dtls.Conn)
+			sessid := hex.EncodeToString(cc.ConnectionState().SessionID)
+			sess := sessdata.Dtls2Sess(sessid)
+			LinkDtls(conn, sess.CSess)
 		}()
 	}
 }

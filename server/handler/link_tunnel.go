@@ -2,23 +2,20 @@ package handler
 
 import (
 	"bytes"
-	"encoding/hex"
 	"fmt"
 	"log"
 	"net"
 	"net/http"
-	"net/http/httputil"
 	"os"
-	"sync"
+	"strings"
 
 	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/sessdata"
-	"github.com/pion/dtls/v2"
 )
 
-var hn string
-
-var ss sync.Map
+var (
+	hn string
+)
 
 func init() {
 	// 获取主机名称
@@ -27,9 +24,9 @@ func init() {
 
 func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	// TODO 调试信息输出
-	hd, _ := httputil.DumpRequest(r, true)
-	fmt.Println("DumpRequest: ", string(hd))
-	fmt.Println("LinkTunnel", r.RemoteAddr)
+	// hd, _ := httputil.DumpRequest(r, true)
+	// fmt.Println("DumpRequest: ", string(hd))
+	// fmt.Println("LinkTunnel", r.RemoteAddr)
 
 	// 判断session-token的值
 	cookie, err := r.Cookie("webvpn")
@@ -58,14 +55,6 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	localIp := r.Header.Get("X-Cstp-Local-Address-Ip4")
 	mobile := r.Header.Get("X-Cstp-License")
 
-	preMasterSecret, err := hex.DecodeString(masterSecret)
-	if err != nil {
-		log.Println(err)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	dtls.Sessions.Store(sess.DtlsSid, preMasterSecret)
-
 	cSess.SetMtu(cstpMtu)
 	cSess.MasterSecret = masterSecret
 	cSess.RemoteAddr = r.RemoteAddr
@@ -80,6 +69,12 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 		cSess.Client = "mobile"
 	}
 	cSess.CstpDpd = cstpDpd
+
+	dtlsPort := ""
+	if strings.Contains(base.Cfg.ServerDTLSAddr, ":") {
+		ss := strings.Split(base.Cfg.ServerDTLSAddr, ":")
+		dtlsPort = ss[1]
+	}
 
 	base.Debug(cSess.IpAddr, cSess.MacHw, sess.Username, mobile)
 
@@ -126,17 +121,15 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("X-CSTP-MSIE-Proxy-Lockdown", "true")
 	w.Header().Set("X-CSTP-Smartcard-Removal-Disconnect", "true")
 
-	w.Header().Set("X-MTU", fmt.Sprintf("%d", cSess.Mtu))      // 1399
 	w.Header().Set("X-CSTP-MTU", fmt.Sprintf("%d", cSess.Mtu)) // 1399
 	w.Header().Set("X-DTLS-MTU", fmt.Sprintf("%d", cSess.Mtu))
 
 	w.Header().Set("X-DTLS-Session-ID", sess.DtlsSid)
-	w.Header().Set("X-DTLS-Port", "4433")
+	w.Header().Set("X-DTLS-Port", dtlsPort)
 	w.Header().Set("X-DTLS-DPD", fmt.Sprintf("%d", cstpDpd))
-	w.Header().Set("X-DTLS-Keepalive", fmt.Sprintf("%d", base.Cfg.CstpKeepalive))
+	w.Header().Set("X-DTLS-Keepalive", fmt.Sprintf("%d", cstpKeepalive))
 	w.Header().Set("X-DTLS-Rekey-Time", "5400")
 	w.Header().Set("X-DTLS12-CipherSuite", "ECDHE-ECDSA-AES128-GCM-SHA256")
-	// w.Header().Set("X-DTLS12-CipherSuite", "ECDHE-RSA-AES128-GCM-SHA256")
 
 	w.Header().Set("X-CSTP-License", "accept")
 	w.Header().Set("X-CSTP-Routing-Filtering-Ignore", "false")
@@ -172,8 +165,6 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
-	ss.Store(cSess.Sess.DtlsSid, cSess)
 
 	go LinkCstp(conn, cSess)
 }

@@ -9,19 +9,33 @@ import (
 )
 
 func LinkDtls(conn net.Conn, cSess *sessdata.ConnSession) {
+	dSess := cSess.NewDtlsConn()
+	if dSess == nil {
+		// 创建失败，直接关闭链接
+		_ = conn.Close()
+		return
+	}
+
 	defer func() {
 		base.Debug("LinkDtls return", cSess.IpAddr)
 		_ = conn.Close()
-		cSess.Close()
+		dSess.Close()
 	}()
 
 	var (
 		dead = time.Duration(cSess.CstpDpd+5) * time.Second
 	)
 
-	go dtlsWrite(conn, cSess)
+	go dtlsWrite(conn, dSess, cSess)
+
+	now := time.Now()
 
 	for {
+
+		if time.Now().Sub(now) > time.Second*30 {
+			// return
+		}
+
 		err := conn.SetReadDeadline(time.Now().Add(dead))
 		if err != nil {
 			base.Error("SetDeadline: ", err)
@@ -48,26 +62,33 @@ func LinkDtls(conn net.Conn, cSess *sessdata.ConnSession) {
 			base.Debug("DISCONNECT", cSess.IpAddr)
 			return
 		case 0x03: // DPD-REQ
-			base.Debug("recv DPD-REQ", cSess.IpAddr)
-			if payloadOut(cSess, sessdata.LTypeIPData, 0x04, nil) {
+			// base.Debug("recv DPD-REQ", cSess.IpAddr)
+			payload := &sessdata.Payload{
+				LType: sessdata.LTypeIPData,
+				PType: 0x04,
+				Data:  nil,
+			}
+
+			select {
+			case cSess.PayloadOutDtls <- payload:
+			case <-dSess.CloseChan:
 				return
 			}
 		case 0x04:
-			base.Debug("recv DPD-RESP", cSess.IpAddr)
+			// base.Debug("recv DPD-RESP", cSess.IpAddr)
 		case 0x00: // DATA
-			if payloadIn(cSess, sessdata.LTypeIPData, 0x00, hdata[1:]) {
+			if payloadIn(cSess, sessdata.LTypeIPData, 0x00, hdata[1:n]) {
 				return
 			}
-
 		}
 	}
 }
 
-func dtlsWrite(conn net.Conn, cSess *sessdata.ConnSession) {
+func dtlsWrite(conn net.Conn, dSess *sessdata.DtlsSession, cSess *sessdata.ConnSession) {
 	defer func() {
 		base.Debug("dtlsWrite return", cSess.IpAddr)
 		_ = conn.Close()
-		cSess.Close()
+		dSess.Close()
 	}()
 
 	var (
@@ -76,9 +97,10 @@ func dtlsWrite(conn net.Conn, cSess *sessdata.ConnSession) {
 	)
 
 	for {
+		// dtls优先推送数据
 		select {
-		case payload = <-cSess.PayloadOut:
-		case <-cSess.CloseChan:
+		case payload = <-cSess.PayloadOutDtls:
+		case <-dSess.CloseChan:
 			return
 		}
 

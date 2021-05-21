@@ -55,7 +55,7 @@ func LinkCstp(conn net.Conn, cSess *sessdata.ConnSession) {
 			return
 		case 0x03: // DPD-REQ
 			// base.Debug("recv DPD-REQ", cSess.IpAddr)
-			if payloadOut(cSess, sessdata.LTypeIPData, 0x04, nil) {
+			if payloadOutCstp(cSess, sessdata.LTypeIPData, 0x04, nil) {
 				return
 			}
 		case 0x04:
@@ -86,7 +86,7 @@ func cstpWrite(conn net.Conn, cSess *sessdata.ConnSession) {
 
 	for {
 		select {
-		case payload = <-cSess.PayloadOut:
+		case payload = <-cSess.PayloadOutCstp:
 		case <-cSess.CloseChan:
 			return
 		}

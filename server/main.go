@@ -19,7 +19,6 @@ func main() {
 
 	base.Start()
 	handler.Start()
-
 	signalWatch()
 }
 
