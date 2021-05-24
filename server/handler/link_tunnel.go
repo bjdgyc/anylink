@@ -7,12 +7,15 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/sessdata"
 )
 
-var hn string
+var (
+	hn string
+)
 
 func init() {
 	// 获取主机名称
@@ -67,6 +70,12 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	}
 	cSess.CstpDpd = cstpDpd
 
+	dtlsPort := ""
+	if strings.Contains(base.Cfg.ServerDTLSAddr, ":") {
+		ss := strings.Split(base.Cfg.ServerDTLSAddr, ":")
+		dtlsPort = ss[1]
+	}
+
 	base.Debug(cSess.IpAddr, cSess.MacHw, sess.Username, mobile)
 
 	// 返回客户端数据
@@ -116,11 +125,11 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("X-DTLS-MTU", fmt.Sprintf("%d", cSess.Mtu))
 
 	w.Header().Set("X-DTLS-Session-ID", sess.DtlsSid)
-	w.Header().Set("X-DTLS-Port", "4433")
-	w.Header().Set("X-DTLS-Keepalive", fmt.Sprintf("%d", base.Cfg.CstpKeepalive))
+	w.Header().Set("X-DTLS-Port", dtlsPort)
+	w.Header().Set("X-DTLS-DPD", fmt.Sprintf("%d", cstpDpd))
+	w.Header().Set("X-DTLS-Keepalive", fmt.Sprintf("%d", cstpKeepalive))
 	w.Header().Set("X-DTLS-Rekey-Time", "5400")
 	w.Header().Set("X-DTLS12-CipherSuite", "ECDHE-ECDSA-AES128-GCM-SHA256")
-	// w.Header().Set("X-DTLS12-CipherSuite", "ECDHE-RSA-AES128-GCM-SHA256")
 
 	w.Header().Set("X-CSTP-License", "accept")
 	w.Header().Set("X-CSTP-Routing-Filtering-Ignore", "false")

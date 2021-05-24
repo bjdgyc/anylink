@@ -18,7 +18,9 @@ import (
 var (
 	// session_token -> SessUser
 	sessions = make(map[string]*Session)
-	sessMux  sync.Mutex
+	// dtlsId -> session_token
+	dtlsIds = make(map[string]string)
+	sessMux sync.RWMutex
 )
 
 // 连接sess
@@ -44,11 +46,23 @@ type ConnSession struct {
 	closeOnce           sync.Once
 	CloseChan           chan struct{}
 	PayloadIn           chan *Payload
-	PayloadOut          chan *Payload
+	// PayloadOut          chan *Payload // 公共ip数据
+	PayloadOutCstp chan *Payload // Cstp的数据
+	PayloadOutDtls chan *Payload // Dtls的数据
+
+	mux   sync.RWMutex
+	dSess *DtlsSession // Dtls Session
+	// DSess *atomic.Value
+}
+
+type DtlsSession struct {
+	CSess     *ConnSession
+	CloseChan chan struct{}
+	closeOnce sync.Once
 }
 
 type Session struct {
-	mux            sync.Mutex
+	mux            sync.RWMutex
 	Sid            string // auth返回的 session-id
 	Token          string // session信息的唯一token
 	DtlsSid        string // dtls协议的 session_id
@@ -122,16 +136,17 @@ func NewSession(token string) *Session {
 
 	sessMux.Lock()
 	sessions[token] = sess
+	dtlsIds[sess.DtlsSid] = token
 	sessMux.Unlock()
 	return sess
 }
 
 func (s *Session) NewConn() *ConnSession {
-	s.mux.Lock()
+	s.mux.RLock()
 	active := s.IsActive
 	macAddr := s.MacAddr
 	username := s.Username
-	s.mux.Unlock()
+	s.mux.RUnlock()
 	if active {
 		s.CSess.Close()
 	}
@@ -155,13 +170,14 @@ func (s *Session) NewConn() *ConnSession {
 	}
 
 	cSess := &ConnSession{
-		Sess:       s,
-		MacHw:      macHw,
-		IpAddr:     ip,
-		closeOnce:  sync.Once{},
-		CloseChan:  make(chan struct{}),
-		PayloadIn:  make(chan *Payload),
-		PayloadOut: make(chan *Payload),
+		Sess:           s,
+		MacHw:          macHw,
+		IpAddr:         ip,
+		closeOnce:      sync.Once{},
+		CloseChan:      make(chan struct{}),
+		PayloadIn:      make(chan *Payload),
+		PayloadOutCstp: make(chan *Payload),
+		PayloadOutDtls: make(chan *Payload),
 	}
 
 	// 查询group信息
@@ -202,6 +218,43 @@ func (cs *ConnSession) Close() {
 		ReleaseIp(cs.IpAddr, cs.Sess.MacAddr)
 		LimitClient(cs.Sess.Username, true)
 	})
+}
+
+// 创建dtls链接
+func (cs *ConnSession) NewDtlsConn() *DtlsSession {
+	cs.mux.Lock()
+	defer cs.mux.Unlock()
+
+	if cs.dSess != nil {
+		// 判断原有连接存在，不进行创建
+		return nil
+	}
+
+	dSess := &DtlsSession{
+		CSess:     cs,
+		CloseChan: make(chan struct{}),
+		closeOnce: sync.Once{},
+	}
+	cs.dSess = dSess
+	return dSess
+}
+
+// 关闭dtls链接
+func (ds *DtlsSession) Close() {
+	ds.closeOnce.Do(func() {
+		base.Info("closeOnce dtls:", ds.CSess.IpAddr)
+		ds.CSess.mux.Lock()
+		defer ds.CSess.mux.Unlock()
+
+		close(ds.CloseChan)
+		ds.CSess.dSess = nil
+	})
+}
+
+func (cs *ConnSession) GetDtlsSession() *DtlsSession {
+	cs.mux.RLock()
+	defer cs.mux.RUnlock()
+	return cs.dSess
 }
 
 const BandwidthPeriodSec = 2 // 流量速率统计周期(秒)
@@ -272,13 +325,34 @@ func SToken2Sess(stoken string) *Session {
 }
 
 func Token2Sess(token string) *Session {
-	sessMux.Lock()
-	defer sessMux.Unlock()
+	sessMux.RLock()
+	defer sessMux.RUnlock()
 	return sessions[token]
 }
 
-func Dtls2Sess(dtlsid []byte) *Session {
-	return nil
+func Dtls2Sess(did string) *Session {
+	sessMux.RLock()
+	defer sessMux.RUnlock()
+	token := dtlsIds[did]
+	return sessions[token]
+}
+
+func Dtls2MasterSecret(did string) string {
+	sessMux.RLock()
+	token := dtlsIds[did]
+	sess := sessions[token]
+	sessMux.RUnlock()
+
+	if sess == nil {
+		return ""
+	}
+
+	sess.mux.RLock()
+	defer sess.mux.RUnlock()
+	if sess.CSess == nil {
+		return ""
+	}
+	return sess.CSess.MasterSecret
 }
 
 func DelSess(token string) {
@@ -298,8 +372,8 @@ func CloseSess(token string) {
 }
 
 func CloseCSess(token string) {
-	sessMux.Lock()
-	defer sessMux.Unlock()
+	sessMux.RLock()
+	defer sessMux.RUnlock()
 	sess, ok := sessions[token]
 	if !ok {
 		return

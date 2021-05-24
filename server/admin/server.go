@@ -49,12 +49,14 @@ func StartAdmin() {
 	r.HandleFunc("/group/del", GroupDel)
 
 	// pprof
-	r.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
-	r.HandleFunc("/debug/pprof/profile", pprof.Profile)
-	r.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
-	r.HandleFunc("/debug/pprof/trace", pprof.Trace)
-	r.HandleFunc("/debug/pprof", location("/debug/pprof/"))
-	r.PathPrefix("/debug/pprof/").HandlerFunc(pprof.Index)
+	if base.Cfg.Pprof {
+		r.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline).Name("debug")
+		r.HandleFunc("/debug/pprof/profile", pprof.Profile).Name("debug")
+		r.HandleFunc("/debug/pprof/symbol", pprof.Symbol).Name("debug")
+		r.HandleFunc("/debug/pprof/trace", pprof.Trace).Name("debug")
+		r.HandleFunc("/debug/pprof", location("/debug/pprof/"))
+		r.PathPrefix("/debug/pprof/").HandlerFunc(pprof.Index).Name("debug")
+	}
 
 	base.Info("Listen admin", base.Cfg.AdminAddr)
 	err := http.ListenAndServe(base.Cfg.AdminAddr, r)

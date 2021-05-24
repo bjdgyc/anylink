@@ -18,6 +18,7 @@ const (
 )
 
 var (
+	baseLw    *logWriter
 	baseLog   *log.Logger
 	baseLevel int
 	levels    map[int]string
@@ -66,7 +67,7 @@ func (lw *logWriter) newFile() {
 
 func initLog() {
 	// 初始化 baseLog
-	baseLw := &logWriter{
+	baseLw = &logWriter{
 		UseStdout: Cfg.LogPath == "",
 		FileName:  path.Join(Cfg.LogPath, logName),
 		NowDate:   time.Now().Format(dateFormat),
@@ -75,6 +76,10 @@ func initLog() {
 	baseLw.newFile()
 	baseLevel = logLevel2Int(Cfg.LogLevel)
 	baseLog = log.New(baseLw, "", log.LstdFlags|log.Lshortfile)
+}
+
+func GetBaseLw() *logWriter {
+	return baseLw
 }
 
 // 获取 log.Logger
