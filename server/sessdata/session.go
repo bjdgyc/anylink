@@ -55,10 +55,11 @@ type ConnSession struct {
 }
 
 type DtlsSession struct {
-	isActive  int32
-	CSess     *ConnSession
+	isActive int32
+	// CSess     *ConnSession
 	CloseChan chan struct{}
 	closeOnce sync.Once
+	IpAddr    net.IP
 }
 
 type Session struct {
@@ -190,10 +191,7 @@ func (s *Session) NewConn() *ConnSession {
 	}
 
 	dSess := &DtlsSession{
-		isActive:  -1,
-		CSess:     cSess,
-		CloseChan: make(chan struct{}),
-		closeOnce: sync.Once{},
+		isActive: -1,
 	}
 	cSess.dSess.Store(dSess)
 
@@ -239,10 +237,11 @@ func (cs *ConnSession) NewDtlsConn() *DtlsSession {
 	}
 
 	dSess := &DtlsSession{
-		isActive:  1,
-		CSess:     cs,
+		isActive: 1,
+		// CSess:     cs,
 		CloseChan: make(chan struct{}),
 		closeOnce: sync.Once{},
+		IpAddr:    cs.IpAddr,
 	}
 	cs.dSess.Store(dSess)
 	return dSess
@@ -251,7 +250,7 @@ func (cs *ConnSession) NewDtlsConn() *DtlsSession {
 // 关闭dtls链接
 func (ds *DtlsSession) Close() {
 	ds.closeOnce.Do(func() {
-		base.Info("closeOnce dtls:", ds.CSess.IpAddr)
+		base.Info("closeOnce dtls:", ds.IpAddr)
 
 		atomic.StoreInt32(&ds.isActive, -1)
 		close(ds.CloseChan)

@@ -9,6 +9,7 @@ import (
 )
 
 func LinkDtls(conn net.Conn, cSess *sessdata.ConnSession) {
+	base.Debug("LinkDtls connect", cSess.IpAddr, conn.RemoteAddr())
 	dSess := cSess.NewDtlsConn()
 	if dSess == nil {
 		// 创建失败，直接关闭链接
@@ -28,14 +29,7 @@ func LinkDtls(conn net.Conn, cSess *sessdata.ConnSession) {
 
 	go dtlsWrite(conn, dSess, cSess)
 
-	now := time.Now()
-
 	for {
-
-		if time.Now().Sub(now) > time.Second*30 {
-			// return
-		}
-
 		err := conn.SetReadDeadline(time.Now().Add(dead))
 		if err != nil {
 			base.Error("SetDeadline: ", err)
@@ -63,15 +57,7 @@ func LinkDtls(conn net.Conn, cSess *sessdata.ConnSession) {
 			return
 		case 0x03: // DPD-REQ
 			// base.Debug("recv DPD-REQ", cSess.IpAddr)
-			payload := &sessdata.Payload{
-				LType: sessdata.LTypeIPData,
-				PType: 0x04,
-				Data:  nil,
-			}
-
-			select {
-			case cSess.PayloadOutDtls <- payload:
-			case <-dSess.CloseChan:
+			if payloadOutDtls(cSess, dSess, sessdata.LTypeIPData, 0x04, nil) {
 				return
 			}
 		case 0x04:

@@ -39,7 +39,7 @@ func payloadOut(cSess *sessdata.ConnSession, lType sessdata.LType, pType byte, d
 	if dSess == nil {
 		return payloadOutCstp(cSess, lType, pType, data)
 	} else {
-		return payloadOutDtls(dSess, lType, pType, data)
+		return payloadOutDtls(cSess, dSess, lType, pType, data)
 	}
 }
 
@@ -61,7 +61,7 @@ func payloadOutCstp(cSess *sessdata.ConnSession, lType sessdata.LType, pType byt
 	return closed
 }
 
-func payloadOutDtls(dSess *sessdata.DtlsSession, lType sessdata.LType, pType byte, data []byte) bool {
+func payloadOutDtls(cSess *sessdata.ConnSession, dSess *sessdata.DtlsSession, lType sessdata.LType, pType byte, data []byte) bool {
 	payload := &sessdata.Payload{
 		LType: lType,
 		PType: pType,
@@ -69,7 +69,7 @@ func payloadOutDtls(dSess *sessdata.DtlsSession, lType sessdata.LType, pType byt
 	}
 
 	select {
-	case dSess.CSess.PayloadOutDtls <- payload:
+	case cSess.PayloadOutDtls <- payload:
 	case <-dSess.CloseChan:
 	}
 
