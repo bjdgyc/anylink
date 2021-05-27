@@ -47,7 +47,7 @@ sh build.sh
 
 # 注意使用root权限运行
 cd anylink-deploy
-sudo ./anylink -conf="conf/server.toml"
+sudo ./anylink --conf="conf/server.toml"
 
 # 默认管理后台访问地址
 # http://host:8800

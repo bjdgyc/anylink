@@ -44,4 +44,4 @@ cp -r web/ui $deploy
 
 #注意使用root权限运行
 #cd anylink-deploy
-#sudo ./anylink -conf="conf/server.toml"
+#sudo ./anylink --conf="conf/server.toml"
