@@ -56,7 +56,6 @@ type ConnSession struct {
 
 type DtlsSession struct {
 	isActive int32
-	// CSess     *ConnSession
 	CloseChan chan struct{}
 	closeOnce sync.Once
 	IpAddr    net.IP
@@ -238,7 +237,6 @@ func (cs *ConnSession) NewDtlsConn() *DtlsSession {
 
 	dSess := &DtlsSession{
 		isActive: 1,
-		// CSess:     cs,
 		CloseChan: make(chan struct{}),
 		closeOnce: sync.Once{},
 		IpAddr:    cs.IpAddr,
