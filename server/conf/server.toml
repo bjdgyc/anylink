@@ -13,7 +13,8 @@ files_path = "../files"
 #日志目录,为空写入标准输出
 #log_path = "../log"
 log_path = ""
-log_level = "info"
+log_level = "debug"
+pprof = false
 
 #系统名称
 issuer = "XX公司VPN"
@@ -26,6 +27,7 @@ jwt_secret = "iLmspvOiz*%ovfcs*wersdf#heR8pNU4XxBm&mW$aPCjSRMbYH#&"
 
 #前台服务监听地址
 server_addr = ":443"
+server_dtls_addr = ":4433"
 #后台服务监听地址
 admin_addr = ":8800"
 #开启tcp proxy protocol协议
@@ -52,8 +54,8 @@ default_group = "one"
 #客户端失效检测时间(秒) dpd > keepalive
 cstp_keepalive = 20
 cstp_dpd = 30
-mobile_keepalive = 50
-mobile_dpd = 60
+mobile_keepalive = 40
+mobile_dpd = 50
 #session过期时间，用于断线重连，0永不过期
 session_timeout = 3600
 auth_timeout = 0

@@ -18,7 +18,9 @@ import (
 var (
 	// session_token -> SessUser
 	sessions = make(map[string]*Session)
-	sessMux  sync.Mutex
+	// dtlsId -> session_token
+	dtlsIds = make(map[string]string)
+	sessMux sync.RWMutex
 )
 
 // 连接sess
@@ -44,11 +46,23 @@ type ConnSession struct {
 	closeOnce           sync.Once
 	CloseChan           chan struct{}
 	PayloadIn           chan *Payload
-	PayloadOut          chan *Payload
+	// PayloadOut          chan *Payload // 公共ip数据
+	PayloadOutCstp chan *Payload // Cstp的数据
+	PayloadOutDtls chan *Payload // Dtls的数据
+
+	// dSess *DtlsSession
+	dSess *atomic.Value
+}
+
+type DtlsSession struct {
+	isActive int32
+	CloseChan chan struct{}
+	closeOnce sync.Once
+	IpAddr    net.IP
 }
 
 type Session struct {
-	mux            sync.Mutex
+	mux            sync.RWMutex
 	Sid            string // auth返回的 session-id
 	Token          string // session信息的唯一token
 	DtlsSid        string // dtls协议的 session_id
@@ -122,16 +136,17 @@ func NewSession(token string) *Session {
 
 	sessMux.Lock()
 	sessions[token] = sess
+	dtlsIds[sess.DtlsSid] = token
 	sessMux.Unlock()
 	return sess
 }
 
 func (s *Session) NewConn() *ConnSession {
-	s.mux.Lock()
+	s.mux.RLock()
 	active := s.IsActive
 	macAddr := s.MacAddr
 	username := s.Username
-	s.mux.Unlock()
+	s.mux.RUnlock()
 	if active {
 		s.CSess.Close()
 	}
@@ -154,24 +169,31 @@ func (s *Session) NewConn() *ConnSession {
 		return nil
 	}
 
-	cSess := &ConnSession{
-		Sess:       s,
-		MacHw:      macHw,
-		IpAddr:     ip,
-		closeOnce:  sync.Once{},
-		CloseChan:  make(chan struct{}),
-		PayloadIn:  make(chan *Payload),
-		PayloadOut: make(chan *Payload),
-	}
-
 	// 查询group信息
 	group := &dbdata.Group{}
 	err = dbdata.One("Name", s.Group, group)
 	if err != nil {
 		base.Error(err)
-		cSess.Close()
 		return nil
 	}
+
+	cSess := &ConnSession{
+		Sess:           s,
+		MacHw:          macHw,
+		IpAddr:         ip,
+		closeOnce:      sync.Once{},
+		CloseChan:      make(chan struct{}),
+		PayloadIn:      make(chan *Payload),
+		PayloadOutCstp: make(chan *Payload),
+		PayloadOutDtls: make(chan *Payload),
+		dSess:          &atomic.Value{},
+	}
+
+	dSess := &DtlsSession{
+		isActive: -1,
+	}
+	cSess.dSess.Store(dSess)
+
 	cSess.Group = group
 	if group.Bandwidth > 0 {
 		// 限流设置
@@ -202,6 +224,44 @@ func (cs *ConnSession) Close() {
 		ReleaseIp(cs.IpAddr, cs.Sess.MacAddr)
 		LimitClient(cs.Sess.Username, true)
 	})
+}
+
+// 创建dtls链接
+func (cs *ConnSession) NewDtlsConn() *DtlsSession {
+	ds := cs.dSess.Load().(*DtlsSession)
+	isActive := atomic.LoadInt32(&ds.isActive)
+	if isActive > 0 {
+		// 判断原有连接存在，不进行创建
+		return nil
+	}
+
+	dSess := &DtlsSession{
+		isActive: 1,
+		CloseChan: make(chan struct{}),
+		closeOnce: sync.Once{},
+		IpAddr:    cs.IpAddr,
+	}
+	cs.dSess.Store(dSess)
+	return dSess
+}
+
+// 关闭dtls链接
+func (ds *DtlsSession) Close() {
+	ds.closeOnce.Do(func() {
+		base.Info("closeOnce dtls:", ds.IpAddr)
+
+		atomic.StoreInt32(&ds.isActive, -1)
+		close(ds.CloseChan)
+	})
+}
+
+func (cs *ConnSession) GetDtlsSession() *DtlsSession {
+	ds := cs.dSess.Load().(*DtlsSession)
+	isActive := atomic.LoadInt32(&ds.isActive)
+	if isActive > 0 {
+		return ds
+	}
+	return nil
 }
 
 const BandwidthPeriodSec = 2 // 流量速率统计周期(秒)
@@ -272,13 +332,34 @@ func SToken2Sess(stoken string) *Session {
 }
 
 func Token2Sess(token string) *Session {
-	sessMux.Lock()
-	defer sessMux.Unlock()
+	sessMux.RLock()
+	defer sessMux.RUnlock()
 	return sessions[token]
 }
 
-func Dtls2Sess(dtlsid []byte) *Session {
-	return nil
+func Dtls2Sess(did string) *Session {
+	sessMux.RLock()
+	defer sessMux.RUnlock()
+	token := dtlsIds[did]
+	return sessions[token]
+}
+
+func Dtls2MasterSecret(did string) string {
+	sessMux.RLock()
+	token := dtlsIds[did]
+	sess := sessions[token]
+	sessMux.RUnlock()
+
+	if sess == nil {
+		return ""
+	}
+
+	sess.mux.RLock()
+	defer sess.mux.RUnlock()
+	if sess.CSess == nil {
+		return ""
+	}
+	return sess.CSess.MasterSecret
 }
 
 func DelSess(token string) {
@@ -298,8 +379,8 @@ func CloseSess(token string) {
 }
 
 func CloseCSess(token string) {
-	sessMux.Lock()
-	defer sessMux.Unlock()
+	sessMux.RLock()
+	defer sessMux.RUnlock()
 	sess, ok := sessions[token]
 	if !ok {
 		return

@@ -47,7 +47,7 @@ sh build.sh
 
 # 注意使用root权限运行
 cd anylink-deploy
-sudo ./anylink -conf="conf/server.toml"
+sudo ./anylink --conf="conf/server.toml"
 
 # 默认管理后台访问地址
 # http://host:8800
@@ -60,6 +60,7 @@ sudo ./anylink -conf="conf/server.toml"
 
 - [x] IP分配(实现IP、MAC映射信息的持久化)
 - [x] TLS-TCP通道
+- [x] DTLS-UDP通道
 - [x] 兼容AnyConnect
 - [x] 基于tun设备的nat访问模式
 - [x] 基于tap设备的桥接访问模式
@@ -71,8 +72,6 @@ sudo ./anylink -conf="conf/server.toml"
 - [x] 流量控制
 - [x] 后台管理界面
 - [x] 访问权限管理
-
-- [ ] DTLS-UDP通道
 
 ## Config
 
