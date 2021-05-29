@@ -9,7 +9,7 @@ import (
 )
 
 func LinkDtls(conn net.Conn, cSess *sessdata.ConnSession) {
-	base.Debug("LinkDtls connect", cSess.IpAddr, conn.RemoteAddr())
+	base.Debug("LinkDtls connect ip:", cSess.IpAddr, "udp-rip:", conn.RemoteAddr())
 	dSess := cSess.NewDtlsConn()
 	if dSess == nil {
 		// 创建失败，直接关闭链接
@@ -35,7 +35,9 @@ func LinkDtls(conn net.Conn, cSess *sessdata.ConnSession) {
 			base.Error("SetDeadline: ", err)
 			return
 		}
-		hdata := make([]byte, BufferSize)
+
+		// hdata := make([]byte, BufferSize)
+		hdata := getByteFull()
 		n, err := conn.Read(hdata)
 		if err != nil {
 			base.Error("read hdata: ", err)
@@ -51,9 +53,9 @@ func LinkDtls(conn net.Conn, cSess *sessdata.ConnSession) {
 		switch hdata[0] {
 		case 0x07: // KEEPALIVE
 			// do nothing
-			base.Debug("recv keepalive", cSess.IpAddr)
+			// base.Debug("recv keepalive", cSess.IpAddr)
 		case 0x05: // DISCONNECT
-			base.Debug("DISCONNECT", cSess.IpAddr)
+			base.Debug("DISCONNECT DTLS", cSess.IpAddr)
 			return
 		case 0x03: // DPD-REQ
 			// base.Debug("recv DPD-REQ", cSess.IpAddr)
@@ -67,6 +69,8 @@ func LinkDtls(conn net.Conn, cSess *sessdata.ConnSession) {
 				return
 			}
 		}
+
+		putByte(hdata)
 	}
 }
 
@@ -78,7 +82,7 @@ func dtlsWrite(conn net.Conn, dSess *sessdata.DtlsSession, cSess *sessdata.ConnS
 	}()
 
 	var (
-		header  []byte
+		// header  []byte
 		payload *sessdata.Payload
 	)
 
@@ -94,13 +98,20 @@ func dtlsWrite(conn net.Conn, dSess *sessdata.DtlsSession, cSess *sessdata.ConnS
 			continue
 		}
 
-		header = []byte{payload.PType}
-		header = append(header, payload.Data...)
+		// header = []byte{payload.PType}
+		header := getByteZero()
+		header = append(header, payload.PType)
+		if payload.PType == 0x00 { // data
+			header = append(header, payload.Data...)
+		}
 		n, err := conn.Write(header)
 		if err != nil {
 			base.Error("write err", err)
 			return
 		}
+
+		putByte(header)
+		putPayload(payload)
 
 		// 限流设置
 		err = cSess.RateLimit(n, false)
