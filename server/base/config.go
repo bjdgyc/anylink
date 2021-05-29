@@ -16,8 +16,9 @@ type config struct {
 }
 
 var configs = []config{
-	{Typ: cfgStr, Name: "server_addr", Usage: "前台服务监听地址", ValStr: ":443"},
-	{Typ: cfgStr, Name: "server_dtls_addr", Usage: "前台DTLS监听地址", ValStr: ":4433"},
+	{Typ: cfgStr, Name: "server_addr", Usage: "服务监听地址", ValStr: ":443"},
+	{Typ: cfgBool, Name: "server_dtls", Usage: "开启DTLS", ValBool: false},
+	{Typ: cfgStr, Name: "server_dtls_addr", Usage: "DTLS监听地址", ValStr: ":4433"},
 	{Typ: cfgStr, Name: "admin_addr", Usage: "后台服务监听地址", ValStr: ":8800"},
 	{Typ: cfgBool, Name: "proxy_protocol", Usage: "TCP代理协议", ValBool: false},
 	{Typ: cfgStr, Name: "db_file", Usage: "数据库地址", ValStr: "./data.db"},
