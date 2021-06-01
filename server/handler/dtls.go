@@ -21,6 +21,10 @@ import (
 // 最后,感谢 github.com/pion/dtls 对golang生态做出的贡献
 
 func startDtls() {
+	if !base.Cfg.ServerDTLS {
+		return
+	}
+
 	certificate, err := selfsign.GenerateSelfSigned()
 	if err != nil {
 		panic(err)

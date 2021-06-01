@@ -7,13 +7,12 @@ import (
 )
 
 func payloadIn(cSess *sessdata.ConnSession, lType sessdata.LType, pType byte, data []byte) bool {
-	payload := &sessdata.Payload{
-		LType: lType,
-		PType: pType,
-		Data:  data,
-	}
+	pl := getPayload()
+	pl.LType = lType
+	pl.PType = pType
+	pl.Data = append(pl.Data, data...)
 
-	return payloadInData(cSess, payload)
+	return payloadInData(cSess, pl)
 }
 
 func payloadInData(cSess *sessdata.ConnSession, payload *sessdata.Payload) bool {
@@ -44,16 +43,15 @@ func payloadOut(cSess *sessdata.ConnSession, lType sessdata.LType, pType byte, d
 }
 
 func payloadOutCstp(cSess *sessdata.ConnSession, lType sessdata.LType, pType byte, data []byte) bool {
-	payload := &sessdata.Payload{
-		LType: lType,
-		PType: pType,
-		Data:  data,
-	}
+	pl := getPayload()
+	pl.LType = lType
+	pl.PType = pType
+	pl.Data = append(pl.Data, data...)
 
 	closed := false
 
 	select {
-	case cSess.PayloadOutCstp <- payload:
+	case cSess.PayloadOutCstp <- pl:
 	case <-cSess.CloseChan:
 		closed = true
 	}
@@ -62,14 +60,13 @@ func payloadOutCstp(cSess *sessdata.ConnSession, lType sessdata.LType, pType byt
 }
 
 func payloadOutDtls(cSess *sessdata.ConnSession, dSess *sessdata.DtlsSession, lType sessdata.LType, pType byte, data []byte) bool {
-	payload := &sessdata.Payload{
-		LType: lType,
-		PType: pType,
-		Data:  data,
-	}
+	pl := getPayload()
+	pl.LType = lType
+	pl.PType = pType
+	pl.Data = append(pl.Data, data...)
 
 	select {
-	case cSess.PayloadOutDtls <- payload:
+	case cSess.PayloadOutDtls <- pl:
 	case <-dSess.CloseChan:
 	}
 

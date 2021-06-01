@@ -89,6 +89,7 @@ func tapWrite(ifce *water.Interface, cSess *sessdata.ConnSession) {
 	var (
 		err     error
 		payload *sessdata.Payload
+		frame   ethernet.Frame
 	)
 
 	for {
@@ -98,12 +99,14 @@ func tapWrite(ifce *water.Interface, cSess *sessdata.ConnSession) {
 			return
 		}
 
-		var frame ethernet.Frame
+		// var frame ethernet.Frame
+		frame = getByteFull()
 		switch payload.LType {
 		default:
 			// log.Println(payload)
 		case sessdata.LTypeEthernet:
-			frame = payload.Data
+			copy(frame, payload.Data)
+			frame = frame[:len(payload.Data)]
 		case sessdata.LTypeIPData: // 需要转换成 Ethernet 数据
 			data := payload.Data
 
@@ -148,6 +151,9 @@ func tapWrite(ifce *water.Interface, cSess *sessdata.ConnSession) {
 			base.Error("tap Write err", err)
 			return
 		}
+
+		putByte(frame)
+		putPayload(payload)
 	}
 }
 
@@ -158,14 +164,16 @@ func tapRead(ifce *water.Interface, cSess *sessdata.ConnSession) {
 	}()
 
 	var (
-		err error
-		n   int
-		buf []byte
+		err   error
+		n     int
+		buf   []byte
+		frame ethernet.Frame
 	)
 
 	for {
-		var frame ethernet.Frame
-		frame.Resize(BufferSize)
+		// var frame ethernet.Frame
+		// frame.Resize(BufferSize)
+		frame = getByteFull()
 		n, err = ifce.Read(frame)
 		if err != nil {
 			base.Error("tap Read err", n, err)
@@ -237,5 +245,7 @@ func tapRead(ifce *water.Interface, cSess *sessdata.ConnSession) {
 			}
 
 		}
+
+		putByte(frame)
 	}
 }

@@ -84,6 +84,8 @@ func tunWrite(ifce *water.Interface, cSess *sessdata.ConnSession) {
 			base.Error("tun Write err", err)
 			return
 		}
+
+		putPayload(payload)
 	}
 }
 
@@ -98,15 +100,15 @@ func tunRead(ifce *water.Interface, cSess *sessdata.ConnSession) {
 	)
 
 	for {
-		data := make([]byte, BufferSize)
+		// data := make([]byte, BufferSize)
+		data := getByteFull()
 		n, err = ifce.Read(data)
 		if err != nil {
 			base.Error("tun Read err", n, err)
 			return
 		}
 
-		data = data[:n]
-
+		// data = data[:n]
 		// ip_src := waterutil.IPv4Source(data)
 		// ip_dst := waterutil.IPv4Destination(data)
 		// ip_port := waterutil.IPv4DestinationPort(data)
@@ -114,9 +116,10 @@ func tunRead(ifce *water.Interface, cSess *sessdata.ConnSession) {
 		// packet := gopacket.NewPacket(data, layers.LayerTypeIPv4, gopacket.Default)
 		// fmt.Println("read:", packet)
 
-		if payloadOut(cSess, sessdata.LTypeIPData, 0x00, data) {
+		if payloadOut(cSess, sessdata.LTypeIPData, 0x00, data[:n]) {
 			return
 		}
 
+		putByte(data)
 	}
 }
