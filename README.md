@@ -87,6 +87,58 @@ sudo ./anylink --conf="conf/server.toml"
 
 [conf/server.toml](server/conf/server.toml)
 
+
+## Setting
+
+网络模式选择，需要配置 `link_mode` 参数，如 `link_mode="tun"`,`link_mode="tap"` 两种参数。 不同的参数需要对服务器做相应的设置。
+
+建议优先选择tun模式，因客户端传输的是IP层数据，无须进行数据转换。 tap模式是在用户态做的链路层到IP层的数据互相转换，性能会有所下降。 如果需要在虚拟机内开启tap模式，请确认虚拟机的网卡开启混杂模式。
+
+### tun设置
+
+1. 开启服务器转发
+
+ ```shell
+ # flie: /etc/sysctl.conf
+ net.ipv4.ip_forward = 1
+
+ #执行如下命令
+ sysctl -w net.ipv4.ip_forward=1
+ ```
+
+2. 设置nat转发规则
+
+```shell
+# eth0为服务器内网网卡
+iptables -t nat -A POSTROUTING -s 192.168.10.0/24 -o eth0 -j MASQUERADE
+```
+
+3. 使用AnyConnect客户端连接即可
+
+### tap设置
+
+1. 创建桥接网卡
+
+```
+注意 server.toml 的ip参数，需要与 bridge-init.sh 的配置参数一致
+```
+
+2. 修改 bridge-init.sh 内的参数
+
+```
+eth="eth0"
+eth_ip="192.168.1.4"
+eth_netmask="255.255.255.0"
+eth_broadcast="192.168.1.255"
+eth_gateway="192.168.1.1"
+```
+
+3. 执行 bridge-init.sh 文件
+
+```
+sh bridge-init.sh
+```
+
 ## Systemd
 
 添加 systemd脚本
@@ -154,57 +206,6 @@ systemd 脚本放入：
    # 构建镜像
    docker build -t anylink .
    ```
-
-## Setting
-
-网络模式选择，需要配置 `link_mode` 参数，如 `link_mode="tun"`,`link_mode="tap"` 两种参数。 不同的参数需要对服务器做相应的设置。
-
-建议优先选择tun模式，因客户端传输的是IP层数据，无须进行数据转换。 tap模式是在用户态做的链路层到IP层的数据互相转换，性能会有所下降。 如果需要在虚拟机内开启tap模式，请确认虚拟机的网卡开启混杂模式。
-
-### tun设置
-
-1. 开启服务器转发
-
- ```shell
- # flie: /etc/sysctl.conf
- net.ipv4.ip_forward = 1
-
- #执行如下命令
- sysctl -w net.ipv4.ip_forward=1
- ```
-
-2. 设置nat转发规则
-
-```shell
-# eth0为服务器内网网卡
-iptables -t nat -A POSTROUTING -s 192.168.10.0/24 -o eth0 -j MASQUERADE
-```
-
-3. 使用AnyConnect客户端连接即可
-
-### tap设置
-
-1. 创建桥接网卡
-
-```
-注意 server.toml 的ip参数，需要与 bridge-init.sh 的配置参数一致
-```
-
-2. 修改 bridge-init.sh 内的参数
-
-```
-eth="eth0"
-eth_ip="192.168.1.4"
-eth_netmask="255.255.255.0"
-eth_broadcast="192.168.1.255"
-eth_gateway="192.168.1.1"
-```
-
-3. 执行 bridge-init.sh 文件
-
-```
-sh bridge-init.sh
-```
 
 ## 常见问题
 
