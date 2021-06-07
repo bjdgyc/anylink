@@ -2,5 +2,6 @@ package base
 
 const (
 	APP_NAME = "AnyLink"
-	APP_VER  = "0.3.1"
+	// 修复严重bug
+	APP_VER = "0.3.3"
 )
