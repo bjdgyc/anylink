@@ -14,7 +14,7 @@ cpath=$(pwd)
 
 echo "编译二进制文件"
 cd $cpath/server
-go build -o anylink -ldflags "-X main.COMMIT_ID=$(git rev-parse HEAD)"
+go build -v -o anylink -ldflags "-X main.COMMIT_ID=$(git rev-parse HEAD)"
 RETVAL $?
 
 echo "编译前端项目"
