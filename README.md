@@ -87,8 +87,9 @@ sudo ./anylink --conf="conf/server.toml"
 
 [conf/server.toml](server/conf/server.toml)
 
-
 ## Setting
+
+> 以下参数必须设置其中之一
 
 网络模式选择，需要配置 `link_mode` 参数，如 `link_mode="tun"`,`link_mode="tap"` 两种参数。 不同的参数需要对服务器做相应的设置。
 
@@ -109,8 +110,12 @@ sudo ./anylink --conf="conf/server.toml"
 2. 设置nat转发规则
 
 ```shell
-# eth0为服务器内网网卡
+# 请根据服务器内网网卡替换 eth0
 iptables -t nat -A POSTROUTING -s 192.168.10.0/24 -o eth0 -j MASQUERADE
+# 如果执行第一个命令不生效，可以继续执行下面的命令
+# iptables -A FORWARD -i eth0 -s 192.168.10.0/24 -j ACCEPT
+# 查看设置是否生效
+iptables -nL -t nat
 ```
 
 3. 使用AnyConnect客户端连接即可
@@ -188,7 +193,7 @@ systemd 脚本放入：
    ```
 
 5. 使用自定义参数启动容器
-   
+
    ```bash
    docker run -itd --name anylink --privileged \
    -e IPV4_CIDR=192.168.10.0/24 \
@@ -221,7 +226,7 @@ QQ群共享文件有相关软件下载
 
 ## Contribution
 
-欢迎提交 PR、Issues，感谢为AnyLink做出贡献。 
+欢迎提交 PR、Issues，感谢为AnyLink做出贡献。
 
 注意新建PR，需要提交到dev分支，其他分支暂不会合并。
 
