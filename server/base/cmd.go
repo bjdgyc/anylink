@@ -72,7 +72,7 @@ func init() {
 	viper.SetEnvPrefix("link")
 
 	// 基础配置
-	rootCmd.Flags().StringVarP(&cfgFile, "config", "c", "./conf/server.toml", "config file")
+	rootCmd.Flags().StringVarP(&cfgFile, "conf", "c", "./conf/server.toml", "config file")
 
 	for _, v := range configs {
 		if v.Typ == cfgStr {
