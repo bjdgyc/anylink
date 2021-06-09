@@ -1,6 +1,7 @@
 package base
 
 import (
+	"errors"
 	"fmt"
 	"math/rand"
 	"os"
@@ -63,7 +64,13 @@ func init() {
 		viper.SetConfigFile(cfgFile)
 		viper.AutomaticEnv()
 
-		err := viper.ReadInConfig()
+		_, err := os.Stat(cfgFile)
+		if errors.Is(err, os.ErrNotExist) {
+			// 文件不存在，不做处理
+			return
+		}
+
+		err = viper.ReadInConfig()
 		if err != nil {
 			fmt.Println("Using config file:", err)
 		}
