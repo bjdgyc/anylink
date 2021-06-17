@@ -39,7 +39,6 @@ type ServerConfig struct {
 	DbFile         string `json:"db_file"`
 	CertFile       string `json:"cert_file"`
 	CertKey        string `json:"cert_key"`
-	UiPath         string `json:"ui_path"`
 	FilesPath      string `json:"files_path"`
 	LogPath        string `json:"log_path"`
 	LogLevel       string `json:"log_level"`
@@ -70,20 +69,20 @@ type ServerConfig struct {
 
 func initServerCfg() {
 
-	sf, _ := filepath.Abs(cfgFile)
-	base := filepath.Dir(sf)
+	// TODO 取消绝对地址转换
+	// sf, _ := filepath.Abs(cfgFile)
+	// base := filepath.Dir(sf)
 
 	// 转换成绝对路径
-	Cfg.DbFile = getAbsPath(base, Cfg.DbFile)
-	Cfg.CertFile = getAbsPath(base, Cfg.CertFile)
-	Cfg.CertKey = getAbsPath(base, Cfg.CertKey)
-	Cfg.UiPath = getAbsPath(base, Cfg.UiPath)
-	Cfg.FilesPath = getAbsPath(base, Cfg.FilesPath)
-	Cfg.LogPath = getAbsPath(base, Cfg.LogPath)
+	// Cfg.DbFile = getAbsPath(base, Cfg.DbFile)
+	// Cfg.CertFile = getAbsPath(base, Cfg.CertFile)
+	// Cfg.CertKey = getAbsPath(base, Cfg.CertKey)
+	// Cfg.UiPath = getAbsPath(base, Cfg.UiPath)
+	// Cfg.FilesPath = getAbsPath(base, Cfg.FilesPath)
+	// Cfg.LogPath = getAbsPath(base, Cfg.LogPath)
 
-	if len(Cfg.JwtSecret) < 20 {
-		fmt.Println("请设置 jwt_secret 长度20位以上")
-		os.Exit(0)
+	if Cfg.JwtSecret == defaultJwt {
+		fmt.Fprintln(os.Stderr, "=== 使用默认的jwt_secret有安全风险，请设置新的jwt_secret ===")
 	}
 
 	fmt.Printf("ServerCfg: %+v \n", Cfg)

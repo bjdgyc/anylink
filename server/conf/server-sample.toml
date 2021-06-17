@@ -6,10 +6,9 @@
 #数据文件
 db_file = "./data.db"
 #证书文件
-cert_file = "./test_vpn_cert.pem"
-cert_key = "./test_vpn_key.pem"
-ui_path = "../ui"
-files_path = "../files"
+cert_file = "./vpn_cert.pem"
+cert_key = "./vpn_cert.key"
+files_path = "./files"
 #日志目录,为空写入标准输出
 #log_path = "../log"
 log_path = ""
@@ -22,7 +21,7 @@ issuer = "XX公司VPN"
 admin_user = "admin"
 #pass 123456
 admin_pass = "$2a$10$UQ7C.EoPifDeJh6d8.31TeSPQU7hM/NOM2nixmBucJpAuXDQNqNke"
-jwt_secret = "iLmspvOiz*%ovfcs*wersdf#heR8pNU4XxBm&mW$aPCjSRMbYH#&"
+jwt_secret = "abcdef.0123456789.abcdef"
 
 
 #服务监听地址

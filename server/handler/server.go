@@ -2,27 +2,52 @@ package handler
 
 import (
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"log"
 	"net"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/pkg/proxyproto"
 	"github.com/gorilla/mux"
+	"github.com/pion/dtls/v2/pkg/crypto/selfsign"
 )
 
 func startTls() {
-	addr := base.Cfg.ServerAddr
-	certFile := base.Cfg.CertFile
-	keyFile := base.Cfg.CertKey
+
+	var (
+		err error
+
+		addr     = base.Cfg.ServerAddr
+		certFile = base.Cfg.CertFile
+		keyFile  = base.Cfg.CertKey
+		certs    = make([]tls.Certificate, 1)
+		ln       net.Listener
+	)
+
+	// 判断证书文件
+	_, err = os.Stat(certFile)
+	if errors.Is(err, os.ErrNotExist) {
+		// 自动生成证书
+		certs[0], err = selfsign.GenerateSelfSignedWithDNS("vpn.anylink")
+	} else {
+		// 使用自定义证书
+		certs[0], err = tls.LoadX509KeyPair(certFile, keyFile)
+	}
+
+	if err != nil {
+		panic(err)
+	}
 
 	// 设置tls信息
 	tlsConfig := &tls.Config{
 		NextProtos:         []string{"http/1.1"},
 		MinVersion:         tls.VersionTLS12,
 		InsecureSkipVerify: true,
+		Certificates:       certs,
 	}
 	srv := &http.Server{
 		Addr:      addr,
@@ -31,9 +56,7 @@ func startTls() {
 		ErrorLog:  base.GetBaseLog(),
 	}
 
-	var ln net.Listener
-
-	ln, err := net.Listen("tcp", addr)
+	ln, err = net.Listen("tcp", addr)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -44,7 +67,7 @@ func startTls() {
 	}
 
 	base.Info("listen server", addr)
-	err = srv.ServeTLS(ln, certFile, keyFile)
+	err = srv.ServeTLS(ln, "", "")
 	if err != nil {
 		base.Fatal(err)
 	}

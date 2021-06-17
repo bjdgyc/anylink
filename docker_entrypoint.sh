@@ -16,7 +16,7 @@ case $var1 in
 *)
   sysctl -w net.ipv4.ip_forward=1
   iptables -t nat -A POSTROUTING -s "${IPV4_CIDR}" -o eth0+ -j MASQUERADE
-  #  iptables -nL -t nat
+  iptables -nL -t nat
 
   /app/anylink "$@"
   ;;
