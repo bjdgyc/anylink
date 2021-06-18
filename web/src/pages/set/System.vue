@@ -46,8 +46,9 @@
 
     <el-card v-if="system.sys" style="margin-top: 10px">
       <div slot="header">
-        <span>go运行环境</span>
+        <span>运行环境</span>
       </div>
+      <Cell left="软件版本" :right="system.sys.appVersion" divider/>
       <Cell left="GO版本" :right="system.sys.goOs" divider/>
       <Cell left="GoArch" :right="system.sys.goArch" divider/>
       <Cell left="GoVersion" :right="system.sys.goVersion" divider/>

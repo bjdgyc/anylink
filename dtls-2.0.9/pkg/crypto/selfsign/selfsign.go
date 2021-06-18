@@ -9,6 +9,7 @@ import (
 	"crypto/rand"
 	"crypto/tls"
 	"crypto/x509"
+	"crypto/x509/pkix"
 	"encoding/hex"
 	"errors"
 	"math/big"
@@ -70,6 +71,11 @@ func WithDNS(key crypto.PrivateKey, cn string, sans ...string) (tls.Certificate,
 	names = append(names, sans...)
 
 	template := x509.Certificate{
+		Subject: pkix.Name{
+			// TODO anylink
+			Organization:       []string{cn},
+			OrganizationalUnit: names,
+		},
 		ExtKeyUsage: []x509.ExtKeyUsage{
 			x509.ExtKeyUsageClientAuth,
 			x509.ExtKeyUsageServerAuth,
