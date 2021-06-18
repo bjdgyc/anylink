@@ -30,6 +30,8 @@ jobs:
       - name: Build
         run: |
           cd server
+          mkdir ui
+          touch ui/index.html
           go build -v -o anylink -ldflags "-X main.CommitId=`git rev-parse HEAD`"
           ./anylink tool -v
 
