@@ -30,7 +30,7 @@ jobs:
       - name: Build
         run: |
           cd server
-          go build -v -o anylink -ldflags "-X main.COMMIT_ID=`git rev-parse HEAD`"
+          go build -v -o anylink -ldflags "-X main.CommitId=`git rev-parse HEAD`"
           ./anylink tool -v
 
       - name: Test coverage
