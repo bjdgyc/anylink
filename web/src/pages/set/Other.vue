@@ -15,8 +15,12 @@
           <el-form-item label="密码" prop="password">
             <el-input v-model="dataSmtp.password"></el-input>
           </el-form-item>
-          <el-form-item label="启用SSL" prop="use_ssl">
-            <el-switch v-model="dataSmtp.use_ssl"></el-switch>
+          <el-form-item label="加密类型" prop="encryption">
+            <el-radio-group v-model="dataSmtp.encryption">
+              <el-radio label="None">None</el-radio>
+              <el-radio label="SSLTLS">SSLTLS</el-radio>
+              <el-radio label="STARTTLS">STARTTLS</el-radio>
+            </el-radio-group>
           </el-form-item>
           <el-form-item label="邮件from" prop="from">
             <el-input v-model="dataSmtp.from"></el-input>

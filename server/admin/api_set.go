@@ -67,10 +67,11 @@ func SetSystem(w http.ResponseWriter, r *http.Request) {
 	hi, _ := host.Info()
 	l, _ := load.Avg()
 	data["sys"] = map[string]interface{}{
-		"goOs":      runtime.GOOS,
-		"goArch":    runtime.GOARCH,
-		"goVersion": runtime.Version(),
-		"goroutine": runtime.NumGoroutine(),
+		"goOs":       runtime.GOOS,
+		"goArch":     runtime.GOARCH,
+		"goVersion":  runtime.Version(),
+		"goroutine":  runtime.NumGoroutine(),
+		"appVersion": "v" + base.APP_VER,
 
 		"hostname": hi.Hostname,
 		"platform": fmt.Sprintf("%v %v %v", hi.Platform, hi.PlatformFamily, hi.PlatformVersion),

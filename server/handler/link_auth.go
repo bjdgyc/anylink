@@ -173,6 +173,48 @@ var auth_complete = `<?xml version="1.0" encoding="UTF-8"?>
             <server-cert-hash>240B97A685B2BFA66AD699B90AAC49EA66495D69</server-cert-hash>
         </vpn-base-config>
         <opaque is-for="vpn-client"></opaque>
+        <vpn-profile-manifest>
+            <vpn rev="1.0">
+                <file type="profile" service-type="user">
+                    <uri>/profile.xml</uri>
+                    <hash type="sha1">A8B0B07FBA93D06E8501E40AB807AEE2464E73B7</hash>
+                </file>
+            </vpn>
+        </vpn-profile-manifest>
     </config>
 </config-auth>
+`
+
+var auth_profile = `<?xml version="1.0" encoding="UTF-8"?>
+<AnyConnectProfile xmlns="http://schemas.xmlsoap.org/encoding/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.xmlsoap.org/encoding/ AnyConnectProfile.xsd">
+
+	<ClientInitialization>
+		<UseStartBeforeLogon UserControllable="false">false</UseStartBeforeLogon>
+		<StrictCertificateTrust>false</StrictCertificateTrust>
+		<RestrictPreferenceCaching>false</RestrictPreferenceCaching>
+		<RestrictTunnelProtocols>IPSec</RestrictTunnelProtocols>
+		<BypassDownloader>true</BypassDownloader>
+		<WindowsVPNEstablishment>AllowRemoteUsers</WindowsVPNEstablishment>
+		<CertEnrollmentPin>pinAllowed</CertEnrollmentPin>
+		<CertificateMatch>
+			<KeyUsage>
+				<MatchKey>Digital_Signature</MatchKey>
+			</KeyUsage>
+			<ExtendedKeyUsage>
+				<ExtendedMatchKey>ClientAuth</ExtendedMatchKey>
+			</ExtendedKeyUsage>
+		</CertificateMatch>
+
+		<BackupServerList>
+	            <HostAddress>localhost</HostAddress>
+		</BackupServerList>
+	</ClientInitialization>
+
+	<ServerList>
+		<HostEntry>
+	            <HostName>VPN Server</HostName>
+	            <HostAddress>localhost</HostAddress>
+		</HostEntry>
+	</ServerList>
+</AnyConnectProfile>
 `

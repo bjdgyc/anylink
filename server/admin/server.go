@@ -2,6 +2,7 @@
 package admin
 
 import (
+	"embed"
 	"net/http"
 	"net/http/pprof"
 
@@ -9,7 +10,9 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// 开启服务
+var UiData embed.FS
+
+// StartAdmin 开启服务
 func StartAdmin() {
 
 	r := mux.NewRouter()
@@ -17,7 +20,8 @@ func StartAdmin() {
 
 	r.Handle("/", http.RedirectHandler("/ui/", http.StatusFound)).Name("index")
 	r.PathPrefix("/ui/").Handler(
-		http.StripPrefix("/ui/", http.FileServer(http.Dir(base.Cfg.UiPath))),
+		// http.StripPrefix("/ui/", http.FileServer(http.Dir(base.Cfg.UiPath))),
+		http.FileServer(http.FS(UiData)),
 	).Name("static")
 	r.HandleFunc("/base/login", Login).Name("login")
 

@@ -2,11 +2,9 @@ package base
 
 import (
 	"fmt"
-	"math/rand"
 	"os"
 	"runtime"
 	"strings"
-	"time"
 
 	"github.com/bjdgyc/anylink/pkg/utils"
 	"github.com/spf13/cobra"
@@ -63,6 +61,11 @@ func init() {
 		viper.SetConfigFile(cfgFile)
 		viper.AutomaticEnv()
 
+		if cfgFile == "" {
+			// 没有配置文件，不做处理
+			return
+		}
+
 		err := viper.ReadInConfig()
 		if err != nil {
 			fmt.Println("Using config file:", err)
@@ -72,7 +75,7 @@ func init() {
 	viper.SetEnvPrefix("link")
 
 	// 基础配置
-	rootCmd.Flags().StringVarP(&cfgFile, "conf", "c", "./conf/server.toml", "config file")
+	rootCmd.Flags().StringVarP(&cfgFile, "conf", "c", "", "config file")
 
 	for _, v := range configs {
 		if v.Typ == cfgStr {
@@ -111,7 +114,6 @@ func initToolCmd() *cobra.Command {
 			fmt.Printf("%s v%s build on %s [%s, %s] commit_id(%s) \n",
 				APP_NAME, APP_VER, runtime.Version(), runtime.GOOS, runtime.GOARCH, CommitId)
 		case secret:
-			rand.Seed(time.Now().UnixNano())
 			s, _ := utils.RandSecret(40, 60)
 			s = strings.Trim(s, "=")
 			fmt.Printf("Secret:%s\n", s)

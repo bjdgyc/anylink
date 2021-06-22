@@ -35,9 +35,11 @@ AnyLink 服务端仅在CentOS 7、Ubuntu 18.04测试通过，如需要安装在�
 >
 > https://github.com/bjdgyc/anylink/releases
 
-> 升级 go version = 1.15
+> 升级 go version = 1.16
 >
 > 需要提前安装好 golang 和 nodejs
+> 
+> 使用客户端前，必须申请安全的https证书，不支持私有证书连接
 
 ```shell
 git clone https://github.com/bjdgyc/anylink.git
@@ -47,11 +49,11 @@ sh build.sh
 
 # 注意使用root权限运行
 cd anylink-deploy
-sudo ./anylink --conf="conf/server.toml"
+sudo ./anylink
 
 # 默认管理后台访问地址
 # http://host:8800
-# 默认账号密码
+# 默认账号 密码
 # admin 123456
 
 ```

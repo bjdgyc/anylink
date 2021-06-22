@@ -4,6 +4,8 @@ const (
 	cfgStr = iota
 	cfgInt
 	cfgBool
+
+	defaultJwt = "abcdef.0123456789.abcdef"
 )
 
 type config struct {
@@ -24,15 +26,14 @@ var configs = []config{
 	{Typ: cfgStr, Name: "db_file", Usage: "数据库地址", ValStr: "./data.db"},
 	{Typ: cfgStr, Name: "cert_file", Usage: "证书文件", ValStr: "./vpn_cert.pem"},
 	{Typ: cfgStr, Name: "cert_key", Usage: "证书密钥", ValStr: "./vpn_cert.key"},
-	{Typ: cfgStr, Name: "ui_path", Usage: "ui文件路径", ValStr: "./ui"},
 	{Typ: cfgStr, Name: "files_path", Usage: "外部下载文件路径", ValStr: "./files"},
-	{Typ: cfgStr, Name: "log_path", Usage: "日志文件路径", ValStr: ""},
-	{Typ: cfgStr, Name: "log_level", Usage: "日志等级", ValStr: "info"},
+	{Typ: cfgStr, Name: "log_path", Usage: "日志文件路径,默认标准输出", ValStr: ""},
+	{Typ: cfgStr, Name: "log_level", Usage: "日志等级 debug、info、warn、error", ValStr: "info"},
 	{Typ: cfgBool, Name: "pprof", Usage: "开启pprof", ValBool: false},
 	{Typ: cfgStr, Name: "issuer", Usage: "系统名称", ValStr: "XX公司VPN"},
 	{Typ: cfgStr, Name: "admin_user", Usage: "管理用户名", ValStr: "admin"},
 	{Typ: cfgStr, Name: "admin_pass", Usage: "管理用户密码", ValStr: "$2a$10$UQ7C.EoPifDeJh6d8.31TeSPQU7hM/NOM2nixmBucJpAuXDQNqNke"},
-	{Typ: cfgStr, Name: "jwt_secret", Usage: "JWT密钥", ValStr: "iLmspvOiz*%ovfcs*wersdf#heR8pNU4XxBm&mW$aPCjSRMbYH#&"},
+	{Typ: cfgStr, Name: "jwt_secret", Usage: "JWT密钥", ValStr: defaultJwt},
 	{Typ: cfgStr, Name: "link_mode", Usage: "虚拟网络类型", ValStr: "tun"},
 	{Typ: cfgStr, Name: "ipv4_cidr", Usage: "ip地址网段", ValStr: "192.168.10.0/24"},
 	{Typ: cfgStr, Name: "ipv4_gateway", Usage: "ipv4_gateway", ValStr: "192.168.10.1"},

@@ -12,35 +12,35 @@ function RETVAL() {
 #当前目录
 cpath=$(pwd)
 
-echo "编译二进制文件"
-cd $cpath/server
-go build -v -o anylink -ldflags "-X main.COMMIT_ID=$(git rev-parse HEAD)"
-RETVAL $?
-
 echo "编译前端项目"
 cd $cpath/web
 #国内可替换源加快速度
+npx browserslist@latest --update-db
 npm install --registry=https://registry.npm.taobao.org
-npm run build --registry=https://registry.npm.taobao.org
 #npm install
-#npm run build
+npm run build
+RETVAL $?
+
+echo "编译二进制文件"
+cd $cpath/server
+rm -rf ui
+cp -rf $cpath/web/ui .
+go build -v -o anylink -ldflags "-X main.CommitId=$(git rev-parse HEAD)"
 RETVAL $?
 
 cd $cpath
 
 echo "整理部署文件"
 deploy="anylink-deploy"
-rm -rf $deploy
+rm -rf $deploy ${deploy}.tar.gz
 mkdir $deploy
-mkdir $deploy/log
 
 cp -r server/anylink $deploy
-cp -r server/conf $deploy
-cp -r server/files $deploy
 cp -r server/bridge-init.sh $deploy
 
 cp -r systemd $deploy
-cp -r web/ui $deploy
+
+tar zcvf ${deploy}.tar.gz $deploy
 
 #注意使用root权限运行
 #cd anylink-deploy
