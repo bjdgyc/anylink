@@ -58,7 +58,7 @@ func ip2long(ip net.IP) uint32 {
 	return binary.BigEndian.Uint32(ip)
 }
 
-// 获取动态ip
+// AcquireIp 获取动态ip
 func AcquireIp(username, macAddr string) net.IP {
 	IpPool.mux.Lock()
 	defer IpPool.mux.Unlock()
@@ -71,37 +71,24 @@ func AcquireIp(username, macAddr string) net.IP {
 	if err == nil {
 		ip := mi.IpAddr
 		ipStr := ip.String()
+		// 跳过活跃连接
+		_, ok := ipActive[ipStr]
 		// 检测原有ip是否在新的ip池内
-		if IpPool.Ipv4IPNet.Contains(ip) {
+		if IpPool.Ipv4IPNet.Contains(ip) && !ok {
 			mi.Username = username
 			mi.LastLogin = tNow
 			// 回写db数据
 			_ = dbdata.Save(mi)
 			ipActive[ipStr] = true
 			return ip
-		} else {
-			_ = dbdata.Del(mi)
 		}
-	}
 
-	// 全局遍历未分配ip
-	// 优先获取没有使用的ip
-	for i := IpPool.IpLongMin; i <= IpPool.IpLongMax; i++ {
-		ip := long2ip(i)
-		ipStr := ip.String()
-		mi := &dbdata.IpMap{}
-		err := dbdata.One("IpAddr", ip, mi)
-		if err != nil && dbdata.CheckErrNotFound(err) {
-			// 该ip没有被使用
-			mi := &dbdata.IpMap{IpAddr: ip, MacAddr: macAddr, Username: username, LastLogin: tNow}
-			_ = dbdata.Save(mi)
-			ipActive[ipStr] = true
-			return ip
-		}
+		_ = dbdata.Del(mi)
+
 	}
 
 	farIp := &dbdata.IpMap{LastLogin: tNow}
-	// 遍历超过租期ip
+	// 全局遍历超过租期ip
 	for i := IpPool.IpLongMin; i <= IpPool.IpLongMax; i++ {
 		ip := long2ip(i)
 		ipStr := ip.String()
@@ -112,11 +99,20 @@ func AcquireIp(username, macAddr string) net.IP {
 		}
 
 		v := &dbdata.IpMap{}
-		err := dbdata.One("IpAddr", ip, v)
+		err = dbdata.One("IpAddr", ip, v)
 		if err != nil {
+			if dbdata.CheckErrNotFound(err) {
+				// 该ip没有被使用
+				mi = &dbdata.IpMap{IpAddr: ip, MacAddr: macAddr, Username: username, LastLogin: tNow}
+				_ = dbdata.Save(mi)
+				ipActive[ipStr] = true
+				return ip
+			}
 			base.Error(err)
 			return nil
 		}
+
+		// 跳过ip保留
 		if v.Keep {
 			continue
 		}
@@ -124,7 +120,7 @@ func AcquireIp(username, macAddr string) net.IP {
 		// 已经超过租期
 		if tNow.Sub(v.LastLogin) > time.Duration(base.Cfg.IpLease)*time.Second {
 			_ = dbdata.Del(v)
-			mi := &dbdata.IpMap{IpAddr: ip, MacAddr: macAddr, Username: username, LastLogin: tNow}
+			mi = &dbdata.IpMap{IpAddr: ip, MacAddr: macAddr, Username: username, LastLogin: tNow}
 			// 重写db数据
 			_ = dbdata.Save(mi)
 			ipActive[ipStr] = true
