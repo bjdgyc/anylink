@@ -1,70 +1,81 @@
 package dbdata
 
 import (
+	"fmt"
+	"log"
+	"strings"
 	"time"
 
-	"github.com/asdine/storm/v3"
-	"github.com/asdine/storm/v3/codec/json"
 	"github.com/bjdgyc/anylink/base"
-	bolt "go.etcd.io/bbolt"
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/go-xorm/xorm"
+	_ "github.com/lib/pq"
+	_ "github.com/mattn/go-sqlite3"
 )
 
-var (
-	sdb *storm.DB
-)
+//定义orm引擎
+var x *xorm.Engine
 
+//创建orm引擎
 func initDb() {
 	var err error
-	sdb, err = storm.Open(base.Cfg.DbFile, storm.Codec(json.Codec),
-		storm.BoltOptions(0600, &bolt.Options{Timeout: 10 * time.Second}))
-	if err != nil {
-		base.Fatal(err)
+	conf := base.ServerCfg2Slice()
+	//var dbconfig string
+	for _, j := range conf {
+		if j.Name == "db_file" {
+			if dbconfig, ok := j.Data.(string); ok {
+				configlist := strings.Split(dbconfig, ":")
+				if len(configlist) < 2 {
+					log.Println("数据库配置错误 :", j.Data, "，自动 使用默认sqlite3数据库")
+					x, err = xorm.NewEngine("sqlite3", "./test.db")
+					break
+				}
+				x, err = xorm.NewEngine(configlist[0], strings.Join(configlist[1:], ":"))
+			}
+			break
+		}
 	}
 
-	// 初始化数据库
-	err = sdb.Init(&User{})
+	//x, err = xorm.NewEngine("mysql", "root:zg1234567899@tcp(172.16.249.34:3306)/test?charset=utf8")
+	//x, err = xorm.NewEngine("sqlite3", "./test.db")
 	if err != nil {
-		base.Fatal(err)
+		log.Fatal("数据库连接失败:", err)
 	}
-
-	// fmt.Println("s1")
+	if err := x.Sync2(new(Group), new(User), new(SettingSmtp), new(SettingOther), new(IpMap)); err != nil {
+		log.Fatal("数据表同步失败:", err)
+	}
+	x.SetConnMaxLifetime(time.Hour)
+	//x.ShowSQL(true)
+	x.ShowExecTime(true)
+	x.SetMaxIdleConns(10)
+	x.SetMaxOpenConns(50)
+	cacher := xorm.NewLRUCacher(xorm.NewMemoryStore(), 10000)
+	x.SetDefaultCacher(cacher)
 }
 
 func initData() {
-	var (
-		err     error
-		install bool
-	)
-
 	// 判断是否初次使用
-	err = Get(SettingBucket, Installed, &install)
-	if err == nil && install {
+	n1 := CountAll(&SettingSmtp{})
+	fmt.Println(n1)
+	if n1 > 0 {
 		// 已经安装过
 		return
 	}
-
-	defer func() {
-		_ = Set(SettingBucket, Installed, true)
-	}()
-
 	smtp := &SettingSmtp{
 		Host: "127.0.0.1",
 		Port: 25,
 		From: "vpn@xx.com",
 	}
-	_ = SettingSet(smtp)
+	err := Save(smtp)
+	fmt.Println(err)
 
 	other := &SettingOther{
 		LinkAddr:    "vpn.xx.com",
 		Banner:      "您已接入公司网络，请按照公司规定使用。\n请勿进行非工作下载及视频行为！",
 		AccountMail: accountMail,
 	}
-	_ = SettingSet(other)
-
-}
-
-func CheckErrNotFound(err error) bool {
-	return err == storm.ErrNotFound
+	err = Save(other)
+	fmt.Println(err)
 }
 
 const accountMail = `<p>您好:</p>

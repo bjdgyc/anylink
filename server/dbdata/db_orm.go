@@ -1,66 +1,62 @@
 package dbdata
 
-import "github.com/asdine/storm/v3/index"
-
 const PageSize = 10
 
 func Save(data interface{}) error {
-	return sdb.Save(data)
-}
-
-func Update(data interface{}) error {
-	return sdb.Update(data)
-}
-
-func UpdateField(data interface{}, fieldName string, value interface{}) error {
-	return sdb.UpdateField(data, fieldName, value)
+	_, err := x.Insert(data)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func Del(data interface{}) error {
-	return sdb.DeleteStruct(data)
+	_, err := x.Delete(data)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func Set(bucket, key string, data interface{}) error {
-	return sdb.Set(bucket, key, data)
+func Set(fieldName string, value interface{}, data interface{}) error {
+	_, err := x.AllCols().Where(fieldName+"=?", value).Update(data)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func Get(bucket, key string, data interface{}) error {
-	return sdb.Get(bucket, key, data)
+func Get(fieldName string, value interface{}, data interface{}) error {
+	_, err := x.Where(fieldName+"=?", value).Get(data)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func CountAll(data interface{}) int {
-	n, _ := sdb.Count(data)
-	return n
+	n, _ := x.Count(data)
+	return int(n)
 }
 
-func One(fieldName string, value interface{}, to interface{}) error {
-	return sdb.One(fieldName, value, to)
+func One(fieldName string, value interface{}, to interface{}) (bool, error) {
+	// _, err := x.Where(fieldName+"=?", value).Get(to)
+	// if err != nil {
+	// 	return err
+	// }
+	return x.Where(fieldName+"=?", value).Get(to)
 }
 
-func Find(fieldName string, value interface{}, to interface{}, options ...func(q *index.Options)) error {
-	return sdb.Find(fieldName, value, to, options...)
-}
+func All(to interface{}, limit, page int) (int64, error) {
 
-func All(to interface{}, limit, page int) error {
-	opt := getOpt(limit, page)
-	return sdb.All(to, opt)
+	return x.Limit(limit, page-1).FindAndCount(to)
 }
 
 func Prefix(fieldName string, prefix string, to interface{}, limit, page int) error {
-	opt := getOpt(limit, page)
-	return sdb.Prefix(fieldName, prefix, to, opt)
-}
 
-func getOpt(limit, page int) func(*index.Options) {
-	skip := (page - 1) * limit
-	opt := func(opt *index.Options) {
-		opt.Reverse = true
-		if limit > 0 {
-			opt.Limit = limit
-		}
-		if skip > 0 {
-			opt.Skip = skip
-		}
+	err := x.Where(fieldName+" LIKE ?", "%"+prefix+"%").Limit(limit, page-1).Find(to)
+	if err != nil {
+		return err
 	}
-	return opt
+	return nil
 }

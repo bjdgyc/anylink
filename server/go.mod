@@ -7,8 +7,13 @@ require (
 	github.com/asdine/storm/v3 v3.2.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-ole/go-ole v1.2.5 // indirect
+	github.com/go-sql-driver/mysql v1.6.0
+	github.com/go-xorm/xorm v0.7.9
 	github.com/google/gopacket v1.1.19
 	github.com/gorilla/mux v1.8.0
+	github.com/lib/pq v1.10.2
+	github.com/mattn/go-sqlite3 v1.14.7
+	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/pion/dtls/v2 v2.0.0-00010101000000-000000000000
 	github.com/pion/logging v0.2.2
 	github.com/shirou/gopsutil v3.21.4+incompatible

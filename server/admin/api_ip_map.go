@@ -23,7 +23,7 @@ func UserIpMapList(w http.ResponseWriter, r *http.Request) {
 	count := dbdata.CountAll(&dbdata.IpMap{})
 
 	var datas []dbdata.IpMap
-	err := dbdata.All(&datas, pageSize, page)
+	_, err := dbdata.All(&datas, pageSize, page)
 	if err != nil {
 		RespError(w, RespInternalErr, err)
 		return
@@ -48,8 +48,8 @@ func UserIpMapDetail(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var data dbdata.IpMap
-	err := dbdata.One("Id", id, &data)
-	if err != nil {
+	ok, err := dbdata.One("Id", id, &data)
+	if err != nil || !ok {
 		RespError(w, RespInternalErr, err)
 		return
 	}

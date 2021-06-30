@@ -10,7 +10,7 @@ import (
 func Start() {
 	dbdata.Start()
 	sessdata.Start()
-
+	initBack()
 	checkTun()
 	if base.Cfg.LinkMode == base.LinkModeTAP {
 		checkTap()

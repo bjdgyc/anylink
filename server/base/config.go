@@ -23,9 +23,9 @@ var configs = []config{
 	{Typ: cfgStr, Name: "server_dtls_addr", Usage: "DTLS监听地址", ValStr: ":4433"},
 	{Typ: cfgStr, Name: "admin_addr", Usage: "后台服务监听地址", ValStr: ":8800"},
 	{Typ: cfgBool, Name: "proxy_protocol", Usage: "TCP代理协议", ValBool: false},
-	{Typ: cfgStr, Name: "db_file", Usage: "数据库地址", ValStr: "./data.db"},
-	{Typ: cfgStr, Name: "cert_file", Usage: "证书文件", ValStr: "./vpn_cert.pem"},
-	{Typ: cfgStr, Name: "cert_key", Usage: "证书密钥", ValStr: "./vpn_cert.key"},
+	{Typ: cfgStr, Name: "db_file", Usage: "数据库地址支持sqlite3和mysql以及pgsql:\nsqlite3:./sslvpn.db\nmysql:root:root@tcp(127.0.0.1:3306)/sslvpn?charset=utf8\npostgres:host=127.0.0.1 port=5432 user=postgres password=postgres dbname=sslvpn sslmode=disable\n", ValStr: "sqlite3:./sslvpn.db"},
+	{Typ: cfgStr, Name: "cert_file", Usage: "证书文件", ValStr: "./test_vpn_cert.pem"},
+	{Typ: cfgStr, Name: "cert_key", Usage: "证书密钥", ValStr: "./test_vpn_cert.pem"},
 	{Typ: cfgStr, Name: "files_path", Usage: "外部下载文件路径", ValStr: "./files"},
 	{Typ: cfgStr, Name: "log_path", Usage: "日志文件路径,默认标准输出", ValStr: ""},
 	{Typ: cfgStr, Name: "log_level", Usage: "日志等级 debug、info、warn、error", ValStr: "info"},
@@ -49,6 +49,9 @@ var configs = []config{
 	{Typ: cfgInt, Name: "mobile_keepalive", Usage: "移动端keepalive接检测时间(秒)", ValInt: 50},
 	{Typ: cfgInt, Name: "mobile_dpd", Usage: "移动端死链接检测时间(秒)", ValInt: 60},
 	{Typ: cfgInt, Name: "session_timeout", Usage: "session过期时间(秒)", ValInt: 3600},
+	{Typ: cfgInt, Name: "ip_check_num", Usage: "5分钟内帐号密码错误次数封IP", ValInt: 50},
+	{Typ: cfgInt, Name: "user_check_num", Usage: "5分钟内帐号密码错误次数封用户", ValInt: 10},
+	{Typ: cfgInt, Name: "back_time", Usage: "IP和用户密码错误封禁时间", ValInt: 300},
 	// {Typ: cfgInt, Name: "auth_timeout", Usage: "auth_timeout", ValInt: 0},
 }
 

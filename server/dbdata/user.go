@@ -3,28 +3,11 @@ package dbdata
 import (
 	"errors"
 	"fmt"
-	"sync"
 	"time"
 
-	"github.com/bjdgyc/anylink/pkg/utils"
+	"github.com/patrickmn/go-cache"
 	"github.com/xlzd/gotp"
 )
-
-type User struct {
-	Id       int    `json:"id" storm:"id,increment"`
-	Username string `json:"username" storm:"unique"`
-	Nickname string `json:"nickname"`
-	Email    string `json:"email"`
-	// Password  string    `json:"password"`
-	PinCode    string    `json:"pin_code"`
-	OtpSecret  string    `json:"otp_secret"`
-	DisableOtp bool      `json:"disable_otp"` // 禁用otp
-	Groups     []string  `json:"groups"`
-	Status     int8      `json:"status"` // 1正常
-	SendEmail  bool      `json:"send_email"`
-	CreatedAt  time.Time `json:"created_at"`
-	UpdatedAt  time.Time `json:"updated_at"`
-}
 
 func SetUser(v *User) error {
 	var err error
@@ -35,19 +18,15 @@ func SetUser(v *User) error {
 	planPass := v.PinCode
 	// 自动生成密码
 	if len(planPass) < 6 {
-		planPass = utils.RandomRunes(8)
+		planPass = RandomRunes(8)
 	}
 	v.PinCode = planPass
-
-	if v.OtpSecret == "" {
-		v.OtpSecret = gotp.RandomSecret(32)
-	}
 
 	// 判断组是否有效
 	ng := []string{}
 	groups := GetGroupNames()
 	for _, g := range v.Groups {
-		if utils.InArrStr(groups, g) {
+		if InArrStr(groups, g) {
 			ng = append(ng, g)
 		}
 	}
@@ -56,57 +35,124 @@ func SetUser(v *User) error {
 	}
 	v.Groups = ng
 
-	v.UpdatedAt = time.Now()
-	err = Save(v)
+	if v.Id == 0 {
+		v.UpdatedAt = time.Now()
+		v.CreatedAt = time.Now()
+		if v.OtpSecret == "" {
+			v.OtpSecret = gotp.RandomSecret(32)
+		}
+		err = Save(v)
+	} else {
+
+		if v.OtpSecret == "" {
+			v.OtpSecret = gotp.RandomSecret(32)
+		}
+		v.UpdatedAt = time.Now()
+		err = Set("id", v.Id, v)
+
+	}
 
 	return err
 }
 
 // 验证用户登陆信息
-func CheckUser(name, pwd, group string) error {
+func CheckUser(name, pwd, group, macAddress string) (username, groupstr, macaddress string, err error) {
 	// TODO 严重问题
 	// return nil
+	d1, ok := autocache.Get(macAddress)
+	if ok {
 
-	pl := len(pwd)
-	if name == "" || pl < 6 {
-		return fmt.Errorf("%s %s", name, "密码错误")
-	}
-	v := &User{}
-	err := One("Username", name, v)
-	if err != nil || v.Status != 1 {
-		return fmt.Errorf("%s %s", name, "用户名错误")
-	}
-	// 判断用户组信息
-	if !utils.InArrStr(v.Groups, group) {
-		return fmt.Errorf("%s %s", name, "用户组错误")
-	}
-	groupData := &Group{}
-	err = One("Name", group, groupData)
-	if err != nil || groupData.Status != 1 {
-		return fmt.Errorf("%s - %s", name, "用户组错误")
+		autodata, ok := d1.(map[string]string)
+		autocache.Delete(macAddress)
+		if !ok {
+			return autodata["name"], autodata["group"], autodata["macAddress"], fmt.Errorf("%s %s", name, "认证数据错误")
+		}
+		if !checkOtp(autodata["name"], pwd, autodata["otp"]) {
+
+			return autodata["name"], autodata["group"], autodata["macAddress"], fmt.Errorf("%s %s", name, "动态码错误")
+		}
+
+		return autodata["name"], autodata["group"], autodata["macAddress"], nil
+
+	} else {
+		v := &User{}
+		ok, err := One("Username", name, v)
+		if err != nil || !ok {
+			return name, group, macAddress, fmt.Errorf("%s %s", name, "用户名错误")
+		}
+		if !v.DisableOtp {
+
+			pl := len(pwd)
+			if name == "" || pl < 6 {
+				return name, group, macAddress, fmt.Errorf("%s %s", name, "密码错误")
+			}
+
+			// 判断用户组信息
+			if !InArrStr(v.Groups, group) {
+				fmt.Printf("%+v\n%s\n", *v, group)
+				return name, group, macAddress, fmt.Errorf("%s %s", name, "用户组错误")
+			}
+			groupData := &Group{}
+			ok, err := One("Name", group, groupData)
+
+			if err != nil || !ok {
+				fmt.Printf("%+v", *groupData)
+				return name, group, macAddress, fmt.Errorf("%s - %s", name, "用户组错误")
+			}
+
+			if pwd != v.PinCode {
+				return name, group, macAddress, fmt.Errorf("%s %s", name, "密码错误")
+			}
+			t1 := make(map[string]string, 3)
+			t1["name"] = name
+			t1["password"] = pwd
+			t1["group"] = group
+			t1["otp"] = v.OtpSecret
+			autocache.Set(macAddress, t1, cache.DefaultExpiration)
+			return name, group, macAddress, fmt.Errorf("%s", "otpcheck")
+		} else {
+			// 判断用户密码
+
+			pl := len(pwd)
+			if name == "" || pl < 6 {
+				return name, group, macAddress, fmt.Errorf("%s %s", name, "密码错误")
+			}
+
+			// 判断用户组信息
+			if !InArrStr(v.Groups, group) {
+				fmt.Printf("%+v\n%s\n", *v, group)
+				return name, group, macAddress, fmt.Errorf("%s %s", name, "用户组错误")
+			}
+			groupData := &Group{}
+			ok, err := One("Name", group, groupData)
+
+			if err != nil || !ok {
+				fmt.Printf("%+v", *groupData)
+				return name, group, macAddress, fmt.Errorf("%s - %s", name, "用户组错误")
+			}
+
+			if pwd != v.PinCode {
+				return name, group, macAddress, fmt.Errorf("%s %s", name, "密码错误")
+			}
+			return name, group, macAddress, nil
+		}
+
 	}
 
 	// 判断otp信息
-	pinCode := pwd
-	if !v.DisableOtp {
-		pinCode = pwd[:pl-6]
-		otp := pwd[pl-6:]
-		if !checkOtp(name, otp, v.OtpSecret) {
-			return fmt.Errorf("%s %s", name, "动态码错误")
-		}
-	}
+	// pinCode := pwd
+	// if !v.DisableOtp {
+	// 	pinCode = pwd[:pl-6]
+	// 	otp := pwd[pl-6:]
+	// 	if !checkOtp(name, otp, v.OtpSecret) {
+	// 		return fmt.Errorf("%s %s", name, "动态码错误")
+	// 	}
+	// }
 
-	// 判断用户密码
-	if pinCode != v.PinCode {
-		return fmt.Errorf("%s %s", name, "密码错误")
-	}
-
-	return nil
 }
 
 var (
-	userOtpMux = sync.Mutex{}
-	userOtp    = map[string]time.Time{}
+	userOtp = New()
 )
 
 func init() {
@@ -115,13 +161,13 @@ func init() {
 
 		for range time.Tick(time.Second * 10) {
 			tnow := time.Now()
-			userOtpMux.Lock()
-			for k, v := range userOtp {
-				if tnow.After(v.Add(expire)) {
-					delete(userOtp, k)
+
+			for v := range userOtp.IterBuffered() {
+				if tnow.After(v.Val.(time.Time).Add(expire)) {
+					userOtp.Remove(v.Key)
 				}
 			}
-			userOtpMux.Unlock()
+
 		}
 	}()
 }
@@ -130,15 +176,12 @@ func init() {
 func checkOtp(name, otp, secret string) bool {
 	key := fmt.Sprintf("%s:%s", name, otp)
 
-	userOtpMux.Lock()
-	defer userOtpMux.Unlock()
-
 	// 令牌只能使用一次
-	if _, ok := userOtp[key]; ok {
+	if _, ok := userOtp.Get(key); ok {
 		// 已经存在
 		return false
 	}
-	userOtp[key] = time.Now()
+	userOtp.Set(key, time.Now())
 
 	totp := gotp.NewDefaultTOTP(secret)
 	unix := time.Now().Unix()

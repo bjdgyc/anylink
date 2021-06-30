@@ -55,7 +55,7 @@ type ConnSession struct {
 }
 
 type DtlsSession struct {
-	isActive int32
+	isActive  int32
 	CloseChan chan struct{}
 	closeOnce sync.Once
 	IpAddr    net.IP
@@ -171,8 +171,8 @@ func (s *Session) NewConn() *ConnSession {
 
 	// 查询group信息
 	group := &dbdata.Group{}
-	err = dbdata.One("Name", s.Group, group)
-	if err != nil {
+	ok, err := dbdata.One("Name", s.Group, group)
+	if err != nil || !ok {
 		base.Error(err)
 		return nil
 	}
@@ -183,9 +183,9 @@ func (s *Session) NewConn() *ConnSession {
 		IpAddr:         ip,
 		closeOnce:      sync.Once{},
 		CloseChan:      make(chan struct{}),
-		PayloadIn:      make(chan *Payload),
-		PayloadOutCstp: make(chan *Payload),
-		PayloadOutDtls: make(chan *Payload),
+		PayloadIn:      make(chan *Payload, 2048),
+		PayloadOutCstp: make(chan *Payload, 2048),
+		PayloadOutDtls: make(chan *Payload, 2048),
 		dSess:          &atomic.Value{},
 	}
 
@@ -236,7 +236,7 @@ func (cs *ConnSession) NewDtlsConn() *DtlsSession {
 	}
 
 	dSess := &DtlsSession{
-		isActive: 1,
+		isActive:  1,
 		CloseChan: make(chan struct{}),
 		closeOnce: sync.Once{},
 		IpAddr:    cs.IpAddr,

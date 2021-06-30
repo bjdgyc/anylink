@@ -12,9 +12,33 @@ import (
 	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/dbdata"
 	"github.com/bjdgyc/anylink/sessdata"
+	"github.com/patrickmn/go-cache"
 )
 
+func checkusernum(user string) bool {
+	_, ok := backtime.Get(user)
+
+	if ok {
+
+		return true
+
+	}
+	return false
+}
+
+func checkipnum(ip string) bool {
+	_, ok := backtime.Get(ip)
+	if ok {
+		return true
+	}
+	return false
+}
 func LinkAuth(w http.ResponseWriter, r *http.Request) {
+	if checkipnum(strings.Split(r.RemoteAddr, ":")[0]) {
+		fmt.Println(strings.Split(r.RemoteAddr, ":")[0], "IP地址密码错误超过阈值被封！")
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 	// 判断anyconnect客户端
 	userAgent := strings.ToLower(r.UserAgent())
 	xAggregateAuth := r.Header.Get("X-Aggregate-Auth")
@@ -25,6 +49,8 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "error request")
 		return
 	}
+
+	//fmt.Println(r.RemoteAddr)
 
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -39,7 +65,16 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	// fmt.Printf("%+v \n", cr)
+	if cr.Auth.Username != "" {
+
+		if checkusernum(cr.Auth.Username) {
+			fmt.Println(cr.Auth.Username, "帐号密码错误次数超过阈值被封！")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+	}
+
+	//fmt.Printf("%+v \n", cr)
 
 	setCommonHeader(w)
 	if cr.Type == "logout" {
@@ -65,11 +100,61 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO 用户密码校验
-	err = dbdata.CheckUser(cr.Auth.Username, cr.Auth.Password, cr.GroupSelect)
+	cr.Auth.Username, cr.GroupSelect, cr.MacAddressList.MacAddress, err = dbdata.CheckUser(cr.Auth.Username, cr.Auth.Password, cr.GroupSelect, cr.MacAddressList.MacAddress)
 	if err != nil {
+		otpcheck := fmt.Sprint(err)
+		if otpcheck == "otpcheck" {
+			//base.Warn(err)
+			w.WriteHeader(http.StatusOK)
+			data := RequestData{Group: cr.GroupSelect, Groups: dbdata.GetGroupNames(), Error: "OTP密码校验"}
+			tplRequest(tpl_otpcheck, w, data)
+			return
+		}
+		//处理拒绝服务攻击ip计数
+
+		ip := strings.Split(r.RemoteAddr, ":")[0]
+
+		ipnumdata, ok := ipcheck.Get(ip)
+		if ok {
+			ipnumd1, ok := ipnumdata.(int)
+			if ipnumd1 >= ipnum {
+				backtime.Set(ip, [0]int{}, cache.DefaultExpiration)
+			}
+			if ok {
+				ipcheck.Set(ip, ipnumd1+1, cache.DefaultExpiration)
+			} else {
+				ipcheck.Set(ip, 1, cache.DefaultExpiration)
+			}
+
+		} else {
+			ipcheck.Set(ip, 1, cache.DefaultExpiration)
+		}
+
+		//处理拒绝服务攻击user计数
+		user := cr.Auth.Username
+		if user != "" {
+			usernumdata, ok := usercheck.Get(user)
+			if ok {
+				usernumdata1, ok := usernumdata.(int)
+				if usernumdata1 >= usernum {
+					backtime.Set(user, [0]int{}, cache.DefaultExpiration)
+				}
+				if ok {
+					usercheck.Set(user, usernumdata1+1, cache.DefaultExpiration)
+				} else {
+					usercheck.Set(user, 1, cache.DefaultExpiration)
+				}
+
+			} else {
+				usercheck.Set(user, 1, cache.DefaultExpiration)
+			}
+			//fmt.Println(user, "帐号密码错误次数！", usernumdata)
+
+		}
+
 		base.Warn(err)
 		w.WriteHeader(http.StatusOK)
-		data := RequestData{Group: cr.GroupSelect, Groups: dbdata.GetGroupNames(), Error: "用户名或密码错误"}
+		data := RequestData{Group: cr.GroupSelect, Groups: dbdata.GetGroupNames(), Error: fmt.Sprint(err)}
 		tplRequest(tpl_request, w, data)
 		return
 	}
@@ -79,7 +164,7 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	//	tplRequest(tpl_request, w, data)
 	//	return
 	// }
-
+	//fmt.Println(cr)
 	// 创建新的session信息
 	sess := sessdata.NewSession("")
 	sess.Username = cr.Auth.Username
@@ -92,17 +177,24 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 		Banner: other.Banner}
 	w.WriteHeader(http.StatusOK)
 	tplRequest(tpl_complete, w, rd)
+	base.Info("login:", cr.Auth.Username, ":", sess.Sid)
 	base.Debug("login", cr.Auth.Username)
 }
 
 const (
 	tpl_request = iota
 	tpl_complete
+	tpl_otpcheck
 )
 
 func tplRequest(typ int, w io.Writer, data RequestData) {
 	if typ == tpl_request {
 		t, _ := template.New("auth_request").Parse(auth_request)
+		_ = t.Execute(w, data)
+		return
+	}
+	if typ == tpl_otpcheck {
+		t, _ := template.New("otp_request").Parse(otp_request)
 		_ = t.Execute(w, data)
 		return
 	}
@@ -152,6 +244,32 @@ var auth_request = `<?xml version="1.0" encoding="UTF-8"?>
                 <option {{if eq $v $.Group}} selected="true"{{end}}>{{$v}}</option>
                 {{end}}
             </select>
+        </form>
+    </auth>
+</config-auth>
+`
+
+var otp_request = `<?xml version="1.0" encoding="UTF-8"?>
+<config-auth client="vpn" type="auth-request" aggregate-auth-version="2">
+    <opaque is-for="sg">
+        <tunnel-group>{{.Group}}</tunnel-group>
+        <group-alias>{{.Group}}</group-alias>
+        <aggauth-handle>168179266</aggauth-handle>
+        <config-hash>1595829378234</config-hash>
+        <auth-method>multiple-cert</auth-method>
+        <auth-method>single-sign-on-v2</auth-method>
+    </opaque>
+    <auth id="main">
+        <title>Login</title>
+        <message>请输入你的OTP密码</message>
+        <banner></banner>
+        {{if .Error}}
+        <error id="88" param1="{{.Error}}" param2="">要求二次校验:  %s</error>
+        {{end}}
+        <form>
+
+            <input type="text" name="password" label="OTP:"></input>
+
         </form>
     </auth>
 </config-auth>

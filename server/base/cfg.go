@@ -64,7 +64,11 @@ type ServerConfig struct {
 	MobileDpd       int    `json:"mobile_dpd"`
 
 	SessionTimeout int `json:"session_timeout"` // in seconds
-	AuthTimeout    int `json:"auth_timeout"`    // in seconds
+
+	Ipchecknum   int `json:"ip_check_num"`   // in seconds
+	Userchecknum int `json:"user_check_num"` // in seconds
+	Back_time    int `json:"back_time"`      // in seconds
+	AuthTimeout  int `json:"auth_timeout"`   // in seconds
 }
 
 func initServerCfg() {

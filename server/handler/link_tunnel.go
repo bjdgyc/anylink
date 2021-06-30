@@ -7,6 +7,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/bjdgyc/anylink/base"
@@ -43,6 +44,8 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 
 	// 开启link
 	cSess := sess.NewConn()
+	fmt.Println(cSess)
+
 	if cSess == nil {
 		log.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
@@ -79,7 +82,7 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	base.Debug(cSess.IpAddr, cSess.MacHw, sess.Username, mobile)
 
 	// 返回客户端数据
-	w.Header().Set("Server", fmt.Sprintf("%s %s", base.APP_NAME, base.APP_VER))
+	w.Header().Set("Server", strings.Join([]string{base.APP_NAME, base.APP_VER}, " "))
 	w.Header().Set("X-CSTP-Version", "1")
 	w.Header().Set("X-CSTP-Protocol", "Copyright (c) 2004 Cisco Systems, Inc.")
 	w.Header().Set("X-CSTP-Address", cSess.IpAddr.String())             // 分配的ip地址
@@ -103,7 +106,7 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("X-CSTP-Split-Exclude", v.IpMask)
 	}
 
-	w.Header().Set("X-CSTP-Lease-Duration", fmt.Sprintf("%d", base.Cfg.IpLease)) // ip地址租期
+	w.Header().Set("X-CSTP-Lease-Duration", strconv.Itoa(base.Cfg.IpLease)) // ip地址租期
 	w.Header().Set("X-CSTP-Session-Timeout", "none")
 	w.Header().Set("X-CSTP-Session-Timeout-Alert-Interval", "60")
 	w.Header().Set("X-CSTP-Session-Timeout-Remaining", "none")
@@ -115,19 +118,19 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("X-CSTP-Rekey-Time", "172800")
 	w.Header().Set("X-CSTP-Rekey-Method", "new-tunnel")
 
-	w.Header().Set("X-CSTP-DPD", fmt.Sprintf("%d", cstpDpd))
-	w.Header().Set("X-CSTP-Keepalive", fmt.Sprintf("%d", cstpKeepalive))
+	w.Header().Set("X-CSTP-DPD", strconv.Itoa(cstpDpd))
+	w.Header().Set("X-CSTP-Keepalive", strconv.Itoa(cstpKeepalive))
 	// w.Header().Set("X-CSTP-Banner", banner.Banner)
 	w.Header().Set("X-CSTP-MSIE-Proxy-Lockdown", "true")
 	w.Header().Set("X-CSTP-Smartcard-Removal-Disconnect", "true")
 
-	w.Header().Set("X-CSTP-MTU", fmt.Sprintf("%d", cSess.Mtu)) // 1399
-	w.Header().Set("X-DTLS-MTU", fmt.Sprintf("%d", cSess.Mtu))
+	w.Header().Set("X-CSTP-MTU", strconv.Itoa(cSess.Mtu)) // 1399
+	w.Header().Set("X-DTLS-MTU", strconv.Itoa(cSess.Mtu))
 
 	w.Header().Set("X-DTLS-Session-ID", sess.DtlsSid)
 	w.Header().Set("X-DTLS-Port", dtlsPort)
-	w.Header().Set("X-DTLS-DPD", fmt.Sprintf("%d", cstpDpd))
-	w.Header().Set("X-DTLS-Keepalive", fmt.Sprintf("%d", cstpKeepalive))
+	w.Header().Set("X-DTLS-DPD", strconv.Itoa(cstpDpd))
+	w.Header().Set("X-DTLS-Keepalive", strconv.Itoa(cstpKeepalive))
 	w.Header().Set("X-DTLS-Rekey-Time", "5400")
 	w.Header().Set("X-DTLS12-CipherSuite", "ECDHE-ECDSA-AES128-GCM-SHA256")
 

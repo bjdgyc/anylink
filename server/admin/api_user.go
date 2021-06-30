@@ -38,9 +38,12 @@ func UserList(w http.ResponseWriter, r *http.Request) {
 	if len(prefix) > 0 {
 		count = pageSize
 		err = dbdata.Prefix("Username", prefix, &datas, pageSize, 1)
+		//fmt.Println(&datas)
+
 	} else {
 		count = dbdata.CountAll(&dbdata.User{})
-		err = dbdata.All(&datas, pageSize, page)
+		_, err = dbdata.All(&datas, pageSize, page)
+
 	}
 
 	if err != nil && !dbdata.CheckErrNotFound(err) {
@@ -67,8 +70,8 @@ func UserDetail(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var user dbdata.User
-	err := dbdata.One("Id", id, &user)
-	if err != nil {
+	ok, err := dbdata.One("Id", id, &user)
+	if err != nil || !ok {
 		RespError(w, RespInternalErr, err)
 		return
 	}
@@ -135,8 +138,9 @@ func UserOtpQr(w http.ResponseWriter, r *http.Request) {
 	idS := r.FormValue("id")
 	id, _ := strconv.Atoi(idS)
 	var user dbdata.User
-	err := dbdata.One("Id", id, &user)
-	if err != nil {
+	ok, err := dbdata.One("Id", id, &user)
+	//fmt.Printf("%+v\n", user)
+	if err != nil || !ok {
 		RespError(w, RespInternalErr, err)
 		return
 	}
@@ -248,5 +252,6 @@ func userAccountMail(user *dbdata.User) error {
 		return err
 	}
 	// fmt.Println(w.String())
-	return SendMail(base.Cfg.Issuer+"平台通知", user.Email, w.String())
+	go SendMail(base.Cfg.Issuer+"平台通知", user.Email, w.String())
+	return err
 }

@@ -97,9 +97,9 @@ func cstpWrite(conn net.Conn, cSess *sessdata.ConnSession) {
 			continue
 		}
 
-		h := []byte{'S', 'T', 'F', 0x01, 0x00, 0x00, payload.PType, 0x00}
+		//h := []byte{'S', 'T', 'F', 0x01, 0x00, 0x00, payload.PType, 0x00}
 		header := getByteZero()
-		header = append(header, h...)
+		header = append(header, 'S', 'T', 'F', 0x01, 0x00, 0x00, payload.PType, 0x00)
 		if payload.PType == 0x00 { // data
 			binary.BigEndian.PutUint16(header[4:6], uint16(len(payload.Data)))
 			header = append(header, payload.Data...)

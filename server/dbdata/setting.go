@@ -20,29 +20,38 @@ func StructName(data interface{}) string {
 	return name
 }
 
+func StructKey(data interface{}) map[string]interface{} {
+	ref := reflect.ValueOf(data)
+	s := &ref
+	if s.Kind() == reflect.Ptr {
+		e := s.Elem()
+		s = &e
+	}
+	d1 := make(map[string]interface{}, s.NumField())
+	for i := 0; i < s.NumField(); i++ {
+		field := s.Field(i)
+		//fmt.Printf("%d. %s %s = %v \n", i, s.Type().Field(i).Name, field.Type(), field.Interface())
+		d1[s.Type().Field(i).Name] = field.Interface()
+	}
+	return d1
+}
+
 func SettingSet(data interface{}) error {
-	key := StructName(data)
-	err := Set(SettingBucket, key, data)
+
+	err := Set("id", 1, data)
 	return err
+
 }
 
 func SettingGet(data interface{}) error {
-	key := StructName(data)
-	err := Get(SettingBucket, key, data)
+	//key := StructName(data)
+	err := Get("id", 1, data)
 	return err
 }
 
-type SettingSmtp struct {
-	Host       string `json:"host"`
-	Port       int    `json:"port"`
-	Username   string `json:"username"`
-	Password   string `json:"password"`
-	From       string `json:"from"`
-	Encryption string `json:"encryption"`
-}
-
-type SettingOther struct {
-	LinkAddr    string `json:"link_addr"`
-	Banner      string `json:"banner"`
-	AccountMail string `json:"account_mail"`
+func CheckErrNotFound(err error) bool {
+	// if fmt.Sprint(err) == "0" {
+	// 	return false
+	// }
+	return true
 }
