@@ -82,6 +82,7 @@ func checkLinkAcl(group *dbdata.Group, payload *sessdata.Payload) bool {
 
 	ip_dst := waterutil.IPv4Destination(payload.Data)
 	ip_port := waterutil.IPv4DestinationPort(payload.Data)
+	ip_proto := waterutil.IPv4Protocol(payload.Data)
 	// fmt.Println("sent:", ip_dst, ip_port)
 
 	// 优先放行dns端口
@@ -94,7 +95,8 @@ func checkLinkAcl(group *dbdata.Group, payload *sessdata.Payload) bool {
 	for _, v := range group.LinkAcl {
 		// 循环判断ip和端口
 		if v.IpNet.Contains(ip_dst) {
-			if v.Port == ip_port || v.Port == 0 {
+			// 放行允许ip的ping
+			if v.Port == ip_port || v.Port == 0 || ip_proto == waterutil.ICMP {
 				if v.Action == dbdata.Allow {
 					return true
 				} else {
