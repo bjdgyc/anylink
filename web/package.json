@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "axios": "^0.20.0",
+    "caniuse-lite": "^1.0.30001242",
     "chokidar": "^3.5.2",
     "core-js": "^3.6.5",
     "echarts": "^4.9.0",
