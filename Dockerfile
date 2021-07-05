@@ -8,7 +8,7 @@ RUN npx browserslist@latest --update-db \
     && ls /web/ui
 
 # server
-FROM golang:alpine as builder_golang
+FROM golang:1.16-alpine as builder_golang
 #TODO 本地打包时使用镜像
 #ENV GOPROXY=https://goproxy.io
 ENV GOOS=linux
@@ -29,11 +29,12 @@ LABEL maintainer="github.com/bjdgyc"
 ENV IPV4_CIDR="192.168.10.0/24"
 
 WORKDIR /app
-COPY --from=builder_node /web/ui  /app/ui
 COPY --from=builder_golang /anylink/server/anylink  /app/
-COPY ./server/conf  /app/conf
-COPY ./server/files  /app/files
 COPY docker_entrypoint.sh  /app/
+
+COPY ./server/conf  /app/conf
+COPY ./server/files  /app/conf/files
+
 
 #TODO 本地打包时使用镜像
 #RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/repositories
