@@ -38,9 +38,9 @@ func SetUser(v *User) error {
 	if v.Id == 0 {
 		v.UpdatedAt = time.Now()
 		v.CreatedAt = time.Now()
-		if v.OtpSecret == "" {
-			v.OtpSecret = gotp.RandomSecret(32)
-		}
+
+		v.OtpSecret = gotp.RandomSecret(32)
+
 		err = Save(v)
 	} else {
 

@@ -19,22 +19,15 @@ var x *xorm.Engine
 //创建orm引擎
 func initDb() {
 	var err error
-	conf := base.ServerCfg2Slice()
-	//var dbconfig string
-	for _, j := range conf {
-		if j.Name == "db_file" {
-			if dbconfig, ok := j.Data.(string); ok {
-				configlist := strings.Split(dbconfig, ":")
-				if len(configlist) < 2 {
-					log.Println("数据库配置错误 :", j.Data, "，自动 使用默认sqlite3数据库")
-					x, err = xorm.NewEngine("sqlite3", "./test.db")
-					break
-				}
-				x, err = xorm.NewEngine(configlist[0], strings.Join(configlist[1:], ":"))
-			}
-			break
-		}
+	dbconfig := base.Cfg.DbFile
+
+	configlist := strings.Split(dbconfig, ":")
+	if len(configlist) < 2 {
+		log.Println("数据库配置错误 :", configlist, "，自动 使用默认sqlite3数据库")
+		x, err = xorm.NewEngine("sqlite3", "./test.db")
+
 	}
+	x, err = xorm.NewEngine(configlist[0], strings.Join(configlist[1:], ":"))
 
 	//x, err = xorm.NewEngine("mysql", "root:zg1234567899@tcp(172.16.249.34:3306)/test?charset=utf8")
 	//x, err = xorm.NewEngine("sqlite3", "./test.db")
@@ -49,8 +42,8 @@ func initDb() {
 	x.ShowExecTime(true)
 	x.SetMaxIdleConns(10)
 	x.SetMaxOpenConns(50)
-	cacher := xorm.NewLRUCacher(xorm.NewMemoryStore(), 10000)
-	x.SetDefaultCacher(cacher)
+	// cacher := xorm.NewLRUCacher(xorm.NewMemoryStore(), 10000)
+	// x.SetDefaultCacher(cacher)
 }
 
 func initData() {

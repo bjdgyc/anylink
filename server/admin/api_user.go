@@ -252,6 +252,6 @@ func userAccountMail(user *dbdata.User) error {
 		return err
 	}
 	// fmt.Println(w.String())
-	go SendMail(base.Cfg.Issuer+"平台通知", user.Email, w.String())
-	return err
+
+	return SendMail(base.Cfg.Issuer+"平台通知", user.Email, w.String())
 }

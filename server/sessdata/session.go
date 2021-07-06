@@ -183,9 +183,9 @@ func (s *Session) NewConn() *ConnSession {
 		IpAddr:         ip,
 		closeOnce:      sync.Once{},
 		CloseChan:      make(chan struct{}),
-		PayloadIn:      make(chan *Payload, 2048),
-		PayloadOutCstp: make(chan *Payload, 2048),
-		PayloadOutDtls: make(chan *Payload, 2048),
+		PayloadIn:      make(chan *Payload, 64),
+		PayloadOutCstp: make(chan *Payload, 64),
+		PayloadOutDtls: make(chan *Payload, 64),
 		dSess:          &atomic.Value{},
 	}
 
