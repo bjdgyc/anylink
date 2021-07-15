@@ -11,12 +11,13 @@ import (
 
 func preIpData() {
 	tmpDb := path.Join(os.TempDir(), "anylink_test.db")
-	base.Cfg.DbFile = tmpDb
+	base.Cfg.DbType = "sqlite3"
+	base.Cfg.DbDsn = tmpDb
 	initDb()
 }
 
 func closeIpdata() {
-	sdb.Close()
+	xdb.Close()
 	tmpDb := path.Join(os.TempDir(), "anylink_test.db")
 	os.Remove(tmpDb)
 }
@@ -27,7 +28,7 @@ func TestDb(t *testing.T) {
 	defer closeIpdata()
 
 	u := User{Username: "a"}
-	err := Save(&u)
+	err := Add(&u)
 	ast.Nil(err)
 
 	ast.Equal(u.Id, 1)

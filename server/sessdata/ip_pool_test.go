@@ -15,7 +15,8 @@ import (
 func preData(tmpDir string) {
 	base.Test()
 	tmpDb := path.Join(tmpDir, "test.db")
-	base.Cfg.DbFile = tmpDb
+	base.Cfg.DbType = "sqlite3"
+	base.Cfg.DbDsn = tmpDb
 	base.Cfg.Ipv4CIDR = "192.168.3.0/24"
 	base.Cfg.Ipv4Start = "192.168.3.1"
 	base.Cfg.Ipv4End = "192.168.3.199"
@@ -27,7 +28,7 @@ func preData(tmpDir string) {
 		Name:      "group1",
 		Bandwidth: 1000,
 	}
-	_ = dbdata.Save(&group)
+	_ = dbdata.Add(&group)
 	initIpPool()
 }
 

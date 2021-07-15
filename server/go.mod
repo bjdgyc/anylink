@@ -4,11 +4,14 @@ go 1.16
 
 require (
 	github.com/StackExchange/wmi v0.0.0-20210224194228-fe8f1750fd46 // indirect
-	github.com/asdine/storm/v3 v3.2.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-ole/go-ole v1.2.5 // indirect
+	github.com/go-sql-driver/mysql v1.6.0
+	github.com/golang/snappy v0.0.1 // indirect
 	github.com/google/gopacket v1.1.19
 	github.com/gorilla/mux v1.8.0
+	github.com/lib/pq v1.7.0
+	github.com/mattn/go-sqlite3 v1.14.6
 	github.com/pion/dtls/v2 v2.0.0-00010101000000-000000000000
 	github.com/pion/logging v0.2.2
 	github.com/shirou/gopsutil v3.21.4+incompatible
@@ -21,10 +24,11 @@ require (
 	github.com/tklauser/go-sysconf v0.3.6 // indirect
 	github.com/xhit/go-simple-mail/v2 v2.9.0
 	github.com/xlzd/gotp v0.0.0-20181030022105-c8557ba2c119
-	go.etcd.io/bbolt v1.3.5
 	golang.org/x/crypto v0.0.0-20210513164829-c07d793c2f9a
 	golang.org/x/net v0.0.0-20210520170846-37e1c6afe023
 	golang.org/x/time v0.0.0-20210220033141-f8bda1e9f3ba
+	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
+	xorm.io/xorm v1.1.2
 )
 
 replace github.com/pion/dtls/v2 => ../dtls-2.0.9

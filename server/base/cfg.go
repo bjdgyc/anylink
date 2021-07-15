@@ -36,17 +36,19 @@ type ServerConfig struct {
 	ServerDTLS     bool   `json:"server_dtls"`
 	AdminAddr      string `json:"admin_addr"`
 	ProxyProtocol  bool   `json:"proxy_protocol"`
-	DbFile         string `json:"db_file"`
-	CertFile       string `json:"cert_file"`
-	CertKey        string `json:"cert_key"`
-	FilesPath      string `json:"files_path"`
-	LogPath        string `json:"log_path"`
-	LogLevel       string `json:"log_level"`
-	Pprof          bool   `json:"pprof"`
-	Issuer         string `json:"issuer"`
-	AdminUser      string `json:"admin_user"`
-	AdminPass      string `json:"admin_pass"`
-	JwtSecret      string `json:"jwt_secret"`
+	// DbFile         string `json:"db_file"`
+	DbType    string `json:"db_type"`
+	DbDsn     string `json:"db_dsn"`
+	CertFile  string `json:"cert_file"`
+	CertKey   string `json:"cert_key"`
+	FilesPath string `json:"files_path"`
+	LogPath   string `json:"log_path"`
+	LogLevel  string `json:"log_level"`
+	Pprof     bool   `json:"pprof"`
+	Issuer    string `json:"issuer"`
+	AdminUser string `json:"admin_user"`
+	AdminPass string `json:"admin_pass"`
+	JwtSecret string `json:"jwt_secret"`
 
 	LinkMode    string `json:"link_mode"` // tun tap
 	Ipv4CIDR    string `json:"ipv4_cidr"` // 192.168.1.0/24

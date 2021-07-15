@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/bjdgyc/anylink/dbdata"
 )
@@ -23,7 +22,7 @@ func UserIpMapList(w http.ResponseWriter, r *http.Request) {
 	count := dbdata.CountAll(&dbdata.IpMap{})
 
 	var datas []dbdata.IpMap
-	err := dbdata.All(&datas, pageSize, page)
+	err := dbdata.Find(&datas, pageSize, page)
 	if err != nil {
 		RespError(w, RespInternalErr, err)
 		return
@@ -75,14 +74,7 @@ func UserIpMapSet(w http.ResponseWriter, r *http.Request) {
 
 	// fmt.Println(v, len(v.Ip), len(v.MacAddr))
 
-	if len(v.IpAddr) < 4 || len(v.MacAddr) < 6 {
-		RespError(w, RespParamErr, "IP或MAC错误")
-		return
-	}
-
-	v.UpdatedAt = time.Now()
-	err = dbdata.Save(v)
-
+	err = dbdata.SetIpMap(v)
 	if err != nil {
 		RespError(w, RespInternalErr, err)
 		return

@@ -11,8 +11,8 @@ import (
 )
 
 type User struct {
-	Id       int    `json:"id" storm:"id,increment"`
-	Username string `json:"username" storm:"unique"`
+	Id       int    `json:"id"  xorm:"pk autoincr not null"`
+	Username string `json:"username" storm:"not null unique"`
 	Nickname string `json:"nickname"`
 	Email    string `json:"email"`
 	// Password  string    `json:"password"`
@@ -57,7 +57,11 @@ func SetUser(v *User) error {
 	v.Groups = ng
 
 	v.UpdatedAt = time.Now()
-	err = Save(v)
+	if v.Id > 0 {
+		err = Set(v)
+	} else {
+		err = Add(v)
+	}
 
 	return err
 }

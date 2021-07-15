@@ -30,8 +30,8 @@ type ValData struct {
 }
 
 type Group struct {
-	Id           int            `json:"id" storm:"id,increment"`
-	Name         string         `json:"name" storm:"unique"`
+	Id           int            `json:"id" xorm:"pk autoincr not null"`
+	Name         string         `json:"name" xorm:"not null unique"`
 	Note         string         `json:"note"`
 	AllowLan     bool           `json:"allow_lan"`
 	ClientDns    []ValData      `json:"client_dns"`
@@ -46,7 +46,7 @@ type Group struct {
 
 func GetGroupNames() []string {
 	var datas []Group
-	err := All(&datas, 0, 0)
+	err := Find(&datas, 0, 0)
 	if err != nil {
 		base.Error(err)
 		return nil
@@ -116,7 +116,11 @@ func SetGroup(g *Group) error {
 	g.LinkAcl = linkAcl
 
 	g.UpdatedAt = time.Now()
-	err = Save(g)
+	if g.Id > 0 {
+		err = Set(g)
+	} else {
+		err = Add(g)
+	}
 
 	return err
 }

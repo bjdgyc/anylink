@@ -67,10 +67,10 @@ func AcquireIp(username, macAddr string) net.IP {
 
 	// 判断已经分配过
 	mi := &dbdata.IpMap{}
-	err := dbdata.One("MacAddr", macAddr, mi)
+	err := dbdata.One("mac_addr", macAddr, mi)
 	if err == nil {
-		ip := mi.IpAddr
-		ipStr := ip.String()
+		ipStr := mi.IpAddr
+		ip := net.ParseIP(ipStr)
 		// 跳过活跃连接
 		_, ok := ipActive[ipStr]
 		// 检测原有ip是否在新的ip池内
@@ -78,7 +78,7 @@ func AcquireIp(username, macAddr string) net.IP {
 			mi.Username = username
 			mi.LastLogin = tNow
 			// 回写db数据
-			_ = dbdata.Save(mi)
+			_ = dbdata.Add(mi)
 			ipActive[ipStr] = true
 			return ip
 		}
@@ -99,12 +99,12 @@ func AcquireIp(username, macAddr string) net.IP {
 		}
 
 		v := &dbdata.IpMap{}
-		err = dbdata.One("IpAddr", ip, v)
+		err = dbdata.One("ip_addr", ipStr, v)
 		if err != nil {
 			if dbdata.CheckErrNotFound(err) {
 				// 该ip没有被使用
-				mi = &dbdata.IpMap{IpAddr: ip, MacAddr: macAddr, Username: username, LastLogin: tNow}
-				_ = dbdata.Save(mi)
+				mi = &dbdata.IpMap{IpAddr: ipStr, MacAddr: macAddr, Username: username, LastLogin: tNow}
+				_ = dbdata.Add(mi)
 				ipActive[ipStr] = true
 				return ip
 			}
@@ -120,9 +120,9 @@ func AcquireIp(username, macAddr string) net.IP {
 		// 已经超过租期
 		if tNow.Sub(v.LastLogin) > time.Duration(base.Cfg.IpLease)*time.Second {
 			_ = dbdata.Del(v)
-			mi = &dbdata.IpMap{IpAddr: ip, MacAddr: macAddr, Username: username, LastLogin: tNow}
+			mi = &dbdata.IpMap{IpAddr: ipStr, MacAddr: macAddr, Username: username, LastLogin: tNow}
 			// 重写db数据
-			_ = dbdata.Save(mi)
+			_ = dbdata.Add(mi)
 			ipActive[ipStr] = true
 			return ip
 		}
@@ -139,11 +139,11 @@ func AcquireIp(username, macAddr string) net.IP {
 	}
 
 	// 使用最早登陆的mac ip
-	ip := farIp.IpAddr
-	ipStr := ip.String()
-	mi = &dbdata.IpMap{IpAddr: ip, MacAddr: macAddr, Username: username, LastLogin: tNow}
+	ipStr := farIp.IpAddr
+	ip := net.ParseIP(ipStr)
+	mi = &dbdata.IpMap{IpAddr: ipStr, MacAddr: macAddr, Username: username, LastLogin: tNow}
 	// 回写db数据
-	_ = dbdata.Save(mi)
+	_ = dbdata.Add(mi)
 	ipActive[ipStr] = true
 	return ip
 }
@@ -155,9 +155,9 @@ func ReleaseIp(ip net.IP, macAddr string) {
 
 	delete(ipActive, ip.String())
 	mi := &dbdata.IpMap{}
-	err := dbdata.One("IpAddr", ip, mi)
+	err := dbdata.One("ip_addr", ip.String(), mi)
 	if err == nil {
 		mi.LastLogin = time.Now()
-		_ = dbdata.Save(mi)
+		_ = dbdata.Add(mi)
 	}
 }
