@@ -64,9 +64,9 @@ func LinkTap(cSess *sessdata.ConnSession) error {
 
 	// arp on
 	cmdstr1 := fmt.Sprintf("ip link set dev %s up mtu %d multicast on", ifce.Name(), cSess.Mtu)
-	cmdstr2 := fmt.Sprintf("sysctl -w net.ipv6.conf.%s.disable_ipv6=1", ifce.Name())
-	cmdstr3 := fmt.Sprintf("ip link set dev %s master %s", ifce.Name(), bridgeName)
-	cmdStrs := []string{cmdstr1, cmdstr2, cmdstr3}
+	cmdstr2 := fmt.Sprintf("ip link set dev %s master %s", ifce.Name(), bridgeName)
+	// cmdstr3 := fmt.Sprintf("sysctl -w net.ipv6.conf.%s.disable_ipv6=1", ifce.Name())
+	cmdStrs := []string{cmdstr1, cmdstr2}
 	err = execCmd(cmdStrs)
 	if err != nil {
 		base.Error(err)
