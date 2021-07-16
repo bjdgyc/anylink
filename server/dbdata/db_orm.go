@@ -69,12 +69,12 @@ func Find(data interface{}, limit, page int) error {
 }
 
 func CountPrefix(fieldName string, prefix string, data interface{}) int {
-	n, _ := xdb.Where(fieldName + " like '" + prefix + "%' ").Count(data)
+	n, _ := xdb.Where(fieldName+" like ?", prefix+"%").Count(data)
 	return int(n)
 }
 
 func Prefix(fieldName string, prefix string, data interface{}, limit, page int) error {
-	where := xdb.Where(fieldName + " like '" + prefix + "%' ")
+	where := xdb.Where(fieldName+" like ?", prefix+"%")
 	if limit == 0 {
 		return where.Find(data)
 	}

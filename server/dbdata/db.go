@@ -20,7 +20,7 @@ func GetXdb() *xorm.Engine {
 
 func initDb() {
 	var err error
-	xdb, err = xorm.NewEngine(base.Cfg.DbType, base.Cfg.DbDsn)
+	xdb, err = xorm.NewEngine(base.Cfg.DbType, base.Cfg.DbSource)
 	// xdb.ShowSQL(true)
 	if err != nil {
 		base.Fatal(err)

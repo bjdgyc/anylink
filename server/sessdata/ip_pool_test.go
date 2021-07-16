@@ -16,7 +16,7 @@ func preData(tmpDir string) {
 	base.Test()
 	tmpDb := path.Join(tmpDir, "test.db")
 	base.Cfg.DbType = "sqlite3"
-	base.Cfg.DbDsn = tmpDb
+	base.Cfg.DbSource = tmpDb
 	base.Cfg.Ipv4CIDR = "192.168.3.0/24"
 	base.Cfg.Ipv4Start = "192.168.3.1"
 	base.Cfg.Ipv4End = "192.168.3.199"

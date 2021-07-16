@@ -12,7 +12,7 @@ import (
 func preIpData() {
 	tmpDb := path.Join(os.TempDir(), "anylink_test.db")
 	base.Cfg.DbType = "sqlite3"
-	base.Cfg.DbDsn = tmpDb
+	base.Cfg.DbSource = tmpDb
 	initDb()
 }
 
