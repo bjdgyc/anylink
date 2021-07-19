@@ -36,8 +36,8 @@ func LinkDtls(conn net.Conn, cSess *sessdata.ConnSession) {
 			return
 		}
 
-		// hdata := make([]byte, BufferSize)
-		hdata := getByteFull()
+		hb := getByteFull()
+		hdata := *hb
 		n, err := conn.Read(hdata)
 		if err != nil {
 			base.Error("read hdata: ", err)
@@ -70,7 +70,7 @@ func LinkDtls(conn net.Conn, cSess *sessdata.ConnSession) {
 			}
 		}
 
-		putByte(hdata)
+		putByte(hb)
 	}
 }
 
@@ -99,7 +99,8 @@ func dtlsWrite(conn net.Conn, dSess *sessdata.DtlsSession, cSess *sessdata.ConnS
 		}
 
 		// header = []byte{payload.PType}
-		header := getByteZero()
+		hb := getByteZero()
+		header := *hb
 		header = append(header, payload.PType)
 		if payload.PType == 0x00 { // data
 			header = append(header, payload.Data...)
@@ -110,7 +111,7 @@ func dtlsWrite(conn net.Conn, dSess *sessdata.DtlsSession, cSess *sessdata.ConnS
 			return
 		}
 
-		putByte(header)
+		putByte(hb)
 		putPayload(payload)
 
 		// 限流设置

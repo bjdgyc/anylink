@@ -34,7 +34,8 @@ func LinkCstp(conn net.Conn, cSess *sessdata.ConnSession) {
 			return
 		}
 		// hdata := make([]byte, BufferSize)
-		hdata := getByteFull()
+		hb := getByteFull()
+		hdata := *hb
 		n, err = conn.Read(hdata)
 		if err != nil {
 			base.Error("read hdata: ", err)
@@ -68,7 +69,7 @@ func LinkCstp(conn net.Conn, cSess *sessdata.ConnSession) {
 			}
 		}
 
-		putByte(hdata)
+		putByte(hb)
 	}
 }
 
@@ -98,7 +99,8 @@ func cstpWrite(conn net.Conn, cSess *sessdata.ConnSession) {
 		}
 
 		h := []byte{'S', 'T', 'F', 0x01, 0x00, 0x00, payload.PType, 0x00}
-		header := getByteZero()
+		hb := getByteZero()
+		header := *hb
 		header = append(header, h...)
 		if payload.PType == 0x00 { // data
 			binary.BigEndian.PutUint16(header[4:6], uint16(len(payload.Data)))
@@ -110,7 +112,7 @@ func cstpWrite(conn net.Conn, cSess *sessdata.ConnSession) {
 			return
 		}
 
-		putByte(header)
+		putByte(hb)
 		putPayload(payload)
 
 		// 限流设置

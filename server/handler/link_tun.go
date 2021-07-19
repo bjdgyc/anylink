@@ -102,7 +102,8 @@ func tunRead(ifce *water.Interface, cSess *sessdata.ConnSession) {
 
 	for {
 		// data := make([]byte, BufferSize)
-		data := getByteFull()
+		hb := getByteFull()
+		data := *hb
 		n, err = ifce.Read(data)
 		if err != nil {
 			base.Error("tun Read err", n, err)
@@ -121,6 +122,6 @@ func tunRead(ifce *water.Interface, cSess *sessdata.ConnSession) {
 			return
 		}
 
-		putByte(data)
+		putByte(hb)
 	}
 }

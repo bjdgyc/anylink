@@ -32,21 +32,21 @@ var bytePool = sync.Pool{
 	New: func() interface{} {
 		b := make([]byte, 0, BufferSize)
 		// fmt.Println("bytePool-init")
-		return b
+		return &b
 	},
 }
 
-func getByteZero() []byte {
-	b := bytePool.Get().([]byte)
+func getByteZero() *[]byte {
+	b := bytePool.Get().(*[]byte)
 	return b
 }
 
-func getByteFull() []byte {
-	b := bytePool.Get().([]byte)
-	b = b[:BufferSize]
+func getByteFull() *[]byte {
+	b := bytePool.Get().(*[]byte)
+	*b = (*b)[:BufferSize]
 	return b
 }
-func putByte(b []byte) {
-	b = b[:0]
+func putByte(b *[]byte) {
+	*b = (*b)[:0]
 	bytePool.Put(b)
 }

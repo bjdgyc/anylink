@@ -101,7 +101,8 @@ func tapWrite(ifce *water.Interface, cSess *sessdata.ConnSession) {
 		}
 
 		// var frame ethernet.Frame
-		frame = getByteFull()
+		fb := getByteFull()
+		frame = *fb
 		switch payload.LType {
 		default:
 			// log.Println(payload)
@@ -153,7 +154,7 @@ func tapWrite(ifce *water.Interface, cSess *sessdata.ConnSession) {
 			return
 		}
 
-		putByte(frame)
+		putByte(fb)
 		putPayload(payload)
 	}
 }
@@ -174,7 +175,8 @@ func tapRead(ifce *water.Interface, cSess *sessdata.ConnSession) {
 	for {
 		// var frame ethernet.Frame
 		// frame.Resize(BufferSize)
-		frame = getByteFull()
+		fb := getByteFull()
+		frame = *fb
 		n, err = ifce.Read(frame)
 		if err != nil {
 			base.Error("tap Read err", n, err)
@@ -247,6 +249,6 @@ func tapRead(ifce *water.Interface, cSess *sessdata.ConnSession) {
 
 		}
 
-		putByte(frame)
+		putByte(fb)
 	}
 }
