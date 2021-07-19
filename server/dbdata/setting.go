@@ -10,12 +10,6 @@ const (
 	InstallData = "OK"
 )
 
-type Setting struct {
-	Id   int    `json:"id" xorm:"pk autoincr not null"`
-	Name string `json:"name" xorm:"not null unique"`
-	Data string `json:"data" xorm:"Text"`
-}
-
 type SettingSmtp struct {
 	Host       string `json:"host"`
 	Port       int    `json:"port"`

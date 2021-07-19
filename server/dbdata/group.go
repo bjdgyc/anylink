@@ -29,20 +29,20 @@ type ValData struct {
 	Note   string `json:"note"`
 }
 
-type Group struct {
-	Id           int            `json:"id" xorm:"pk autoincr not null"`
-	Name         string         `json:"name" xorm:"not null unique"`
-	Note         string         `json:"note"`
-	AllowLan     bool           `json:"allow_lan"`
-	ClientDns    []ValData      `json:"client_dns"`
-	RouteInclude []ValData      `json:"route_include"`
-	RouteExclude []ValData      `json:"route_exclude"`
-	LinkAcl      []GroupLinkAcl `json:"link_acl"`
-	Bandwidth    int            `json:"bandwidth"` // 带宽限制
-	Status       int8           `json:"status"`    // 1正常
-	CreatedAt    time.Time      `json:"created_at"`
-	UpdatedAt    time.Time      `json:"updated_at"`
-}
+// type Group struct {
+// 	Id           int            `json:"id" xorm:"pk autoincr not null"`
+// 	Name         string         `json:"name" xorm:"not null unique"`
+// 	Note         string         `json:"note"`
+// 	AllowLan     bool           `json:"allow_lan"`
+// 	ClientDns    []ValData      `json:"client_dns"`
+// 	RouteInclude []ValData      `json:"route_include"`
+// 	RouteExclude []ValData      `json:"route_exclude"`
+// 	LinkAcl      []GroupLinkAcl `json:"link_acl"`
+// 	Bandwidth    int            `json:"bandwidth"` // 带宽限制
+// 	Status       int8           `json:"status"`    // 1正常
+// 	CreatedAt    time.Time      `json:"created_at"`
+// 	UpdatedAt    time.Time      `json:"updated_at"`
+// }
 
 func GetGroupNames() []string {
 	var datas []Group
