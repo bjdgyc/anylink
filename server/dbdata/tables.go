@@ -6,7 +6,7 @@ import (
 
 type Group struct {
 	Id           int            `json:"id" xorm:"pk autoincr not null"`
-	Name         string         `json:"name" xorm:"varchar(255) not null index(idx_code) unique"`
+	Name         string         `json:"name" xorm:"varchar(60) not null index(idx_name) unique"`
 	Note         string         `json:"note" xorm:"varchar(255)"`
 	AllowLan     bool           `json:"allow_lan" xorm:"Bool"`
 	ClientDns    []ValData      `json:"client_dns" xorm:"Text"`
@@ -21,11 +21,11 @@ type Group struct {
 
 type User struct {
 	Id       int    `json:"id" xorm:"pk autoincr not null"`
-	Username string `json:"username" xorm:"varchar(255) not null index(idx_code) unique"`
+	Username string `json:"username" xorm:"varchar(60) not null index(idx_username) unique"`
 	Nickname string `json:"nickname" xorm:"varchar(255)"`
 	Email    string `json:"email" xorm:"varchar(255)"`
 	// Password  string    `json:"password"`
-	PinCode    string    `json:"pin_code" xorm:"varchar(255)"`
+	PinCode    string    `json:"pin_code" xorm:"varchar(32)"`
 	OtpSecret  string    `json:"otp_secret" xorm:"varchar(255)"`
 	DisableOtp bool      `json:"disable_otp" xorm:"Bool"` // 禁用otp
 	Groups     []string  `json:"groups" xorm:"Text"`
@@ -37,9 +37,9 @@ type User struct {
 
 type IpMap struct {
 	Id        int       `json:"id" xorm:"pk autoincr not null"`
-	IpAddr    string    `json:"ip_addr" xorm:"Text"`
-	MacAddr   string    `json:"mac_addr" xorm:"varchar(32) index(idx_macaddr)"`
-	Username  string    `json:"username" xorm:"varchar(255)"`
+	IpAddr    string    `json:"ip_addr" xorm:"varchar(32) index(idx_ip_addr)"`
+	MacAddr   string    `json:"mac_addr" xorm:"varchar(32) index(idx_mac_addr)"`
+	Username  string    `json:"username" xorm:"varchar(60)"`
 	Keep      bool      `json:"keep" xorm:"Bool"` // 保留 ip-mac 绑定
 	KeepTime  time.Time `json:"keep_time" xorm:"DateTime"`
 	Note      string    `json:"note" xorm:"varchar(255)"` // 备注
@@ -49,6 +49,6 @@ type IpMap struct {
 
 type Setting struct {
 	Id   int    `json:"id" xorm:"pk autoincr not null"`
-	Name string `json:"name" xorm:"not null unique"`
+	Name string `json:"name" xorm:"varchar(60) not null unique"`
 	Data string `json:"data" xorm:"Text"`
 }
