@@ -103,7 +103,7 @@ func dtlsWrite(conn net.Conn, dSess *sessdata.DtlsSession, cSess *sessdata.ConnS
 		header := *hb
 		header = append(header, payload.PType)
 		if payload.PType == 0x00 { // data
-			header = append(header, payload.Data...)
+			header = append(header, *payload.Data...)
 		}
 		n, err := conn.Write(header)
 		if err != nil {

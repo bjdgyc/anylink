@@ -8,8 +8,9 @@ import (
 
 var plPool = sync.Pool{
 	New: func() interface{} {
+		b := make([]byte, 0, BufferSize)
 		pl := sessdata.Payload{
-			Data: make([]byte, 0, BufferSize),
+			Data: &b,
 		}
 		// fmt.Println("plPool-init", len(pl.Data), cap(pl.Data))
 		return &pl
@@ -24,7 +25,7 @@ func getPayload() *sessdata.Payload {
 func putPayload(pl *sessdata.Payload) {
 	pl.LType = 0
 	pl.PType = 0
-	pl.Data = pl.Data[:0]
+	*pl.Data = (*pl.Data)[:0]
 	plPool.Put(pl)
 }
 

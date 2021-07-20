@@ -80,7 +80,7 @@ func tunWrite(ifce *water.Interface, cSess *sessdata.ConnSession) {
 			return
 		}
 
-		_, err = ifce.Write(payload.Data)
+		_, err = ifce.Write(*payload.Data)
 		if err != nil {
 			base.Error("tun Write err", err)
 			return

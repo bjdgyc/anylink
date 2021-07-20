@@ -102,9 +102,10 @@ func cstpWrite(conn net.Conn, cSess *sessdata.ConnSession) {
 		hb := getByteZero()
 		header := *hb
 		header = append(header, h...)
-		if payload.PType == 0x00 { // data
-			binary.BigEndian.PutUint16(header[4:6], uint16(len(payload.Data)))
-			header = append(header, payload.Data...)
+		if payload.PType == 0x00 {
+			data := *payload.Data
+			binary.BigEndian.PutUint16(header[4:6], uint16(len(data)))
+			header = append(header, data...)
 		}
 		n, err = conn.Write(header)
 		if err != nil {

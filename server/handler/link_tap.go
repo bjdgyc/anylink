@@ -103,17 +103,16 @@ func tapWrite(ifce *water.Interface, cSess *sessdata.ConnSession) {
 		// var frame ethernet.Frame
 		fb := getByteFull()
 		frame = *fb
+		pData := *payload.Data
 		switch payload.LType {
 		default:
 			// log.Println(payload)
 		case sessdata.LTypeEthernet:
-			copy(frame, payload.Data)
-			frame = frame[:len(payload.Data)]
+			copy(frame, pData)
+			frame = frame[:len(pData)]
 		case sessdata.LTypeIPData: // 需要转换成 Ethernet 数据
-			data := payload.Data
-
-			ip_src := waterutil.IPv4Source(data)
-			if waterutil.IsIPv6(data) || !ip_src.Equal(cSess.IpAddr) {
+			ip_src := waterutil.IPv4Source(pData)
+			if waterutil.IsIPv6(pData) || !ip_src.Equal(cSess.IpAddr) {
 				// 过滤掉IPv6的数据
 				// 非分配给客户端ip，直接丢弃
 				continue
@@ -122,7 +121,7 @@ func tapWrite(ifce *water.Interface, cSess *sessdata.ConnSession) {
 			// packet := gopacket.NewPacket(data, layers.LayerTypeIPv4, gopacket.Default)
 			// fmt.Println("get:", packet)
 
-			ip_dst := waterutil.IPv4Destination(data)
+			ip_dst := waterutil.IPv4Destination(pData)
 			// fmt.Println("get:", ip_src, ip_dst)
 
 			var dstHw net.HardwareAddr
@@ -142,8 +141,8 @@ func tapWrite(ifce *water.Interface, cSess *sessdata.ConnSession) {
 			}
 			// fmt.Println("Gateway", ip_dst, dstAddr.HardwareAddr)
 
-			frame.Prepare(dstHw, cSess.MacHw, ethernet.NotTagged, ethernet.IPv4, len(data))
-			copy(frame[12+2:], data)
+			frame.Prepare(dstHw, cSess.MacHw, ethernet.NotTagged, ethernet.IPv4, len(pData))
+			copy(frame[12+2:], pData)
 		}
 
 		// packet := gopacket.NewPacket(frame, layers.LayerTypeEthernet, gopacket.Default)

@@ -10,7 +10,7 @@ const (
 type Payload struct {
 	PType byte  // payload types
 	LType LType // LinkType
-	Data  []byte
+	Data  *[]byte
 }
 
 /*

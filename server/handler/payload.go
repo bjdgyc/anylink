@@ -10,7 +10,7 @@ func payloadIn(cSess *sessdata.ConnSession, lType sessdata.LType, pType byte, da
 	pl := getPayload()
 	pl.LType = lType
 	pl.PType = pType
-	pl.Data = append(pl.Data, data...)
+	*pl.Data = append(*pl.Data, data...)
 
 	return payloadInData(cSess, pl)
 }
@@ -46,7 +46,7 @@ func payloadOutCstp(cSess *sessdata.ConnSession, lType sessdata.LType, pType byt
 	pl := getPayload()
 	pl.LType = lType
 	pl.PType = pType
-	pl.Data = append(pl.Data, data...)
+	*pl.Data = append(*pl.Data, data...)
 
 	closed := false
 
@@ -63,7 +63,7 @@ func payloadOutDtls(cSess *sessdata.ConnSession, dSess *sessdata.DtlsSession, lT
 	pl := getPayload()
 	pl.LType = lType
 	pl.PType = pType
-	pl.Data = append(pl.Data, data...)
+	*pl.Data = append(*pl.Data, data...)
 
 	select {
 	case cSess.PayloadOutDtls <- pl:
@@ -80,9 +80,10 @@ func checkLinkAcl(group *dbdata.Group, payload *sessdata.Payload) bool {
 		return true
 	}
 
-	ip_dst := waterutil.IPv4Destination(payload.Data)
-	ip_port := waterutil.IPv4DestinationPort(payload.Data)
-	ip_proto := waterutil.IPv4Protocol(payload.Data)
+	data := *payload.Data
+	ip_dst := waterutil.IPv4Destination(data)
+	ip_port := waterutil.IPv4DestinationPort(data)
+	ip_proto := waterutil.IPv4Protocol(data)
 	// fmt.Println("sent:", ip_dst, ip_port)
 
 	// 优先放行dns端口
