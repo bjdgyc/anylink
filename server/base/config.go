@@ -11,6 +11,7 @@ const (
 type config struct {
 	Typ     int
 	Name    string
+	Short   string
 	Usage   string
 	ValStr  string
 	ValInt  int

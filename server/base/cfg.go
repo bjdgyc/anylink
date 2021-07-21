@@ -31,6 +31,7 @@ var (
 
 type ServerConfig struct {
 	// LinkAddr      string `json:"link_addr"`
+	ConfFile       string `json:"conf_file"`
 	ServerAddr     string `json:"server_addr"`
 	ServerDTLSAddr string `json:"server_dtls_addr"`
 	ServerDTLS     bool   `json:"server_dtls"`
@@ -65,7 +66,7 @@ type ServerConfig struct {
 	MobileDpd       int    `json:"mobile_dpd"`
 
 	SessionTimeout int `json:"session_timeout"` // in seconds
-	AuthTimeout    int `json:"auth_timeout"`    // in seconds
+	// AuthTimeout    int `json:"auth_timeout"`    // in seconds
 }
 
 func initServerCfg() {
@@ -127,6 +128,7 @@ func initCfg() {
 		}
 	}
 
+	Cfg.ConfFile = cfgFile
 	initServerCfg()
 }
 
@@ -150,9 +152,9 @@ func ServerCfg2Slice() []SCfg {
 		value := s.Field(i)
 		tag := field.Tag.Get("json")
 		usage, env := getUsageEnv(tag)
-		if usage == "" {
-			continue
-		}
+		// if usage == "" {
+		// continue
+		// }
 
 		datas = append(datas, SCfg{Name: tag, Env: env, Info: usage, Data: value.Interface()})
 	}
