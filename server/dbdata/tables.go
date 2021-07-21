@@ -1,12 +1,13 @@
 package dbdata
 
 import (
+	"encoding/json"
 	"time"
 )
 
 type Group struct {
 	Id           int            `json:"id" xorm:"pk autoincr not null"`
-	Name         string         `json:"name" xorm:"varchar(60) not null unique(inx_name)"`
+	Name         string         `json:"name" xorm:"varchar(60) not null unique"`
 	Note         string         `json:"note" xorm:"varchar(255)"`
 	AllowLan     bool           `json:"allow_lan" xorm:"Bool"`
 	ClientDns    []ValData      `json:"client_dns" xorm:"Text"`
@@ -21,7 +22,7 @@ type Group struct {
 
 type User struct {
 	Id       int    `json:"id" xorm:"pk autoincr not null"`
-	Username string `json:"username" xorm:"varchar(60) not null unique(inx_username)"`
+	Username string `json:"username" xorm:"varchar(60) not null unique"`
 	Nickname string `json:"nickname" xorm:"varchar(255)"`
 	Email    string `json:"email" xorm:"varchar(255)"`
 	// Password  string    `json:"password"`
@@ -37,8 +38,8 @@ type User struct {
 
 type IpMap struct {
 	Id        int       `json:"id" xorm:"pk autoincr not null"`
-	IpAddr    string    `json:"ip_addr" xorm:"varchar(32) not null unique(inx_ip_addr)"`
-	MacAddr   string    `json:"mac_addr" xorm:"varchar(32) not null unique(inx_mac_addr)"`
+	IpAddr    string    `json:"ip_addr" xorm:"varchar(32) not null unique"`
+	MacAddr   string    `json:"mac_addr" xorm:"varchar(32) not null unique"`
 	Username  string    `json:"username" xorm:"varchar(60)"`
 	Keep      bool      `json:"keep" xorm:"Bool"` // 保留 ip-mac 绑定
 	KeepTime  time.Time `json:"keep_time" xorm:"DateTime"`
@@ -48,8 +49,8 @@ type IpMap struct {
 }
 
 type Setting struct {
-	Id        int       `json:"id" xorm:"pk autoincr not null"`
-	Name      string    `json:"name" xorm:"varchar(60) not null unique(inx_name)"`
-	Data      string    `json:"data" xorm:"Text"`
-	UpdatedAt time.Time `json:"updated_at" xorm:"DateTime updated"`
+	Id        int             `json:"id" xorm:"pk autoincr not null"`
+	Name      string          `json:"name" xorm:"varchar(60) not null unique"`
+	Data      json.RawMessage `json:"data" xorm:"Text"`
+	UpdatedAt time.Time       `json:"updated_at" xorm:"DateTime updated"`
 }

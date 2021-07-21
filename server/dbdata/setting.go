@@ -3,12 +3,12 @@ package dbdata
 import (
 	"encoding/json"
 	"reflect"
+	"xorm.io/xorm"
 )
 
-const (
-	InstallName = "Install"
-	InstallData = "OK"
-)
+type SettingInstall struct {
+	Installed bool `json:"installed"`
+}
 
 type SettingSmtp struct {
 	Host       string `json:"host"`
@@ -36,29 +36,30 @@ func StructName(data interface{}) string {
 	return name
 }
 
-func SettingAdd(data interface{}) error {
+func SettingSessAdd(sess *xorm.Session, data interface{}) error {
 	name := StructName(data)
 	v, _ := json.Marshal(data)
-	s := Setting{Name: name, Data: string(v)}
-	err := Add(&s)
+	s := &Setting{Name: name, Data: v}
+	_, err := sess.InsertOne(s)
+
 	return err
 }
 
 func SettingSet(data interface{}) error {
 	name := StructName(data)
 	v, _ := json.Marshal(data)
-	s := Setting{Data: string(v)}
-	err := Update("name", name, &s)
+	s := &Setting{Data: v}
+	err := Update("name", name, s)
 	return err
 }
 
 func SettingGet(data interface{}) error {
 	name := StructName(data)
-	s := Setting{Name: name}
-	err := One("name", name, &s)
+	s := &Setting{Name: name}
+	err := One("name", name, s)
 	if err != nil {
 		return err
 	}
-	err = json.Unmarshal([]byte(s.Data), data)
+	err = json.Unmarshal(s.Data, data)
 	return err
 }
