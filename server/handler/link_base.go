@@ -58,7 +58,7 @@ func execCmd(cmdStrs []string) error {
 		cmd := exec.Command("sh", "-c", cmdStr)
 		b, err := cmd.CombinedOutput()
 		if err != nil {
-			log.Println(string(b), err)
+			log.Println(string(b))
 			return err
 		}
 	}

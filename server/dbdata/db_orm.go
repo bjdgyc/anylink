@@ -1,66 +1,84 @@
 package dbdata
 
-import "github.com/asdine/storm/v3/index"
+import (
+	"errors"
+	"reflect"
+)
 
 const PageSize = 10
 
-func Save(data interface{}) error {
-	return sdb.Save(data)
+var ErrNotFound = errors.New("ErrNotFound")
+
+func Add(data interface{}) error {
+	_, err := xdb.InsertOne(data)
+	return err
 }
 
-func Update(data interface{}) error {
-	return sdb.Update(data)
-}
-
-func UpdateField(data interface{}, fieldName string, value interface{}) error {
-	return sdb.UpdateField(data, fieldName, value)
+func Update(fieldName string, value interface{}, data interface{}) error {
+	_, err := xdb.Where(fieldName+"=?", value).Update(data)
+	return err
 }
 
 func Del(data interface{}) error {
-	return sdb.DeleteStruct(data)
+	_, err := xdb.Delete(data)
+	return err
 }
 
-func Set(bucket, key string, data interface{}) error {
-	return sdb.Set(bucket, key, data)
+func extract(data interface{}, fieldName string) interface{} {
+	ref := reflect.ValueOf(data)
+	r := &ref
+	if r.Kind() == reflect.Ptr {
+		e := r.Elem()
+		r = &e
+	}
+	field := r.FieldByName(fieldName).Interface()
+	return field
 }
 
-func Get(bucket, key string, data interface{}) error {
-	return sdb.Get(bucket, key, data)
+// 更新全部字段
+func Set(data interface{}) error {
+	id := extract(data, "Id")
+	_, err := xdb.ID(id).AllCols().Update(data)
+	return err
+}
+
+func One(fieldName string, value interface{}, data interface{}) error {
+	has, err := xdb.Where(fieldName+"=?", value).Get(data)
+	if err != nil {
+		return err
+	}
+	if !has {
+		return ErrNotFound
+	}
+
+	return nil
 }
 
 func CountAll(data interface{}) int {
-	n, _ := sdb.Count(data)
-	return n
+	n, _ := xdb.Count(data)
+	return int(n)
 }
 
-func One(fieldName string, value interface{}, to interface{}) error {
-	return sdb.One(fieldName, value, to)
-}
-
-func Find(fieldName string, value interface{}, to interface{}, options ...func(q *index.Options)) error {
-	return sdb.Find(fieldName, value, to, options...)
-}
-
-func All(to interface{}, limit, page int) error {
-	opt := getOpt(limit, page)
-	return sdb.All(to, opt)
-}
-
-func Prefix(fieldName string, prefix string, to interface{}, limit, page int) error {
-	opt := getOpt(limit, page)
-	return sdb.Prefix(fieldName, prefix, to, opt)
-}
-
-func getOpt(limit, page int) func(*index.Options) {
-	skip := (page - 1) * limit
-	opt := func(opt *index.Options) {
-		opt.Reverse = true
-		if limit > 0 {
-			opt.Limit = limit
-		}
-		if skip > 0 {
-			opt.Skip = skip
-		}
+func Find(data interface{}, limit, page int) error {
+	if limit == 0 {
+		return xdb.Find(data)
 	}
-	return opt
+
+	start := (page - 1) * limit
+	return xdb.Limit(limit, start).Find(data)
+}
+
+func CountPrefix(fieldName string, prefix string, data interface{}) int {
+	n, _ := xdb.Where(fieldName+" like ?", prefix+"%").Count(data)
+	return int(n)
+}
+
+func Prefix(fieldName string, prefix string, data interface{}, limit, page int) error {
+	where := xdb.Where(fieldName+" like ?", prefix+"%")
+	if limit == 0 {
+		return where.Find(data)
+	}
+
+	start := (page - 1) * limit
+	return where.Limit(limit, start).Find(data)
 }

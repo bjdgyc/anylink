@@ -22,7 +22,7 @@ func GroupList(w http.ResponseWriter, r *http.Request) {
 	count := dbdata.CountAll(&dbdata.Group{})
 
 	var datas []dbdata.Group
-	err := dbdata.All(&datas, pageSize, page)
+	err := dbdata.Find(&datas, pageSize, page)
 	if err != nil {
 		RespError(w, RespInternalErr, err)
 		return

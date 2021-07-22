@@ -6,5 +6,5 @@ func Start() {
 }
 
 func Stop() error {
-	return sdb.Close()
+	return xdb.Close()
 }

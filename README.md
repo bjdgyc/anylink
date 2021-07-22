@@ -77,7 +77,7 @@ sudo ./anylink
 
 ## Config
 
-默认配置文件内有详细的注释，根据注释填写配置即可。
+> 默认配置文件内有详细的注释，根据注释填写配置即可。
 
 ```shell
 # 生成后台密码
@@ -87,7 +87,17 @@ sudo ./anylink
 ./anylink tool -s
 ```
 
-[conf/server.toml](server/conf/server.toml)
+> 数据库配置示例
+
+|  db_type   | db_source  |
+|  ----  | ----  |
+| sqlite3  | ./conf/anylink.db |
+| mysql  | user:password@tcp(127.0.0.1:3306)/anylink?charset=utf8 |
+| postgres  | user:password@localhost/anylink?sslmode=verify-full |
+
+> 示例配置文件
+> 
+> [conf/server-sample.toml](server/conf/server-sample.toml)
 
 ## Setting
 

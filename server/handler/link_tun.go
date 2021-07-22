@@ -46,14 +46,15 @@ func LinkTun(cSess *sessdata.ConnSession) error {
 	cmdstr1 := fmt.Sprintf("ip link set dev %s up mtu %d multicast off", ifce.Name(), cSess.Mtu)
 	cmdstr2 := fmt.Sprintf("ip addr add dev %s local %s peer %s/32",
 		ifce.Name(), base.Cfg.Ipv4Gateway, cSess.IpAddr)
-	cmdstr3 := fmt.Sprintf("sysctl -w net.ipv6.conf.%s.disable_ipv6=1", ifce.Name())
-	cmdStrs := []string{cmdstr1, cmdstr2, cmdstr3}
-	err = execCmd(cmdStrs)
+	err = execCmd([]string{cmdstr1, cmdstr2})
 	if err != nil {
 		base.Error(err)
 		_ = ifce.Close()
 		return err
 	}
+
+	cmdstr3 := fmt.Sprintf("sysctl -w net.ipv6.conf.%s.disable_ipv6=1", ifce.Name())
+	execCmd([]string{cmdstr3})
 
 	go tunRead(ifce, cSess)
 	go tunWrite(ifce, cSess)
@@ -79,7 +80,7 @@ func tunWrite(ifce *water.Interface, cSess *sessdata.ConnSession) {
 			return
 		}
 
-		_, err = ifce.Write(payload.Data)
+		_, err = ifce.Write(*payload.Data)
 		if err != nil {
 			base.Error("tun Write err", err)
 			return
@@ -101,7 +102,8 @@ func tunRead(ifce *water.Interface, cSess *sessdata.ConnSession) {
 
 	for {
 		// data := make([]byte, BufferSize)
-		data := getByteFull()
+		hb := getByteFull()
+		data := *hb
 		n, err = ifce.Read(data)
 		if err != nil {
 			base.Error("tun Read err", n, err)
@@ -120,6 +122,6 @@ func tunRead(ifce *water.Interface, cSess *sessdata.ConnSession) {
 			return
 		}
 
-		putByte(data)
+		putByte(hb)
 	}
 }

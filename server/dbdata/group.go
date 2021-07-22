@@ -29,24 +29,24 @@ type ValData struct {
 	Note   string `json:"note"`
 }
 
-type Group struct {
-	Id           int            `json:"id" storm:"id,increment"`
-	Name         string         `json:"name" storm:"unique"`
-	Note         string         `json:"note"`
-	AllowLan     bool           `json:"allow_lan"`
-	ClientDns    []ValData      `json:"client_dns"`
-	RouteInclude []ValData      `json:"route_include"`
-	RouteExclude []ValData      `json:"route_exclude"`
-	LinkAcl      []GroupLinkAcl `json:"link_acl"`
-	Bandwidth    int            `json:"bandwidth"` // 带宽限制
-	Status       int8           `json:"status"`    // 1正常
-	CreatedAt    time.Time      `json:"created_at"`
-	UpdatedAt    time.Time      `json:"updated_at"`
-}
+// type Group struct {
+// 	Id           int            `json:"id" xorm:"pk autoincr not null"`
+// 	Name         string         `json:"name" xorm:"not null unique"`
+// 	Note         string         `json:"note"`
+// 	AllowLan     bool           `json:"allow_lan"`
+// 	ClientDns    []ValData      `json:"client_dns"`
+// 	RouteInclude []ValData      `json:"route_include"`
+// 	RouteExclude []ValData      `json:"route_exclude"`
+// 	LinkAcl      []GroupLinkAcl `json:"link_acl"`
+// 	Bandwidth    int            `json:"bandwidth"` // 带宽限制
+// 	Status       int8           `json:"status"`    // 1正常
+// 	CreatedAt    time.Time      `json:"created_at"`
+// 	UpdatedAt    time.Time      `json:"updated_at"`
+// }
 
 func GetGroupNames() []string {
 	var datas []Group
-	err := All(&datas, 0, 0)
+	err := Find(&datas, 0, 0)
 	if err != nil {
 		base.Error(err)
 		return nil
@@ -116,7 +116,11 @@ func SetGroup(g *Group) error {
 	g.LinkAcl = linkAcl
 
 	g.UpdatedAt = time.Now()
-	err = Save(g)
+	if g.Id > 0 {
+		err = Set(g)
+	} else {
+		err = Add(g)
+	}
 
 	return err
 }

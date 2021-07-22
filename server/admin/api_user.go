@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 	"text/template"
@@ -36,11 +37,11 @@ func UserList(w http.ResponseWriter, r *http.Request) {
 
 	// 查询前缀匹配
 	if len(prefix) > 0 {
-		count = pageSize
-		err = dbdata.Prefix("Username", prefix, &datas, pageSize, 1)
+		count = dbdata.CountPrefix("username", prefix, &dbdata.User{})
+		err = dbdata.Prefix("username", prefix, &datas, pageSize, 1)
 	} else {
 		count = dbdata.CountAll(&dbdata.User{})
-		err = dbdata.All(&datas, pageSize, page)
+		err = dbdata.Find(&datas, pageSize, page)
 	}
 
 	if err != nil && !dbdata.CheckErrNotFound(err) {
@@ -141,7 +142,7 @@ func UserOtpQr(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	issuer := base.Cfg.Issuer
+	issuer := url.QueryEscape(base.Cfg.Issuer)
 	qrstr := fmt.Sprintf("otpauth://totp/%s:%s?issuer=%s&secret=%s", issuer, user.Email, issuer, user.OtpSecret)
 	qr, _ := qrcode.New(qrstr, qrcode.High)
 

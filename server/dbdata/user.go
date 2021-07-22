@@ -10,21 +10,21 @@ import (
 	"github.com/xlzd/gotp"
 )
 
-type User struct {
-	Id       int    `json:"id" storm:"id,increment"`
-	Username string `json:"username" storm:"unique"`
-	Nickname string `json:"nickname"`
-	Email    string `json:"email"`
-	// Password  string    `json:"password"`
-	PinCode    string    `json:"pin_code"`
-	OtpSecret  string    `json:"otp_secret"`
-	DisableOtp bool      `json:"disable_otp"` // 禁用otp
-	Groups     []string  `json:"groups"`
-	Status     int8      `json:"status"` // 1正常
-	SendEmail  bool      `json:"send_email"`
-	CreatedAt  time.Time `json:"created_at"`
-	UpdatedAt  time.Time `json:"updated_at"`
-}
+// type User struct {
+// 	Id       int    `json:"id"  xorm:"pk autoincr not null"`
+// 	Username string `json:"username" storm:"not null unique"`
+// 	Nickname string `json:"nickname"`
+// 	Email    string `json:"email"`
+// 	// Password  string    `json:"password"`
+// 	PinCode    string    `json:"pin_code"`
+// 	OtpSecret  string    `json:"otp_secret"`
+// 	DisableOtp bool      `json:"disable_otp"` // 禁用otp
+// 	Groups     []string  `json:"groups"`
+// 	Status     int8      `json:"status"` // 1正常
+// 	SendEmail  bool      `json:"send_email"`
+// 	CreatedAt  time.Time `json:"created_at"`
+// 	UpdatedAt  time.Time `json:"updated_at"`
+// }
 
 func SetUser(v *User) error {
 	var err error
@@ -57,7 +57,11 @@ func SetUser(v *User) error {
 	v.Groups = ng
 
 	v.UpdatedAt = time.Now()
-	err = Save(v)
+	if v.Id > 0 {
+		err = Set(v)
+	} else {
+		err = Add(v)
+	}
 
 	return err
 }

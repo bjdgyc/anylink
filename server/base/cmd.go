@@ -1,6 +1,7 @@
 package base
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"runtime"
@@ -22,8 +23,8 @@ var (
 	secret bool
 	// 显示版本信息
 	rev bool
-	// 获取env名称
-	env bool
+	// 输出debug信息
+	debug bool
 
 	// Used for flags.
 	runSrv bool
@@ -57,35 +58,21 @@ func init() {
 		},
 	}
 
-	cobra.OnInitialize(func() {
-		viper.SetConfigFile(cfgFile)
-		viper.AutomaticEnv()
-
-		if cfgFile == "" {
-			// 没有配置文件，不做处理
-			return
-		}
-
-		err := viper.ReadInConfig()
-		if err != nil {
-			fmt.Println("Using config file:", err)
-		}
-	})
-
 	viper.SetEnvPrefix("link")
 
 	// 基础配置
-	rootCmd.Flags().StringVarP(&cfgFile, "conf", "c", "", "config file")
+	rootCmd.Flags().StringVarP(&cfgFile, "conf", "c", "./conf/server.toml", "config file")
+	_ = viper.BindEnv("conf")
 
 	for _, v := range configs {
 		if v.Typ == cfgStr {
-			rootCmd.Flags().String(v.Name, v.ValStr, v.Usage)
+			rootCmd.Flags().StringP(v.Name, v.Short, v.ValStr, v.Usage)
 		}
 		if v.Typ == cfgInt {
-			rootCmd.Flags().Int(v.Name, v.ValInt, v.Usage)
+			rootCmd.Flags().IntP(v.Name, v.Short, v.ValInt, v.Usage)
 		}
 		if v.Typ == cfgBool {
-			rootCmd.Flags().Bool(v.Name, v.ValBool, v.Usage)
+			rootCmd.Flags().BoolP(v.Name, v.Short, v.ValBool, v.Usage)
 		}
 
 		_ = viper.BindPFlag(v.Name, rootCmd.Flags().Lookup(v.Name))
@@ -94,6 +81,22 @@ func init() {
 	}
 
 	rootCmd.AddCommand(initToolCmd())
+
+	cobra.OnInitialize(func() {
+		viper.SetConfigFile(cfgFile)
+		viper.AutomaticEnv()
+
+		_, err := os.Stat(cfgFile)
+		if errors.Is(err, os.ErrNotExist) {
+			// 没有配置文件，不做处理
+			return
+		}
+
+		err = viper.ReadInConfig()
+		if err != nil {
+			fmt.Println("Using config file:", err)
+		}
+	})
 }
 
 func initToolCmd() *cobra.Command {
@@ -106,7 +109,7 @@ func initToolCmd() *cobra.Command {
 	toolCmd.Flags().BoolVarP(&rev, "version", "v", false, "display version info")
 	toolCmd.Flags().BoolVarP(&secret, "secret", "s", false, "generate a random jwt secret")
 	toolCmd.Flags().StringVarP(&passwd, "passwd", "p", "", "convert the password plaintext")
-	toolCmd.Flags().BoolVarP(&env, "env", "e", false, "list the config name and env key")
+	toolCmd.Flags().BoolVarP(&debug, "debug", "d", false, "list the config viper.Debug() info")
 
 	toolCmd.Run = func(cmd *cobra.Command, args []string) {
 		switch {
@@ -120,10 +123,8 @@ func initToolCmd() *cobra.Command {
 		case passwd != "":
 			pass, _ := utils.PasswordHash(passwd)
 			fmt.Printf("Passwd:%s\n", pass)
-		case env:
-			for k, v := range envs {
-				fmt.Printf("%s => %s\n", k, v)
-			}
+		case debug:
+			viper.Debug()
 		default:
 			fmt.Println("Using [anylink tool -h] for help")
 		}

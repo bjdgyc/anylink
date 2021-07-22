@@ -5,11 +5,10 @@ import (
 	"net/http"
 	"runtime"
 
-	"github.com/bjdgyc/anylink/dbdata"
-	"github.com/bjdgyc/anylink/sessdata"
-
 	"github.com/bjdgyc/anylink/base"
+	"github.com/bjdgyc/anylink/dbdata"
 	"github.com/bjdgyc/anylink/pkg/utils"
+	"github.com/bjdgyc/anylink/sessdata"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/disk"
 	"github.com/shirou/gopsutil/host"

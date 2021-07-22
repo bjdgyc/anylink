@@ -1,70 +1,112 @@
 package dbdata
 
 import (
-	"time"
-
-	"github.com/asdine/storm/v3"
-	"github.com/asdine/storm/v3/codec/json"
 	"github.com/bjdgyc/anylink/base"
-	bolt "go.etcd.io/bbolt"
+	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/lib/pq"
+	_ "github.com/mattn/go-sqlite3"
+	"xorm.io/xorm"
 )
 
 var (
-	sdb *storm.DB
+	xdb *xorm.Engine
 )
+
+func GetXdb() *xorm.Engine {
+	return xdb
+}
 
 func initDb() {
 	var err error
-	sdb, err = storm.Open(base.Cfg.DbFile, storm.Codec(json.Codec),
-		storm.BoltOptions(0600, &bolt.Options{Timeout: 10 * time.Second}))
+	xdb, err = xorm.NewEngine(base.Cfg.DbType, base.Cfg.DbSource)
+	// xdb.ShowSQL(true)
 	if err != nil {
 		base.Fatal(err)
 	}
 
 	// 初始化数据库
-	err = sdb.Init(&User{})
+	err = xdb.Sync2(&User{}, &Setting{}, &Group{}, &IpMap{})
 	if err != nil {
 		base.Fatal(err)
 	}
 
-	// fmt.Println("s1")
+	// fmt.Println("s1=============", err)
 }
 
 func initData() {
 	var (
-		err     error
-		install bool
+		err error
 	)
 
 	// 判断是否初次使用
-	err = Get(SettingBucket, Installed, &install)
-	if err == nil && install {
+	install := &SettingInstall{}
+	err = SettingGet(install)
+
+	if err == nil && install.Installed {
 		// 已经安装过
 		return
 	}
 
-	defer func() {
-		_ = Set(SettingBucket, Installed, true)
-	}()
-
-	smtp := &SettingSmtp{
-		Host: "127.0.0.1",
-		Port: 25,
-		From: "vpn@xx.com",
+	// 发生错误
+	if err != ErrNotFound {
+		base.Fatal(err)
 	}
-	_ = SettingSet(smtp)
 
+	err = addInitData()
+	if err != nil {
+		base.Fatal(err)
+	}
+
+}
+
+func addInitData() error {
+	var (
+		err error
+	)
+
+	sess := xdb.NewSession()
+	defer sess.Close()
+
+	err = sess.Begin()
+	if err != nil {
+		return err
+	}
+
+	// SettingSmtp
+	smtp := &SettingSmtp{
+		Host:       "127.0.0.1",
+		Port:       25,
+		From:       "vpn@xx.com",
+		Encryption: "None",
+	}
+	err = SettingSessAdd(sess, smtp)
+	if err != nil {
+		return err
+	}
+
+	// SettingOther
 	other := &SettingOther{
 		LinkAddr:    "vpn.xx.com",
 		Banner:      "您已接入公司网络，请按照公司规定使用。\n请勿进行非工作下载及视频行为！",
 		AccountMail: accountMail,
 	}
-	_ = SettingSet(other)
+	err = SettingSessAdd(sess, other)
+	if err != nil {
+		return err
+	}
 
+	// Install
+	install := &SettingInstall{Installed: true}
+	err = SettingSessAdd(sess, install)
+	if err != nil {
+		return err
+	}
+
+	return sess.Commit()
 }
 
 func CheckErrNotFound(err error) bool {
-	return err == storm.ErrNotFound
+	return err == ErrNotFound
 }
 
 const accountMail = `<p>您好:</p>
