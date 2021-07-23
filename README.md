@@ -38,7 +38,7 @@ AnyLink 服务端仅在CentOS 7、Ubuntu 18.04测试通过，如需要安装在�
 > 升级 go version = 1.16
 >
 > 需要提前安装好 golang 和 nodejs
-> 
+>
 > 使用客户端前，必须申请安全的https证书，不支持私有证书连接
 
 ```shell
@@ -89,14 +89,14 @@ sudo ./anylink
 
 > 数据库配置示例
 
-|  db_type   | db_source  |
-|  ----  | ----  |
-| sqlite3  | ./conf/anylink.db |
-| mysql  | user:password@tcp(127.0.0.1:3306)/anylink?charset=utf8 |
-| postgres  | user:password@localhost/anylink?sslmode=verify-full |
+| db_type  | db_source                                              |
+| -------- | ------------------------------------------------------ |
+| sqlite3  | ./conf/anylink.db                                      |
+| mysql    | user:password@tcp(127.0.0.1:3306)/anylink?charset=utf8 |
+| postgres | user:password@localhost/anylink?sslmode=verify-full    |
 
 > 示例配置文件
-> 
+>
 > [conf/server-sample.toml](server/conf/server-sample.toml)
 
 ## Setting
@@ -179,6 +179,8 @@ systemd 脚本放入：
 
    ```bash
    docker pull bjdgyc/anylink:latest
+   # 查看帮助命令信息
+   docker run -it --rm bjdgyc/anylink -h
    ```
 
 2. 生成密码
@@ -199,20 +201,21 @@ systemd 脚本放入：
 
    ```bash
    docker run -itd --name anylink --privileged \
-   -p 443:443 -p 8800:8800 \
-   --restart=always \
-   bjdgyc/anylink
+       -p 443:443 -p 8800:8800 \
+       --restart=always \
+       bjdgyc/anylink
    ```
 
 5. 使用自定义参数启动容器
 
    ```bash
    docker run -itd --name anylink --privileged \
-   -e IPV4_CIDR=192.168.10.0/24 \
-   -p 443:443 -p 8800:8800 \
-   --restart=always \
-   bjdgyc/anylink \
-   -c=/etc/server.toml --admin_addr=:8080
+       -e IPV4_CIDR=192.168.10.0/24 \
+       -p 443:443 -p 8800:8800 \
+       --restart=always \
+       bjdgyc/anylink \
+       # "-c=/etc/server.toml" 参数可以参考 -h 命令
+       -c=/etc/server.toml --ip_lease = 1209600 \ # IP地址租约时长
    ```
 
 6. 构建镜像
@@ -247,6 +250,7 @@ QQ群共享文件有相关软件下载
 <details>
 <summary>展开查看</summary>
 
+
 ![system.jpg](screenshot/system.jpg)
 ![setting.jpg](screenshot/setting.jpg)
 ![users.jpg](screenshot/users.jpg)
@@ -264,7 +268,3 @@ QQ群共享文件有相关软件下载
 <a href="https://www.jetbrains.com">
     <img src="screenshot/jetbrains.png" width="200" height="200" alt="jetbrains.png" />
 </a>
-
-
-
-
