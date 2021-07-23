@@ -179,6 +179,8 @@ systemd 脚本放入：
 
    ```bash
    docker pull bjdgyc/anylink:latest
+   # 查看帮助命令信息
+   docker run -it --rm bjdgyc/anylink -h
    ```
 
 2. 生成密码
@@ -212,10 +214,8 @@ systemd 脚本放入：
        -p 443:443 -p 8800:8800 \
        --restart=always \
        bjdgyc/anylink \
-       # "-c=/etc/server.toml" 参数可以指定`server.toml`中多个变量 
-       -c=/etc/server.toml --admin_addr=:8080 \   # WEB管理IP和端口
+       # "-c=/etc/server.toml" 参数可以参考 -h 命令
        -c=/etc/server.toml --ip_lease = 1209600 \ # IP地址租约时长
-       # -c=/etc/server.toml --<!请参考server.toml内变量!>
    ```
 
 6. 构建镜像
