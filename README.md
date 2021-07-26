@@ -210,12 +210,25 @@ systemd 脚本放入：
 
    ```bash
    docker run -itd --name anylink --privileged \
-       -e IPV4_CIDR=192.168.10.0/24 \
-       -p 443:443 -p 8800:8800 \
-       --restart=always \
+       -p 5443:443 -p 8800:8800 \
+       --restart=always
+       -v=anylink_volume:/app \
        bjdgyc/anylink \
-       # "-c=/etc/server.toml" 参数可以参考 -h 命令
-       -c=/etc/server.toml --ip_lease = 1209600 \ # IP地址租约时长
+       -c=/etc/server.toml --issuer="AnyLink SSL VPN" \ 
+       -c=/etc/server.toml --default_group="普通用户组" \ # VPN用户组
+       -c=/etc/server.toml --files_path="./conf/files" \
+       -c=/etc/server.toml --cert_file="./conf/vpn_cert.pem" \
+       -c=/etc/server.toml --cert_key="./conf/vpn_cert.key" \
+       -c=/etc/server.toml --admin_addr=":8800" \ # WEB管理端口
+       -c=/etc/server.toml --log_path="" \ # 留空为标准输出
+       -c=/etc/server.toml --log_level=debug \ # 日志级别
+       -c=/etc/server.toml --admin_user="rokae" \ # 管理账号明辉岑
+       -c=/etc/server.toml --ipv4_cidr=172.17.3.0/24 \ # 客户端网段
+       -c=/etc/server.toml --ipv4_gateway=172.17.3.1 \ # DHCP 分配网关
+       -c=/etc/server.toml --ipv4_start=172.17.3.10 \  # DHCP 分配IP其实
+       -c=/etc/server.toml --ipv4_end=172.17.3.254 \   # DHCP 分配IP结束
+       -c=/etc/server.toml --ip_lease=28800 # DHCP租约时长
+       # "-c=/etc/server.toml" 更多参数可以参考 -h 命令
    ```
 
 6. 构建镜像
