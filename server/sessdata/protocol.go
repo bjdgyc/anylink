@@ -8,8 +8,8 @@ const (
 )
 
 type Payload struct {
-	PType byte  // payload types
 	LType LType // LinkType
+	PType byte  // payload types
 	Data  *[]byte
 }
 

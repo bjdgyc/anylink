@@ -6,18 +6,9 @@ import (
 	"github.com/songgao/water/waterutil"
 )
 
-func payloadIn(cSess *sessdata.ConnSession, lType sessdata.LType, pType byte, data []byte) bool {
-	pl := getPayload()
-	pl.LType = lType
-	pl.PType = pType
-	*pl.Data = append(*pl.Data, data...)
-
-	return payloadInData(cSess, pl)
-}
-
-func payloadInData(cSess *sessdata.ConnSession, payload *sessdata.Payload) bool {
+func payloadIn(cSess *sessdata.ConnSession, pl *sessdata.Payload) bool {
 	// 进行Acl规则判断
-	check := checkLinkAcl(cSess.Group, payload)
+	check := checkLinkAcl(cSess.Group, pl)
 	if !check {
 		// 校验不通过直接丢弃
 		return false
@@ -25,7 +16,7 @@ func payloadInData(cSess *sessdata.ConnSession, payload *sessdata.Payload) bool 
 
 	closed := false
 	select {
-	case cSess.PayloadIn <- payload:
+	case cSess.PayloadIn <- pl:
 	case <-cSess.CloseChan:
 		closed = true
 	}
@@ -33,21 +24,16 @@ func payloadInData(cSess *sessdata.ConnSession, payload *sessdata.Payload) bool 
 	return closed
 }
 
-func payloadOut(cSess *sessdata.ConnSession, lType sessdata.LType, pType byte, data []byte) bool {
+func payloadOut(cSess *sessdata.ConnSession, pl *sessdata.Payload) bool {
 	dSess := cSess.GetDtlsSession()
 	if dSess == nil {
-		return payloadOutCstp(cSess, lType, pType, data)
+		return payloadOutCstp(cSess, pl)
 	} else {
-		return payloadOutDtls(cSess, dSess, lType, pType, data)
+		return payloadOutDtls(cSess, dSess, pl)
 	}
 }
 
-func payloadOutCstp(cSess *sessdata.ConnSession, lType sessdata.LType, pType byte, data []byte) bool {
-	pl := getPayload()
-	pl.LType = lType
-	pl.PType = pType
-	*pl.Data = append(*pl.Data, data...)
-
+func payloadOutCstp(cSess *sessdata.ConnSession, pl *sessdata.Payload) bool {
 	closed := false
 
 	select {
@@ -59,12 +45,7 @@ func payloadOutCstp(cSess *sessdata.ConnSession, lType sessdata.LType, pType byt
 	return closed
 }
 
-func payloadOutDtls(cSess *sessdata.ConnSession, dSess *sessdata.DtlsSession, lType sessdata.LType, pType byte, data []byte) bool {
-	pl := getPayload()
-	pl.LType = lType
-	pl.PType = pType
-	*pl.Data = append(*pl.Data, data...)
-
+func payloadOutDtls(cSess *sessdata.ConnSession, dSess *sessdata.DtlsSession, pl *sessdata.Payload) bool {
 	select {
 	case cSess.PayloadOutDtls <- pl:
 	case <-dSess.CloseChan:

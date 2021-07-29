@@ -20,6 +20,7 @@ func LinkCstp(conn net.Conn, cSess *sessdata.ConnSession) {
 		err     error
 		n       int
 		dataLen uint16
+		data    []byte
 		dead    = time.Duration(cSess.CstpDpd+5) * time.Second
 	)
 
@@ -34,9 +35,9 @@ func LinkCstp(conn net.Conn, cSess *sessdata.ConnSession) {
 			return
 		}
 		// hdata := make([]byte, BufferSize)
-		hb := getByteFull()
-		hdata := *hb
-		n, err = conn.Read(hdata)
+		pl := getPayload()
+		data = *pl.Data
+		n, err = conn.Read(data)
 		if err != nil {
 			base.Error("read hdata: ", err)
 			return
@@ -48,7 +49,7 @@ func LinkCstp(conn net.Conn, cSess *sessdata.ConnSession) {
 			base.Error(err)
 		}
 
-		switch hdata[6] {
+		switch data[6] {
 		case 0x07: // KEEPALIVE
 			// do nothing
 			// base.Debug("recv keepalive", cSess.IpAddr)
@@ -57,19 +58,20 @@ func LinkCstp(conn net.Conn, cSess *sessdata.ConnSession) {
 			return
 		case 0x03: // DPD-REQ
 			// base.Debug("recv DPD-REQ", cSess.IpAddr)
-			if payloadOutCstp(cSess, sessdata.LTypeIPData, 0x04, nil) {
+			pl.PType = 0x04
+			if payloadOutCstp(cSess, pl) {
 				return
 			}
 		case 0x04:
 			// log.Println("recv DPD-RESP")
 		case 0x00: // DATA
-			dataLen = binary.BigEndian.Uint16(hdata[4:6]) // 4,5
-			if payloadIn(cSess, sessdata.LTypeIPData, 0x00, hdata[8:8+dataLen]) {
+			dataLen = binary.BigEndian.Uint16(data[4:6]) // 4,5
+			copy(data, data[8:8+dataLen])
+			*pl.Data = data[:dataLen]
+			if payloadIn(cSess, pl) {
 				return
 			}
 		}
-
-		putByte(hb)
 	}
 }
 
@@ -81,40 +83,42 @@ func cstpWrite(conn net.Conn, cSess *sessdata.ConnSession) {
 	}()
 
 	var (
-		err error
-		n   int
-		// header  []byte
-		payload *sessdata.Payload
+		err  error
+		n    int
+		data []byte
+		pl   *sessdata.Payload
 	)
 
 	for {
 		select {
-		case payload = <-cSess.PayloadOutCstp:
+		case pl = <-cSess.PayloadOutCstp:
 		case <-cSess.CloseChan:
 			return
 		}
 
-		if payload.LType != sessdata.LTypeIPData {
+		if pl.LType != sessdata.LTypeIPData {
 			continue
 		}
 
-		h := []byte{'S', 'T', 'F', 0x01, 0x00, 0x00, payload.PType, 0x00}
-		hb := getByteZero()
-		header := *hb
-		header = append(header, h...)
-		if payload.PType == 0x00 {
-			data := *payload.Data
-			binary.BigEndian.PutUint16(header[4:6], uint16(len(data)))
-			header = append(header, data...)
+		data = *pl.Data
+		if pl.PType == 0x00 {
+			l := len(data)
+			data = data[:l+8]
+			copy(data[8:], data)
+			copy(data[:8], plHeader)
+			binary.BigEndian.PutUint16(data[4:6], uint16(l))
+		} else {
+			data = append(data[:0], plHeader...)
+			data[6] = pl.PType
 		}
-		n, err = conn.Write(header)
+		*pl.Data = data
+		n, err = conn.Write(*pl.Data)
 		if err != nil {
 			base.Error("write err", err)
 			return
 		}
 
-		putByte(hb)
-		putPayload(payload)
+		putPayload(pl)
 
 		// 限流设置
 		err = cSess.RateLimit(n, false)
