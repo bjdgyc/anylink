@@ -68,9 +68,10 @@ func LinkDtls(conn net.Conn, cSess *sessdata.ConnSession) {
 			// base.Debug("recv DPD-RESP", cSess.IpAddr)
 		case 0x00: // DATA
 			// 去除数据头
-			copy(pl.Data, pl.Data[1:n])
+			// copy(pl.Data, pl.Data[1:n])
 			// 更新切片长度
-			pl.Data = pl.Data[:n-1]
+			// pl.Data = pl.Data[:n-1]
+			pl.Data = append(pl.Data[:0], pl.Data[1:n]...)
 			if payloadIn(cSess, pl) {
 				return
 			}

@@ -69,6 +69,7 @@ func LinkCstp(conn net.Conn, cSess *sessdata.ConnSession) {
 			copy(pl.Data, pl.Data[8:8+dataLen])
 			// 更新切片长度
 			pl.Data = pl.Data[:dataLen]
+			// pl.Data = append(pl.Data[:0], pl.Data[8:8+dataLen]...)
 			if payloadIn(cSess, pl) {
 				return
 			}
