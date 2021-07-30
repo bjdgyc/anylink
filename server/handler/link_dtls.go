@@ -24,21 +24,22 @@ func LinkDtls(conn net.Conn, cSess *sessdata.ConnSession) {
 	}()
 
 	var (
+		err  error
+		n    int
 		dead = time.Duration(cSess.CstpDpd+5) * time.Second
 	)
 
 	go dtlsWrite(conn, dSess, cSess)
 
 	for {
-		err := conn.SetReadDeadline(time.Now().Add(dead))
+		err = conn.SetReadDeadline(time.Now().Add(dead))
 		if err != nil {
 			base.Error("SetDeadline: ", err)
 			return
 		}
 
-		hb := getByteFull()
-		hdata := *hb
-		n, err := conn.Read(hdata)
+		pl := getPayload()
+		n, err = conn.Read(pl.Data)
 		if err != nil {
 			base.Error("read hdata: ", err)
 			return
@@ -50,7 +51,7 @@ func LinkDtls(conn net.Conn, cSess *sessdata.ConnSession) {
 			base.Error(err)
 		}
 
-		switch hdata[0] {
+		switch pl.Data[0] {
 		case 0x07: // KEEPALIVE
 			// do nothing
 			// base.Debug("recv keepalive", cSess.IpAddr)
@@ -59,18 +60,22 @@ func LinkDtls(conn net.Conn, cSess *sessdata.ConnSession) {
 			return
 		case 0x03: // DPD-REQ
 			// base.Debug("recv DPD-REQ", cSess.IpAddr)
-			if payloadOutDtls(cSess, dSess, sessdata.LTypeIPData, 0x04, nil) {
+			pl.PType = 0x04
+			if payloadOutDtls(cSess, dSess, pl) {
 				return
 			}
 		case 0x04:
 			// base.Debug("recv DPD-RESP", cSess.IpAddr)
 		case 0x00: // DATA
-			if payloadIn(cSess, sessdata.LTypeIPData, 0x00, hdata[1:n]) {
+			// 去除数据头
+			copy(pl.Data, pl.Data[1:n])
+			// 更新切片长度
+			pl.Data = pl.Data[:n-1]
+			if payloadIn(cSess, pl) {
 				return
 			}
 		}
 
-		putByte(hb)
 	}
 }
 
@@ -82,37 +87,42 @@ func dtlsWrite(conn net.Conn, dSess *sessdata.DtlsSession, cSess *sessdata.ConnS
 	}()
 
 	var (
-		// header  []byte
-		payload *sessdata.Payload
+		pl *sessdata.Payload
 	)
 
 	for {
 		// dtls优先推送数据
 		select {
-		case payload = <-cSess.PayloadOutDtls:
+		case pl = <-cSess.PayloadOutDtls:
 		case <-dSess.CloseChan:
 			return
 		}
 
-		if payload.LType != sessdata.LTypeIPData {
+		if pl.LType != sessdata.LTypeIPData {
 			continue
 		}
 
 		// header = []byte{payload.PType}
-		hb := getByteZero()
-		header := *hb
-		header = append(header, payload.PType)
-		if payload.PType == 0x00 { // data
-			header = append(header, *payload.Data...)
+		if pl.PType == 0x00 { // data
+			// 获取数据长度
+			l := len(pl.Data)
+			// 先扩容 +1
+			pl.Data = pl.Data[:l+1]
+			// 数据后移
+			copy(pl.Data[1:], pl.Data)
+			// 添加头信息
+			pl.Data[0] = pl.PType
+		} else {
+			// 设置头类型
+			pl.Data = append(pl.Data[:0], pl.PType)
 		}
-		n, err := conn.Write(header)
+		n, err := conn.Write(pl.Data)
 		if err != nil {
 			base.Error("write err", err)
 			return
 		}
 
-		putByte(hb)
-		putPayload(payload)
+		putPayload(pl)
 
 		// 限流设置
 		err = cSess.RateLimit(n, false)

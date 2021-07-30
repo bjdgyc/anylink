@@ -80,7 +80,7 @@ func tunWrite(ifce *water.Interface, cSess *sessdata.ConnSession) {
 			return
 		}
 
-		_, err = ifce.Write(*pl.Data)
+		_, err = ifce.Write(pl.Data)
 		if err != nil {
 			base.Error("tun Write err", err)
 			return
@@ -103,13 +103,14 @@ func tunRead(ifce *water.Interface, cSess *sessdata.ConnSession) {
 	for {
 		// data := make([]byte, BufferSize)
 		pl := getPayload()
-		n, err = ifce.Read(*pl.Data)
+		n, err = ifce.Read(pl.Data)
 		if err != nil {
 			base.Error("tun Read err", n, err)
 			return
 		}
 
-		*pl.Data = (*pl.Data)[:n]
+		// 更新数据长度
+		pl.Data = (pl.Data)[:n]
 
 		// data = data[:n]
 		// ip_src := waterutil.IPv4Source(data)

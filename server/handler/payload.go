@@ -55,13 +55,13 @@ func payloadOutDtls(cSess *sessdata.ConnSession, dSess *sessdata.DtlsSession, pl
 }
 
 // Acl规则校验
-func checkLinkAcl(group *dbdata.Group, payload *sessdata.Payload) bool {
-	if payload.LType == sessdata.LTypeIPData && payload.PType == 0x00 && len(group.LinkAcl) > 0 {
+func checkLinkAcl(group *dbdata.Group, pl *sessdata.Payload) bool {
+	if pl.LType == sessdata.LTypeIPData && pl.PType == 0x00 && len(group.LinkAcl) > 0 {
 	} else {
 		return true
 	}
 
-	data := *payload.Data
+	data := pl.Data
 	ip_dst := waterutil.IPv4Destination(data)
 	ip_port := waterutil.IPv4DestinationPort(data)
 	ip_proto := waterutil.IPv4Protocol(data)

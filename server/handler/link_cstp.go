@@ -20,7 +20,6 @@ func LinkCstp(conn net.Conn, cSess *sessdata.ConnSession) {
 		err     error
 		n       int
 		dataLen uint16
-		data    []byte
 		dead    = time.Duration(cSess.CstpDpd+5) * time.Second
 	)
 
@@ -36,8 +35,7 @@ func LinkCstp(conn net.Conn, cSess *sessdata.ConnSession) {
 		}
 		// hdata := make([]byte, BufferSize)
 		pl := getPayload()
-		data = *pl.Data
-		n, err = conn.Read(data)
+		n, err = conn.Read(pl.Data)
 		if err != nil {
 			base.Error("read hdata: ", err)
 			return
@@ -49,7 +47,7 @@ func LinkCstp(conn net.Conn, cSess *sessdata.ConnSession) {
 			base.Error(err)
 		}
 
-		switch data[6] {
+		switch pl.Data[6] {
 		case 0x07: // KEEPALIVE
 			// do nothing
 			// base.Debug("recv keepalive", cSess.IpAddr)
@@ -65,9 +63,12 @@ func LinkCstp(conn net.Conn, cSess *sessdata.ConnSession) {
 		case 0x04:
 			// log.Println("recv DPD-RESP")
 		case 0x00: // DATA
-			dataLen = binary.BigEndian.Uint16(data[4:6]) // 4,5
-			copy(data, data[8:8+dataLen])
-			*pl.Data = data[:dataLen]
+			// 获取数据长度
+			dataLen = binary.BigEndian.Uint16(pl.Data[4:6]) // 4,5
+			// 去除数据头
+			copy(pl.Data, pl.Data[8:8+dataLen])
+			// 更新切片长度
+			pl.Data = pl.Data[:dataLen]
 			if payloadIn(cSess, pl) {
 				return
 			}
@@ -83,10 +84,9 @@ func cstpWrite(conn net.Conn, cSess *sessdata.ConnSession) {
 	}()
 
 	var (
-		err  error
-		n    int
-		data []byte
-		pl   *sessdata.Payload
+		err error
+		n   int
+		pl  *sessdata.Payload
 	)
 
 	for {
@@ -100,19 +100,24 @@ func cstpWrite(conn net.Conn, cSess *sessdata.ConnSession) {
 			continue
 		}
 
-		data = *pl.Data
 		if pl.PType == 0x00 {
-			l := len(data)
-			data = data[:l+8]
-			copy(data[8:], data)
-			copy(data[:8], plHeader)
-			binary.BigEndian.PutUint16(data[4:6], uint16(l))
+			// 获取数据长度
+			l := len(pl.Data)
+			// 先扩容 +8
+			pl.Data = pl.Data[:l+8]
+			// 数据后移
+			copy(pl.Data[8:], pl.Data)
+			// 添加头信息
+			copy(pl.Data[:8], plHeader)
+			// 更新头长度
+			binary.BigEndian.PutUint16(pl.Data[4:6], uint16(l))
 		} else {
-			data = append(data[:0], plHeader...)
-			data[6] = pl.PType
+			pl.Data = append(pl.Data[:0], plHeader...)
+			// 设置头类型
+			pl.Data[6] = pl.PType
 		}
-		*pl.Data = data
-		n, err = conn.Write(*pl.Data)
+
+		n, err = conn.Write(pl.Data)
 		if err != nil {
 			base.Error("write err", err)
 			return
