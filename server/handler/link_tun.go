@@ -69,24 +69,24 @@ func tunWrite(ifce *water.Interface, cSess *sessdata.ConnSession) {
 	}()
 
 	var (
-		err     error
-		payload *sessdata.Payload
+		err error
+		pl  *sessdata.Payload
 	)
 
 	for {
 		select {
-		case payload = <-cSess.PayloadIn:
+		case pl = <-cSess.PayloadIn:
 		case <-cSess.CloseChan:
 			return
 		}
 
-		_, err = ifce.Write(payload.Data)
+		_, err = ifce.Write(pl.Data)
 		if err != nil {
 			base.Error("tun Write err", err)
 			return
 		}
 
-		putPayload(payload)
+		putPayload(pl)
 	}
 }
 
@@ -102,13 +102,15 @@ func tunRead(ifce *water.Interface, cSess *sessdata.ConnSession) {
 
 	for {
 		// data := make([]byte, BufferSize)
-		hb := getByteFull()
-		data := *hb
-		n, err = ifce.Read(data)
+		pl := getPayload()
+		n, err = ifce.Read(pl.Data)
 		if err != nil {
 			base.Error("tun Read err", n, err)
 			return
 		}
+
+		// 更新数据长度
+		pl.Data = (pl.Data)[:n]
 
 		// data = data[:n]
 		// ip_src := waterutil.IPv4Source(data)
@@ -118,10 +120,8 @@ func tunRead(ifce *water.Interface, cSess *sessdata.ConnSession) {
 		// packet := gopacket.NewPacket(data, layers.LayerTypeIPv4, gopacket.Default)
 		// fmt.Println("read:", packet)
 
-		if payloadOut(cSess, sessdata.LTypeIPData, 0x00, data[:n]) {
+		if payloadOut(cSess, pl) {
 			return
 		}
-
-		putByte(hb)
 	}
 }

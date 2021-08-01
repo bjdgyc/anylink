@@ -5,8 +5,6 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
-
-	"github.com/spf13/viper"
 )
 
 const (
@@ -31,6 +29,7 @@ var (
 
 type ServerConfig struct {
 	// LinkAddr      string `json:"link_addr"`
+	Conf           string `json:"conf"`
 	ServerAddr     string `json:"server_addr"`
 	ServerDTLSAddr string `json:"server_dtls_addr"`
 	ServerDTLS     bool   `json:"server_dtls"`
@@ -65,7 +64,7 @@ type ServerConfig struct {
 	MobileDpd       int    `json:"mobile_dpd"`
 
 	SessionTimeout int `json:"session_timeout"` // in seconds
-	AuthTimeout    int `json:"auth_timeout"`    // in seconds
+	// AuthTimeout    int `json:"auth_timeout"`    // in seconds
 }
 
 func initServerCfg() {
@@ -81,6 +80,10 @@ func initServerCfg() {
 	// Cfg.UiPath = getAbsPath(base, Cfg.UiPath)
 	// Cfg.FilesPath = getAbsPath(base, Cfg.FilesPath)
 	// Cfg.LogPath = getAbsPath(base, Cfg.LogPath)
+
+	if Cfg.AdminPass == defaultPwd {
+		fmt.Fprintln(os.Stderr, "=== 使用默认的admin_pass有安全风险，请设置新的admin_pass ===")
+	}
 
 	if Cfg.JwtSecret == defaultJwt {
 		fmt.Fprintln(os.Stderr, "=== 使用默认的jwt_secret有安全风险，请设置新的jwt_secret ===")
@@ -115,13 +118,13 @@ func initCfg() {
 		for _, v := range configs {
 			if v.Name == tag {
 				if v.Typ == cfgStr {
-					value.SetString(viper.GetString(v.Name))
+					value.SetString(linkViper.GetString(v.Name))
 				}
 				if v.Typ == cfgInt {
-					value.SetInt(int64(viper.GetInt(v.Name)))
+					value.SetInt(int64(linkViper.GetInt(v.Name)))
 				}
 				if v.Typ == cfgBool {
-					value.SetBool(viper.GetBool(v.Name))
+					value.SetBool(linkViper.GetBool(v.Name))
 				}
 			}
 		}
@@ -150,9 +153,6 @@ func ServerCfg2Slice() []SCfg {
 		value := s.Field(i)
 		tag := field.Tag.Get("json")
 		usage, env := getUsageEnv(tag)
-		if usage == "" {
-			continue
-		}
 
 		datas = append(datas, SCfg{Name: tag, Env: env, Info: usage, Data: value.Interface()})
 	}

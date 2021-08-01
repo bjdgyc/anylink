@@ -3,13 +3,21 @@ package handler
 import (
 	"sync"
 
+	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/sessdata"
 )
 
+// 不允许直接修改
+// [6] => PType
+var plHeader = []byte{'S', 'T', 'F', 0x01, 0x00, 0x00, 0x00, 0x00}
+
 var plPool = sync.Pool{
 	New: func() interface{} {
+		b := make([]byte, BufferSize)
 		pl := sessdata.Payload{
-			Data: make([]byte, 0, BufferSize),
+			LType: sessdata.LTypeIPData,
+			PType: 0x00,
+			Data:  b,
 		}
 		// fmt.Println("plPool-init", len(pl.Data), cap(pl.Data))
 		return &pl
@@ -22,15 +30,21 @@ func getPayload() *sessdata.Payload {
 }
 
 func putPayload(pl *sessdata.Payload) {
-	pl.LType = 0
-	pl.PType = 0
-	pl.Data = pl.Data[:0]
+	// 错误数据丢弃
+	if cap(pl.Data) != BufferSize {
+		base.Warn("payload cap is err", cap(pl.Data))
+		return
+	}
+
+	pl.LType = sessdata.LTypeIPData
+	pl.PType = 0x00
+	pl.Data = pl.Data[:BufferSize]
 	plPool.Put(pl)
 }
 
 var bytePool = sync.Pool{
 	New: func() interface{} {
-		b := make([]byte, 0, BufferSize)
+		b := make([]byte, BufferSize)
 		// fmt.Println("bytePool-init")
 		return &b
 	},
@@ -38,15 +52,15 @@ var bytePool = sync.Pool{
 
 func getByteZero() *[]byte {
 	b := bytePool.Get().(*[]byte)
+	*b = (*b)[:0]
 	return b
 }
 
 func getByteFull() *[]byte {
 	b := bytePool.Get().(*[]byte)
-	*b = (*b)[:BufferSize]
 	return b
 }
 func putByte(b *[]byte) {
-	*b = (*b)[:0]
+	*b = (*b)[:BufferSize]
 	bytePool.Put(b)
 }

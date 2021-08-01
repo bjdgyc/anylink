@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 	"text/template"
@@ -141,7 +142,7 @@ func UserOtpQr(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	issuer := base.Cfg.Issuer
+	issuer := url.QueryEscape(base.Cfg.Issuer)
 	qrstr := fmt.Sprintf("otpauth://totp/%s:%s?issuer=%s&secret=%s", issuer, user.Email, issuer, user.OtpSecret)
 	qr, _ := qrcode.New(qrstr, qrcode.High)
 

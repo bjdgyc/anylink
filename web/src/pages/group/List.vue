@@ -181,17 +181,19 @@
             <el-col :span="4">
               <el-button size="mini" type="success" icon="el-icon-plus" circle
                          @click.prevent="addDomain(ruleForm.client_dns)"></el-button>
-              <el-button size="mini" type="danger" icon="el-icon-minus" circle
-                         @click.prevent="removeDomain(ruleForm.client_dns)"></el-button>
             </el-col>
           </el-row>
           <el-row v-for="(item,index) in ruleForm.client_dns"
-                  :key="index" style="margin-bottom: 5px" gutter="10">
+                  :key="index" style="margin-bottom: 5px" :gutter="10">
             <el-col :span="10">
               <el-input v-model="item.val"></el-input>
             </el-col>
-            <el-col :span="14">
+            <el-col :span="12">
               <el-input v-model="item.note" placeholder="备注"></el-input>
+            </el-col>
+            <el-col :span="2">
+              <el-button size="mini" type="danger" icon="el-icon-minus" circle
+                         @click.prevent="removeDomain(ruleForm.client_dns,index)"></el-button>
             </el-col>
           </el-row>
         </el-form-item>
@@ -202,17 +204,19 @@
             <el-col :span="4">
               <el-button size="mini" type="success" icon="el-icon-plus" circle
                          @click.prevent="addDomain(ruleForm.route_include)"></el-button>
-              <el-button size="mini" type="danger" icon="el-icon-minus" circle
-                         @click.prevent="removeDomain(ruleForm.route_include)"></el-button>
             </el-col>
           </el-row>
           <el-row v-for="(item,index) in ruleForm.route_include"
-                  :key="index" style="margin-bottom: 5px" gutter="10">
+                  :key="index" style="margin-bottom: 5px" :gutter="10">
             <el-col :span="10">
               <el-input v-model="item.val"></el-input>
             </el-col>
-            <el-col :span="14">
+            <el-col :span="12">
               <el-input v-model="item.note" placeholder="备注"></el-input>
+            </el-col>
+            <el-col :span="2">
+              <el-button size="mini" type="danger" icon="el-icon-minus" circle
+                         @click.prevent="removeDomain(ruleForm.route_include,index)"></el-button>
             </el-col>
           </el-row>
         </el-form-item>
@@ -223,17 +227,19 @@
             <el-col :span="4">
               <el-button size="mini" type="success" icon="el-icon-plus" circle
                          @click.prevent="addDomain(ruleForm.route_exclude)"></el-button>
-              <el-button size="mini" type="danger" icon="el-icon-minus" circle
-                         @click.prevent="removeDomain(ruleForm.route_exclude)"></el-button>
             </el-col>
           </el-row>
           <el-row v-for="(item,index) in ruleForm.route_exclude"
-                  :key="index" style="margin-bottom: 5px" gutter="10">
+                  :key="index" style="margin-bottom: 5px" :gutter="10">
             <el-col :span="10">
               <el-input v-model="item.val"></el-input>
             </el-col>
-            <el-col :span="14">
+            <el-col :span="12">
               <el-input v-model="item.note" placeholder="备注"></el-input>
+            </el-col>
+            <el-col :span="2">
+              <el-button size="mini" type="danger" icon="el-icon-minus" circle
+                         @click.prevent="removeDomain(ruleForm.route_exclude,index)"></el-button>
             </el-col>
           </el-row>
         </el-form-item>
@@ -244,13 +250,11 @@
             <el-col :span="4">
               <el-button size="mini" type="success" icon="el-icon-plus" circle
                          @click.prevent="addDomain(ruleForm.link_acl)"></el-button>
-              <el-button size="mini" type="danger" icon="el-icon-minus" circle
-                         @click.prevent="removeDomain(ruleForm.link_acl)"></el-button>
             </el-col>
           </el-row>
 
           <el-row v-for="(item,index) in ruleForm.link_acl"
-                  :key="index" style="margin-bottom: 5px" gutter="5">
+                  :key="index" style="margin-bottom: 5px" :gutter="5">
             <el-col :span="11">
               <el-input placeholder="请输入CIDR地址" v-model="item.val">
                 <el-select v-model="item.action" slot="prepend">
@@ -262,8 +266,12 @@
             <el-col :span="3">
               <el-input v-model.number="item.port" placeholder="端口"></el-input>
             </el-col>
-            <el-col :span="10">
+            <el-col :span="8">
               <el-input v-model="item.note" placeholder="备注"></el-input>
+            </el-col>
+            <el-col :span="2">
+              <el-button size="mini" type="danger" icon="el-icon-minus" circle
+                         @click.prevent="removeDomain(ruleForm.link_acl,index)"></el-button>
             </el-col>
           </el-row>
         </el-form-item>
@@ -389,13 +397,16 @@ export default {
         console.log(error);
       });
     },
-    removeDomain(arr, item) {
-      console.log(item)
+    removeDomain(arr, index) {
+      console.log(index)
+      if (index >= 0 && index < arr.length) {
+        arr.splice(index, 1)
+      }
       // let index = arr.indexOf(item);
       // if (index !== -1 && arr.length > 1) {
       //   arr.splice(index, 1)
       // }
-      arr.pop()
+      // arr.pop()
     },
     addDomain(arr) {
       arr.push({val: "", action: "allow", port: 0});

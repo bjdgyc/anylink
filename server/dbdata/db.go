@@ -1,8 +1,6 @@
 package dbdata
 
 import (
-	"encoding/json"
-
 	"github.com/bjdgyc/anylink/base"
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
@@ -41,17 +39,24 @@ func initData() {
 	)
 
 	// 判断是否初次使用
-	s := &Setting{}
-	err = One("name", InstallName, s)
-	if err == nil && s.Data == InstallData {
+	install := &SettingInstall{}
+	err = SettingGet(install)
+
+	if err == nil && install.Installed {
 		// 已经安装过
 		return
+	}
+
+	// 发生错误
+	if err != ErrNotFound {
+		base.Fatal(err)
 	}
 
 	err = addInitData()
 	if err != nil {
 		base.Fatal(err)
 	}
+
 }
 
 func addInitData() error {
@@ -74,9 +79,7 @@ func addInitData() error {
 		From:       "vpn@xx.com",
 		Encryption: "None",
 	}
-	v, _ := json.Marshal(smtp)
-	s := &Setting{Name: StructName(smtp), Data: string(v)}
-	_, err = sess.InsertOne(s)
+	err = SettingSessAdd(sess, smtp)
 	if err != nil {
 		return err
 	}
@@ -87,16 +90,14 @@ func addInitData() error {
 		Banner:      "您已接入公司网络，请按照公司规定使用。\n请勿进行非工作下载及视频行为！",
 		AccountMail: accountMail,
 	}
-	v, _ = json.Marshal(other)
-	s = &Setting{Name: StructName(other), Data: string(v)}
-	_, err = sess.InsertOne(s)
+	err = SettingSessAdd(sess, other)
 	if err != nil {
 		return err
 	}
 
 	// Install
-	install := &Setting{Name: InstallName, Data: InstallData}
-	_, err = sess.InsertOne(install)
+	install := &SettingInstall{Installed: true}
+	err = SettingSessAdd(sess, install)
 	if err != nil {
 		return err
 	}

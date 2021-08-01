@@ -6,11 +6,13 @@ const (
 	cfgBool
 
 	defaultJwt = "abcdef.0123456789.abcdef"
+	defaultPwd = "$2a$10$UQ7C.EoPifDeJh6d8.31TeSPQU7hM/NOM2nixmBucJpAuXDQNqNke"
 )
 
 type config struct {
 	Typ     int
 	Name    string
+	Short   string
 	Usage   string
 	ValStr  string
 	ValInt  int
@@ -18,6 +20,7 @@ type config struct {
 }
 
 var configs = []config{
+	{Typ: cfgStr, Name: "conf", Usage: "config file", ValStr: "./conf/server.toml", Short: "c"},
 	{Typ: cfgStr, Name: "server_addr", Usage: "服务监听地址", ValStr: ":443"},
 	{Typ: cfgBool, Name: "server_dtls", Usage: "开启DTLS", ValBool: false},
 	{Typ: cfgStr, Name: "server_dtls_addr", Usage: "DTLS监听地址", ValStr: ":4433"},
@@ -33,7 +36,7 @@ var configs = []config{
 	{Typ: cfgBool, Name: "pprof", Usage: "开启pprof", ValBool: false},
 	{Typ: cfgStr, Name: "issuer", Usage: "系统名称", ValStr: "XX公司VPN"},
 	{Typ: cfgStr, Name: "admin_user", Usage: "管理用户名", ValStr: "admin"},
-	{Typ: cfgStr, Name: "admin_pass", Usage: "管理用户密码", ValStr: "$2a$10$UQ7C.EoPifDeJh6d8.31TeSPQU7hM/NOM2nixmBucJpAuXDQNqNke"},
+	{Typ: cfgStr, Name: "admin_pass", Usage: "管理用户密码", ValStr: defaultPwd},
 	{Typ: cfgStr, Name: "jwt_secret", Usage: "JWT密钥", ValStr: defaultJwt},
 	{Typ: cfgStr, Name: "link_mode", Usage: "虚拟网络类型", ValStr: "tun"},
 	{Typ: cfgStr, Name: "ipv4_cidr", Usage: "ip地址网段", ValStr: "192.168.10.0/24"},

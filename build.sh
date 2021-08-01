@@ -25,6 +25,8 @@ echo "编译二进制文件"
 cd $cpath/server
 rm -rf ui
 cp -rf $cpath/web/ui .
+#国内可替换源加快速度
+export GOPROXY=https://goproxy.io
 go build -v -o anylink -ldflags "-X main.CommitId=$(git rev-parse HEAD)"
 RETVAL $?
 
