@@ -166,7 +166,7 @@
 
         <el-form-item label="带宽限制" prop="bandwidth">
           <el-input v-model.number="ruleForm.bandwidth">
-            <template slot="append">BYTE</template>
+            <template slot="append">BYTE/S</template>
           </el-input>
         </el-form-item>
         <el-form-item label="本地网络" prop="allow_lan">
@@ -455,4 +455,4 @@ export default {
 .el-select {
   width: 80px;
 }
-</style>
+</style
