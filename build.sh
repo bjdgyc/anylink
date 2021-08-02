@@ -39,6 +39,7 @@ mkdir $deploy
 
 cp -r server/anylink $deploy
 cp -r server/bridge-init.sh $deploy
+cp -r server/conf $deploy
 
 cp -r systemd $deploy
 
