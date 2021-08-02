@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"reflect"
 	"runtime"
 	"strings"
 
@@ -15,8 +16,6 @@ import (
 var (
 	// 提交id
 	CommitId string
-	// 配置文件
-	cfgFile string
 	// pass明文
 	passwd string
 	// 生成密钥
@@ -29,11 +28,14 @@ var (
 	// Used for flags.
 	runSrv bool
 
-	rootCmd *cobra.Command
+	linkViper *viper.Viper
+	rootCmd   *cobra.Command
 )
 
 // Execute executes the root command.
 func execute() {
+	initCmd()
+
 	err := rootCmd.Execute()
 	if err != nil {
 		fmt.Println(err)
@@ -41,13 +43,25 @@ func execute() {
 	}
 
 	// viper.Debug()
+	ref := reflect.ValueOf(linkViper)
+	s := ref.Elem()
+	ee := s.FieldByName("env")
+	if ee.Kind() != reflect.Map {
+		panic("Viper env is err")
+	}
+	rr := ee.MapRange()
+	for rr.Next() {
+		// fmt.Println(rr.Key(), rr.Value())
+		envs[rr.Key().String()] = rr.Value().String()
+	}
 
 	if !runSrv {
 		os.Exit(0)
 	}
 }
 
-func init() {
+func initCmd() {
+	linkViper = viper.New()
 	rootCmd = &cobra.Command{
 		Use:   "anylink",
 		Short: "AnyLink VPN Server",
@@ -58,11 +72,9 @@ func init() {
 		},
 	}
 
-	viper.SetEnvPrefix("link")
+	linkViper.SetEnvPrefix("link")
 
 	// 基础配置
-	rootCmd.Flags().StringVarP(&cfgFile, "conf", "c", "./conf/server.toml", "config file")
-	_ = viper.BindEnv("conf")
 
 	for _, v := range configs {
 		if v.Typ == cfgStr {
@@ -75,24 +87,25 @@ func init() {
 			rootCmd.Flags().BoolP(v.Name, v.Short, v.ValBool, v.Usage)
 		}
 
-		_ = viper.BindPFlag(v.Name, rootCmd.Flags().Lookup(v.Name))
-		_ = viper.BindEnv(v.Name)
+		_ = linkViper.BindPFlag(v.Name, rootCmd.Flags().Lookup(v.Name))
+		_ = linkViper.BindEnv(v.Name)
 		// viper.SetDefault(v.Name, v.Value)
 	}
 
 	rootCmd.AddCommand(initToolCmd())
 
 	cobra.OnInitialize(func() {
-		viper.SetConfigFile(cfgFile)
-		viper.AutomaticEnv()
+		linkViper.AutomaticEnv()
+		conf := linkViper.GetString("conf")
 
-		_, err := os.Stat(cfgFile)
+		_, err := os.Stat(conf)
 		if errors.Is(err, os.ErrNotExist) {
 			// 没有配置文件，不做处理
 			return
 		}
 
-		err = viper.ReadInConfig()
+		linkViper.SetConfigFile(conf)
+		err = linkViper.ReadInConfig()
 		if err != nil {
 			fmt.Println("Using config file:", err)
 		}
@@ -124,7 +137,7 @@ func initToolCmd() *cobra.Command {
 			pass, _ := utils.PasswordHash(passwd)
 			fmt.Printf("Passwd:%s\n", pass)
 		case debug:
-			viper.Debug()
+			linkViper.Debug()
 		default:
 			fmt.Println("Using [anylink tool -h] for help")
 		}

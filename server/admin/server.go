@@ -58,7 +58,7 @@ func StartAdmin() {
 		r.HandleFunc("/debug/pprof/profile", pprof.Profile).Name("debug")
 		r.HandleFunc("/debug/pprof/symbol", pprof.Symbol).Name("debug")
 		r.HandleFunc("/debug/pprof/trace", pprof.Trace).Name("debug")
-		r.HandleFunc("/debug/pprof", location("/debug/pprof/"))
+		r.HandleFunc("/debug/pprof", location("/debug/pprof/")).Name("debug")
 		r.PathPrefix("/debug/pprof/").HandlerFunc(pprof.Index).Name("debug")
 	}
 

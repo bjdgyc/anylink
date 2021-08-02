@@ -77,7 +77,7 @@ sudo ./anylink
 
 ## Config
 
-> 默认配置文件内有详细的注释，根据注释填写配置即可。
+> 示例配置文件内有详细的注释，根据注释填写配置即可。
 
 ```shell
 # 生成后台密码
@@ -179,25 +179,29 @@ systemd 脚本放入：
 
    ```bash
    docker pull bjdgyc/anylink:latest
-   # 查看帮助命令信息
+   ```
+
+2. 查看命令信息
+
+   ```bash
    docker run -it --rm bjdgyc/anylink -h
    ```
 
-2. 生成密码
+3. 生成密码
 
    ```bash
    docker run -it --rm bjdgyc/anylink tool -p 123456
    #Passwd:$2a$10$lCWTCcGmQdE/4Kb1wabbLelu4vY/cUwBwN64xIzvXcihFgRzUvH2a
    ```
 
-3. 生成jwt secret
+4. 生成jwt secret
 
    ```bash
    docker run -it --rm bjdgyc/anylink tool -s
    #Secret:9qXoIhY01jqhWIeIluGliOS4O_rhcXGGGu422uRZ1JjZxIZmh17WwzW36woEbA
    ```
 
-4. 启动容器
+5. 启动容器
 
    ```bash
    docker run -itd --name anylink --privileged \
@@ -206,19 +210,19 @@ systemd 脚本放入：
        bjdgyc/anylink
    ```
 
-5. 使用自定义参数启动容器
+6. 使用自定义参数启动容器
 
    ```bash
+   # 参数可以参考 -h 命令
    docker run -itd --name anylink --privileged \
        -e IPV4_CIDR=192.168.10.0/24 \
        -p 443:443 -p 8800:8800 \
        --restart=always \
        bjdgyc/anylink \
-       # "-c=/etc/server.toml" 参数可以参考 -h 命令
        -c=/etc/server.toml --ip_lease = 1209600 \ # IP地址租约时长
    ```
 
-6. 构建镜像
+7. 构建镜像
 
    ```bash
    #获取仓库源码
