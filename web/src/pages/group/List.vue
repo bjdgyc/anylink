@@ -455,4 +455,4 @@ export default {
 .el-select {
   width: 80px;
 }
-</style
+</style>
