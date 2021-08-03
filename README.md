@@ -245,8 +245,6 @@ systemd 脚本放入：
 
 ## Discussion
 
-![qq.png](screenshot/qq.png)
-
 添加QQ群: 567510628
 
 QQ群共享文件有相关软件下载
