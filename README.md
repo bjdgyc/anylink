@@ -235,6 +235,13 @@ systemd 脚本放入：
 
 请前往 [问题地址](question.md) 查看具体信息
 
+## Donate
+
+> 如果您觉得anylink对你有帮助，欢迎给我们打赏，也是帮助anylink更好的发展。
+
+![wxpay](screenshot/wxpay.png)
+
+
 ## Discussion
 
 ![qq.png](screenshot/qq.png)
