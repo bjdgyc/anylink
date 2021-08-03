@@ -235,9 +235,15 @@ systemd 脚本放入：
 
 请前往 [问题地址](question.md) 查看具体信息
 
-## Discussion
+## Donate
 
-![qq.png](screenshot/qq.png)
+> 如果您觉得anylink对你有帮助，欢迎给我们打赏，也是帮助anylink更好的发展。
+
+<p>
+    <img src="screenshot/wxpay.png" width="400" />
+</p>
+
+## Discussion
 
 添加QQ群: 567510628
 
@@ -270,5 +276,5 @@ QQ群共享文件有相关软件下载
 ## Thank
 
 <a href="https://www.jetbrains.com">
-    <img src="screenshot/jetbrains.png" width="200" height="200" alt="jetbrains.png" />
+    <img src="screenshot/jetbrains.png" width="200" alt="jetbrains.png" />
 </a>
