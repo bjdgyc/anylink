@@ -122,6 +122,9 @@ sudo ./anylink
 2. 设置nat转发规则
 
 ```shell
+systemctl stop firewalld.service
+systemctl disable firewalld.service
+
 # 请根据服务器内网网卡替换 eth0
 iptables -t nat -A POSTROUTING -s 192.168.10.0/24 -o eth0 -j MASQUERADE
 # 如果执行第一个命令不生效，可以继续执行下面的命令

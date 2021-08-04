@@ -1,13 +1,15 @@
 [Unit]
-Description=VPN Server Service
-After=network.target
+Description=AnyLink Server Service
+Documentation=https://github.com/bjdgyc/anylink
+After=network-online.target
 
 [Service]
 Type=simple
 User=root
-WorkingDirectory= /usr/local/anylink-deploy
+WorkingDirectory=/usr/local/anylink-deploy
 Restart=on-failure
 RestartSec=5s
-ExecStart=/usr/local/anylink-deploy/anylink --conf=conf/server.toml
+ExecStart=/usr/local/anylink-deploy/anylink --conf=./conf/server.toml
+
 [Install]
 WantedBy=multi-user.target
