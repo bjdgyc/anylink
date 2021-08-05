@@ -54,6 +54,7 @@ var configs = []config{
 	{Typ: cfgInt, Name: "mobile_dpd", Usage: "移动端死链接检测时间(秒)", ValInt: 60},
 	{Typ: cfgInt, Name: "session_timeout", Usage: "session过期时间(秒)", ValInt: 3600},
 	// {Typ: cfgInt, Name: "auth_timeout", Usage: "auth_timeout", ValInt: 0},
+	{Typ: cfgInt, Name: "audit_interval", Usage: "审计去重间隔(秒)", ValInt: 1800},
 }
 
 var envs = map[string]string{}

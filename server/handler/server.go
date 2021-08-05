@@ -10,11 +10,10 @@ import (
 	"os"
 	"time"
 
-	"github.com/pion/dtls/v2/pkg/crypto/selfsign"
-
 	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/pkg/proxyproto"
 	"github.com/gorilla/mux"
+	"github.com/pion/dtls/v2/pkg/crypto/selfsign"
 )
 
 func startTls() {

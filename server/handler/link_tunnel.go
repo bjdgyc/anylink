@@ -147,7 +147,7 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	base.Debug(buf.String())
 
 	hj := w.(http.Hijacker)
-	conn, _, err := hj.Hijack()
+	conn, bufRW, err := hj.Hijack()
 	if err != nil {
 		base.Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -166,5 +166,5 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	go LinkCstp(conn, cSess)
+	go LinkCstp(conn, bufRW, cSess)
 }

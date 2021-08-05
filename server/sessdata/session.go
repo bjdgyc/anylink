@@ -46,9 +46,9 @@ type ConnSession struct {
 	closeOnce           sync.Once
 	CloseChan           chan struct{}
 	PayloadIn           chan *Payload
-	// PayloadOut          chan *Payload // 公共ip数据
-	PayloadOutCstp chan *Payload // Cstp的数据
-	PayloadOutDtls chan *Payload // Dtls的数据
+	PayloadOutCstp      chan *Payload    // Cstp的数据
+	PayloadOutDtls      chan *Payload    // Dtls的数据
+	IpAuditMap          map[string]int64 // 审计的ip数据
 
 	// dSess *DtlsSession
 	dSess *atomic.Value
@@ -186,6 +186,7 @@ func (s *Session) NewConn() *ConnSession {
 		PayloadIn:      make(chan *Payload, 64),
 		PayloadOutCstp: make(chan *Payload, 64),
 		PayloadOutDtls: make(chan *Payload, 64),
+		IpAuditMap:     make(map[string]int64, 512),
 		dSess:          &atomic.Value{},
 	}
 

@@ -65,6 +65,7 @@ type ServerConfig struct {
 
 	SessionTimeout int `json:"session_timeout"` // in seconds
 	// AuthTimeout    int `json:"auth_timeout"`    // in seconds
+	AuditInterval int `json:"audit_interval"` // in seconds
 }
 
 func initServerCfg() {
