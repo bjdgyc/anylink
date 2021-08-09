@@ -5,6 +5,8 @@
 # Requires: bridge-utils
 #################################
 
+#yum install bridge-utils
+
 # Define Bridge Interface
 br="anylink0"
 
@@ -12,8 +14,7 @@ br="anylink0"
 # with TAP interface(s) above.
 
 eth="eth0"
-eth_ip="192.168.10.4"
-eth_netmask="255.255.255.0"
+eth_ip="192.168.10.4/24"
 eth_broadcast="192.168.10.255"
 eth_gateway="192.168.10.1"
 
@@ -21,11 +22,14 @@ eth_gateway="192.168.10.1"
 brctl addbr $br
 brctl addif $br $eth
 
-ifconfig $eth 0.0.0.0 up
+ip addr del $eth_ip dev $eth
+ip addr add 0.0.0.0 dev $eth
+ip link set dev $eth up
 
 mac=`cat /sys/class/net/$eth/address`
-ifconfig $br hw ether $mac
-ifconfig $br $eth_ip netmask $eth_netmask broadcast $eth_broadcast up
+ip link set up address $mac dev $br
+ip addr add $eth_ip broadcast $eth_broadcast dev $br
+
 
 route add default gateway $eth_gateway
 
