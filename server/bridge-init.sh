@@ -24,7 +24,7 @@ brctl addif $br $eth
 
 ip addr del $eth_ip dev $eth
 ip addr add 0.0.0.0 dev $eth
-ip link set dev $eth up
+ip link set dev $eth ip promisc on
 
 mac=`cat /sys/class/net/$eth/address`
 ip link set up address $mac dev $br
