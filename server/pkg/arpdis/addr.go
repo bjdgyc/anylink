@@ -4,6 +4,8 @@ import (
 	"net"
 	"sync"
 	"time"
+
+	"github.com/bjdgyc/anylink/pkg/utils"
 )
 
 const (
@@ -16,7 +18,7 @@ const (
 )
 
 var (
-	table   = make(map[string]*Addr)
+	table   = make(map[string]*Addr, 128)
 	tableMu sync.RWMutex
 )
 
@@ -40,25 +42,25 @@ func Lookup(ip net.IP, onlyTable bool) *Addr {
 
 // Add adds a IP-MAC map to a runtime ARP table.
 func tableLookup(ip net.IP) *Addr {
-	tableMu.Lock()
+	tableMu.RLock()
 	addr := table[ip.To4().String()]
-	tableMu.Unlock()
+	tableMu.RUnlock()
 	if addr == nil {
 		return nil
 	}
 
 	// 判断老化过期时间
-	tsub := time.Since(addr.disTime)
+	tSub := utils.NowSec().Sub(addr.disTime)
 	switch addr.Type {
+	case TypeStatic:
 	case TypeNormal:
-		if tsub > StaleTimeNormal {
+		if tSub > StaleTimeNormal {
 			return nil
 		}
 	case TypeUnreachable:
-		if tsub > StaleTimeUnreachable {
+		if tSub > StaleTimeUnreachable {
 			return nil
 		}
-	case TypeStatic:
 	}
 
 	return addr
@@ -70,7 +72,7 @@ func Add(addr *Addr) {
 		return
 	}
 	if addr.disTime.IsZero() {
-		addr.disTime = time.Now()
+		addr.disTime = utils.NowSec()
 	}
 	ip := addr.IP.To4().String()
 	tableMu.Lock()

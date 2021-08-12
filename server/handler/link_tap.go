@@ -2,6 +2,7 @@ package handler
 
 import (
 	"fmt"
+	"io"
 	"net"
 
 	"github.com/bjdgyc/anylink/base"
@@ -17,18 +18,32 @@ import (
 const bridgeName = "anylink0"
 
 var (
-	bridgeIp net.IP
-	bridgeHw net.HardwareAddr
+	// 网关mac地址
+	gatewayHw net.HardwareAddr
 )
 
-func checkTap() {
-	brFace, err := net.InterfaceByName(bridgeName)
+type LinkDriver interface {
+	io.ReadWriteCloser
+	Name() string
+}
+
+func _setGateway() {
+	dstAddr := arpdis.Lookup(sessdata.IpPool.Ipv4Gateway, false)
+	gatewayHw = dstAddr.HardwareAddr
+	// 设置为静态地址映射
+	dstAddr.Type = arpdis.TypeStatic
+	arpdis.Add(dstAddr)
+}
+
+func _checkTapIp(ifName string) {
+	iFace, err := net.InterfaceByName(ifName)
 	if err != nil {
 		base.Fatal("testTap err: ", err)
 	}
-	bridgeHw = brFace.HardwareAddr
 
-	addrs, err := brFace.Addrs()
+	var ifIp net.IP
+
+	addrs, err := iFace.Addrs()
 	if err != nil {
 		base.Fatal("testTap err: ", err)
 	}
@@ -37,15 +52,17 @@ func checkTap() {
 		if err != nil || ip.To4() == nil {
 			continue
 		}
-		bridgeIp = ip
-	}
-	if bridgeIp == nil && bridgeHw == nil {
-		base.Fatal("bridgeIp is err")
+		ifIp = ip
 	}
 
-	if !sessdata.IpPool.Ipv4IPNet.Contains(bridgeIp) {
-		base.Fatal("bridgeIp or Ip network err")
+	if !sessdata.IpPool.Ipv4IPNet.Contains(ifIp) {
+		base.Fatal("tapIp or Ip network err")
 	}
+}
+
+func checkTap() {
+	_setGateway()
+	_checkTapIp(bridgeName)
 }
 
 // 创建tap网卡
@@ -60,9 +77,8 @@ func LinkTap(cSess *sessdata.ConnSession) error {
 		return err
 	}
 
-	cSess.TunName = ifce.Name()
+	cSess.SetIfName(ifce.Name())
 
-	// arp on
 	cmdstr1 := fmt.Sprintf("ip link set dev %s up mtu %d multicast on", ifce.Name(), cSess.Mtu)
 	cmdstr2 := fmt.Sprintf("ip link set dev %s master %s", ifce.Name(), bridgeName)
 	err = execCmd([]string{cmdstr1, cmdstr2})
@@ -75,25 +91,31 @@ func LinkTap(cSess *sessdata.ConnSession) error {
 	cmdstr3 := fmt.Sprintf("sysctl -w net.ipv6.conf.%s.disable_ipv6=1", ifce.Name())
 	execCmd([]string{cmdstr3})
 
-	go tapRead(ifce, cSess)
-	go tapWrite(ifce, cSess)
+	go allTapRead(ifce, cSess)
+	go allTapWrite(ifce, cSess)
 	return nil
 }
 
-func tapWrite(ifce *water.Interface, cSess *sessdata.ConnSession) {
+// ========================通用代码===========================
+
+func allTapWrite(ifce LinkDriver, cSess *sessdata.ConnSession) {
 	defer func() {
 		base.Debug("LinkTap return", cSess.IpAddr)
 		cSess.Close()
-		_ = ifce.Close()
+		ifce.Close()
 	}()
 
 	var (
 		err   error
+		dstHw net.HardwareAddr
 		pl    *sessdata.Payload
-		frame ethernet.Frame
+		frame = make(ethernet.Frame, BufferSize)
+		ipDst = net.IPv4(1, 2, 3, 4)
 	)
 
 	for {
+		frame.Resize(BufferSize)
+
 		select {
 		case pl = <-cSess.PayloadIn:
 		case <-cSess.CloseChan:
@@ -101,45 +123,46 @@ func tapWrite(ifce *water.Interface, cSess *sessdata.ConnSession) {
 		}
 
 		// var frame ethernet.Frame
-		fb := getByteFull()
-		frame = *fb
 		switch pl.LType {
 		default:
 			// log.Println(payload)
 		case sessdata.LTypeEthernet:
 			copy(frame, pl.Data)
 			frame = frame[:len(pl.Data)]
+
+			// packet := gopacket.NewPacket(frame, layers.LayerTypeEthernet, gopacket.Default)
+			// fmt.Println("wirteArp:", packet)
 		case sessdata.LTypeIPData: // 需要转换成 Ethernet 数据
-			ip_src := waterutil.IPv4Source(pl.Data)
-			if waterutil.IsIPv6(pl.Data) || !ip_src.Equal(cSess.IpAddr) {
-				// 过滤掉IPv6的数据
+			ipSrc := waterutil.IPv4Source(pl.Data)
+			if !ipSrc.Equal(cSess.IpAddr) {
 				// 非分配给客户端ip，直接丢弃
 				continue
 			}
 
-			// packet := gopacket.NewPacket(data, layers.LayerTypeIPv4, gopacket.Default)
+			if waterutil.IsIPv6(pl.Data) {
+				// 过滤掉IPv6的数据
+				continue
+			}
+
+			// packet := gopacket.NewPacket(pl.Data, layers.LayerTypeIPv4, gopacket.Default)
 			// fmt.Println("get:", packet)
 
-			ip_dst := waterutil.IPv4Destination(pl.Data)
-			// fmt.Println("get:", ip_src, ip_dst)
+			// 手动设置ipv4地址
+			ipDst[12] = pl.Data[16]
+			ipDst[13] = pl.Data[17]
+			ipDst[14] = pl.Data[18]
+			ipDst[15] = pl.Data[19]
 
-			var dstHw net.HardwareAddr
-			if !sessdata.IpPool.Ipv4IPNet.Contains(ip_dst) || ip_dst.Equal(sessdata.IpPool.Ipv4Gateway) {
-				// 不是同一网段，使用网关mac地址
-				dstAddr := arpdis.Lookup(sessdata.IpPool.Ipv4Gateway, false)
-				dstHw = dstAddr.HardwareAddr
-			} else {
-				dstAddr := arpdis.Lookup(ip_dst, true)
+			dstHw = gatewayHw
+			if sessdata.IpPool.Ipv4IPNet.Contains(ipDst) {
+				dstAddr := arpdis.Lookup(ipDst, true)
 				// fmt.Println("dstAddr", dstAddr)
 				if dstAddr != nil {
 					dstHw = dstAddr.HardwareAddr
-				} else {
-					dstHw = bridgeHw
 				}
-
 			}
-			// fmt.Println("Gateway", ip_dst, dstAddr.HardwareAddr)
 
+			// fmt.Println("Gateway", ipSrc, ipDst, dstHw)
 			frame.Prepare(dstHw, cSess.MacHw, ethernet.NotTagged, ethernet.IPv4, len(pl.Data))
 			copy(frame[12+2:], pl.Data)
 		}
@@ -152,29 +175,26 @@ func tapWrite(ifce *water.Interface, cSess *sessdata.ConnSession) {
 			return
 		}
 
-		putByte(fb)
 		putPayload(pl)
 	}
 }
 
-func tapRead(ifce *water.Interface, cSess *sessdata.ConnSession) {
+func allTapRead(ifce LinkDriver, cSess *sessdata.ConnSession) {
 	defer func() {
 		base.Debug("tapRead return", cSess.IpAddr)
-		_ = ifce.Close()
+		ifce.Close()
 	}()
 
 	var (
 		err   error
 		n     int
 		data  []byte
-		frame ethernet.Frame
+		frame = make(ethernet.Frame, BufferSize)
 	)
 
 	for {
-		// var frame ethernet.Frame
-		// frame.Resize(BufferSize)
-		fb := getByteFull()
-		frame = *fb
+		frame.Resize(BufferSize)
+
 		n, err = ifce.Read(frame)
 		if err != nil {
 			base.Error("tap Read err", n, err)
@@ -184,8 +204,6 @@ func tapRead(ifce *water.Interface, cSess *sessdata.ConnSession) {
 
 		switch frame.Ethertype() {
 		default:
-			// packet := gopacket.NewPacket(frame, layers.LayerTypeEthernet, gopacket.Default)
-			// fmt.Println(packet)
 			continue
 		case ethernet.IPv6:
 			continue
@@ -214,7 +232,7 @@ func tapRead(ifce *water.Interface, cSess *sessdata.ConnSession) {
 
 		case ethernet.ARP:
 			// 暂时仅实现了ARP协议
-			packet := gopacket.NewPacket(frame, layers.LayerTypeEthernet, gopacket.Default)
+			packet := gopacket.NewPacket(frame, layers.LayerTypeEthernet, gopacket.NoCopy)
 			layer := packet.Layer(layers.LayerTypeARP)
 			arpReq := layer.(*layers.ARP)
 
@@ -223,12 +241,12 @@ func tapRead(ifce *water.Interface, cSess *sessdata.ConnSession) {
 				continue
 			}
 
-			// fmt.Println("arp", net.IP(arpReq.SourceProtAddress), sess.Ip)
+			// fmt.Println("arp", time.Now(), net.IP(arpReq.SourceProtAddress), cSess.IpAddr)
 			// fmt.Println(packet)
 
 			// 返回ARP数据
 			src := &arpdis.Addr{IP: cSess.IpAddr, HardwareAddr: cSess.MacHw}
-			dst := &arpdis.Addr{IP: arpReq.SourceProtAddress, HardwareAddr: frame.Source()}
+			dst := &arpdis.Addr{IP: arpReq.SourceProtAddress, HardwareAddr: arpReq.SourceHwAddress}
 			data, err = arpdis.NewARPReply(src, dst)
 			if err != nil {
 				base.Error(err)
@@ -237,13 +255,9 @@ func tapRead(ifce *water.Interface, cSess *sessdata.ConnSession) {
 
 			// 从接受的arp信息添加arp地址
 			addr := &arpdis.Addr{
-				IP:           make([]byte, len(arpReq.SourceProtAddress)),
-				HardwareAddr: make([]byte, len(frame.Source())),
+				IP:           append([]byte{}, dst.IP...),
+				HardwareAddr: append([]byte{}, dst.HardwareAddr...),
 			}
-			// addr.IP = arpReq.SourceProtAddress
-			// addr.HardwareAddr = frame.Source()
-			copy(addr.IP, arpReq.SourceProtAddress)
-			copy(addr.HardwareAddr, frame.Source())
 			arpdis.Add(addr)
 
 			pl := getPayload()
@@ -259,7 +273,5 @@ func tapRead(ifce *water.Interface, cSess *sessdata.ConnSession) {
 			}
 
 		}
-
-		putByte(fb)
 	}
 }

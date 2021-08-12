@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/bjdgyc/anylink/base"
+	"github.com/bjdgyc/anylink/pkg/utils"
 	"github.com/bjdgyc/anylink/sessdata"
 )
 
@@ -32,7 +33,7 @@ func LinkDtls(conn net.Conn, cSess *sessdata.ConnSession) {
 	go dtlsWrite(conn, dSess, cSess)
 
 	for {
-		err = conn.SetReadDeadline(time.Now().Add(dead))
+		err = conn.SetReadDeadline(utils.NowSec().Add(dead))
 		if err != nil {
 			base.Error("SetDeadline: ", err)
 			return

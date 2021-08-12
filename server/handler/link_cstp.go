@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/bjdgyc/anylink/base"
+	"github.com/bjdgyc/anylink/pkg/utils"
 	"github.com/bjdgyc/anylink/sessdata"
 )
 
@@ -29,7 +30,7 @@ func LinkCstp(conn net.Conn, bufRW *bufio.ReadWriter, cSess *sessdata.ConnSessio
 	for {
 
 		// 设置超时限制
-		err = conn.SetReadDeadline(time.Now().Add(dead))
+		err = conn.SetReadDeadline(utils.NowSec().Add(dead))
 		if err != nil {
 			base.Error("SetDeadline: ", err)
 			return

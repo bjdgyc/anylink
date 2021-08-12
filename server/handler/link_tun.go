@@ -40,8 +40,7 @@ func LinkTun(cSess *sessdata.ConnSession) error {
 		return err
 	}
 	// log.Printf("Interface Name: %s\n", ifce.Name())
-	cSess.SetTunName(ifce.Name())
-	// cSess.TunName = ifce.Name()
+	cSess.SetIfName(ifce.Name())
 
 	cmdstr1 := fmt.Sprintf("ip link set dev %s up mtu %d multicast off", ifce.Name(), cSess.Mtu)
 	cmdstr2 := fmt.Sprintf("ip addr add dev %s local %s peer %s/32",

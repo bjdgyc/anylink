@@ -160,9 +160,12 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 		err = LinkTun(cSess)
 	case base.LinkModeTAP:
 		err = LinkTap(cSess)
+	case base.LinkModeMacvtap:
+		err = LinkMacvtap(cSess)
 	}
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		conn.Close()
+		base.Error(err)
 		return
 	}
 

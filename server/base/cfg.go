@@ -8,8 +8,10 @@ import (
 )
 
 const (
-	LinkModeTUN = "tun"
-	LinkModeTAP = "tap"
+	LinkModeTUN     = "tun"
+	LinkModeTAP     = "tap"
+	LinkModeMacvtap = "macvtap"
+	LinkModeIpvtap  = "ipvtap"
 )
 
 var (
@@ -48,11 +50,12 @@ type ServerConfig struct {
 	AdminPass      string `json:"admin_pass"`
 	JwtSecret      string `json:"jwt_secret"`
 
-	LinkMode    string `json:"link_mode"` // tun tap
-	Ipv4CIDR    string `json:"ipv4_cidr"` // 192.168.1.0/24
-	Ipv4Gateway string `json:"ipv4_gateway"`
-	Ipv4Start   string `json:"ipv4_start"` // 192.168.1.100
-	Ipv4End     string `json:"ipv4_end"`   // 192.168.1.200
+	LinkMode    string `json:"link_mode"`    // tun tap macvtap ipvtap
+	Ipv4Master  string `json:"ipv4_master"`  // eth0
+	Ipv4CIDR    string `json:"ipv4_cidr"`    // 192.168.10.0/24
+	Ipv4Gateway string `json:"ipv4_gateway"` // 192.168.10.1
+	Ipv4Start   string `json:"ipv4_start"`   // 192.168.10.100
+	Ipv4End     string `json:"ipv4_end"`     // 192.168.10.200
 	IpLease     int    `json:"ip_lease"`
 
 	MaxClient       int    `json:"max_client"`

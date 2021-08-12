@@ -11,10 +11,17 @@ func Start() {
 	dbdata.Start()
 	sessdata.Start()
 
-	checkTun()
-	if base.Cfg.LinkMode == base.LinkModeTAP {
+	switch base.Cfg.LinkMode {
+	case base.LinkModeTUN:
+		checkTun()
+	case base.LinkModeTAP:
 		checkTap()
+	case base.LinkModeMacvtap:
+		checkMacvtap()
+	default:
+		base.Fatal("LinkMode is err")
 	}
+
 	go admin.StartAdmin()
 	go startTls()
 	go startDtls()
@@ -22,4 +29,5 @@ func Start() {
 
 func Stop() {
 	_ = dbdata.Stop()
+	destroyVtap()
 }

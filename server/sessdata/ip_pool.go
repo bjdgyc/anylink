@@ -1,13 +1,13 @@
 package sessdata
 
 import (
-	"encoding/binary"
 	"net"
 	"sync"
 	"time"
 
 	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/dbdata"
+	"github.com/bjdgyc/anylink/pkg/utils"
 )
 
 var (
@@ -43,19 +43,8 @@ func initIpPool() {
 	// max := min | uint32(math.Pow(2, float64(32-one))-1)
 
 	// ip地址池
-	IpPool.IpLongMin = ip2long(net.ParseIP(base.Cfg.Ipv4Start))
-	IpPool.IpLongMax = ip2long(net.ParseIP(base.Cfg.Ipv4End))
-}
-
-func long2ip(i uint32) net.IP {
-	ip := make([]byte, 4)
-	binary.BigEndian.PutUint32(ip, i)
-	return ip
-}
-
-func ip2long(ip net.IP) uint32 {
-	ip = ip.To4()
-	return binary.BigEndian.Uint32(ip)
+	IpPool.IpLongMin = utils.Ip2long(net.ParseIP(base.Cfg.Ipv4Start))
+	IpPool.IpLongMax = utils.Ip2long(net.ParseIP(base.Cfg.Ipv4End))
 }
 
 // AcquireIp 获取动态ip
@@ -90,7 +79,7 @@ func AcquireIp(username, macAddr string) net.IP {
 	farIp := &dbdata.IpMap{LastLogin: tNow}
 	// 全局遍历超过租期ip
 	for i := IpPool.IpLongMin; i <= IpPool.IpLongMax; i++ {
-		ip := long2ip(i)
+		ip := utils.Long2ip(i)
 		ipStr := ip.String()
 
 		// 跳过活跃连接
