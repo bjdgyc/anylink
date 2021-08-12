@@ -93,7 +93,7 @@ func createVtap(cSess *sessdata.ConnSession, ifName string) error {
 
 	var fdInt int
 
-	fdInt, err = syscall.Open(tName, os.O_RDWR|syscall.O_NONBLOCK, 0)
+	fdInt, err = syscall.Open(tName, syscall.O_RDWR|syscall.O_NONBLOCK, 0)
 	if err != nil {
 		return err
 	}
