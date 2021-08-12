@@ -103,9 +103,9 @@ sudo ./anylink
 
 > 以下参数必须设置其中之一
 
-网络模式选择，需要配置 `link_mode` 参数，如 `link_mode="tun"`,`link_mode="tap"` 两种参数。 不同的参数需要对服务器做相应的设置。
+网络模式选择，需要配置 `link_mode` 参数，如 `link_mode="tun"`,`link_mode="tap"`,`link_mode="macvtap"` 等参数。 不同的参数需要对服务器做相应的设置。
 
-建议优先选择tun模式，因客户端传输的是IP层数据，无须进行数据转换。 tap模式是在用户态做的链路层到IP层的数据互相转换，性能会有所下降。 如果需要在虚拟机内开启tap模式，请确认虚拟机的网卡开启混杂模式。
+建议优先选择tun模式，其次选择macvtap模式，因客户端传输的是IP层数据，无须进行数据转换。 tap模式是在用户态做的链路层到IP层的数据互相转换，性能会有所下降。 如果需要在虚拟机内开启tap模式，请确认虚拟机的网卡开启混杂模式。
 
 ### tun设置
 
@@ -135,6 +135,23 @@ iptables -nL -t nat
 
 3. 使用AnyConnect客户端连接即可
 
+### macvtap设置
+
+1. 设置配置文件
+
+> macvtap 设置相对比较简单，只需要配置相应的参数即可。
+> 以下参数可以通过执行 `ip a` 查看
+
+```
+#内网主网卡名称
+ipv4_master = "eth0"
+#以下网段需要跟ipv4_master网卡设置成一样
+ipv4_cidr = "192.168.10.0/24"
+ipv4_gateway = "192.168.10.1"
+ipv4_start = "192.168.10.100"
+ipv4_end = "192.168.10.200"
+```
+
 ### tap设置
 
 1. 创建桥接网卡
@@ -145,12 +162,13 @@ iptables -nL -t nat
 
 2. 修改 bridge-init.sh 内的参数
 
+> 以下参数可以通过执行 `ip a` 查看
+
 ```
 eth="eth0"
-eth_ip="192.168.1.4"
-eth_netmask="255.255.255.0"
-eth_broadcast="192.168.1.255"
-eth_gateway="192.168.1.1"
+eth_ip="192.168.10.4/24"
+eth_broadcast="192.168.10.255"
+eth_gateway="192.168.10.1"
 ```
 
 3. 执行 bridge-init.sh 文件
