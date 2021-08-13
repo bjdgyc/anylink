@@ -27,13 +27,15 @@ AnyLink 服务端仅在CentOS 7、Ubuntu 18.04测试通过，如需要安装在�
 
 ## Screenshot
 
-![online](screenshot/online.jpg)
+![online](doc/screenshot/online.jpg)
 
 ## Installation
 
 > 没有编程基础的同学建议直接下载release包，从下面的地址下载 anylink-deploy.tar.gz
 >
 > https://github.com/bjdgyc/anylink/releases
+
+### 自行编译安装
 
 > 升级 go version = 1.16
 >
@@ -264,7 +266,7 @@ systemd 脚本放入：
 > 如果您觉得anylink对你有帮助，欢迎给我们打赏，也是帮助anylink更好的发展。
 
 <p>
-    <img src="screenshot/wxpay.png" width="500" />
+    <img src="doc/screenshot/wxpay.png" width="500" />
 </p>
 
 ## Discussion
@@ -285,11 +287,11 @@ QQ群共享文件有相关软件下载
 <summary>展开查看</summary>
 
 
-![system.jpg](screenshot/system.jpg)
-![setting.jpg](screenshot/setting.jpg)
-![users.jpg](screenshot/users.jpg)
-![ip_map.jpg](screenshot/ip_map.jpg)
-![group.jpg](screenshot/group.jpg)
+![system.jpg](doc/screenshot/system.jpg)
+![setting.jpg](doc/screenshot/setting.jpg)
+![users.jpg](doc/screenshot/users.jpg)
+![ip_map.jpg](doc/screenshot/ip_map.jpg)
+![group.jpg](doc/screenshot/group.jpg)
 
 </details>
 
