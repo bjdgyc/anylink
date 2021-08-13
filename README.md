@@ -266,7 +266,7 @@ systemd 脚本放入：
 > 如果您觉得anylink对你有帮助，欢迎给我们打赏，也是帮助anylink更好的发展。
 
 <p>
-    <img src="doc/screenshot/wxpay.png" width="500" />
+    <img src="doc/screenshot/wxpay2.png" width="400" />
 </p>
 
 ## Discussion
