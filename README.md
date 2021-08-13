@@ -8,7 +8,7 @@
 ![GitHub downloads)](https://img.shields.io/github/downloads/bjdgyc/anylink/total)
 ![LICENSE](https://img.shields.io/github/license/bjdgyc/anylink)
 
-AnyLink 是一个企业级远程办公sslvpn的软件，可以支持多人同时在线使用。
+AnyLink 是一个企业级远程办公 sslvpn 的软件，可以支持多人同时在线使用。
 
 ## Repo
 
@@ -21,25 +21,27 @@ AnyLink 是一个企业级远程办公sslvpn的软件，可以支持多人同时
 AnyLink 基于 [ietf-openconnect](https://tools.ietf.org/html/draft-mavrogiannopoulos-openconnect-02)
 协议开发，并且借鉴了 [ocserv](http://ocserv.gitlab.io/www/index.html) 的开发思路，使其可以同时兼容 AnyConnect 客户端。
 
-AnyLink 使用TLS/DTLS进行数据加密，因此需要RSA或ECC证书，可以通过 Let's Encrypt 和 TrustAsia 申请免费的SSL证书。
+AnyLink 使用 TLS/DTLS 进行数据加密，因此需要 RSA 或 ECC 证书，可以通过 Let's Encrypt 和 TrustAsia 申请免费的 SSL 证书。
 
-AnyLink 服务端仅在CentOS 7、Ubuntu 18.04测试通过，如需要安装在其他系统，需要服务端支持tun/tap功能、ip设置命令。
+AnyLink 服务端仅在 CentOS 7、Ubuntu 18.04 测试通过，如需要安装在其他系统，需要服务端支持 tun/tap 功能、ip 设置命令。
 
 ## Screenshot
 
-![online](screenshot/online.jpg)
+![online](doc/screenshot/online.jpg)
 
 ## Installation
 
-> 没有编程基础的同学建议直接下载release包，从下面的地址下载 anylink-deploy.tar.gz
+> 没有编程基础的同学建议直接下载 release 包，从下面的地址下载 anylink-deploy.tar.gz
 >
 > https://github.com/bjdgyc/anylink/releases
+
+### 自行编译安装
 
 > 升级 go version = 1.16
 >
 > 需要提前安装好 golang 和 nodejs
 >
-> 使用客户端前，必须申请安全的https证书，不支持私有证书连接
+> 使用客户端前，必须申请安全的 https 证书，不支持私有证书连接
 
 ```shell
 git clone https://github.com/bjdgyc/anylink.git
@@ -60,20 +62,23 @@ sudo ./anylink
 
 ## Feature
 
-- [x] IP分配(实现IP、MAC映射信息的持久化)
-- [x] TLS-TCP通道
-- [x] DTLS-UDP通道
-- [x] 兼容AnyConnect
-- [x] 基于tun设备的nat访问模式
-- [x] 基于tap设备的桥接访问模式
+- [x] IP 分配(实现 IP、MAC 映射信息的持久化)
+- [x] TLS-TCP 通道
+- [x] DTLS-UDP 通道
+- [x] 兼容 AnyConnect
+- [x] 基于 tun 设备的 nat 访问模式
+- [x] 基于 tap 设备的桥接访问模式
+- [x] 基于 macvtap 设备的桥接访问模式
 - [x] 支持 [proxy protocol v1](http://www.haproxy.org/download/2.2/doc/proxy-protocol.txt) 协议
 - [x] 用户组支持
 - [x] 多用户支持
-- [x] TOTP令牌支持
-- [x] TOTP令牌开关
-- [x] 流量控制
+- [x] TOTP 令牌支持
+- [x] TOTP 令牌开关
+- [x] 流量速率限制
 - [x] 后台管理界面
 - [x] 访问权限管理
+- [ ] IP 访问审计功能
+- [ ] 基于 ipvtap 设备的桥接访问模式
 
 ## Config
 
@@ -103,25 +108,28 @@ sudo ./anylink
 
 > 以下参数必须设置其中之一
 
-网络模式选择，需要配置 `link_mode` 参数，如 `link_mode="tun"`,`link_mode="tap"` 两种参数。 不同的参数需要对服务器做相应的设置。
+网络模式选择，需要配置 `link_mode` 参数，如 `link_mode="tun"`,`link_mode="macvtap"`,`link_mode="tap"` 等参数。 不同的参数需要对服务器做相应的设置。
 
-建议优先选择tun模式，因客户端传输的是IP层数据，无须进行数据转换。 tap模式是在用户态做的链路层到IP层的数据互相转换，性能会有所下降。 如果需要在虚拟机内开启tap模式，请确认虚拟机的网卡开启混杂模式。
+建议优先选择 tun 模式，其次选择 macvtap 模式，因客户端传输的是 IP 层数据，无须进行数据转换。 tap 模式是在用户态做的链路层到 IP 层的数据互相转换，性能会有所下降。 如果需要在虚拟机内开启 tap 模式，请确认虚拟机的网卡开启混杂模式。
 
-### tun设置
+### tun 设置
 
 1. 开启服务器转发
 
- ```shell
- # flie: /etc/sysctl.conf
- net.ipv4.ip_forward = 1
+```shell
+# flie: /etc/sysctl.conf
+net.ipv4.ip_forward = 1
 
- #执行如下命令
- sysctl -w net.ipv4.ip_forward=1
- ```
+#执行如下命令
+sysctl -w net.ipv4.ip_forward=1
+```
 
-2. 设置nat转发规则
+2. 设置 nat 转发规则
 
 ```shell
+systemctl stop firewalld.service
+systemctl disable firewalld.service
+
 # 请根据服务器内网网卡替换 eth0
 iptables -t nat -A POSTROUTING -s 192.168.10.0/24 -o eth0 -j MASQUERADE
 # 如果执行第一个命令不生效，可以继续执行下面的命令
@@ -130,9 +138,26 @@ iptables -t nat -A POSTROUTING -s 192.168.10.0/24 -o eth0 -j MASQUERADE
 iptables -nL -t nat
 ```
 
-3. 使用AnyConnect客户端连接即可
+3. 使用 AnyConnect 客户端连接即可
 
-### tap设置
+### macvtap 设置
+
+1. 设置配置文件
+
+> macvtap 设置相对比较简单，只需要配置相应的参数即可。
+> 以下参数可以通过执行 `ip a` 查看
+
+```
+#内网主网卡名称
+ipv4_master = "eth0"
+#以下网段需要跟ipv4_master网卡设置成一样
+ipv4_cidr = "192.168.10.0/24"
+ipv4_gateway = "192.168.10.1"
+ipv4_start = "192.168.10.100"
+ipv4_end = "192.168.10.200"
+```
+
+### tap 设置
 
 1. 创建桥接网卡
 
@@ -142,12 +167,13 @@ iptables -nL -t nat
 
 2. 修改 bridge-init.sh 内的参数
 
+> 以下参数可以通过执行 `ip a` 查看
+
 ```
 eth="eth0"
-eth_ip="192.168.1.4"
-eth_netmask="255.255.255.0"
-eth_broadcast="192.168.1.255"
-eth_gateway="192.168.1.1"
+eth_ip="192.168.10.4/24"
+eth_broadcast="192.168.10.255"
+eth_gateway="192.168.10.1"
 ```
 
 3. 执行 bridge-init.sh 文件
@@ -158,20 +184,20 @@ sh bridge-init.sh
 
 ## Systemd
 
-添加 systemd脚本
+添加 systemd 脚本
 
-* anylink 程序目录放入 `/usr/local/anylink-deploy`
+- anylink 程序目录放入 `/usr/local/anylink-deploy`
 
 systemd 脚本放入：
 
-* centos: `/usr/lib/systemd/system/`
-* ubuntu: `/lib/systemd/system/`
+- centos: `/usr/lib/systemd/system/`
+- ubuntu: `/lib/systemd/system/`
 
 操作命令:
 
-* 启动: `systemctl start anylink`
-* 停止: `systemctl stop anylink`
-* 开机自启: `systemctl enable anylink`
+- 启动: `systemctl start anylink`
+- 停止: `systemctl stop anylink`
+- 开机自启: `systemctl enable anylink`
 
 ## Docker
 
@@ -194,7 +220,7 @@ systemd 脚本放入：
    #Passwd:$2a$10$lCWTCcGmQdE/4Kb1wabbLelu4vY/cUwBwN64xIzvXcihFgRzUvH2a
    ```
 
-4. 生成jwt secret
+4. 生成 jwt secret
 
    ```bash
    docker run -it --rm bjdgyc/anylink tool -s
@@ -237,35 +263,36 @@ systemd 脚本放入：
 
 ## Donate
 
-> 如果您觉得anylink对你有帮助，欢迎给我们打赏，也是帮助anylink更好的发展。
+> 如果您觉得 anylink 对你有帮助，欢迎给我们打赏，也是帮助 anylink 更好的发展。
+> 
+> [查看打赏列表](doc/README.md)
 
 <p>
-    <img src="screenshot/wxpay.png" width="400" />
+    <img src="doc/screenshot/wxpay2.png" width="400" />
 </p>
 
 ## Discussion
 
-添加QQ群: 567510628
+添加 QQ 群: 567510628
 
-QQ群共享文件有相关软件下载
+QQ 群共享文件有相关软件下载
 
 ## Contribution
 
-欢迎提交 PR、Issues，感谢为AnyLink做出贡献。
+欢迎提交 PR、Issues，感谢为 AnyLink 做出贡献。
 
-注意新建PR，需要提交到dev分支，其他分支暂不会合并。
+注意新建 PR，需要提交到 dev 分支，其他分支暂不会合并。
 
 ## Other Screenshot
 
 <details>
 <summary>展开查看</summary>
 
-
-![system.jpg](screenshot/system.jpg)
-![setting.jpg](screenshot/setting.jpg)
-![users.jpg](screenshot/users.jpg)
-![ip_map.jpg](screenshot/ip_map.jpg)
-![group.jpg](screenshot/group.jpg)
+![system.jpg](doc/screenshot/system.jpg)
+![setting.jpg](doc/screenshot/setting.jpg)
+![users.jpg](doc/screenshot/users.jpg)
+![ip_map.jpg](doc/screenshot/ip_map.jpg)
+![group.jpg](doc/screenshot/group.jpg)
 
 </details>
 
@@ -276,5 +303,5 @@ QQ群共享文件有相关软件下载
 ## Thank
 
 <a href="https://www.jetbrains.com">
-    <img src="screenshot/jetbrains.png" width="200" alt="jetbrains.png" />
+    <img src="doc/screenshot/jetbrains.png" width="200" alt="jetbrains.png" />
 </a>

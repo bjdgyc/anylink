@@ -32,7 +32,7 @@ type ConnSession struct {
 	MacHw               net.HardwareAddr // 客户端mac地址,从Session取出
 	RemoteAddr          string
 	Mtu                 int
-	TunName             string
+	IfName              string
 	Client              string // 客户端  mobile pc
 	CstpDpd             int
 	Group               *dbdata.Group
@@ -41,14 +41,14 @@ type ConnSession struct {
 	BandwidthDown       uint32 // 使用下行带宽 Byte
 	BandwidthUpPeriod   uint32 // 前一周期的总量
 	BandwidthDownPeriod uint32
-	BandwidthUpAll      uint32 // 使用上行带宽总量
-	BandwidthDownAll    uint32 // 使用下行带宽总量
+	BandwidthUpAll      uint64 // 使用上行带宽总量
+	BandwidthDownAll    uint64 // 使用下行带宽总量
 	closeOnce           sync.Once
 	CloseChan           chan struct{}
 	PayloadIn           chan *Payload
-	// PayloadOut          chan *Payload // 公共ip数据
-	PayloadOutCstp chan *Payload // Cstp的数据
-	PayloadOutDtls chan *Payload // Dtls的数据
+	PayloadOutCstp      chan *Payload    // Cstp的数据
+	PayloadOutDtls      chan *Payload    // Dtls的数据
+	IpAuditMap          map[string]int64 // 审计的ip数据
 
 	// dSess *DtlsSession
 	dSess *atomic.Value
@@ -111,9 +111,9 @@ func checkSession() {
 
 func GenToken() string {
 	// 生成32位的 token
-	btoken := make([]byte, 32)
-	rand.Read(btoken)
-	return fmt.Sprintf("%x", btoken)
+	bToken := make([]byte, 32)
+	rand.Read(bToken)
+	return fmt.Sprintf("%x", bToken)
 }
 
 func NewSession(token string) *Session {
@@ -186,6 +186,7 @@ func (s *Session) NewConn() *ConnSession {
 		PayloadIn:      make(chan *Payload, 64),
 		PayloadOutCstp: make(chan *Payload, 64),
 		PayloadOutDtls: make(chan *Payload, 64),
+		IpAuditMap:     make(map[string]int64, 512),
 		dSess:          &atomic.Value{},
 	}
 
@@ -284,8 +285,8 @@ func (cs *ConnSession) ratePeriod() {
 		atomic.SwapUint32(&cs.BandwidthUpPeriod, rtUp/BandwidthPeriodSec)
 		atomic.SwapUint32(&cs.BandwidthDownPeriod, rtDown/BandwidthPeriodSec)
 		// 累加所有流量
-		atomic.AddUint32(&cs.BandwidthUpAll, rtUp)
-		atomic.AddUint32(&cs.BandwidthDownAll, rtDown)
+		atomic.AddUint64(&cs.BandwidthUpAll, uint64(rtUp))
+		atomic.AddUint64(&cs.BandwidthDownAll, uint64(rtDown))
 	}
 }
 
@@ -304,10 +305,10 @@ func (cs *ConnSession) SetMtu(mtu string) {
 	}
 }
 
-func (cs *ConnSession) SetTunName(name string) {
+func (cs *ConnSession) SetIfName(name string) {
 	cs.Sess.mux.Lock()
 	defer cs.Sess.mux.Unlock()
-	cs.TunName = name
+	cs.IfName = name
 }
 
 func (cs *ConnSession) RateLimit(byt int, isUp bool) error {

@@ -2,22 +2,21 @@
 FROM node:lts-alpine as builder_node
 WORKDIR /web
 COPY ./web /web
-RUN npx browserslist@latest --update-db \
-    && npm install \
+RUN npm install --registry=https://registry.npm.taobao.org \
     && npm run build \
     && ls /web/ui
 
 # server
 FROM golang:1.16-alpine as builder_golang
 #TODO 本地打包时使用镜像
-#ENV GOPROXY=https://goproxy.io
+ENV GOPROXY=https://goproxy.io
 ENV GOOS=linux
 WORKDIR /anylink
 COPY . /anylink
 COPY --from=builder_node /web/ui  /anylink/server/ui
 
 #TODO 本地打包时使用镜像
-#RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/repositories
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/repositories
 RUN apk add --no-cache git gcc musl-dev
 RUN cd /anylink/server;go build -o anylink -ldflags "-X main.CommitId=$(git rev-parse HEAD)" \
     && /anylink/server/anylink tool -v
@@ -37,7 +36,7 @@ COPY ./server/files  /app/conf/files
 
 
 #TODO 本地打包时使用镜像
-#RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/repositories
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/repositories
 RUN apk add --no-cache bash iptables \
     && chmod +x /app/docker_entrypoint.sh \
     && ls /app

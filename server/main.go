@@ -11,7 +11,6 @@ import (
 	"syscall"
 
 	"github.com/bjdgyc/anylink/admin"
-
 	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/handler"
 )

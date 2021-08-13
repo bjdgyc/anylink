@@ -54,3 +54,14 @@ type Setting struct {
 	Data      json.RawMessage `json:"data" xorm:"Text"`
 	UpdatedAt time.Time       `json:"updated_at" xorm:"DateTime updated"`
 }
+
+type AccessAudit struct {
+	Id        int       `json:"id" xorm:"pk autoincr not null"`
+	Username  string    `json:"username" xorm:"varchar(60) not null"`
+	Protocol  uint8     `json:"protocol" xorm:"not null"`
+	Src       string    `json:"src" xorm:"varchar(60) not null"`
+	SrcPort   uint16    `json:"src_port" xorm:"not null"`
+	Dst       string    `json:"dst" xorm:"varchar(60) not null"`
+	DstPort   uint16    `json:"dst_port" xorm:"not null"`
+	CreatedAt time.Time `json:"created_at" xorm:"DateTime"`
+}

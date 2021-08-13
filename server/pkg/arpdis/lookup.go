@@ -19,7 +19,8 @@ func doLookup(ip net.IP) *Addr {
 	err := doPing(ip.String())
 	if err != nil {
 		// log.Println(err)
-		addr := &Addr{IP: ip, Type: TypeUnreachable}
+		addr := &Addr{IP: net.IPv4(1, 2, 3, 4), Type: TypeUnreachable}
+		copy(addr.IP, ip)
 		return addr
 	}
 
@@ -50,7 +51,9 @@ func doArpShow(ip net.IP) *Addr {
 		return nil
 	}
 
-	return &Addr{IP: ip, HardwareAddr: mac}
+	addr := &Addr{IP: net.IPv4(1, 2, 3, 4), HardwareAddr: mac}
+	copy(addr.IP, ip)
+	return addr
 }
 
 // IP address       HW type     Flags       HW address            Mask     Device

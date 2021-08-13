@@ -1,17 +1,25 @@
 package handler
 
 import (
+	"encoding/binary"
+
+	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/dbdata"
+	"github.com/bjdgyc/anylink/pkg/utils"
 	"github.com/bjdgyc/anylink/sessdata"
 	"github.com/songgao/water/waterutil"
 )
 
 func payloadIn(cSess *sessdata.ConnSession, pl *sessdata.Payload) bool {
-	// 进行Acl规则判断
-	check := checkLinkAcl(cSess.Group, pl)
-	if !check {
-		// 校验不通过直接丢弃
-		return false
+	if pl.LType == sessdata.LTypeIPData && pl.PType == 0x00 {
+		// 进行Acl规则判断
+		check := checkLinkAcl(cSess.Group, pl)
+		if !check {
+			// 校验不通过直接丢弃
+			return false
+		}
+
+		logAudit(cSess, pl)
 	}
 
 	closed := false
@@ -61,24 +69,23 @@ func checkLinkAcl(group *dbdata.Group, pl *sessdata.Payload) bool {
 		return true
 	}
 
-	data := pl.Data
-	ip_dst := waterutil.IPv4Destination(data)
-	ip_port := waterutil.IPv4DestinationPort(data)
-	ip_proto := waterutil.IPv4Protocol(data)
+	ipDst := waterutil.IPv4Destination(pl.Data)
+	ipPort := waterutil.IPv4DestinationPort(pl.Data)
+	ipProto := waterutil.IPv4Protocol(pl.Data)
 	// fmt.Println("sent:", ip_dst, ip_port)
 
 	// 优先放行dns端口
 	for _, v := range group.ClientDns {
-		if v.Val == ip_dst.String() && ip_port == 53 {
+		if v.Val == ipDst.String() && ipPort == 53 {
 			return true
 		}
 	}
 
 	for _, v := range group.LinkAcl {
 		// 循环判断ip和端口
-		if v.IpNet.Contains(ip_dst) {
+		if v.IpNet.Contains(ipDst) {
 			// 放行允许ip的ping
-			if v.Port == ip_port || v.Port == 0 || ip_proto == waterutil.ICMP {
+			if v.Port == ipPort || v.Port == 0 || ipProto == waterutil.ICMP {
 				if v.Action == dbdata.Allow {
 					return true
 				} else {
@@ -89,4 +96,50 @@ func checkLinkAcl(group *dbdata.Group, pl *sessdata.Payload) bool {
 	}
 
 	return false
+}
+
+// 访问日志审计
+func logAudit(cSess *sessdata.ConnSession, pl *sessdata.Payload) {
+	ipSrc := waterutil.IPv4Source(pl.Data)
+	ipDst := waterutil.IPv4Destination(pl.Data)
+	ipPort := waterutil.IPv4DestinationPort(pl.Data)
+	ipProto := waterutil.IPv4Protocol(pl.Data)
+
+	// 只统计 tcp和udp 的访问
+	switch ipProto {
+	case waterutil.TCP:
+	case waterutil.UDP:
+	default:
+		return
+	}
+
+	b := getByte34()
+	key := *b
+	copy(key[:16], ipSrc)
+	copy(key[16:32], ipDst)
+	binary.BigEndian.PutUint16(key[32:34], ipPort)
+
+	s := utils.BytesToString(key)
+	nu := utils.NowSec().Unix()
+
+	// 判断已经存在，并且没有过期
+	v, ok := cSess.IpAuditMap[s]
+	if ok && nu-v < int64(base.Cfg.AuditInterval) {
+		// 回收byte对象
+		putByte34(b)
+		return
+	}
+
+	cSess.IpAuditMap[s] = nu
+
+	audit := dbdata.AccessAudit{
+		Username:  cSess.Sess.Username,
+		Protocol:  uint8(ipProto),
+		Src:       ipSrc.String(),
+		Dst:       ipDst.String(),
+		DstPort:   ipPort,
+		CreatedAt: utils.NowSec(),
+	}
+
+	_ = dbdata.Add(audit)
 }

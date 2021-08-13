@@ -319,7 +319,7 @@ export default {
         status: 1,
         allow_lan: true,
         client_dns: [{val: '114.114.114.114'}],
-        route_include: [],
+        route_include: [{val: 'all', note: '默认全局代理'}],
         route_exclude: [],
         link_acl: [],
       },

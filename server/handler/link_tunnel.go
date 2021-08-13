@@ -96,6 +96,9 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	}
 	// 允许的路由
 	for _, v := range cSess.Group.RouteInclude {
+		if v.Val == "all" {
+			continue
+		}
 		w.Header().Add("X-CSTP-Split-Include", v.IpMask)
 	}
 	// 不允许的路由
@@ -147,7 +150,7 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	base.Debug(buf.String())
 
 	hj := w.(http.Hijacker)
-	conn, _, err := hj.Hijack()
+	conn, bufRW, err := hj.Hijack()
 	if err != nil {
 		base.Error(err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -160,11 +163,14 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 		err = LinkTun(cSess)
 	case base.LinkModeTAP:
 		err = LinkTap(cSess)
+	case base.LinkModeMacvtap:
+		err = LinkMacvtap(cSess)
 	}
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		conn.Close()
+		base.Error(err)
 		return
 	}
 
-	go LinkCstp(conn, cSess)
+	go LinkCstp(conn, bufRW, cSess)
 }

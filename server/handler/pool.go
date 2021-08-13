@@ -9,7 +9,12 @@ import (
 
 // 不允许直接修改
 // [6] => PType
-var plHeader = []byte{'S', 'T', 'F', 0x01, 0x00, 0x00, 0x00, 0x00}
+var plHeader = []byte{
+	'S', 'T', 'F', 1,
+	0x00, 0x00, /* Length */
+	0x00, /* Type */
+	0x00, /* Unknown */
+}
 
 var plPool = sync.Pool{
 	New: func() interface{} {
@@ -63,4 +68,22 @@ func getByteFull() *[]byte {
 func putByte(b *[]byte) {
 	*b = (*b)[:BufferSize]
 	bytePool.Put(b)
+}
+
+// 长度 34 小对象
+var byte34Pool = sync.Pool{
+	New: func() interface{} {
+		b := make([]byte, 34)
+		return &b
+	},
+}
+
+func getByte34() *[]byte {
+	b := byte34Pool.Get().(*[]byte)
+	return b
+}
+
+func putByte34(b *[]byte) {
+	*b = (*b)[:34]
+	byte34Pool.Put(b)
 }

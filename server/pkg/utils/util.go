@@ -3,11 +3,30 @@ package utils
 import (
 	"fmt"
 	"math/rand"
+	"sync/atomic"
 	"time"
+)
+
+var (
+	// 每秒时间缓存
+	timeNowSec = &atomic.Value{}
 )
 
 func init() {
 	rand.Seed(time.Now().UnixNano())
+
+	timeNowSec.Store(time.Now())
+	go func() {
+		tick := time.NewTicker(time.Second * 1)
+		for c := range tick.C {
+			timeNowSec.Store(c)
+		}
+	}()
+}
+
+func NowSec() time.Time {
+	t := timeNowSec.Load()
+	return t.(time.Time)
 }
 
 func InArrStr(arr []string, str string) bool {

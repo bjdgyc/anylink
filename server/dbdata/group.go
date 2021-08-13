@@ -68,17 +68,26 @@ func SetGroup(g *Group) error {
 	clientDns := []ValData{}
 	for _, v := range g.ClientDns {
 		if v.Val != "" {
+			ip := net.ParseIP(v.Val)
+			if ip.String() != v.Val {
+				return errors.New("DNS IP 错误")
+			}
 			clientDns = append(clientDns, v)
 		}
 	}
 	if len(clientDns) == 0 {
-		return errors.New("DNS 错误")
+		return errors.New("必须设置一个DNS")
 	}
 	g.ClientDns = clientDns
 
 	routeInclude := []ValData{}
 	for _, v := range g.RouteInclude {
 		if v.Val != "" {
+			if v.Val == "all" {
+				routeInclude = append(routeInclude, v)
+				continue
+			}
+
 			ipMask, _, err := parseIpNet(v.Val)
 			if err != nil {
 				return errors.New("RouteInclude 错误" + err.Error())

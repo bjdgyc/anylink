@@ -1,15 +1,17 @@
 package handler
 
 import (
+	"bufio"
 	"encoding/binary"
 	"net"
 	"time"
 
 	"github.com/bjdgyc/anylink/base"
+	"github.com/bjdgyc/anylink/pkg/utils"
 	"github.com/bjdgyc/anylink/sessdata"
 )
 
-func LinkCstp(conn net.Conn, cSess *sessdata.ConnSession) {
+func LinkCstp(conn net.Conn, bufRW *bufio.ReadWriter, cSess *sessdata.ConnSession) {
 	defer func() {
 		base.Debug("LinkCstp return", cSess.IpAddr)
 		_ = conn.Close()
@@ -23,19 +25,19 @@ func LinkCstp(conn net.Conn, cSess *sessdata.ConnSession) {
 		dead    = time.Duration(cSess.CstpDpd+5) * time.Second
 	)
 
-	go cstpWrite(conn, cSess)
+	go cstpWrite(conn, bufRW, cSess)
 
 	for {
 
 		// 设置超时限制
-		err = conn.SetReadDeadline(time.Now().Add(dead))
+		err = conn.SetReadDeadline(utils.NowSec().Add(dead))
 		if err != nil {
 			base.Error("SetDeadline: ", err)
 			return
 		}
 		// hdata := make([]byte, BufferSize)
 		pl := getPayload()
-		n, err = conn.Read(pl.Data)
+		n, err = bufRW.Read(pl.Data)
 		if err != nil {
 			base.Error("read hdata: ", err)
 			return
@@ -77,7 +79,7 @@ func LinkCstp(conn net.Conn, cSess *sessdata.ConnSession) {
 	}
 }
 
-func cstpWrite(conn net.Conn, cSess *sessdata.ConnSession) {
+func cstpWrite(conn net.Conn, bufRW *bufio.ReadWriter, cSess *sessdata.ConnSession) {
 	defer func() {
 		base.Debug("cstpWrite return", cSess.IpAddr)
 		_ = conn.Close()
