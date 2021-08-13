@@ -84,8 +84,10 @@ func SetGroup(g *Group) error {
 	for _, v := range g.RouteInclude {
 		if v.Val != "" {
 			if v.Val == "all" {
+				routeInclude = append(routeInclude, v)
 				continue
 			}
+
 			ipMask, _, err := parseIpNet(v.Val)
 			if err != nil {
 				return errors.New("RouteInclude 错误" + err.Error())

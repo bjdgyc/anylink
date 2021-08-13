@@ -96,6 +96,9 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	}
 	// 允许的路由
 	for _, v := range cSess.Group.RouteInclude {
+		if v.Val == "all" {
+			continue
+		}
 		w.Header().Add("X-CSTP-Split-Include", v.IpMask)
 	}
 	// 不允许的路由
