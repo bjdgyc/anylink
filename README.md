@@ -66,14 +66,17 @@ sudo ./anylink
 - [x] 兼容AnyConnect
 - [x] 基于tun设备的nat访问模式
 - [x] 基于tap设备的桥接访问模式
+- [x] 基于macvtap设备的桥接访问模式
 - [x] 支持 [proxy protocol v1](http://www.haproxy.org/download/2.2/doc/proxy-protocol.txt) 协议
 - [x] 用户组支持
 - [x] 多用户支持
 - [x] TOTP令牌支持
 - [x] TOTP令牌开关
-- [x] 流量控制
+- [x] 流量速率限制
 - [x] 后台管理界面
 - [x] 访问权限管理
+- [ ] IP访问审计功能
+- [ ] 基于ipvtap设备的桥接访问模式
 
 ## Config
 
