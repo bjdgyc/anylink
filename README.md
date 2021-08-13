@@ -108,7 +108,7 @@ sudo ./anylink
 
 > 以下参数必须设置其中之一
 
-网络模式选择，需要配置 `link_mode` 参数，如 `link_mode="tun"`,`link_mode="tap"`,`link_mode="macvtap"` 等参数。 不同的参数需要对服务器做相应的设置。
+网络模式选择，需要配置 `link_mode` 参数，如 `link_mode="tun"`,`link_mode="macvtap"`,`link_mode="tap"` 等参数。 不同的参数需要对服务器做相应的设置。
 
 建议优先选择 tun 模式，其次选择 macvtap 模式，因客户端传输的是 IP 层数据，无须进行数据转换。 tap 模式是在用户态做的链路层到 IP 层的数据互相转换，性能会有所下降。 如果需要在虚拟机内开启 tap 模式，请确认虚拟机的网卡开启混杂模式。
 
@@ -303,5 +303,5 @@ QQ 群共享文件有相关软件下载
 ## Thank
 
 <a href="https://www.jetbrains.com">
-    <img src="screenshot/jetbrains.png" width="200" alt="jetbrains.png" />
+    <img src="doc/screenshot/jetbrains.png" width="200" alt="jetbrains.png" />
 </a>
