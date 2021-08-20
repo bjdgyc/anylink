@@ -52,7 +52,7 @@ func execute() {
 	rr := ee.MapRange()
 	for rr.Next() {
 		// fmt.Println(rr.Key(), rr.Value())
-		envs[rr.Key().String()] = rr.Value().String()
+		envs[rr.Key().String()] = fmt.Sprint(rr.Value())
 	}
 
 	if !runSrv {
