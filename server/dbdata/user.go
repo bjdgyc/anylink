@@ -69,7 +69,7 @@ func SetUser(v *User) error {
 // 验证用户登陆信息
 func CheckUser(name, pwd, group string) error {
 	// TODO 严重问题
-	return nil
+	// return nil
 
 	pl := len(pwd)
 	if name == "" || pl < 6 {
