@@ -100,6 +100,10 @@ func checkLinkAcl(group *dbdata.Group, pl *sessdata.Payload) bool {
 
 // 访问日志审计
 func logAudit(cSess *sessdata.ConnSession, pl *sessdata.Payload) {
+	if base.Cfg.AuditInterval <= 0 {
+		return
+	}
+
 	ipSrc := waterutil.IPv4Source(pl.Data)
 	ipDst := waterutil.IPv4Destination(pl.Data)
 	ipPort := waterutil.IPv4DestinationPort(pl.Data)

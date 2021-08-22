@@ -32,6 +32,7 @@
       <el-menu-item index="/admin/set/system">系统信息</el-menu-item>
       <el-menu-item index="/admin/set/soft">软件配置</el-menu-item>
       <el-menu-item index="/admin/set/other">其他设置</el-menu-item>
+      <el-menu-item index="/admin/set/audit">审计日志</el-menu-item>
     </el-submenu>
 
     <el-submenu index="2">
