@@ -12,6 +12,6 @@
 
 | 昵称     | 主页                         |
 | -------- | ---------------------------- |
-| 代码 oo8 |                              |
+| 代码oo8 |                              |
 | 甘磊     | https://github.com/ganlei333 |
-| Oo@     |                              |
+| Oo@     | https://github.com/chooop    |
