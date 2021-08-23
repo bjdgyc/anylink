@@ -37,9 +37,7 @@ AnyLink 服务端仅在 CentOS 7、Ubuntu 18.04 测试通过，如需要安装�
 
 ### 自行编译安装
 
-> 升级 go version = 1.16
->
-> 需要提前安装好 golang 和 nodejs
+> 需要提前安装好 golang >= 1.16 和 nodejs >= 14.x
 >
 > 使用客户端前，必须申请安全的 https 证书，不支持私有证书连接
 
@@ -77,7 +75,7 @@ sudo ./anylink
 - [x] 流量速率限制
 - [x] 后台管理界面
 - [x] 访问权限管理
-- [ ] IP 访问审计功能
+- [x] IP 访问审计功能
 - [ ] 基于 ipvtap 设备的桥接访问模式
 
 ## Config
