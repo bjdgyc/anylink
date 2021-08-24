@@ -52,7 +52,7 @@
           <template slot-scope="scope">
             <el-popconfirm
                 class="m-left-10"
-                @onConfirm="handleDel(scope.row)"
+                @confirm="handleDel(scope.row)"
                 title="确定要删除审计日志吗？">
               <el-button
                   slot="reference"

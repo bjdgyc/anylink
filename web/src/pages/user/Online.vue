@@ -95,7 +95,7 @@
 
             <el-popconfirm
                 class="m-left-10"
-                @onConfirm="handleOffline(scope.row)"
+                @confirm="handleOffline(scope.row)"
                 title="确定要下线用户吗？">
               <el-button
                   slot="reference"

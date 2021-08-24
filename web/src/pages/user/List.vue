@@ -120,7 +120,7 @@
 
             <el-popconfirm
                 class="m-left-10"
-                @onConfirm="handleDel(scope.row)"
+                @confirm="handleDel(scope.row)"
                 title="确定要删除用户吗？">
               <el-button
                   slot="reference"

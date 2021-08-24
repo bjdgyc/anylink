@@ -118,8 +118,8 @@
 
             <el-popconfirm
                 style="margin-left: 10px"
-                @onConfirm="handleDel(scope.row)"
-                title="确定要删除用户吗？">
+                @confirm="handleDel(scope.row)"
+                title="确定要删除用户组吗？">
               <el-button
                   slot="reference"
                   size="mini"
