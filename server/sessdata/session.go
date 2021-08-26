@@ -186,8 +186,12 @@ func (s *Session) NewConn() *ConnSession {
 		PayloadIn:      make(chan *Payload, 64),
 		PayloadOutCstp: make(chan *Payload, 64),
 		PayloadOutDtls: make(chan *Payload, 64),
-		IpAuditMap:     make(map[string]int64, 512),
 		dSess:          &atomic.Value{},
+	}
+
+	// ip 审计
+	if base.Cfg.AuditInterval >= 0 {
+		cSess.IpAuditMap = make(map[string]int64, 512)
 	}
 
 	dSess := &DtlsSession{
