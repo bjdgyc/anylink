@@ -52,13 +52,12 @@
           <template slot-scope="scope">
             <el-popconfirm
                 class="m-left-10"
-                @onConfirm="handleDel(scope.row)"
+                @confirm="handleDel(scope.row)"
                 title="确定要删除审计日志吗？">
               <el-button
                   slot="reference"
                   size="mini"
-                  type="danger"
-                  @click="handleDelete(scope.row)">删除
+                  type="danger">删除
               </el-button>
             </el-popconfirm>
 
@@ -85,7 +84,7 @@
 import axios from "axios";
 
 export default {
-  name: "IpMap",
+  name: "Audit",
   components: {},
   mixins: [],
   created() {

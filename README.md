@@ -182,20 +182,20 @@ sh bridge-init.sh
 
 ## Systemd
 
-添加 systemd 脚本
+1. 添加 anylink 程序
 
-- anylink 程序目录放入 `/usr/local/anylink-deploy`
+   - anylink 程序目录放入 `/usr/local/anylink-deploy`
 
-systemd 脚本放入：
+2. systemd/anylink.service 脚本放入：
 
-- centos: `/usr/lib/systemd/system/`
-- ubuntu: `/lib/systemd/system/`
+   - centos: `/usr/lib/systemd/system/`
+   - ubuntu: `/lib/systemd/system/`
 
-操作命令:
+3. 操作命令:
 
-- 启动: `systemctl start anylink`
-- 停止: `systemctl stop anylink`
-- 开机自启: `systemctl enable anylink`
+   - 启动: `systemctl start anylink`
+   - 停止: `systemctl stop anylink`
+   - 开机自启: `systemctl enable anylink`
 
 ## Docker
 

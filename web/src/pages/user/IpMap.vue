@@ -76,13 +76,12 @@
 
             <el-popconfirm
                 class="m-left-10"
-                @onConfirm="handleDel(scope.row)"
+                @confirm="handleDel(scope.row)"
                 title="确定要删除IP映射吗？">
               <el-button
                   slot="reference"
                   size="mini"
-                  type="danger"
-                  @click="handleDelete(scope.row)">删除
+                  type="danger">删除
               </el-button>
             </el-popconfirm>
 
