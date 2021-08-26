@@ -31,8 +31,9 @@ WORKDIR /app
 COPY --from=builder_golang /anylink/server/anylink  /app/
 COPY docker_entrypoint.sh  /app/
 
+COPY ./server/bridge-init.sh /app/
 COPY ./server/conf  /app/conf
-COPY ./server/files  /app/conf/files
+#COPY ./server/files  /app/conf/files
 
 
 #TODO 本地打包时使用镜像
