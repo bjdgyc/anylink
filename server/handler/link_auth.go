@@ -19,7 +19,7 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	userAgent := strings.ToLower(r.UserAgent())
 	xAggregateAuth := r.Header.Get("X-Aggregate-Auth")
 	xTranscendVersion := r.Header.Get("X-Transcend-Version")
-	if !(strings.Contains(userAgent, "anyconnect") &&
+	if !((strings.Contains(userAgent, "anyconnect") || strings.Contains(userAgent, "openconnect")) &&
 		xAggregateAuth == "1" && xTranscendVersion == "1") {
 		w.WriteHeader(http.StatusForbidden)
 		fmt.Fprintf(w, "error request")
