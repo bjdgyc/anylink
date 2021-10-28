@@ -15,7 +15,7 @@ func LinkHome(w http.ResponseWriter, r *http.Request) {
 
 	connection := strings.ToLower(r.Header.Get("Connection"))
 	userAgent := strings.ToLower(r.UserAgent())
-	if connection == "close" && strings.Contains(userAgent, "anyconnect") {
+	if connection == "close" && (strings.Contains(userAgent, "anyconnect") || strings.Contains(userAgent, "openconnect")) {
 		w.Header().Set("Connection", "close")
 		w.WriteHeader(http.StatusBadRequest)
 		return
