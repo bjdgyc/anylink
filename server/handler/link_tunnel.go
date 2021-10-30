@@ -22,6 +22,14 @@ func init() {
 	hn, _ = os.Hostname()
 }
 
+func HttpSetHeader(w http.ResponseWriter, key string, value string) {
+   w.Header()[key] = []string{value}
+}
+
+func HttpAddHeader(w http.ResponseWriter, key string, value string) {
+   w.Header()[key] = append(w.Header()[key], value)
+}
+
 func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	// TODO 调试信息输出
 	// hd, _ := httputil.DumpRequest(r, true)
@@ -51,6 +59,7 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 
 	// 客户端信息
 	cstpMtu := r.Header.Get("X-CSTP-MTU")
+	cstpBaseMtu := r.Header.Get("X-CSTP-Base-MTU")
 	masterSecret := r.Header.Get("X-DTLS-Master-Secret")
 	localIp := r.Header.Get("X-Cstp-Local-Address-Ip4")
 	mobile := r.Header.Get("X-Cstp-License")
@@ -79,68 +88,71 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	base.Debug(cSess.IpAddr, cSess.MacHw, sess.Username, mobile)
 
 	// 返回客户端数据
-	w.Header().Set("Server", fmt.Sprintf("%s %s", base.APP_NAME, base.APP_VER))
-	w.Header().Set("X-CSTP-Version", "1")
-	w.Header().Set("X-CSTP-Protocol", "Copyright (c) 2004 Cisco Systems, Inc.")
-	w.Header().Set("X-CSTP-Address", cSess.IpAddr.String())             // 分配的ip地址
-	w.Header().Set("X-CSTP-Netmask", sessdata.IpPool.Ipv4Mask.String()) // 子网掩码
-	w.Header().Set("X-CSTP-Hostname", hn)                               // 机器名称
+	HttpSetHeader(w, "Server", fmt.Sprintf("%s %s", base.APP_NAME, base.APP_VER))
+	HttpSetHeader(w, "X-CSTP-Version", "1")
+	HttpSetHeader(w, "X-CSTP-Server-Name", fmt.Sprintf("%s %s", base.APP_NAME, base.APP_VER))
+	HttpSetHeader(w, "X-CSTP-Protocol", "Copyright (c) 2004 Cisco Systems, Inc.")
+	HttpSetHeader(w, "X-CSTP-Address", cSess.IpAddr.String())             // 分配的ip地址
+	HttpSetHeader(w, "X-CSTP-Netmask", sessdata.IpPool.Ipv4Mask.String()) // 子网掩码
+	HttpSetHeader(w, "X-CSTP-Hostname", hn)                               // 机器名称
+	//HttpSetHeader(w, "X-CSTP-Default-Domain", cSess.LocalIp)          
+	HttpSetHeader(w, "X-CSTP-Base-MTU", cstpBaseMtu)
 
 	// 允许本地LAN访问vpn网络，必须放在路由的第一个
 	if cSess.Group.AllowLan {
-		w.Header().Set("X-CSTP-Split-Exclude", "0.0.0.0/255.255.255.255")
+		HttpSetHeader(w, "X-CSTP-Split-Exclude", "0.0.0.0/255.255.255.255")
 	}
 	// dns地址
 	for _, v := range cSess.Group.ClientDns {
-		w.Header().Add("X-CSTP-DNS", v.Val)
+		HttpAddHeader(w, "X-CSTP-DNS", v.Val)
 	}
 	// 允许的路由
 	for _, v := range cSess.Group.RouteInclude {
 		if v.Val == "all" {
 			continue
 		}
-		w.Header().Add("X-CSTP-Split-Include", v.IpMask)
+		HttpAddHeader(w, "X-CSTP-Split-Include", v.IpMask)
 	}
 	// 不允许的路由
 	for _, v := range cSess.Group.RouteExclude {
-		w.Header().Add("X-CSTP-Split-Exclude", v.IpMask)
+		HttpAddHeader(w, "X-CSTP-Split-Exclude", v.IpMask)
 	}
 
-	w.Header().Set("X-CSTP-Lease-Duration", fmt.Sprintf("%d", base.Cfg.IpLease)) // ip地址租期
-	w.Header().Set("X-CSTP-Session-Timeout", "none")
-	w.Header().Set("X-CSTP-Session-Timeout-Alert-Interval", "60")
-	w.Header().Set("X-CSTP-Session-Timeout-Remaining", "none")
-	w.Header().Set("X-CSTP-Idle-Timeout", "18000")
-	w.Header().Set("X-CSTP-Disconnected-Timeout", "18000")
-	w.Header().Set("X-CSTP-Keep", "true")
-	w.Header().Set("X-CSTP-Tunnel-All-DNS", "false")
+	HttpSetHeader(w, "X-CSTP-Lease-Duration", fmt.Sprintf("%d", base.Cfg.IpLease)) // ip地址租期
+	HttpSetHeader(w, "X-CSTP-Session-Timeout", "none")
+	HttpSetHeader(w, "X-CSTP-Session-Timeout-Alert-Interval", "60")
+	HttpSetHeader(w, "X-CSTP-Session-Timeout-Remaining", "none")
+	HttpSetHeader(w, "X-CSTP-Idle-Timeout", "18000")
+	HttpSetHeader(w, "X-CSTP-Disconnected-Timeout", "18000")
+	HttpSetHeader(w, "X-CSTP-Keep", "true")
+	HttpSetHeader(w, "X-CSTP-Tunnel-All-DNS", "false")
 
-	w.Header().Set("X-CSTP-Rekey-Time", "172800")
-	w.Header().Set("X-CSTP-Rekey-Method", "new-tunnel")
+	HttpSetHeader(w, "X-CSTP-Rekey-Time", "172800")
+	HttpSetHeader(w, "X-CSTP-Rekey-Method", "new-tunnel")
 
-	w.Header().Set("X-CSTP-DPD", fmt.Sprintf("%d", cstpDpd))
-	w.Header().Set("X-CSTP-Keepalive", fmt.Sprintf("%d", cstpKeepalive))
-	// w.Header().Set("X-CSTP-Banner", banner.Banner)
-	w.Header().Set("X-CSTP-MSIE-Proxy-Lockdown", "true")
-	w.Header().Set("X-CSTP-Smartcard-Removal-Disconnect", "true")
+	HttpSetHeader(w, "X-CSTP-DPD", fmt.Sprintf("%d", cstpDpd))
+	HttpSetHeader(w, "X-CSTP-Keepalive", fmt.Sprintf("%d", cstpKeepalive))
+	// HttpSetHeader(w, "X-CSTP-Banner", banner.Banner)
+	HttpSetHeader(w, "X-CSTP-MSIE-Proxy-Lockdown", "true")
+	HttpSetHeader(w, "X-CSTP-Smartcard-Removal-Disconnect", "true")
 
-	w.Header().Set("X-CSTP-MTU", fmt.Sprintf("%d", cSess.Mtu)) // 1399
-	w.Header().Set("X-DTLS-MTU", fmt.Sprintf("%d", cSess.Mtu))
+	HttpSetHeader(w, "X-CSTP-MTU", fmt.Sprintf("%d", cSess.Mtu)) // 1399
+	HttpSetHeader(w, "X-DTLS-MTU", fmt.Sprintf("%d", cSess.Mtu))
 
-	w.Header().Set("X-DTLS-Session-ID", sess.DtlsSid)
-	w.Header().Set("X-DTLS-Port", dtlsPort)
-	w.Header().Set("X-DTLS-DPD", fmt.Sprintf("%d", cstpDpd))
-	w.Header().Set("X-DTLS-Keepalive", fmt.Sprintf("%d", cstpKeepalive))
-	w.Header().Set("X-DTLS-Rekey-Time", "5400")
-	w.Header().Set("X-DTLS12-CipherSuite", "ECDHE-ECDSA-AES128-GCM-SHA256")
+	HttpSetHeader(w, "X-DTLS-Session-ID", sess.DtlsSid)
+	HttpSetHeader(w, "X-DTLS-Port", dtlsPort)
+	HttpSetHeader(w, "X-DTLS-DPD", fmt.Sprintf("%d", cstpDpd))
+	HttpSetHeader(w, "X-DTLS-Keepalive", fmt.Sprintf("%d", cstpKeepalive))
+	HttpSetHeader(w, "X-DTLS-Rekey-Time", "5400")
+	HttpSetHeader(w, "X-DTLS12-CipherSuite", "ECDHE-ECDSA-AES128-GCM-SHA256")
 
-	w.Header().Set("X-CSTP-License", "accept")
-	w.Header().Set("X-CSTP-Routing-Filtering-Ignore", "false")
-	w.Header().Set("X-CSTP-Quarantine", "false")
-	w.Header().Set("X-CSTP-Disable-Always-On-VPN", "false")
-	w.Header().Set("X-CSTP-Client-Bypass-Protocol", "false")
-	w.Header().Set("X-CSTP-TCP-Keepalive", "false")
-	// w.Header().Set("X-CSTP-Post-Auth-XML", ``)
+	HttpSetHeader(w, "X-CSTP-License", "accept")
+	HttpSetHeader(w, "X-CSTP-Routing-Filtering-Ignore", "false")
+	HttpSetHeader(w, "X-CSTP-Quarantine", "false")
+	HttpSetHeader(w, "X-CSTP-Disable-Always-On-VPN", "false")
+	HttpSetHeader(w, "X-CSTP-Client-Bypass-Protocol", "false")
+	HttpSetHeader(w, "X-CSTP-TCP-Keepalive", "false")
+	// HttpSetHeader(w, "X-CSTP-Post-Auth-XML", ``)
 	w.WriteHeader(http.StatusOK)
 
 	hClone := w.Header().Clone()
