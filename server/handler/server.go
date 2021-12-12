@@ -2,18 +2,15 @@ package handler
 
 import (
 	"crypto/tls"
-	"errors"
 	"fmt"
 	"log"
 	"net"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/pkg/proxyproto"
 	"github.com/gorilla/mux"
-	"github.com/pion/dtls/v2/pkg/crypto/selfsign"
 )
 
 func startTls() {
@@ -29,15 +26,16 @@ func startTls() {
 	)
 
 	// 判断证书文件
-	_, err = os.Stat(certFile)
-	if errors.Is(err, os.ErrNotExist) {
-		// 自动生成证书
-		certs[0], err = selfsign.GenerateSelfSignedWithDNS("vpn.anylink")
-	} else {
-		// 使用自定义证书
-		certs[0], err = tls.LoadX509KeyPair(certFile, keyFile)
-	}
+	//_, err = os.Stat(certFile)
+	//if errors.Is(err, os.ErrNotExist) {
+	//	// 自动生成证书
+	//	certs[0], err = selfsign.GenerateSelfSignedWithDNS("vpn.anylink")
+	//} else {
+	//	// 使用自定义证书
+	//	certs[0], err = tls.LoadX509KeyPair(certFile, keyFile)
+	//}
 
+	certs[0], err = tls.LoadX509KeyPair(certFile, keyFile)
 	if err != nil {
 		panic(err)
 	}

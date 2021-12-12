@@ -15,3 +15,6 @@
 | 代码oo8 |                              |
 | 甘磊     | https://github.com/ganlei333 |
 | Oo@     | https://github.com/chooop    |
+| 虚极静笃 |                              |
+| Ficapy |                              |
+

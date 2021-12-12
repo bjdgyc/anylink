@@ -1,0 +1,29 @@
+#示例配置信息
+
+#其他配置文件,可以使用绝对路径
+#或者相对于 anylink 二进制文件的路径
+
+#数据文件
+db_type = "sqlite3"
+db_source = "./conf/anylink.db"
+#证书文件
+cert_file = "./conf/vpn_cert.pem"
+cert_key = "./conf/vpn_cert.key"
+files_path = "./conf/files"
+
+#系统名称
+issuer = "XX公司VPN"
+#后台管理用户
+admin_user = "admin"
+#pass 123456
+admin_pass = "$2a$10$UQ7C.EoPifDeJh6d8.31TeSPQU7hM/NOM2nixmBucJpAuXDQNqNke"
+jwt_secret = "abcdef.0123456789.abcdef"
+
+#服务监听地址
+server_addr = ":443"
+#后台服务监听地址
+admin_addr = ":8800"
+
+
+
+
