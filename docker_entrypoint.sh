@@ -18,6 +18,6 @@ case $var1 in
   iptables -t nat -A POSTROUTING -s "${IPV4_CIDR}" -o eth0+ -j MASQUERADE
   iptables -nL -t nat
 
-  /app/anylink "$@"
+  exec /app/anylink "$@"
   ;;
 esac
