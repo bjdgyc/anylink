@@ -101,7 +101,7 @@ func initCmd() {
 		_, err := os.Stat(conf)
 		if errors.Is(err, os.ErrNotExist) {
 			// 没有配置文件，不做处理
-			return
+			panic(err)
 		}
 
 		linkViper.SetConfigFile(conf)
