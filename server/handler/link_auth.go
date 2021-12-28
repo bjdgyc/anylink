@@ -19,7 +19,7 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	userAgent := strings.ToLower(r.UserAgent())
 	xAggregateAuth := r.Header.Get("X-Aggregate-Auth")
 	xTranscendVersion := r.Header.Get("X-Transcend-Version")
-	if !((strings.Contains(userAgent, "anyconnect") || strings.Contains(userAgent, "openconnect")) && 
+	if !((strings.Contains(userAgent, "anyconnect") || strings.Contains(userAgent, "openconnect")) &&
 		xAggregateAuth == "1" && xTranscendVersion == "1") {
 		w.WriteHeader(http.StatusForbidden)
 		fmt.Fprintf(w, "error request")
@@ -176,7 +176,7 @@ var auth_complete = `<?xml version="1.0" encoding="UTF-8"?>
         <vpn-profile-manifest>
             <vpn rev="1.0">
                 <file type="profile" service-type="user">
-                    <uri>/profile.xml</uri>
+                    <uri>/files/profile.xml</uri>
                     <hash type="sha1">A8B0B07FBA93D06E8501E40AB807AEE2464E73B7</hash>
                 </file>
             </vpn>

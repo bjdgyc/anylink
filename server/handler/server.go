@@ -77,9 +77,9 @@ func initRoute() http.Handler {
 	r.HandleFunc("/", LinkAuth).Methods(http.MethodPost)
 	r.HandleFunc("/CSCOSSLC/tunnel", LinkTunnel).Methods(http.MethodConnect)
 	r.HandleFunc("/otp_qr", LinkOtpQr).Methods(http.MethodGet)
-	r.HandleFunc("/profile.xml", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(auth_profile))
-	}).Methods(http.MethodGet)
+	// r.HandleFunc("/profile.xml", func(w http.ResponseWriter, r *http.Request) {
+	// 	w.Write([]byte(auth_profile))
+	// }).Methods(http.MethodGet)
 	r.PathPrefix("/files/").Handler(
 		http.StripPrefix("/files/",
 			http.FileServer(http.Dir(base.Cfg.FilesPath)),
