@@ -42,6 +42,7 @@ cp -r server/bridge-init.sh $deploy
 cp -r server/conf $deploy
 
 cp -r systemd $deploy
+cp -r LICENSE $deploy
 
 tar zcvf ${deploy}.tar.gz $deploy
 

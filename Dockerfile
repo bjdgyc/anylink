@@ -33,7 +33,7 @@ COPY docker_entrypoint.sh  /app/
 
 COPY ./server/bridge-init.sh /app/
 COPY ./server/conf  /app/conf
-#COPY ./server/files  /app/conf/files
+COPY ./LICENSE  /app/LICENSE
 
 
 #TODO 本地打包时使用镜像
