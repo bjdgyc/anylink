@@ -6,6 +6,7 @@
 [![codecov](https://codecov.io/gh/bjdgyc/anylink/branch/master/graph/badge.svg?token=JTFLIIIBQ0)](https://codecov.io/gh/bjdgyc/anylink)
 ![GitHub release](https://img.shields.io/github/v/release/bjdgyc/anylink)
 ![GitHub downloads)](https://img.shields.io/github/downloads/bjdgyc/anylink/total)
+[![Docker pulls)](https://img.shields.io/docker/pulls/bjdgyc/anylink.svg)](https://hub.docker.com/r/bjdgyc/anylink)
 ![LICENSE](https://img.shields.io/github/license/bjdgyc/anylink)
 
 AnyLink 是一个企业级远程办公 sslvpn 的软件，可以支持多人同时在线使用。
