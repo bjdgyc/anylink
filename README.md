@@ -37,10 +37,11 @@ AnyLink 服务端仅在 CentOS 7、Ubuntu 18.04 测试通过，如需要安装�
 > https://github.com/bjdgyc/anylink/releases
 
 ### 使用问题
+
 > 对于测试环境，可以使用 vpn.test.vqilu.cn 绑定host进行测试
-> 
+>
 > 对于线上环境，必须申请安全的 https 证书，不支持私有证书连接
-> 
+>
 > 客户端请使用群共享文件的版本，其他版本没有测试过，不保证使用正常
 
 ### 自行编译安装
@@ -70,6 +71,7 @@ sudo ./anylink
 - [x] TLS-TCP 通道
 - [x] DTLS-UDP 通道
 - [x] 兼容 AnyConnect
+- [x] 兼容 OpenConnect
 - [x] 基于 tun 设备的 nat 访问模式
 - [x] 基于 tap 设备的桥接访问模式
 - [x] 基于 macvtap 设备的桥接访问模式
@@ -114,7 +116,8 @@ sudo ./anylink
 
 网络模式选择，需要配置 `link_mode` 参数，如 `link_mode="tun"`,`link_mode="macvtap"`,`link_mode="tap"(不推荐)` 等参数。 不同的参数需要对服务器做相应的设置。
 
-建议优先选择 tun 模式，其次选择 macvtap 模式，因客户端传输的是 IP 层数据，无须进行数据转换。 tap 模式是在用户态做的链路层到 IP 层的数据互相转换，性能会有所下降。 如果需要在虚拟机内开启 tap 模式，请确认虚拟机的网卡开启混杂模式。
+建议优先选择 tun 模式，其次选择 macvtap 模式，因客户端传输的是 IP 层数据，无须进行数据转换。 tap 模式是在用户态做的链路层到 IP 层的数据互相转换，性能会有所下降。 如果需要在虚拟机内开启 tap
+模式，请确认虚拟机的网卡开启混杂模式。
 
 ### tun 设置
 
@@ -190,18 +193,18 @@ sh bridge-init.sh
 
 1. 添加 anylink 程序
 
-   - anylink 程序目录放入 `/usr/local/anylink-deploy`
+    - anylink 程序目录放入 `/usr/local/anylink-deploy`
 
 2. systemd/anylink.service 脚本放入：
 
-   - centos: `/usr/lib/systemd/system/`
-   - ubuntu: `/lib/systemd/system/`
+    - centos: `/usr/lib/systemd/system/`
+    - ubuntu: `/lib/systemd/system/`
 
 3. 操作命令:
 
-   - 启动: `systemctl start anylink`
-   - 停止: `systemctl stop anylink`
-   - 开机自启: `systemctl enable anylink`
+    - 启动: `systemctl start anylink`
+    - 停止: `systemctl stop anylink`
+    - 开机自启: `systemctl enable anylink`
 
 ## Docker
 
@@ -268,7 +271,7 @@ sh bridge-init.sh
 ## Donate
 
 > 如果您觉得 anylink 对你有帮助，欢迎给我们打赏，也是帮助 anylink 更好的发展。
-> 
+>
 > [查看打赏列表](doc/README.md)
 
 <p>

@@ -10,6 +10,7 @@ db_source = "./conf/anylink.db"
 cert_file = "./conf/vpn_cert.crt"
 cert_key = "./conf/vpn_cert.key"
 files_path = "./conf/files"
+log_level = "debug"
 
 #系统名称
 issuer = "XX公司VPN"

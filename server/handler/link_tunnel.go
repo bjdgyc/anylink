@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/bjdgyc/anylink/base"
+	"github.com/bjdgyc/anylink/dbdata"
 	"github.com/bjdgyc/anylink/sessdata"
 )
 
@@ -23,11 +24,11 @@ func init() {
 }
 
 func HttpSetHeader(w http.ResponseWriter, key string, value string) {
-   w.Header()[key] = []string{value}
+	w.Header()[key] = []string{value}
 }
 
 func HttpAddHeader(w http.ResponseWriter, key string, value string) {
-   w.Header()[key] = append(w.Header()[key], value)
+	w.Header()[key] = append(w.Header()[key], value)
 }
 
 func LinkTunnel(w http.ResponseWriter, r *http.Request) {
@@ -95,7 +96,7 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	HttpSetHeader(w, "X-CSTP-Address", cSess.IpAddr.String())             // 分配的ip地址
 	HttpSetHeader(w, "X-CSTP-Netmask", sessdata.IpPool.Ipv4Mask.String()) // 子网掩码
 	HttpSetHeader(w, "X-CSTP-Hostname", hn)                               // 机器名称
-	//HttpSetHeader(w, "X-CSTP-Default-Domain", cSess.LocalIp)          
+	//HttpSetHeader(w, "X-CSTP-Default-Domain", cSess.LocalIp)
 	HttpSetHeader(w, "X-CSTP-Base-MTU", cstpBaseMtu)
 
 	// 允许本地LAN访问vpn网络，必须放在路由的第一个
@@ -108,7 +109,7 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	}
 	// 允许的路由
 	for _, v := range cSess.Group.RouteInclude {
-		if v.Val == "all" {
+		if v.Val == dbdata.All {
 			continue
 		}
 		HttpAddHeader(w, "X-CSTP-Split-Include", v.IpMask)
