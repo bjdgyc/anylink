@@ -14,6 +14,8 @@ import (
 	"github.com/bjdgyc/anylink/sessdata"
 )
 
+var profileHash = ""
+
 func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	// 判断anyconnect客户端
 	userAgent := strings.ToLower(r.UserAgent())
@@ -89,7 +91,7 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	other := &dbdata.SettingOther{}
 	_ = dbdata.SettingGet(other)
 	rd := RequestData{SessionId: sess.Sid, SessionToken: sess.Sid + "@" + sess.Token,
-		Banner: other.Banner}
+		Banner: other.Banner, ProfileHash: profileHash}
 	w.WriteHeader(http.StatusOK)
 	tplRequest(tpl_complete, w, rd)
 	base.Debug("login", cr.Auth.Username)
@@ -125,6 +127,7 @@ type RequestData struct {
 	SessionId    string
 	SessionToken string
 	Banner       string
+	ProfileHash  string
 }
 
 var auth_request = `<?xml version="1.0" encoding="UTF-8"?>
@@ -176,8 +179,8 @@ var auth_complete = `<?xml version="1.0" encoding="UTF-8"?>
         <vpn-profile-manifest>
             <vpn rev="1.0">
                 <file type="profile" service-type="user">
-                    <uri>/files/profile.xml</uri>
-                    <hash type="sha1">A8B0B07FBA93D06E8501E40AB807AEE2464E73B7</hash>
+                    <uri>/profile.xml</uri>
+                    <hash type="sha1">{{.ProfileHash}}</hash>
                 </file>
             </vpn>
         </vpn-profile-manifest>

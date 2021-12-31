@@ -32,6 +32,7 @@ var (
 type ServerConfig struct {
 	// LinkAddr      string `json:"link_addr"`
 	Conf           string `json:"conf"`
+	Profile        string `json:"profile"`
 	ServerAddr     string `json:"server_addr"`
 	ServerDTLSAddr string `json:"server_dtls_addr"`
 	ServerDTLS     bool   `json:"server_dtls"`

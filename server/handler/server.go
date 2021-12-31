@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/bjdgyc/anylink/base"
@@ -26,14 +27,14 @@ func startTls() {
 	)
 
 	// 判断证书文件
-	//_, err = os.Stat(certFile)
-	//if errors.Is(err, os.ErrNotExist) {
+	// _, err = os.Stat(certFile)
+	// if errors.Is(err, os.ErrNotExist) {
 	//	// 自动生成证书
 	//	certs[0], err = selfsign.GenerateSelfSignedWithDNS("vpn.anylink")
-	//} else {
+	// } else {
 	//	// 使用自定义证书
 	//	certs[0], err = tls.LoadX509KeyPair(certFile, keyFile)
-	//}
+	// }
 
 	certs[0], err = tls.LoadX509KeyPair(certFile, keyFile)
 	if err != nil {
@@ -77,9 +78,10 @@ func initRoute() http.Handler {
 	r.HandleFunc("/", LinkAuth).Methods(http.MethodPost)
 	r.HandleFunc("/CSCOSSLC/tunnel", LinkTunnel).Methods(http.MethodConnect)
 	r.HandleFunc("/otp_qr", LinkOtpQr).Methods(http.MethodGet)
-	// r.HandleFunc("/profile.xml", func(w http.ResponseWriter, r *http.Request) {
-	// 	w.Write([]byte(auth_profile))
-	// }).Methods(http.MethodGet)
+	r.HandleFunc("/profile.xml", func(w http.ResponseWriter, r *http.Request) {
+		b, _ := os.ReadFile(base.Cfg.Profile)
+		w.Write(b)
+	}).Methods(http.MethodGet)
 	r.PathPrefix("/files/").Handler(
 		http.StripPrefix("/files/",
 			http.FileServer(http.Dir(base.Cfg.FilesPath)),
