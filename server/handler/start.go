@@ -1,6 +1,10 @@
 package handler
 
 import (
+	"crypto/sha1"
+	"encoding/hex"
+	"os"
+
 	"github.com/bjdgyc/anylink/admin"
 	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/dbdata"
@@ -21,6 +25,14 @@ func Start() {
 	default:
 		base.Fatal("LinkMode is err")
 	}
+
+	// 计算profile.xml的hash
+	b, err := os.ReadFile(base.Cfg.Profile)
+	if err != nil {
+		panic(err)
+	}
+	ha := sha1.Sum(b)
+	profileHash = hex.EncodeToString(ha[:])
 
 	go admin.StartAdmin()
 	go startTls()

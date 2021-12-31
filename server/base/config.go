@@ -21,6 +21,7 @@ type config struct {
 
 var configs = []config{
 	{Typ: cfgStr, Name: "conf", Usage: "config file", ValStr: "./conf/server.toml", Short: "c"},
+	{Typ: cfgStr, Name: "profile", Usage: "profile.xml file", ValStr: "./conf/profile.xml"},
 	{Typ: cfgStr, Name: "server_addr", Usage: "服务监听地址", ValStr: ":443"},
 	{Typ: cfgBool, Name: "server_dtls", Usage: "开启DTLS", ValBool: false},
 	{Typ: cfgStr, Name: "server_dtls_addr", Usage: "DTLS监听地址", ValStr: ":4433"},

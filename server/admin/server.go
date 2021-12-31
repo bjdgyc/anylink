@@ -18,6 +18,11 @@ func StartAdmin() {
 	r := mux.NewRouter()
 	r.Use(authMiddleware)
 
+	// 监控检测
+	r.HandleFunc("/status.html", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("ok"))
+	}).Name("index")
+
 	r.Handle("/", http.RedirectHandler("/ui/", http.StatusFound)).Name("index")
 	r.PathPrefix("/ui/").Handler(
 		// http.StripPrefix("/ui/", http.FileServer(http.Dir(base.Cfg.UiPath))),

@@ -6,10 +6,11 @@
 #数据文件
 db_type = "sqlite3"
 db_source = "./conf/anylink.db"
-#证书文件
+#证书文件 使用跟nginx一样的证书即可
 cert_file = "./conf/vpn_cert.pem"
 cert_key = "./conf/vpn_cert.key"
 files_path = "./conf/files"
+profile = "./conf/profile.xml"
 #日志目录,为空写入标准输出
 #log_path = "./log"
 log_path = ""
