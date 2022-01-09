@@ -55,7 +55,7 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 
 	if cr.Type == "init" {
 		w.WriteHeader(http.StatusOK)
-		data := RequestData{Group: cr.GroupSelect, Groups: dbdata.GetGroupNames()}
+		data := RequestData{Group: cr.GroupSelect, Groups: dbdata.GetAvailableGroups()}
 		tplRequest(tpl_request, w, data)
 		return
 	}
@@ -67,11 +67,11 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO 用户密码校验
-	err = dbdata.CheckUser(cr.Auth.Username, cr.Auth.Password, cr.GroupSelect)
+	err = dbdata.CheckUser(cr.Auth.Username, cr.Auth.Password, &cr.GroupSelect)
 	if err != nil {
 		base.Warn(err)
 		w.WriteHeader(http.StatusOK)
-		data := RequestData{Group: cr.GroupSelect, Groups: dbdata.GetGroupNames(), Error: "用户名或密码错误"}
+		data := RequestData{Group: cr.GroupSelect, Groups: dbdata.GetAvailableGroups(), Error: err.Error()}
 		tplRequest(tpl_request, w, data)
 		return
 	}
@@ -150,11 +150,13 @@ var auth_request = `<?xml version="1.0" encoding="UTF-8"?>
         <form>
             <input type="text" name="username" label="Username:"></input>
             <input type="password" name="password" label="Password:"></input>
+			{{if gt (len .Groups) 1}}
             <select name="group_list" label="GROUP:">
                 {{range $v := .Groups}}
                 <option {{if eq $v $.Group}} selected="true"{{end}}>{{$v}}</option>
                 {{end}}
             </select>
+			{{end}}
         </form>
     </auth>
 </config-auth>

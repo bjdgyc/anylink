@@ -67,7 +67,7 @@ func SetUser(v *User) error {
 }
 
 // 验证用户登陆信息
-func CheckUser(name, pwd, group string) error {
+func CheckUser(name, pwd string, group *string) error {
 	// TODO 严重问题
 	// return nil
 
@@ -81,7 +81,16 @@ func CheckUser(name, pwd, group string) error {
 		return fmt.Errorf("%s %s", name, "用户名错误")
 	}
 	// 判断用户组信息
-	if !utils.InArrStr(v.Groups, group) {
+	// 当只有一个可用的用户组时，客户端不显示用户组选项，默认使用该用户唯一可用的组
+	if *group == "" {
+		Groups := GetAvailableGroups()
+		for _, g := range v.Groups {
+			if utils.InArrStr(Groups, g) {
+				*group = g
+				break
+			}
+		}
+	} else if !utils.InArrStr(v.Groups, *group) {
 		return fmt.Errorf("%s %s", name, "用户组错误")
 	}
 	groupData := &Group{}

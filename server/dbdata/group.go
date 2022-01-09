@@ -58,6 +58,22 @@ func GetGroupNames() []string {
 	return names
 }
 
+func GetAvailableGroups() []string {
+	var datas []Group
+	err := Find(&datas, 0, 0)
+	if err != nil {
+		base.Error(err)
+		return nil
+	}
+	var names []string
+	for _, v := range datas {
+		if v.Status == 1 {
+			names = append(names, v.Name)
+		}
+	}
+	return names
+}
+
 func SetGroup(g *Group) error {
 	var err error
 	if g.Name == "" {
