@@ -32,12 +32,12 @@ func TestCheckUser(t *testing.T) {
 	// 验证 PinCode + OtpSecret
 	totp := gotp.NewDefaultTOTP(u.OtpSecret)
 	secret := totp.Now()
-	err = CheckUser("aaa", u.PinCode+secret, group)
+	err = CheckUser("aaa", u.PinCode+secret, &group)
 	ast.Nil(err)
 
 	// 单独验证密码
 	u.DisableOtp = true
 	_ = SetUser(&u)
-	err = CheckUser("aaa", u.PinCode, group)
+	err = CheckUser("aaa", u.PinCode, &group)
 	ast.Nil(err)
 }
