@@ -150,13 +150,13 @@ var auth_request = `<?xml version="1.0" encoding="UTF-8"?>
         <form>
             <input type="text" name="username" label="Username:"></input>
             <input type="password" name="password" label="Password:"></input>
-			{{if gt (len .Groups) 1}}
+	    {{if gt (len .Groups) 1}}
             <select name="group_list" label="GROUP:">
                 {{range $v := .Groups}}
                 <option {{if eq $v $.Group}} selected="true"{{end}}>{{$v}}</option>
                 {{end}}
             </select>
-			{{end}}
+	    {{end}}
         </form>
     </auth>
 </config-auth>
