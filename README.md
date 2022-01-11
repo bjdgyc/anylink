@@ -129,6 +129,9 @@ net.ipv4.ip_forward = 1
 
 #执行如下命令
 sysctl -w net.ipv4.ip_forward=1
+
+# 查看设置是否生效
+cat /proc/sys/net/ipv4/ip_forward
 ```
 
 2. 设置 nat 转发规则
