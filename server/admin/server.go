@@ -69,7 +69,7 @@ func StartAdmin() {
 	}
 
 	base.Info("Listen admin", base.Cfg.AdminAddr)
-	err := http.ListenAndServe(base.Cfg.AdminAddr, r)
+	err := http.ListenAndServeTLS(base.Cfg.AdminAddr, base.Cfg.CertFile, base.Cfg.CertKey, r)
 	if err != nil {
 		base.Fatal(err)
 	}
