@@ -7,9 +7,10 @@
 db_type = "sqlite3"
 db_source = "./conf/anylink.db"
 #证书文件
-cert_file = "./conf/vpn_cert.pem"
+cert_file = "./conf/vpn_cert.crt"
 cert_key = "./conf/vpn_cert.key"
 files_path = "./conf/files"
+log_level = "debug"
 
 #系统名称
 issuer = "XX公司VPN"

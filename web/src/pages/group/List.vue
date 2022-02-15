@@ -423,6 +423,7 @@ export default {
           if (rdata.code === 0) {
             this.$message.success(rdata.msg);
             this.getData(1);
+            this.user_edit_dialog = false
           } else {
             this.$message.error(rdata.msg);
           }

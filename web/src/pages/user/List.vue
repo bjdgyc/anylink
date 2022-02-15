@@ -388,6 +388,7 @@ export default {
           if (data.code === 0) {
             this.$message.success(data.msg);
             this.getData(1);
+            this.user_edit_dialog = false
           } else {
             this.$message.error(data.msg);
           }

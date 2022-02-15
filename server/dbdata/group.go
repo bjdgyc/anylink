@@ -12,6 +12,7 @@ import (
 const (
 	Allow = "allow"
 	Deny  = "deny"
+	All   = "all"
 )
 
 type GroupLinkAcl struct {
@@ -65,25 +66,10 @@ func SetGroup(g *Group) error {
 	}
 
 	// 判断数据
-	clientDns := []ValData{}
-	for _, v := range g.ClientDns {
-		if v.Val != "" {
-			ip := net.ParseIP(v.Val)
-			if ip.String() != v.Val {
-				return errors.New("DNS IP 错误")
-			}
-			clientDns = append(clientDns, v)
-		}
-	}
-	if len(clientDns) == 0 {
-		return errors.New("必须设置一个DNS")
-	}
-	g.ClientDns = clientDns
-
 	routeInclude := []ValData{}
 	for _, v := range g.RouteInclude {
 		if v.Val != "" {
-			if v.Val == "all" {
+			if v.Val == All {
 				routeInclude = append(routeInclude, v)
 				continue
 			}
@@ -123,6 +109,24 @@ func SetGroup(g *Group) error {
 		}
 	}
 	g.LinkAcl = linkAcl
+
+	// DNS 判断
+	clientDns := []ValData{}
+	for _, v := range g.ClientDns {
+		if v.Val != "" {
+			ip := net.ParseIP(v.Val)
+			if ip.String() != v.Val {
+				return errors.New("DNS IP 错误")
+			}
+			clientDns = append(clientDns, v)
+		}
+	}
+	if len(routeInclude) == 0 || (len(routeInclude) == 1 && routeInclude[0].Val == "all") {
+		if len(clientDns) == 0 {
+			return errors.New("默认路由，必须设置一个DNS")
+		}
+	}
+	g.ClientDns = clientDns
 
 	g.UpdatedAt = time.Now()
 	if g.Id > 0 {
