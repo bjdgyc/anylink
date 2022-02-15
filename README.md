@@ -59,7 +59,7 @@ cd anylink-deploy
 sudo ./anylink
 
 # 默认管理后台访问地址
-# http://host:8800
+# https://host:8800
 # 默认账号 密码
 # admin 123456
 
