@@ -30,6 +30,16 @@ AnyLink 服务端仅在 CentOS 7、Ubuntu 18.04 测试通过，如需要安装�
 
 ![online](doc/screenshot/online.jpg)
 
+## Donate
+
+> 如果您觉得 anylink 对你有帮助，欢迎给我们打赏，也是帮助 anylink 更好的发展。
+>
+> [查看打赏列表](doc/README.md)
+
+<p>
+    <img src="doc/screenshot/wxpay2.png" width="400" />
+</p>
+
 ## Installation
 
 > 没有编程基础的同学建议直接下载 release 包，从下面的地址下载 anylink-deploy.tar.gz
@@ -270,16 +280,6 @@ sh bridge-init.sh
 ## 常见问题
 
 请前往 [问题地址](doc/question.md) 查看具体信息
-
-## Donate
-
-> 如果您觉得 anylink 对你有帮助，欢迎给我们打赏，也是帮助 anylink 更好的发展。
->
-> [查看打赏列表](doc/README.md)
-
-<p>
-    <img src="doc/screenshot/wxpay2.png" width="400" />
-</p>
 
 ## Discussion
 
