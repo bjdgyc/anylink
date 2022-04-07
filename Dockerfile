@@ -2,12 +2,12 @@
 FROM node:lts-alpine as builder_node
 WORKDIR /web
 COPY ./web /web
-RUN npm install --registry=https://registry.npm.taobao.org \
-    && npm run build \
+RUN yarn install \
+    && yarn run build \
     && ls /web/ui
 
 # server
-FROM golang:1.16-alpine as builder_golang
+FROM golang:1.17-alpine as builder_golang
 #TODO 本地打包时使用镜像
 ENV GOPROXY=https://goproxy.io
 ENV GOOS=linux

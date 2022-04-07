@@ -19,11 +19,8 @@ func startTls() {
 	var (
 		err error
 
-		addr     = base.Cfg.ServerAddr
-		certFile = base.Cfg.CertFile
-		keyFile  = base.Cfg.CertKey
-		certs    = make([]tls.Certificate, 1)
-		ln       net.Listener
+		addr = base.Cfg.ServerAddr
+		ln   net.Listener
 	)
 
 	// 判断证书文件
@@ -36,16 +33,20 @@ func startTls() {
 	//	certs[0], err = tls.LoadX509KeyPair(certFile, keyFile)
 	// }
 
-	certs[0], err = tls.LoadX509KeyPair(certFile, keyFile)
-	if err != nil {
-		panic(err)
+	// 修复 CVE-2016-2183
+	// https://segmentfault.com/a/1190000038486901
+	// nmap -sV --script ssl-enum-ciphers -p 443 www.example.com
+	cipherSuites := tls.CipherSuites()
+	selectedCipherSuites := make([]uint16, 0, len(cipherSuites))
+	for _, s := range cipherSuites {
+		selectedCipherSuites = append(selectedCipherSuites, s.ID)
 	}
 
 	// 设置tls信息
 	tlsConfig := &tls.Config{
 		NextProtos:   []string{"http/1.1"},
 		MinVersion:   tls.VersionTLS12,
-		Certificates: certs,
+		CipherSuites: selectedCipherSuites,
 		// InsecureSkipVerify: true,
 	}
 	srv := &http.Server{
@@ -66,7 +67,7 @@ func startTls() {
 	}
 
 	base.Info("listen server", addr)
-	err = srv.ServeTLS(ln, "", "")
+	err = srv.ServeTLS(ln, base.Cfg.CertFile, base.Cfg.CertKey)
 	if err != nil {
 		base.Fatal(err)
 	}

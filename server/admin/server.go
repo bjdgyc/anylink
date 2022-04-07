@@ -2,6 +2,7 @@
 package admin
 
 import (
+	"crypto/tls"
 	"embed"
 	"net/http"
 	"net/http/pprof"
@@ -69,7 +70,25 @@ func StartAdmin() {
 	}
 
 	base.Info("Listen admin", base.Cfg.AdminAddr)
-	err := http.ListenAndServeTLS(base.Cfg.AdminAddr, base.Cfg.CertFile, base.Cfg.CertKey, r)
+
+	// 修复 CVE-2016-2183
+	cipherSuites := tls.CipherSuites()
+	selectedCipherSuites := make([]uint16, 0, len(cipherSuites))
+	for _, s := range cipherSuites {
+		selectedCipherSuites = append(selectedCipherSuites, s.ID)
+	}
+	// 设置tls信息
+	tlsConfig := &tls.Config{
+		NextProtos:   []string{"http/1.1"},
+		MinVersion:   tls.VersionTLS12,
+		CipherSuites: selectedCipherSuites,
+	}
+	srv := &http.Server{
+		Addr:      base.Cfg.AdminAddr,
+		Handler:   r,
+		TLSConfig: tlsConfig,
+	}
+	err := srv.ListenAndServeTLS(base.Cfg.CertFile, base.Cfg.CertKey)
 	if err != nil {
 		base.Fatal(err)
 	}
