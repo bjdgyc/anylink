@@ -16,9 +16,13 @@ echo "编译前端项目"
 cd $cpath/web
 #国内可替换源加快速度
 #npx browserslist@latest --update-db
-npm install --registry=https://registry.npm.taobao.org
+#npm install --registry=https://registry.npm.taobao.org
 #npm install
-npm run build
+#npm run build
+
+yarn install
+yarn run build
+
 RETVAL $?
 
 echo "编译二进制文件"
