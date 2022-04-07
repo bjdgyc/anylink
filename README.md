@@ -30,16 +30,6 @@ AnyLink 服务端仅在 CentOS 7、Ubuntu 18.04 测试通过，如需要安装�
 
 ![online](doc/screenshot/online.jpg)
 
-## Donate
-
-> 如果您觉得 anylink 对你有帮助，欢迎给我们打赏，也是帮助 anylink 更好的发展。
->
-> [查看打赏列表](doc/README.md)
-
-<p>
-    <img src="doc/screenshot/wxpay2.png" width="400" />
-</p>
-
 ## Installation
 
 > 没有编程基础的同学建议直接下载 release 包，从下面的地址下载 anylink-deploy.tar.gz
@@ -250,14 +240,15 @@ sh bridge-init.sh
 5. 启动容器
 
    ```bash
+   # -e IPV4_CIDR=192.168.10.0/24 这个参数要与配置文件内的网段一致
    docker run -itd --name anylink --privileged \
+       -e IPV4_CIDR=192.168.10.0/24
        -p 443:443 -p 8800:8800 \
        --restart=always \
        bjdgyc/anylink
    ```
 
 6. 使用自定义参数启动容器
-
    ```bash
    # 参数可以参考 -h 命令
    docker run -itd --name anylink --privileged \
@@ -276,6 +267,16 @@ sh bridge-init.sh
    # 构建镜像
    docker build -t anylink .
    ```
+
+## Donate
+
+> 如果您觉得 anylink 对你有帮助，欢迎给我们打赏，也是帮助 anylink 更好的发展。
+>
+> [查看打赏列表](doc/README.md)
+
+<p>
+    <img src="doc/screenshot/wxpay2.png" width="400" />
+</p>
 
 ## 常见问题
 
