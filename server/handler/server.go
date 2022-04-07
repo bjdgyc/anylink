@@ -34,6 +34,8 @@ func startTls() {
 	// }
 
 	// 修复 CVE-2016-2183
+	// https://segmentfault.com/a/1190000038486901
+	// nmap -sV --script ssl-enum-ciphers -p 443 www.example.com
 	cipherSuites := tls.CipherSuites()
 	selectedCipherSuites := make([]uint16, 0, len(cipherSuites))
 	for _, s := range cipherSuites {
