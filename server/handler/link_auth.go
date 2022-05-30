@@ -229,11 +229,10 @@ var ds_domains_xml = `
             <custom-attr>
             {{if .DsExcludeDomains}}
                <dynamic-split-exclude-domains><![CDATA[{{.DsExcludeDomains}},]]></dynamic-split-exclude-domains>
-            {{end}}
-            {{if .DsIncludeDomains}}
+            {{else if .DsIncludeDomains}}
                <dynamic-split-include-domains><![CDATA[{{.DsIncludeDomains}}]]></dynamic-split-include-domains>
             {{end}}
-            </custom-attr>			
+            </custom-attr>
         </opaque>
     </config>
 </config-auth>
