@@ -375,6 +375,7 @@ export default {
     handleEdit(row) {
       !this.$refs['ruleForm'] || this.$refs['ruleForm'].resetFields();
       console.log(row)
+      this.activeTab = "general"
       this.user_edit_dialog = true
       if (!row) {
         return;
