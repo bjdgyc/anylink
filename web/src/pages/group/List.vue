@@ -152,143 +152,155 @@
         center>
 
       <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="ruleForm">
-        <el-form-item label="用户组ID" prop="id">
-          <el-input v-model="ruleForm.id" disabled></el-input>
-        </el-form-item>
+        <el-tabs v-model="activeTab">
+           <el-tab-pane label="通用" name="general">      
+                <el-form-item label="用户组ID" prop="id">
+                <el-input v-model="ruleForm.id" disabled></el-input>
+                </el-form-item>
 
-        <el-form-item label="组名" prop="name">
-          <el-input v-model="ruleForm.name" :disabled="ruleForm.id > 0"></el-input>
-        </el-form-item>
+                <el-form-item label="组名" prop="name">
+                <el-input v-model="ruleForm.name" :disabled="ruleForm.id > 0"></el-input>
+                </el-form-item>
 
-        <el-form-item label="备注" prop="note">
-          <el-input v-model="ruleForm.note"></el-input>
-        </el-form-item>
+                <el-form-item label="备注" prop="note">
+                <el-input v-model="ruleForm.note"></el-input>
+                </el-form-item>
 
-        <el-form-item label="带宽限制" prop="bandwidth">
-          <el-input v-model.number="ruleForm.bandwidth">
-            <template slot="append">BYTE/S</template>
-          </el-input>
-        </el-form-item>
-        <el-form-item label="本地网络" prop="allow_lan">
-          <el-switch
-              v-model="ruleForm.allow_lan">
-          </el-switch>
-        </el-form-item>
+                <el-form-item label="带宽限制" prop="bandwidth">
+                <el-input v-model.number="ruleForm.bandwidth">
+                    <template slot="append">BYTE/S</template>
+                </el-input>
+                </el-form-item>
+                <el-form-item label="本地网络" prop="allow_lan">
+                <el-switch
+                    v-model="ruleForm.allow_lan">
+                </el-switch>
+                </el-form-item>
 
-        <el-form-item label="客户端DNS" prop="client_dns">
-          <el-row class="msg-info">
-            <el-col :span="20">输入IP格式如: 192.168.0.10</el-col>
-            <el-col :span="4">
-              <el-button size="mini" type="success" icon="el-icon-plus" circle
-                         @click.prevent="addDomain(ruleForm.client_dns)"></el-button>
-            </el-col>
-          </el-row>
-          <el-row v-for="(item,index) in ruleForm.client_dns"
-                  :key="index" style="margin-bottom: 5px" :gutter="10">
-            <el-col :span="10">
-              <el-input v-model="item.val"></el-input>
-            </el-col>
-            <el-col :span="12">
-              <el-input v-model="item.note" placeholder="备注"></el-input>
-            </el-col>
-            <el-col :span="2">
-              <el-button size="mini" type="danger" icon="el-icon-minus" circle
-                         @click.prevent="removeDomain(ruleForm.client_dns,index)"></el-button>
-            </el-col>
-          </el-row>
-        </el-form-item>
+                <el-form-item label="客户端DNS" prop="client_dns">
+                <el-row class="msg-info">
+                    <el-col :span="20">输入IP格式如: 192.168.0.10</el-col>
+                    <el-col :span="4">
+                    <el-button size="mini" type="success" icon="el-icon-plus" circle
+                                @click.prevent="addDomain(ruleForm.client_dns)"></el-button>
+                    </el-col>
+                </el-row>
+                <el-row v-for="(item,index) in ruleForm.client_dns"
+                        :key="index" style="margin-bottom: 5px" :gutter="10">
+                    <el-col :span="10">
+                    <el-input v-model="item.val"></el-input>
+                    </el-col>
+                    <el-col :span="12">
+                    <el-input v-model="item.note" placeholder="备注"></el-input>
+                    </el-col>
+                    <el-col :span="2">
+                    <el-button size="mini" type="danger" icon="el-icon-minus" circle
+                                @click.prevent="removeDomain(ruleForm.client_dns,index)"></el-button>
+                    </el-col>
+                </el-row>
+                </el-form-item>
+                <el-form-item label="状态" prop="status">
+                    <el-radio-group v-model="ruleForm.status">
+                        <el-radio :label="1" border>启用</el-radio>
+                        <el-radio :label="0" border>停用</el-radio>
+                    </el-radio-group>
+                </el-form-item>            
+            </el-tab-pane>
 
-        <el-form-item label="包含路由" prop="route_include">
-          <el-row class="msg-info">
-            <el-col :span="20">输入CIDR格式如: 192.168.1.0/24</el-col>
-            <el-col :span="4">
-              <el-button size="mini" type="success" icon="el-icon-plus" circle
-                         @click.prevent="addDomain(ruleForm.route_include)"></el-button>
-            </el-col>
-          </el-row>
-          <el-row v-for="(item,index) in ruleForm.route_include"
-                  :key="index" style="margin-bottom: 5px" :gutter="10">
-            <el-col :span="10">
-              <el-input v-model="item.val"></el-input>
-            </el-col>
-            <el-col :span="12">
-              <el-input v-model="item.note" placeholder="备注"></el-input>
-            </el-col>
-            <el-col :span="2">
-              <el-button size="mini" type="danger" icon="el-icon-minus" circle
-                         @click.prevent="removeDomain(ruleForm.route_include,index)"></el-button>
-            </el-col>
-          </el-row>
-        </el-form-item>
+            <el-tab-pane label="路由设置" name="route">
+                <el-form-item label="包含路由" prop="route_include">
+                <el-row class="msg-info">
+                    <el-col :span="20">输入CIDR格式如: 192.168.1.0/24</el-col>
+                    <el-col :span="4">
+                    <el-button size="mini" type="success" icon="el-icon-plus" circle
+                                @click.prevent="addDomain(ruleForm.route_include)"></el-button>
+                    </el-col>
+                </el-row>
+                <el-row v-for="(item,index) in ruleForm.route_include"
+                        :key="index" style="margin-bottom: 5px" :gutter="10">
+                    <el-col :span="10">
+                    <el-input v-model="item.val"></el-input>
+                    </el-col>
+                    <el-col :span="12">
+                    <el-input v-model="item.note" placeholder="备注"></el-input>
+                    </el-col>
+                    <el-col :span="2">
+                    <el-button size="mini" type="danger" icon="el-icon-minus" circle
+                                @click.prevent="removeDomain(ruleForm.route_include,index)"></el-button>
+                    </el-col>
+                </el-row>
+                </el-form-item>
 
-        <el-form-item label="排除路由" prop="route_exclude">
-          <el-row class="msg-info">
-            <el-col :span="20">输入CIDR格式如: 192.168.2.0/24</el-col>
-            <el-col :span="4">
-              <el-button size="mini" type="success" icon="el-icon-plus" circle
-                         @click.prevent="addDomain(ruleForm.route_exclude)"></el-button>
-            </el-col>
-          </el-row>
-          <el-row v-for="(item,index) in ruleForm.route_exclude"
-                  :key="index" style="margin-bottom: 5px" :gutter="10">
-            <el-col :span="10">
-              <el-input v-model="item.val"></el-input>
-            </el-col>
-            <el-col :span="12">
-              <el-input v-model="item.note" placeholder="备注"></el-input>
-            </el-col>
-            <el-col :span="2">
-              <el-button size="mini" type="danger" icon="el-icon-minus" circle
-                         @click.prevent="removeDomain(ruleForm.route_exclude,index)"></el-button>
-            </el-col>
-          </el-row>
-        </el-form-item>
+                <el-form-item label="排除路由" prop="route_exclude">
+                <el-row class="msg-info">
+                    <el-col :span="20">输入CIDR格式如: 192.168.2.0/24</el-col>
+                    <el-col :span="4">
+                    <el-button size="mini" type="success" icon="el-icon-plus" circle
+                                @click.prevent="addDomain(ruleForm.route_exclude)"></el-button>
+                    </el-col>
+                </el-row>
+                <el-row v-for="(item,index) in ruleForm.route_exclude"
+                        :key="index" style="margin-bottom: 5px" :gutter="10">
+                    <el-col :span="10">
+                    <el-input v-model="item.val"></el-input>
+                    </el-col>
+                    <el-col :span="12">
+                    <el-input v-model="item.note" placeholder="备注"></el-input>
+                    </el-col>
+                    <el-col :span="2">
+                    <el-button size="mini" type="danger" icon="el-icon-minus" circle
+                                @click.prevent="removeDomain(ruleForm.route_exclude,index)"></el-button>
+                    </el-col>
+                </el-row>
+                </el-form-item>
+            </el-tab-pane>
+            <el-tab-pane label="权限控制" name="link_acl">
+                <el-form-item label="权限控制" prop="link_acl">
+                <el-row class="msg-info">
+                    <el-col :span="20">输入CIDR格式如: 192.168.3.0/24 端口0表示所有端口</el-col>
+                    <el-col :span="4">
+                    <el-button size="mini" type="success" icon="el-icon-plus" circle
+                                @click.prevent="addDomain(ruleForm.link_acl)"></el-button>
+                    </el-col>
+                </el-row>
 
-        <el-form-item label="权限控制" prop="link_acl">
-          <el-row class="msg-info">
-            <el-col :span="20">输入CIDR格式如: 192.168.3.0/24 端口0表示所有端口</el-col>
-            <el-col :span="4">
-              <el-button size="mini" type="success" icon="el-icon-plus" circle
-                         @click.prevent="addDomain(ruleForm.link_acl)"></el-button>
-            </el-col>
-          </el-row>
+                <el-row v-for="(item,index) in ruleForm.link_acl"
+                        :key="index" style="margin-bottom: 5px" :gutter="5">
+                    <el-col :span="11">
+                    <el-input placeholder="请输入CIDR地址" v-model="item.val">
+                        <el-select v-model="item.action" slot="prepend">
+                        <el-option label="允许" value="allow"></el-option>
+                        <el-option label="禁止" value="deny"></el-option>
+                        </el-select>
+                    </el-input>
+                    </el-col>
+                    <el-col :span="3">
+                    <el-input v-model.number="item.port" placeholder="端口"></el-input>
+                    </el-col>
+                    <el-col :span="8">
+                    <el-input v-model="item.note" placeholder="备注"></el-input>
+                    </el-col>
+                    <el-col :span="2">
+                    <el-button size="mini" type="danger" icon="el-icon-minus" circle
+                                @click.prevent="removeDomain(ruleForm.link_acl,index)"></el-button>
+                    </el-col>
+                </el-row>
+                </el-form-item>
+            </el-tab-pane>
 
-          <el-row v-for="(item,index) in ruleForm.link_acl"
-                  :key="index" style="margin-bottom: 5px" :gutter="5">
-            <el-col :span="11">
-              <el-input placeholder="请输入CIDR地址" v-model="item.val">
-                <el-select v-model="item.action" slot="prepend">
-                  <el-option label="允许" value="allow"></el-option>
-                  <el-option label="禁止" value="deny"></el-option>
-                </el-select>
-              </el-input>
-            </el-col>
-            <el-col :span="3">
-              <el-input v-model.number="item.port" placeholder="端口"></el-input>
-            </el-col>
-            <el-col :span="8">
-              <el-input v-model="item.note" placeholder="备注"></el-input>
-            </el-col>
-            <el-col :span="2">
-              <el-button size="mini" type="danger" icon="el-icon-minus" circle
-                         @click.prevent="removeDomain(ruleForm.link_acl,index)"></el-button>
-            </el-col>
-          </el-row>
-        </el-form-item>
-
-        <el-form-item label="状态" prop="status">
-          <el-radio-group v-model="ruleForm.status">
-            <el-radio :label="1" border>启用</el-radio>
-            <el-radio :label="0" border>停用</el-radio>
-          </el-radio-group>
-
-        </el-form-item>
-
-        <el-form-item>
-          <el-button type="primary" @click="submitForm('ruleForm')">保存</el-button>
-          <el-button @click="disVisible">取消</el-button>
-        </el-form-item>
-      </el-form>
+            <el-tab-pane label="域名拆分隧道" name="ds_domains">
+                <el-form-item label="包含域名" prop="ds_include_domains">
+                    <el-input type="textarea" :rows="5" v-model="ruleForm.ds_include_domains" placeholder="输入域名用,号分隔，默认匹配所有子域名, 如baidu.com,163.com"></el-input>
+                </el-form-item>                
+                <el-form-item label="排除域名" prop="ds_exclude_domains">
+                    <el-input type="textarea" :rows="5" v-model="ruleForm.ds_exclude_domains" placeholder="输入域名用,号分隔，默认匹配所有子域名, 如baidu.com,163.com"></el-input>
+                </el-form-item>
+            </el-tab-pane>
+            <el-form-item>
+            <el-button type="primary" @click="submitForm('ruleForm')">保存</el-button>
+            <el-button @click="disVisible">取消</el-button>
+            </el-form-item>
+        </el-form>
     </el-dialog>
 
   </div>
@@ -313,6 +325,7 @@ export default {
       page: 1,
       tableData: [],
       count: 10,
+      activeTab : "general",
 
       ruleForm: {
         bandwidth: 0,

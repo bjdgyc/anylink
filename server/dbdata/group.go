@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"regexp"
+	"strings"
 	"time"
 
 	"github.com/bjdgyc/anylink/base"
@@ -127,6 +129,20 @@ func SetGroup(g *Group) error {
 		}
 	}
 	g.ClientDns = clientDns
+	// 域名拆分隧道，不能同时填写
+	if g.DsIncludeDomains != "" && g.DsExcludeDomains != "" {
+		return errors.New("包含/排除域名不能同时填写")
+	}
+	// 校验包含域名的格式
+	err = CheckDomainNames(g.DsIncludeDomains)
+	if err != nil {
+		return errors.New("包含域名有误：" + err.Error())
+	}
+	// 校验排除域名的格式
+	err = CheckDomainNames(g.DsExcludeDomains)
+	if err != nil {
+		return errors.New("排除域名有误：" + err.Error())
+	}
 
 	g.UpdatedAt = time.Now()
 	if g.Id > 0 {
@@ -148,4 +164,28 @@ func parseIpNet(s string) (string, *net.IPNet, error) {
 	ipMask := fmt.Sprintf("%s/%s", ip, mask)
 
 	return ipMask, ipNet, nil
+}
+func CheckDomainNames(domains string) error {
+	if domains == "" {
+		return nil
+	}
+	str_slice := strings.Split(domains, ",")
+	for _, val := range str_slice {
+		if val == "" {
+			return errors.New(val + " 请以逗号分隔域名")
+		}
+		if !ValidateDomainName(val) {
+			return errors.New(val + " 域名有误")
+		}
+	}
+	return nil
+}
+
+func ValidateDomainName(domain string) bool {
+	pos := strings.LastIndex(domain, ".")
+	if pos != -1 && len(domain[pos+1:]) < 2 {
+		return false
+	}
+	RegExp := regexp.MustCompile(`^[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+$`)
+	return RegExp.MatchString(domain)
 }
