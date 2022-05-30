@@ -209,21 +209,3 @@ func SetPostAuthXml(g *dbdata.Group, w http.ResponseWriter) error {
 	HttpSetHeader(w, "X-CSTP-Post-Auth-XML", result.String())
 	return nil
 }
-
-var ds_domains_xml = `
-<?xml version="1.0" encoding="UTF-8"?>
-<config-auth client="vpn" type="complete" aggregate-auth-version="2">
-    <config client="vpn" type="private">
-        <opaque is-for="vpn-client">
-            <custom-attr>
-            {{if .DsExcludeDomains}}
-               <dynamic-split-exclude-domains><![CDATA[{{.DsExcludeDomains}},]]></dynamic-split-exclude-domains>
-            {{end}}
-            {{if .DsIncludeDomains}}
-               <dynamic-split-include-domains><![CDATA[{{.DsIncludeDomains}}]]></dynamic-split-include-domains>
-            {{end}}
-            </custom-attr>			
-        </opaque>
-    </config>
-</config-auth>
-`
