@@ -202,14 +202,11 @@ func SetPostAuthXml(g *dbdata.Group, w http.ResponseWriter) error {
 		return err
 	}
 	var result bytes.Buffer
-	_ = tmpl.Execute(&result, g)
+	err = tmpl.Execute(&result, g)
 	if err != nil {
 		return err
 	}
-	if result.String() != "" {
-		HttpSetHeader(w, "X-CSTP-Post-Auth-XML", result.String())
-		base.Info(result.String())
-	}
+	HttpSetHeader(w, "X-CSTP-Post-Auth-XML", result.String())
 	return nil
 }
 
