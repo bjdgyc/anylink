@@ -182,10 +182,6 @@ func CheckDomainNames(domains string) error {
 }
 
 func ValidateDomainName(domain string) bool {
-	pos := strings.LastIndex(domain, ".")
-	if pos != -1 && len(domain[pos+1:]) < 2 {
-		return false
-	}
-	RegExp := regexp.MustCompile(`^[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+$`)
+	RegExp := regexp.MustCompile(`^([a-zA-Z0-9][-a-zA-Z0-9]{0,62}\.)+[A-Za-z]{2,18}$`)
 	return RegExp.MatchString(domain)
 }
