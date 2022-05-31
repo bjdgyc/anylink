@@ -130,6 +130,8 @@ func SetGroup(g *Group) error {
 	}
 	g.ClientDns = clientDns
 	// 域名拆分隧道，不能同时填写
+	g.DsIncludeDomains = strings.TrimSpace(g.DsIncludeDomains)
+	g.DsExcludeDomains = strings.TrimSpace(g.DsExcludeDomains)
 	if g.DsIncludeDomains != "" && g.DsExcludeDomains != "" {
 		return errors.New("包含/排除域名不能同时填写")
 	}
