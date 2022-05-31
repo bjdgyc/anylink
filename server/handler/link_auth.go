@@ -221,3 +221,19 @@ var auth_profile = `<?xml version="1.0" encoding="UTF-8"?>
 	</ServerList>
 </AnyConnectProfile>
 `
+var ds_domains_xml = `
+<?xml version="1.0" encoding="UTF-8"?>
+<config-auth client="vpn" type="complete" aggregate-auth-version="2">
+    <config client="vpn" type="private">
+        <opaque is-for="vpn-client">
+            <custom-attr>
+            {{if .DsExcludeDomains}}
+               <dynamic-split-exclude-domains><![CDATA[{{.DsExcludeDomains}},]]></dynamic-split-exclude-domains>
+            {{else if .DsIncludeDomains}}
+               <dynamic-split-include-domains><![CDATA[{{.DsIncludeDomains}}]]></dynamic-split-include-domains>
+            {{end}}
+            </custom-attr>
+        </opaque>
+    </config>
+</config-auth>
+`
