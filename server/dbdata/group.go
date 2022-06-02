@@ -154,19 +154,23 @@ func SetGroup(g *Group) error {
 	if err != nil {
 		return errors.New("排除域名有误：" + err.Error())
 	}
-	// 处理认证类型
+	// 处理认证方式的逻辑
+	defAuth := map[string]interface{}{
+		"type": "local",
+	}
+	if len(g.Auth) == 0 {
+		g.Auth = defAuth
+	}
 	switch g.Auth["type"] {
 	case "local":
-		g.Auth = map[string]interface{}{
-			"type": g.Auth["type"],
-		}
+		g.Auth = defAuth
 	case "radius":
 		err = checkRadiusData(g.Auth)
 		if err != nil {
 			return err
 		}
 	default:
-		return errors.New("未知的认证类型")
+		return errors.New("#" + fmt.Sprintf("%s", g.Auth["type"]) + "#未知的认证类型")
 	}
 
 	g.UpdatedAt = time.Now()

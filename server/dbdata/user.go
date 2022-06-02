@@ -8,7 +8,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/pkg/utils"
 	"github.com/xlzd/gotp"
 	"layeh.com/radius"
@@ -79,12 +78,12 @@ func CheckUser(name, pwd, group string) error {
 	if err != nil {
 		return fmt.Errorf("%s %s", name, "No用户组")
 	}
+	// 初始化Auth
 	if len(groupData.Auth) == 0 {
 		groupData.Auth["type"] = "local"
 	}
-	base.Debug(name + " auth type: " + fmt.Sprintf("%s", groupData.Auth["type"]))
 	switch groupData.Auth["type"] {
-	case "local":
+	case "", "local":
 		return checkLocalUser(name, pwd, group)
 	case "radius":
 		radisConf := AuthRadius{}
