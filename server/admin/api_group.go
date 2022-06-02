@@ -62,7 +62,9 @@ func GroupDetail(w http.ResponseWriter, r *http.Request) {
 		RespError(w, RespInternalErr, err)
 		return
 	}
-
+	if len(data.Auth) == 0 {
+		data.Auth["type"] = "local"
+	}
 	RespSucess(w, data)
 }
 

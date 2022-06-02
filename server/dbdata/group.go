@@ -1,6 +1,7 @@
 package dbdata
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net"
@@ -32,19 +33,27 @@ type ValData struct {
 	Note   string `json:"note"`
 }
 
+type AuthRadius struct {
+	Addr   string `json:"addr"`
+	Secret string `json:"secret"`
+}
+
 // type Group struct {
-// 	Id           int            `json:"id" xorm:"pk autoincr not null"`
-// 	Name         string         `json:"name" xorm:"not null unique"`
-// 	Note         string         `json:"note"`
-// 	AllowLan     bool           `json:"allow_lan"`
-// 	ClientDns    []ValData      `json:"client_dns"`
-// 	RouteInclude []ValData      `json:"route_include"`
-// 	RouteExclude []ValData      `json:"route_exclude"`
-// 	LinkAcl      []GroupLinkAcl `json:"link_acl"`
-// 	Bandwidth    int            `json:"bandwidth"` // 带宽限制
-// 	Status       int8           `json:"status"`    // 1正常
-// 	CreatedAt    time.Time      `json:"created_at"`
-// 	UpdatedAt    time.Time      `json:"updated_at"`
+// 	Id               int                    `json:"id" xorm:"pk autoincr not null"`
+// 	Name             string                 `json:"name" xorm:"varchar(60) not null unique"`
+// 	Note             string                 `json:"note" xorm:"varchar(255)"`
+// 	AllowLan         bool                   `json:"allow_lan" xorm:"Bool"`
+// 	ClientDns        []ValData              `json:"client_dns" xorm:"Text"`
+// 	RouteInclude     []ValData              `json:"route_include" xorm:"Text"`
+// 	RouteExclude     []ValData              `json:"route_exclude" xorm:"Text"`
+// 	DsExcludeDomains string                 `json:"ds_exclude_domains" xorm:"Text"`
+// 	DsIncludeDomains string                 `json:"ds_include_domains" xorm:"Text"`
+// 	LinkAcl          []GroupLinkAcl         `json:"link_acl" xorm:"Text"`
+// 	Bandwidth        int                    `json:"bandwidth" xorm:"Int"`                           // 带宽限制
+// 	Auth             map[string]interface{} `json:"auth" xorm:"not null default '{}' varchar(255)"` // 认证方式
+// 	Status           int8                   `json:"status" xorm:"Int"`                              // 1正常
+// 	CreatedAt        time.Time              `json:"created_at" xorm:"DateTime created"`
+// 	UpdatedAt        time.Time              `json:"updated_at" xorm:"DateTime updated"`
 // }
 
 func GetGroupNames() []string {
@@ -145,6 +154,20 @@ func SetGroup(g *Group) error {
 	if err != nil {
 		return errors.New("排除域名有误：" + err.Error())
 	}
+	// 处理认证类型
+	switch g.Auth["type"] {
+	case "local":
+		g.Auth = map[string]interface{}{
+			"type": g.Auth["type"],
+		}
+	case "radius":
+		err = checkRadiusData(g.Auth)
+		if err != nil {
+			return err
+		}
+	default:
+		return errors.New("未知的认证类型")
+	}
 
 	g.UpdatedAt = time.Now()
 	if g.Id > 0 {
@@ -167,6 +190,24 @@ func parseIpNet(s string) (string, *net.IPNet, error) {
 
 	return ipMask, ipNet, nil
 }
+
+func checkRadiusData(auth map[string]interface{}) error {
+	radisConf := AuthRadius{}
+	bodyBytes, err := json.Marshal(auth["radius"])
+	if err != nil {
+		return errors.New("Radius的密钥/服务器地址填写有误")
+	}
+	json.Unmarshal(bodyBytes, &radisConf)
+	if !ValidateIpPort(radisConf.Addr) {
+		return errors.New("Radius的服务器地址填写有误")
+	}
+	// freeradius官网最大8000字符, 这里限制800
+	if len(radisConf.Secret) < 8 || len(radisConf.Secret) > 800 {
+		return errors.New("Radius的密钥长度需在8～800个字符之间")
+	}
+	return nil
+}
+
 func CheckDomainNames(domains string) error {
 	if domains == "" {
 		return nil
@@ -186,4 +227,9 @@ func CheckDomainNames(domains string) error {
 func ValidateDomainName(domain string) bool {
 	RegExp := regexp.MustCompile(`^([a-zA-Z0-9][-a-zA-Z0-9]{0,62}\.)+[A-Za-z]{2,18}$`)
 	return RegExp.MatchString(domain)
+}
+
+func ValidateIpPort(addr string) bool {
+	RegExp := regexp.MustCompile(`^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\:([0-9]|[1-9]\d{1,3}|[1-5]\d{4}|6[0-5]{2}[0-3][0-5])$$`)
+	return RegExp.MatchString(addr)
 }

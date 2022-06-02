@@ -207,6 +207,25 @@
                 </el-form-item>            
             </el-tab-pane>
 
+            <el-tab-pane label="认证方式" name="authtype">
+                <el-form-item label="认证" prop="authtype">
+                    <el-radio-group v-model="ruleForm.auth.type">
+                        <el-radio label="local" border>本地</el-radio>
+                        <el-radio label="radius" border>Radius</el-radio>
+                    </el-radio-group>
+                </el-form-item>               
+                <el-form-item label="Radius密钥" v-if="ruleForm.auth.type == 'radius'">
+                    <el-col :span="10">
+                        <el-input v-model="ruleForm.auth.radius.secret"></el-input>
+                    </el-col>
+                </el-form-item>               
+                <el-form-item label="Radius服务器" v-if="ruleForm.auth.type == 'radius'">
+                    <el-col :span="10">
+                        <el-input v-model="ruleForm.auth.radius.addr" placeholder="输入IP和端口 192.168.2.1:1812"></el-input>
+                    </el-col>
+                </el-form-item>                
+            </el-tab-pane>            
+
             <el-tab-pane label="路由设置" name="route">
                 <el-form-item label="包含路由" prop="route_include">
                 <el-row class="msg-info">
@@ -300,7 +319,7 @@
             <el-button type="primary" @click="submitForm('ruleForm')">保存</el-button>
             <el-button @click="disVisible">取消</el-button>
             </el-form-item>
-        </el-form>
+        </el-form>        
     </el-dialog>
 
   </div>
@@ -318,7 +337,8 @@ export default {
     this.$emit('update:route_name', ['用户组信息', '用户组列表'])
   },
   mounted() {
-    this.getData(1)
+    this.getData(1);
+    this.setAuthData();
   },
   data() {
     return {
@@ -335,21 +355,17 @@ export default {
         route_include: [{val: 'all', note: '默认全局代理'}],
         route_exclude: [],
         link_acl: [],
+        auth : {"type":'local'}
       },
       rules: {
         name: [
-          {required: true, message: '请输入用户名', trigger: 'blur'},
+          {required: true, message: '请输入组名', trigger: 'blur'},
           {max: 30, message: '长度小于 30 个字符', trigger: 'blur'}
         ],
         bandwidth: [
-          {required: true, message: '请输入用户姓名', trigger: 'blur'},
-          {type: 'number', message: '年龄必须为数字值'}
+          {required: true, message: '请输入带宽限制', trigger: 'blur'},
+          {type: 'number', message: '带宽限制必须为数字值'}
         ],
-        email: [
-          {required: true, message: '请输入用户邮箱', trigger: 'blur'},
-          {type: 'email', message: '请输入正确的邮箱地址', trigger: ['blur', 'change']}
-        ],
-
         status: [
           {required: true}
         ],
@@ -357,6 +373,14 @@ export default {
     }
   },
   methods: {
+    setAuthData(row) {
+        var defAuthData = {"type":'local', 
+                           "radius":{"addr":"", "secret":""},
+                          }
+        if (this.ruleForm.auth.type == "local" || !row) {
+            this.ruleForm.auth = defAuthData;
+        }
+    },
     handleDel(row) {
       axios.post('/group/del?id=' + row.id).then(resp => {
         const rdata = resp.data;
@@ -378,15 +402,16 @@ export default {
       this.activeTab = "general"
       this.user_edit_dialog = true
       if (!row) {
+        this.setAuthData(row)
         return;
       }
-
       axios.get('/group/detail', {
         params: {
           id: row.id,
         }
       }).then(resp => {
-        this.ruleForm = resp.data.data
+        this.ruleForm = resp.data.data;
+        this.setAuthData(resp.data.data);
       }).catch(error => {
         this.$message.error('哦，请求出错');
         console.log(error);
@@ -426,12 +451,11 @@ export default {
       arr.push({val: "", action: "allow", port: 0});
     },
     submitForm(formName) {
-      this.$refs[formName].validate((valid) => {
+      this.$refs[formName].validate((valid, obj) => {
         if (!valid) {
           console.log('error submit!!');
           return false;
         }
-
         axios.post('/group/set', this.ruleForm).then(resp => {
           const rdata = resp.data;
           if (rdata.code === 0) {

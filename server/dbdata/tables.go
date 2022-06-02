@@ -6,20 +6,21 @@ import (
 )
 
 type Group struct {
-	Id               int            `json:"id" xorm:"pk autoincr not null"`
-	Name             string         `json:"name" xorm:"varchar(60) not null unique"`
-	Note             string         `json:"note" xorm:"varchar(255)"`
-	AllowLan         bool           `json:"allow_lan" xorm:"Bool"`
-	ClientDns        []ValData      `json:"client_dns" xorm:"Text"`
-	RouteInclude     []ValData      `json:"route_include" xorm:"Text"`
-	RouteExclude     []ValData      `json:"route_exclude" xorm:"Text"`
-	DsExcludeDomains string         `json:"ds_exclude_domains" xorm:"Text"`
-	DsIncludeDomains string         `json:"ds_include_domains" xorm:"Text"`
-	LinkAcl          []GroupLinkAcl `json:"link_acl" xorm:"Text"`
-	Bandwidth        int            `json:"bandwidth" xorm:"Int"` // 带宽限制
-	Status           int8           `json:"status" xorm:"Int"`    // 1正常
-	CreatedAt        time.Time      `json:"created_at" xorm:"DateTime created"`
-	UpdatedAt        time.Time      `json:"updated_at" xorm:"DateTime updated"`
+	Id               int                    `json:"id" xorm:"pk autoincr not null"`
+	Name             string                 `json:"name" xorm:"varchar(60) not null unique"`
+	Note             string                 `json:"note" xorm:"varchar(255)"`
+	AllowLan         bool                   `json:"allow_lan" xorm:"Bool"`
+	ClientDns        []ValData              `json:"client_dns" xorm:"Text"`
+	RouteInclude     []ValData              `json:"route_include" xorm:"Text"`
+	RouteExclude     []ValData              `json:"route_exclude" xorm:"Text"`
+	DsExcludeDomains string                 `json:"ds_exclude_domains" xorm:"Text"`
+	DsIncludeDomains string                 `json:"ds_include_domains" xorm:"Text"`
+	LinkAcl          []GroupLinkAcl         `json:"link_acl" xorm:"Text"`
+	Bandwidth        int                    `json:"bandwidth" xorm:"Int"`                           // 带宽限制
+	Auth             map[string]interface{} `json:"auth" xorm:"not null default '{}' varchar(255)"` // 认证方式
+	Status           int8                   `json:"status" xorm:"Int"`                              // 1正常
+	CreatedAt        time.Time              `json:"created_at" xorm:"DateTime created"`
+	UpdatedAt        time.Time              `json:"updated_at" xorm:"DateTime updated"`
 }
 
 type User struct {

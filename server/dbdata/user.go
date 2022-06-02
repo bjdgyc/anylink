@@ -1,13 +1,18 @@
 package dbdata
 
 import (
+	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"sync"
 	"time"
 
+	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/pkg/utils"
 	"github.com/xlzd/gotp"
+	"layeh.com/radius"
+	"layeh.com/radius/rfc2865"
 )
 
 // type User struct {
@@ -68,6 +73,38 @@ func SetUser(v *User) error {
 
 // 验证用户登陆信息
 func CheckUser(name, pwd, group string) error {
+	// 获取登入的group数据
+	groupData := &Group{}
+	err := One("Name", group, groupData)
+	if err != nil {
+		return fmt.Errorf("%s %s", name, "No用户组")
+	}
+	if len(groupData.Auth) == 0 {
+		groupData.Auth["type"] = "local"
+	}
+	base.Debug(name + " auth type: " + fmt.Sprintf("%s", groupData.Auth["type"]))
+	switch groupData.Auth["type"] {
+	case "local":
+		return checkLocalUser(name, pwd, group)
+	case "radius":
+		radisConf := AuthRadius{}
+		bodyBytes, err := json.Marshal(groupData.Auth["radius"])
+		if err != nil {
+			fmt.Errorf("%s %s", name, "Radius出现Marshal错误")
+		}
+		err = json.Unmarshal(bodyBytes, &radisConf)
+		if err != nil {
+			fmt.Errorf("%s %s", name, "Radius出现Unmarshal错误")
+		}
+		return checkRadiusUser(name, pwd, radisConf)
+	default:
+		return fmt.Errorf("%s %s", name, "无效的认证类型")
+	}
+	return nil
+}
+
+// 验证本地用户登陆信息
+func checkLocalUser(name, pwd, group string) error {
 	// TODO 严重问题
 	// return nil
 
@@ -105,6 +142,22 @@ func CheckUser(name, pwd, group string) error {
 		return fmt.Errorf("%s %s", name, "密码错误")
 	}
 
+	return nil
+}
+
+func checkRadiusUser(name string, pwd string, raduisConf AuthRadius) error {
+	packet := radius.New(radius.CodeAccessRequest, []byte(raduisConf.Secret))
+	rfc2865.UserName_SetString(packet, name)
+	rfc2865.UserPassword_SetString(packet, pwd)
+	ctx, done := context.WithTimeout(context.Background(), 3*time.Second)
+	defer done()
+	response, err := radius.Exchange(ctx, packet, raduisConf.Addr)
+	if err != nil {
+		return fmt.Errorf("%s %s", name, "Radius服务器连接异常, 请检测服务器和端口")
+	}
+	if response.Code != radius.CodeAccessAccept {
+		return fmt.Errorf("%s %s", name, "Radius：用户名或密码错误")
+	}
 	return nil
 }
 
