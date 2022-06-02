@@ -205,9 +205,9 @@ func checkRadiusData(auth map[string]interface{}) error {
 	if !ValidateIpPort(radisConf.Addr) {
 		return errors.New("Radius的服务器地址填写有误")
 	}
-	// freeradius官网最大8000字符, 这里限制800
-	if len(radisConf.Secret) < 8 || len(radisConf.Secret) > 800 {
-		return errors.New("Radius的密钥长度需在8～800个字符之间")
+	// freeradius官网最大8000字符, 这里限制200
+	if len(radisConf.Secret) < 8 || len(radisConf.Secret) > 200 {
+		return errors.New("Radius的密钥长度需在8～200个字符之间")
 	}
 	return nil
 }

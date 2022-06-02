@@ -451,7 +451,7 @@ export default {
       arr.push({val: "", action: "allow", port: 0});
     },
     submitForm(formName) {
-      this.$refs[formName].validate((valid, obj) => {
+      this.$refs[formName].validate((valid) => {
         if (!valid) {
           console.log('error submit!!');
           return false;
