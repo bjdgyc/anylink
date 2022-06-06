@@ -1,7 +1,6 @@
 package dbdata
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net"
@@ -31,11 +30,6 @@ type ValData struct {
 	Val    string `json:"val"`
 	IpMask string `json:"ip_mask"`
 	Note   string `json:"note"`
-}
-
-type AuthRadius struct {
-	Addr   string `json:"addr"`
-	Secret string `json:"secret"`
 }
 
 // type Group struct {
@@ -154,23 +148,26 @@ func SetGroup(g *Group) error {
 	if err != nil {
 		return errors.New("排除域名有误：" + err.Error())
 	}
-	// 处理认证方式的逻辑
+	// 处理登入方式的逻辑
 	defAuth := map[string]interface{}{
 		"type": "local",
 	}
 	if len(g.Auth) == 0 {
 		g.Auth = defAuth
 	}
-	switch g.Auth["type"] {
-	case "local":
+	authType := g.Auth["type"].(string)
+	if authType == "local" {
 		g.Auth = defAuth
-	case "radius":
-		err = checkRadiusData(g.Auth)
+	} else {
+		_, ok := authRegistry[authType]
+		if !ok {
+			return errors.New("未知的认证方式: " + fmt.Sprintf("%s", g.Auth["type"]))
+		}
+		auth := makeInstance(authType).(IUserAuth)
+		err = auth.checkData(g.Auth)
 		if err != nil {
 			return err
 		}
-	default:
-		return errors.New("#" + fmt.Sprintf("%s", g.Auth["type"]) + "#未知的认证类型")
 	}
 
 	g.UpdatedAt = time.Now()
@@ -195,23 +192,6 @@ func parseIpNet(s string) (string, *net.IPNet, error) {
 	return ipMask, ipNet, nil
 }
 
-func checkRadiusData(auth map[string]interface{}) error {
-	radisConf := AuthRadius{}
-	bodyBytes, err := json.Marshal(auth["radius"])
-	if err != nil {
-		return errors.New("Radius的密钥/服务器地址填写有误")
-	}
-	json.Unmarshal(bodyBytes, &radisConf)
-	if !ValidateIpPort(radisConf.Addr) {
-		return errors.New("Radius的服务器地址填写有误")
-	}
-	// freeradius官网最大8000字符, 这里限制200
-	if len(radisConf.Secret) < 8 || len(radisConf.Secret) > 200 {
-		return errors.New("Radius的密钥长度需在8～200个字符之间")
-	}
-	return nil
-}
-
 func CheckDomainNames(domains string) error {
 	if domains == "" {
 		return nil
@@ -231,9 +211,4 @@ func CheckDomainNames(domains string) error {
 func ValidateDomainName(domain string) bool {
 	RegExp := regexp.MustCompile(`^([a-zA-Z0-9][-a-zA-Z0-9]{0,62}\.)+[A-Za-z]{2,18}$`)
 	return RegExp.MatchString(domain)
-}
-
-func ValidateIpPort(addr string) bool {
-	RegExp := regexp.MustCompile(`^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\:([0-9]|[1-9]\d{1,3}|[1-5]\d{4}|6[0-5]{2}[0-3][0-5])$$`)
-	return RegExp.MatchString(addr)
 }
