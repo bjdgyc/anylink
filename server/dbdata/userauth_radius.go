@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
-	"regexp"
 	"time"
 
 	"layeh.com/radius"
@@ -70,9 +69,4 @@ func (auth AuthRadius) checkUser(name string, pwd string, authData map[string]in
 		return fmt.Errorf("%s %s", name, "Radius：用户名或密码错误")
 	}
 	return nil
-}
-
-func ValidateIpPort(addr string) bool {
-	RegExp := regexp.MustCompile(`^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\:([0-9]|[1-9]\d{1,3}|[1-5]\d{4}|6[0-5]{2}[0-3][0-5])$$`)
-	return RegExp.MatchString(addr)
 }
