@@ -38,16 +38,16 @@ func (auth AuthRadius) checkData(authData map[string]interface{}) error {
 	return nil
 }
 
-func (auth AuthRadius) checkUser(name string, pwd string, authData map[string]interface{}) error {
+func (auth AuthRadius) checkUser(name, pwd string, g *Group) error {
 	pl := len(pwd)
 	if name == "" || pl < 1 {
 		return fmt.Errorf("%s %s", name, "密码错误")
 	}
-	authType := authData["type"].(string)
-	if _, ok := authData[authType]; !ok {
+	authType := g.Auth["type"].(string)
+	if _, ok := g.Auth[authType]; !ok {
 		return fmt.Errorf("%s %s", name, "Radius的radius值不存在")
 	}
-	bodyBytes, err := json.Marshal(authData[authType])
+	bodyBytes, err := json.Marshal(g.Auth[authType])
 	if err != nil {
 		return fmt.Errorf("%s %s", name, "Radius Marshal出现错误")
 	}
