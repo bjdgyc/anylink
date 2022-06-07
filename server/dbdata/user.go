@@ -1,8 +1,6 @@
 package dbdata
 
 import (
-	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"sync"
@@ -10,8 +8,6 @@ import (
 
 	"github.com/bjdgyc/anylink/pkg/utils"
 	"github.com/xlzd/gotp"
-	"layeh.com/radius"
-	"layeh.com/radius/rfc2865"
 )
 
 // type User struct {
@@ -70,30 +66,33 @@ func SetUser(v *User) error {
 	return err
 }
 
-// 验证用户登陆信息
+// 验证用户登录信息
 func CheckUser(name, pwd, group string) error {
 	// 获取登入的group数据
 	groupData := &Group{}
 	err := One("Name", group, groupData)
-	if err != nil {
-		return fmt.Errorf("%s %s", name, "No用户组")
+	if err != nil || groupData.Status != 1 {
+		return fmt.Errorf("%s - %s", name, "用户组错误")
 	}
 	// 初始化Auth
 	if len(groupData.Auth) == 0 {
 		groupData.Auth["type"] = "local"
 	}
-	switch groupData.Auth["type"] {
-	case "", "local":
+	authType := groupData.Auth["type"].(string)
+	// 本地认证方式
+	if authType == "local" {
 		return checkLocalUser(name, pwd, group)
-	case "radius":
-		return checkRadiusUser(name, pwd, groupData.Auth)
-	default:
-		return fmt.Errorf("%s %s", name, "无效的认证类型")
 	}
-	return nil
+	// 其它认证方式, 支持自定义
+	_, ok := authRegistry[authType]
+	if !ok {
+		return fmt.Errorf("%s %s", "未知的认证方式: ", authType)
+	}
+	auth := makeInstance(authType).(IUserAuth)
+	return auth.checkUser(name, pwd, groupData)
 }
 
-// 验证本地用户登陆信息
+// 验证本地用户登录信息
 func checkLocalUser(name, pwd, group string) error {
 	// TODO 严重问题
 	// return nil
@@ -111,12 +110,6 @@ func checkLocalUser(name, pwd, group string) error {
 	if !utils.InArrStr(v.Groups, group) {
 		return fmt.Errorf("%s %s", name, "用户组错误")
 	}
-	groupData := &Group{}
-	err = One("Name", group, groupData)
-	if err != nil || groupData.Status != 1 {
-		return fmt.Errorf("%s - %s", name, "用户组错误")
-	}
-
 	// 判断otp信息
 	pinCode := pwd
 	if !v.DisableOtp {
@@ -132,35 +125,6 @@ func checkLocalUser(name, pwd, group string) error {
 		return fmt.Errorf("%s %s", name, "密码错误")
 	}
 
-	return nil
-}
-
-func checkRadiusUser(name string, pwd string, auth map[string]interface{}) error {
-	if _, ok := auth["radius"]; !ok {
-		fmt.Errorf("%s %s", name, "Radius的radius值不存在")
-	}
-	radiusConf := AuthRadius{}
-	bodyBytes, err := json.Marshal(auth["radius"])
-	if err != nil {
-		fmt.Errorf("%s %s", name, "Radius Marshal出现错误")
-	}
-	err = json.Unmarshal(bodyBytes, &radiusConf)
-	if err != nil {
-		fmt.Errorf("%s %s", name, "Radius Unmarshal出现错误")
-	}
-	// radius认证时，设置超时3秒
-	packet := radius.New(radius.CodeAccessRequest, []byte(radiusConf.Secret))
-	rfc2865.UserName_SetString(packet, name)
-	rfc2865.UserPassword_SetString(packet, pwd)
-	ctx, done := context.WithTimeout(context.Background(), 3*time.Second)
-	defer done()
-	response, err := radius.Exchange(ctx, packet, radiusConf.Addr)
-	if err != nil {
-		return fmt.Errorf("%s %s", name, "Radius服务器连接异常, 请检测服务器和端口")
-	}
-	if response.Code != radius.CodeAccessAccept {
-		return fmt.Errorf("%s %s", name, "Radius：用户名或密码错误")
-	}
 	return nil
 }
 
