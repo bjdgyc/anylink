@@ -68,3 +68,17 @@ type AccessAudit struct {
 	DstPort   uint16    `json:"dst_port" xorm:"not null"`
 	CreatedAt time.Time `json:"created_at" xorm:"DateTime"`
 }
+
+type Policy struct {
+	Id               int       `json:"id" xorm:"pk autoincr not null"`
+	Username         string    `json:"username" xorm:"varchar(60) not null unique"`
+	AllowLan         bool      `json:"allow_lan" xorm:"Bool"`
+	ClientDns        []ValData `json:"client_dns" xorm:"Text"`
+	RouteInclude     []ValData `json:"route_include" xorm:"Text"`
+	RouteExclude     []ValData `json:"route_exclude" xorm:"Text"`
+	DsExcludeDomains string    `json:"ds_exclude_domains" xorm:"Text"`
+	DsIncludeDomains string    `json:"ds_include_domains" xorm:"Text"`
+	Status           int8      `json:"status" xorm:"Int"` // 1正常 0 禁用
+	CreatedAt        time.Time `json:"created_at" xorm:"DateTime created"`
+	UpdatedAt        time.Time `json:"updated_at" xorm:"DateTime updated"`
+}

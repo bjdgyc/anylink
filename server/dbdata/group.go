@@ -161,7 +161,7 @@ func SetGroup(g *Group) error {
 	} else {
 		_, ok := authRegistry[authType]
 		if !ok {
-			return errors.New("未知的认证方式: " + fmt.Sprintf("%s", g.Auth["type"]))
+			return errors.New("未知的认证方式: " + authType)
 		}
 		auth := makeInstance(authType).(IUserAuth)
 		err = auth.checkData(g.Auth)
