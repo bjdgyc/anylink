@@ -41,7 +41,7 @@ func SetPolicy(p *Policy) error {
 		}
 	}
 	p.RouteInclude = routeInclude
-	// 包含路由
+	// 排除路由
 	routeExclude := []ValData{}
 	for _, v := range p.RouteExclude {
 		if v.Val != "" {
