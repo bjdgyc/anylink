@@ -58,4 +58,12 @@ func TestCheckUser(t *testing.T) {
 		ast.Equal("aaa Radius服务器连接异常, 请检测服务器和端口", err.Error())
 
 	}
+	// 添加用户策略
+	dns2 := []ValData{{Val: "8.8.8.8"}}
+	route2 := []ValData{{Val: "192.168.2.1/24"}}
+	p1 := Policy{Username: "aaa", Status: 1, ClientDns: dns2, RouteInclude: route2}
+	err = SetPolicy(&p1)
+	ast.Nil(err)
+	err = CheckUser("aaa", u.PinCode, group)
+	ast.Nil(err)
 }

@@ -100,6 +100,9 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	//HttpSetHeader(w, "X-CSTP-Default-Domain", cSess.LocalIp)
 	HttpSetHeader(w, "X-CSTP-Base-MTU", cstpBaseMtu)
 
+	// 设置用户策略
+	SetUserPolicy(sess.Username, cSess.Group)
+
 	// 允许本地LAN访问vpn网络，必须放在路由的第一个
 	if cSess.Group.AllowLan {
 		HttpSetHeader(w, "X-CSTP-Split-Exclude", "0.0.0.0/255.255.255.255")
@@ -208,4 +211,18 @@ func SetPostAuthXml(g *dbdata.Group, w http.ResponseWriter) error {
 	}
 	HttpSetHeader(w, "X-CSTP-Post-Auth-XML", result.String())
 	return nil
+}
+
+// 设置用户策略, 覆盖Group的属性值
+func SetUserPolicy(username string, g *dbdata.Group) {
+	userPolicy := dbdata.GetPolicy(username)
+	if userPolicy.Id != 0 && userPolicy.Status == 1 {
+		base.Debug(username + " use UserPolicy")
+		g.AllowLan = userPolicy.AllowLan
+		g.ClientDns = userPolicy.ClientDns
+		g.RouteInclude = userPolicy.RouteInclude
+		g.RouteExclude = userPolicy.RouteExclude
+		g.DsExcludeDomains = userPolicy.DsExcludeDomains
+		g.DsIncludeDomains = userPolicy.DsIncludeDomains
+	}
 }

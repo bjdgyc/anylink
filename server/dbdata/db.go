@@ -25,7 +25,7 @@ func initDb() {
 	}
 
 	// 初始化数据库
-	err = xdb.Sync2(&User{}, &Setting{}, &Group{}, &IpMap{}, &AccessAudit{})
+	err = xdb.Sync2(&User{}, &Setting{}, &Group{}, &IpMap{}, &AccessAudit{}, &Policy{})
 	if err != nil {
 		base.Fatal(err)
 	}

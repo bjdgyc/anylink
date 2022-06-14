@@ -52,6 +52,10 @@ func StartAdmin() {
 	r.HandleFunc("/user/ip_map/detail", UserIpMapDetail)
 	r.HandleFunc("/user/ip_map/set", UserIpMapSet)
 	r.HandleFunc("/user/ip_map/del", UserIpMapDel)
+	r.HandleFunc("/user/policy/list", PolicyList)
+	r.HandleFunc("/user/policy/detail", PolicyDetail)
+	r.HandleFunc("/user/policy/set", PolicySet)
+	r.HandleFunc("/user/policy/del", PolicyDel)
 
 	r.HandleFunc("/group/list", GroupList)
 	r.HandleFunc("/group/names", GroupNames)

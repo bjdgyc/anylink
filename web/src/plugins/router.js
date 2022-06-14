@@ -20,6 +20,7 @@ const routes = [
             {path: 'set/audit', component: () => import('@/pages/set/Audit')},
 
             {path: 'user/list', component: () => import('@/pages/user/List')},
+            {path: 'user/policy', component: () => import('@/pages/user/Policy')},
             {path: 'user/online', component: () => import('@/pages/user/Online')},
             {path: 'user/ip_map', component: () => import('@/pages/user/IpMap')},
 
