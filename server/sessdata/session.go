@@ -294,9 +294,12 @@ func (cs *ConnSession) ratePeriod() {
 	}
 }
 
-const MaxMtu = 1460
+var MaxMtu = 1460
 
 func (cs *ConnSession) SetMtu(mtu string) {
+	if base.Cfg.Mtu > 0 {
+		MaxMtu = base.Cfg.Mtu
+	}
 	cs.Mtu = MaxMtu
 
 	mi, err := strconv.Atoi(mtu)
