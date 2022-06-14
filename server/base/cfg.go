@@ -66,6 +66,7 @@ type ServerConfig struct {
 	CstpDpd         int    `json:"cstp_dpd"`       // Dead peer detection in seconds
 	MobileKeepalive int    `json:"mobile_keepalive"`
 	MobileDpd       int    `json:"mobile_dpd"`
+	Mtu             int    `json:"mtu"`
 
 	SessionTimeout int `json:"session_timeout"` // in seconds
 	// AuthTimeout    int `json:"auth_timeout"`    // in seconds
