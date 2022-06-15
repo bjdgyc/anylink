@@ -30,6 +30,16 @@ AnyLink 服务端仅在 CentOS 7、Ubuntu 18.04 测试通过，如需要安装�
 
 ![online](doc/screenshot/online.jpg)
 
+## Donate
+
+> 如果您觉得 anylink 对你有帮助，欢迎给我们打赏，也是帮助 anylink 更好的发展。
+>
+> [查看打赏列表](doc/README.md)
+
+<p>
+    <img src="doc/screenshot/wxpay2.png" width="400" />
+</p>
+
 ## Installation
 
 > 没有编程基础的同学建议直接下载 release 包，从下面的地址下载 anylink-deploy.tar.gz
@@ -78,12 +88,15 @@ sudo ./anylink
 - [x] 支持 [proxy protocol v1](http://www.haproxy.org/download/2.2/doc/proxy-protocol.txt) 协议
 - [x] 用户组支持
 - [x] 多用户支持
+- [x] 用户策略支持
 - [x] TOTP 令牌支持
 - [x] TOTP 令牌开关
 - [x] 流量速率限制
 - [x] 后台管理界面
 - [x] 访问权限管理
 - [x] IP 访问审计功能
+- [x] 域名动态拆分隧道（域名路由功能）
+- [x] radius认证支持
 - [ ] 基于 ipvtap 设备的桥接访问模式
 
 ## Config
@@ -268,15 +281,6 @@ sh bridge-init.sh
    docker build -t anylink .
    ```
 
-## Donate
-
-> 如果您觉得 anylink 对你有帮助，欢迎给我们打赏，也是帮助 anylink 更好的发展。
->
-> [查看打赏列表](doc/README.md)
-
-<p>
-    <img src="doc/screenshot/wxpay2.png" width="400" />
-</p>
 
 ## 常见问题
 
