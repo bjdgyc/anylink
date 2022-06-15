@@ -65,7 +65,8 @@
             label="路由包含"
             width="200">
           <template slot-scope="scope">
-            <el-row v-for="(item,inx) in scope.row.route_include" :key="inx">{{ item.val }}</el-row>
+            <el-row v-for="(item,inx) in scope.row.route_include.slice(0, 5)" :key="inx">{{ item.val }}</el-row>
+            <el-row v-if="scope.row.route_include.length > 5">...</el-row>            
           </template>
         </el-table-column>
 
@@ -74,7 +75,8 @@
             label="路由排除"
             width="200">
           <template slot-scope="scope">
-            <el-row v-for="(item,inx) in scope.row.route_exclude" :key="inx">{{ item.val }}</el-row>
+            <el-row v-for="(item,inx) in scope.row.route_exclude.slice(0, 5)" :key="inx">{{ item.val }}</el-row>
+            <el-row v-if="scope.row.route_exclude.length > 5">...</el-row>
           </template>
         </el-table-column>
 
@@ -83,9 +85,10 @@
             label="LINK-ACL"
             min-width="200">
           <template slot-scope="scope">
-            <el-row v-for="(item,inx) in scope.row.link_acl" :key="inx">
+            <el-row v-for="(item,inx) in scope.row.link_acl.slice(0, 5)" :key="inx">
               {{ item.action }} => {{ item.val }} : {{ item.port }}
             </el-row>
+            <el-row v-if="scope.row.link_acl.length > 5">...</el-row>
           </template>
         </el-table-column>
 
