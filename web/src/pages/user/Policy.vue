@@ -50,21 +50,31 @@
 
         <el-table-column
             prop="route_include"
-            label="包含路由"
+            label="路由包含"
             width="200">
           <template slot-scope="scope">
-            <el-row v-for="(item,inx) in scope.row.route_include.slice(0, 5)" :key="inx">{{ item.val }}</el-row>
-            <el-row v-if="scope.row.route_include.length > 5">...</el-row>
+            <el-row v-for="(item,inx) in scope.row.route_include.slice(0, readMinRows)" :key="inx">{{ item.val }}</el-row>
+            <div v-if="scope.row.route_include.length > readMinRows">
+              <div v-if="readMore[`ri_${ scope.row.id }`]">
+                <el-row v-for="(item,inx) in scope.row.route_include.slice(readMinRows)" :key="inx">{{ item.val }}</el-row>              
+              </div>
+              <el-button size="mini" type="text" @click="toggleMore(`ri_${ scope.row.id }`)">{{ readMore[`ri_${ scope.row.id }`] ? "▲ 收起" : "▼ 更多" }}</el-button>              
+            </div>            
           </template>
         </el-table-column>
 
         <el-table-column
             prop="route_exclude"
-            label="排除路由"
+            label="路由排除"
             width="200">
           <template slot-scope="scope">
-            <el-row v-for="(item,inx) in scope.row.route_exclude.slice(0, 5)" :key="inx">{{ item.val }}</el-row>
-            <el-row v-if="scope.row.route_exclude.length > 5">...</el-row>
+            <el-row v-for="(item,inx) in scope.row.route_exclude.slice(0, readMinRows)" :key="inx">{{ item.val }}</el-row>
+            <div v-if="scope.row.route_exclude.length > readMinRows">
+              <div v-if="readMore[`re_${ scope.row.id }`]">
+                <el-row v-for="(item,inx) in scope.row.route_exclude.slice(readMinRows)" :key="inx">{{ item.val }}</el-row>              
+              </div>
+              <el-button size="mini" type="text" @click="toggleMore(`re_${ scope.row.id }`)">{{ readMore[`re_${ scope.row.id }`] ? "▲ 收起" : "▼ 更多" }}</el-button>              
+            </div>
           </template>
         </el-table-column>
         <el-table-column
@@ -261,6 +271,8 @@ export default {
       tableData: [],
       count: 10,
       activeTab : "general",
+      readMore: {},
+      readMinRows : 5,      
       ruleForm: {
         bandwidth: 0,
         status: 1,
@@ -379,7 +391,14 @@ export default {
     },
     resetForm(formName) {
       this.$refs[formName].resetFields();
-    }
+    },
+    toggleMore(id) {
+      if (this.readMore[id]) {
+        this.$set(this.readMore, id, false);
+      } else {
+        this.$set(this.readMore, id, true);
+      }
+    },    
   },
 
 }
