@@ -5,9 +5,9 @@ function gDateFormat(p) {
     var year = da.getFullYear();
     var month = da.getMonth() + 1;
     var dt = da.getDate();
-    var h = da.getHours();
-    var m = da.getMinutes();
-    var s = da.getSeconds();
+    var h = ('0'+da.getHours()).slice(-2);
+    var m = ('0'+da.getMinutes()).slice(-2)
+    var s = ('0'+da.getSeconds()).slice(-2);
 
     return year + '-' + month + '-' + dt + ' ' + h + ':' + m + ':' + s;
 }
