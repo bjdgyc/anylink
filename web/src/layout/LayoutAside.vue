@@ -42,6 +42,7 @@
       </template>
 
       <el-menu-item index="/admin/user/list">用户列表</el-menu-item>
+      <el-menu-item index="/admin/user/policy">用户策略</el-menu-item>
       <el-menu-item index="/admin/user/online">在线用户</el-menu-item>
       <el-menu-item index="/admin/user/ip_map">IP映射</el-menu-item>
     </el-submenu>

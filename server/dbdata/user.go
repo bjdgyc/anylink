@@ -66,8 +66,34 @@ func SetUser(v *User) error {
 	return err
 }
 
-// 验证用户登陆信息
+// 验证用户登录信息
 func CheckUser(name, pwd, group string) error {
+	// 获取登入的group数据
+	groupData := &Group{}
+	err := One("Name", group, groupData)
+	if err != nil || groupData.Status != 1 {
+		return fmt.Errorf("%s - %s", name, "用户组错误")
+	}
+	// 初始化Auth
+	if len(groupData.Auth) == 0 {
+		groupData.Auth["type"] = "local"
+	}
+	authType := groupData.Auth["type"].(string)
+	// 本地认证方式
+	if authType == "local" {
+		return checkLocalUser(name, pwd, group)
+	}
+	// 其它认证方式, 支持自定义
+	_, ok := authRegistry[authType]
+	if !ok {
+		return fmt.Errorf("%s %s", "未知的认证方式: ", authType)
+	}
+	auth := makeInstance(authType).(IUserAuth)
+	return auth.checkUser(name, pwd, groupData)
+}
+
+// 验证本地用户登录信息
+func checkLocalUser(name, pwd, group string) error {
 	// TODO 严重问题
 	// return nil
 
@@ -84,12 +110,6 @@ func CheckUser(name, pwd, group string) error {
 	if !utils.InArrStr(v.Groups, group) {
 		return fmt.Errorf("%s %s", name, "用户组错误")
 	}
-	groupData := &Group{}
-	err = One("Name", group, groupData)
-	if err != nil || groupData.Status != 1 {
-		return fmt.Errorf("%s - %s", name, "用户组错误")
-	}
-
 	// 判断otp信息
 	pinCode := pwd
 	if !v.DisableOtp {

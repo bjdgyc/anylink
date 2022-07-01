@@ -9,7 +9,7 @@ import (
 	"github.com/bjdgyc/anylink/dbdata"
 )
 
-func GroupList(w http.ResponseWriter, r *http.Request) {
+func PolicyList(w http.ResponseWriter, r *http.Request) {
 	_ = r.ParseForm()
 	pageS := r.FormValue("page")
 	page, _ := strconv.Atoi(pageS)
@@ -19,9 +19,9 @@ func GroupList(w http.ResponseWriter, r *http.Request) {
 
 	var pageSize = dbdata.PageSize
 
-	count := dbdata.CountAll(&dbdata.Group{})
+	count := dbdata.CountAll(&dbdata.Policy{})
 
-	var datas []dbdata.Group
+	var datas []dbdata.Policy
 	err := dbdata.Find(&datas, pageSize, page)
 	if err != nil {
 		RespError(w, RespInternalErr, err)
@@ -37,17 +37,7 @@ func GroupList(w http.ResponseWriter, r *http.Request) {
 	RespSucess(w, data)
 }
 
-func GroupNames(w http.ResponseWriter, r *http.Request) {
-	var names = dbdata.GetGroupNames()
-	data := map[string]interface{}{
-		"count":     len(names),
-		"page_size": 0,
-		"datas":     names,
-	}
-	RespSucess(w, data)
-}
-
-func GroupDetail(w http.ResponseWriter, r *http.Request) {
+func PolicyDetail(w http.ResponseWriter, r *http.Request) {
 	_ = r.ParseForm()
 	idS := r.FormValue("id")
 	id, _ := strconv.Atoi(idS)
@@ -56,33 +46,31 @@ func GroupDetail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var data dbdata.Group
+	var data dbdata.Policy
 	err := dbdata.One("Id", id, &data)
 	if err != nil {
 		RespError(w, RespInternalErr, err)
 		return
 	}
-	if len(data.Auth) == 0 {
-		data.Auth["type"] = "local"
-	}
+
 	RespSucess(w, data)
 }
 
-func GroupSet(w http.ResponseWriter, r *http.Request) {
+func PolicySet(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		RespError(w, RespInternalErr, err)
 		return
 	}
 	defer r.Body.Close()
-	v := &dbdata.Group{}
+	v := &dbdata.Policy{}
 	err = json.Unmarshal(body, v)
 	if err != nil {
 		RespError(w, RespInternalErr, err)
 		return
 	}
 
-	err = dbdata.SetGroup(v)
+	err = dbdata.SetPolicy(v)
 	if err != nil {
 		RespError(w, RespInternalErr, err)
 		return
@@ -91,7 +79,7 @@ func GroupSet(w http.ResponseWriter, r *http.Request) {
 	RespSucess(w, nil)
 }
 
-func GroupDel(w http.ResponseWriter, r *http.Request) {
+func PolicyDel(w http.ResponseWriter, r *http.Request) {
 	_ = r.ParseForm()
 	idS := r.FormValue("id")
 	id, _ := strconv.Atoi(idS)
@@ -100,7 +88,7 @@ func GroupDel(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := dbdata.Group{Id: id}
+	data := dbdata.Policy{Id: id}
 	err := dbdata.Del(&data)
 	if err != nil {
 		RespError(w, RespInternalErr, err)

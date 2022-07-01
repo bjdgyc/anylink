@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"text/template"
 
 	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/dbdata"
@@ -99,6 +100,9 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	//HttpSetHeader(w, "X-CSTP-Default-Domain", cSess.LocalIp)
 	HttpSetHeader(w, "X-CSTP-Base-MTU", cstpBaseMtu)
 
+	// 设置用户策略
+	SetUserPolicy(sess.Username, cSess.Group)
+
 	// 允许本地LAN访问vpn网络，必须放在路由的第一个
 	if cSess.Group.AllowLan {
 		HttpSetHeader(w, "X-CSTP-Split-Exclude", "0.0.0.0/255.255.255.255")
@@ -118,7 +122,6 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	for _, v := range cSess.Group.RouteExclude {
 		HttpAddHeader(w, "X-CSTP-Split-Exclude", v.IpMask)
 	}
-
 	HttpSetHeader(w, "X-CSTP-Lease-Duration", fmt.Sprintf("%d", base.Cfg.IpLease)) // ip地址租期
 	HttpSetHeader(w, "X-CSTP-Session-Timeout", "none")
 	HttpSetHeader(w, "X-CSTP-Session-Timeout-Alert-Interval", "60")
@@ -153,7 +156,11 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	HttpSetHeader(w, "X-CSTP-Disable-Always-On-VPN", "false")
 	HttpSetHeader(w, "X-CSTP-Client-Bypass-Protocol", "false")
 	HttpSetHeader(w, "X-CSTP-TCP-Keepalive", "false")
-	// HttpSetHeader(w, "X-CSTP-Post-Auth-XML", ``)
+	// 设置域名拆分隧道（移动端不支持）
+	if mobile != "mobile" {
+		SetPostAuthXml(cSess.Group, w)
+	}
+
 	w.WriteHeader(http.StatusOK)
 
 	hClone := w.Header().Clone()
@@ -186,4 +193,36 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	}
 
 	go LinkCstp(conn, bufRW, cSess)
+}
+
+// 设置域名拆分隧道
+func SetPostAuthXml(g *dbdata.Group, w http.ResponseWriter) error {
+	if g.DsExcludeDomains == "" && g.DsIncludeDomains == "" {
+		return nil
+	}
+	tmpl, err := template.New("post_auth_xml").Parse(ds_domains_xml)
+	if err != nil {
+		return err
+	}
+	var result bytes.Buffer
+	err = tmpl.Execute(&result, g)
+	if err != nil {
+		return err
+	}
+	HttpSetHeader(w, "X-CSTP-Post-Auth-XML", result.String())
+	return nil
+}
+
+// 设置用户策略, 覆盖Group的属性值
+func SetUserPolicy(username string, g *dbdata.Group) {
+	userPolicy := dbdata.GetPolicy(username)
+	if userPolicy.Id != 0 && userPolicy.Status == 1 {
+		base.Debug(username + " use UserPolicy")
+		g.AllowLan = userPolicy.AllowLan
+		g.ClientDns = userPolicy.ClientDns
+		g.RouteInclude = userPolicy.RouteInclude
+		g.RouteExclude = userPolicy.RouteExclude
+		g.DsExcludeDomains = userPolicy.DsExcludeDomains
+		g.DsIncludeDomains = userPolicy.DsIncludeDomains
+	}
 }
