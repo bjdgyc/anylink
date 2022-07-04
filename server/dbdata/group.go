@@ -159,14 +159,18 @@ func SetGroup(g *Group) error {
 	if authType == "local" {
 		g.Auth = defAuth
 	} else {
-		_, ok := authRegistry[authType]
-		if !ok {
+		if _, ok := authRegistry[authType]; !ok {
 			return errors.New("未知的认证方式: " + authType)
 		}
 		auth := makeInstance(authType).(IUserAuth)
 		err = auth.checkData(g.Auth)
 		if err != nil {
 			return err
+		}
+		// 重置Auth， 删除多余的key
+		g.Auth = map[string]interface{}{
+			"type":   authType,
+			authType: g.Auth[authType],
 		}
 	}
 

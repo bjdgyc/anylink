@@ -228,22 +228,45 @@
 
             <el-tab-pane label="认证方式" name="authtype">
                 <el-form-item label="认证" prop="authtype">
-                    <el-radio-group v-model="ruleForm.auth.type">
+                    <el-radio-group v-model="ruleForm.auth.type" @change="authTypeChange">
                         <el-radio label="local" border>本地</el-radio>
                         <el-radio label="radius" border>Radius</el-radio>
+                        <el-radio label="ldap" border>LDAP</el-radio>
                     </el-radio-group>
-                </el-form-item>               
-                <el-form-item label="Radius密钥" v-if="ruleForm.auth.type == 'radius'">
-                    <el-col :span="10">
-                        <el-input v-model="ruleForm.auth.radius.secret"></el-input>
-                    </el-col>
-                </el-form-item>               
-                <el-form-item label="Radius服务器" v-if="ruleForm.auth.type == 'radius'">
-                    <el-col :span="10">
-                        <el-input v-model="ruleForm.auth.radius.addr" placeholder="输入IP和端口 192.168.2.1:1812"></el-input>
-                    </el-col>
-                </el-form-item>                
-            </el-tab-pane>            
+                </el-form-item>   
+                <templete v-if="ruleForm.auth.type == 'radius'">
+                  <el-form-item label="服务器地址" prop="auth.radius.addr" :rules="this.ruleForm.auth.type== 'radius' ? this.rules['auth.radius.addr'] : [{ required: false }]">
+                      <el-input v-model="ruleForm.auth.radius.addr" placeholder="输入IP和端口 192.168.2.1:1812"></el-input>
+                  </el-form-item>                
+                  <el-form-item label="密钥" prop="auth.radius.secret" :rules="this.ruleForm.auth.type== 'radius' ? this.rules['auth.radius.secret'] : [{ required: false }]">
+                      <el-input v-model="ruleForm.auth.radius.secret"></el-input>
+                  </el-form-item>               
+                </templete>
+
+                <templete v-if="ruleForm.auth.type == 'ldap'">
+                  <el-form-item label="服务器地址" prop="auth.ldap.addr" :rules="this.ruleForm.auth.type== 'ldap' ? this.rules['auth.ldap.addr'] : [{ required: false }]">
+                      <el-input v-model="ruleForm.auth.ldap.addr" placeholder="例如 192.168.2.1:389"></el-input>    
+                  </el-form-item> 
+                  <el-form-item label="开启TLS" prop="auth.ldap.tls">
+                    <el-switch v-model="ruleForm.auth.ldap.tls"></el-switch>                      
+                  </el-form-item>
+                  <el-form-item label="查询账号" prop="auth.ldap.bind_name" :rules="this.ruleForm.auth.type== 'ldap' ? this.rules['auth.ldap.bind_name'] : [{ required: false }]">
+                    <el-input v-model="ruleForm.auth.ldap.bind_name"></el-input>
+                  </el-form-item>
+                  <el-form-item label="查询密码" prop="auth.ldap.bind_pwd" :rules="this.ruleForm.auth.type== 'ldap' ? this.rules['auth.ldap.bind_pwd'] : [{ required: false }]">
+                    <el-input type="password" v-model="ruleForm.auth.ldap.bind_pwd"></el-input>
+                  </el-form-item>                                                
+                  <el-form-item label="BaseDN" prop="auth.ldap.base_dn" :rules="this.ruleForm.auth.type== 'ldap' ? this.rules['auth.ldap.base_dn'] : [{ required: false }]">
+                    <el-input v-model="ruleForm.auth.ldap.base_dn" placeholder="例如 DC=abc,DC=com"></el-input>
+                  </el-form-item>  
+                  <el-form-item label="搜索属性" prop="auth.ldap.search_attr" :rules="this.ruleForm.auth.type== 'ldap' ? this.rules['auth.ldap.search_attr'] : [{ required: false }]">
+                    <el-input v-model="ruleForm.auth.ldap.search_attr" placeholder="例如 sAMAccountName"></el-input>
+                  </el-form-item>    
+                  <el-form-item label="绑定DN" prop="auth.ldap.member_of">
+                    <el-input v-model="ruleForm.auth.ldap.member_of" placeholder="例如 CN=test,CN=User,DC=abc,DC=com"></el-input>
+                  </el-form-item>                                                                      
+                </templete>                 
+            </el-tab-pane>  
 
             <el-tab-pane label="路由设置" name="route">
                 <el-form-item label="包含路由" prop="route_include">
@@ -368,6 +391,19 @@ export default {
       activeTab : "general",
       readMore: {},
       readMinRows : 5,
+      defAuth : {
+                type:'local', 
+                radius:{addr:"", secret:""},
+                ldap:{
+                      addr:"", 
+                      tls:false,
+                      base_dn:"",
+                      search_attr:"sAMAccountName",
+                      member_of:"",
+                      bind_name:"",
+                      bind_pwd:"",
+                      },
+      },          
       ruleForm: {
         bandwidth: 0,
         status: 1,
@@ -376,7 +412,7 @@ export default {
         route_include: [{val: 'all', note: '默认全局代理'}],
         route_exclude: [],
         link_acl: [],
-        auth : {"type":'local'}
+        auth : {},
       },
       rules: {
         name: [
@@ -390,17 +426,37 @@ export default {
         status: [
           {required: true}
         ],
+        "auth.radius.addr": [
+          {required: true, message: '请输入Radius服务器', trigger: 'blur'}
+        ],
+        "auth.radius.secret": [
+          {required: true, message: '请输入Radius密钥', trigger: 'blur'}
+        ],        
+        "auth.ldap.addr": [
+          {required: true, message: '请输入服务器地址(含端口)', trigger: 'blur'}
+        ],  
+        "auth.ldap.bind_name": [
+          {required: true, message: '请输入查询账号', trigger: 'blur'}
+        ],
+        "auth.ldap.bind_pwd": [
+          {required: true, message: '请输入查询密码', trigger: 'blur'}
+        ],         
+        "auth.ldap.base_dn": [
+          {required: true, message: '请输入BaseDN值', trigger: 'blur'}
+        ],
+        "auth.ldap.search_attr": [
+          {required: true, message: '请输入搜索属性', trigger: 'blur'}
+        ],                                       
       },
     }
   },
   methods: {
     setAuthData(row) {
-        var defAuthData = {"type":'local', 
-                           "radius":{"addr":"", "secret":""},
-                          }
-        if (this.ruleForm.auth.type == "local" || !row) {
-            this.ruleForm.auth = defAuthData;
-        }
+      if (! row) {
+        this.ruleForm.auth = JSON.parse(JSON.stringify(this.defAuth));
+        return ;
+      }
+      this.ruleForm.auth = Object.assign(JSON.parse(JSON.stringify(this.defAuth)), row.auth);
     },
     handleDel(row) {
       axios.post('/group/del?id=' + row.id).then(resp => {
@@ -503,6 +559,9 @@ export default {
         this.$set(this.readMore, id, true);
       }
     },
+    authTypeChange() {
+      this.$refs['ruleForm'].clearValidate();
+    }
   },
 }
 </script>
