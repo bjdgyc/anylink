@@ -17,7 +17,7 @@ type Group struct {
 	DsIncludeDomains string                 `json:"ds_include_domains" xorm:"Text"`
 	LinkAcl          []GroupLinkAcl         `json:"link_acl" xorm:"Text"`
 	Bandwidth        int                    `json:"bandwidth" xorm:"Int"`                           // 带宽限制
-	Auth             map[string]interface{} `json:"auth" xorm:"not null default '{}' varchar(255)"` // 认证方式
+	Auth             map[string]interface{} `json:"auth" xorm:"not null default '{}' varchar(500)"` // 认证方式
 	Status           int8                   `json:"status" xorm:"Int"`                              // 1正常
 	CreatedAt        time.Time              `json:"created_at" xorm:"DateTime created"`
 	UpdatedAt        time.Time              `json:"updated_at" xorm:"DateTime updated"`

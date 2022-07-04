@@ -56,7 +56,6 @@ func TestCheckUser(t *testing.T) {
 	err = CheckUser("aaa", "bbbbbbb", group2)
 	if ast.NotNil(err) {
 		ast.Equal("aaa Radius服务器连接异常, 请检测服务器和端口", err.Error())
-
 	}
 	// 添加用户策略
 	dns2 := []ValData{{Val: "8.8.8.8"}}
@@ -66,4 +65,25 @@ func TestCheckUser(t *testing.T) {
 	ast.Nil(err)
 	err = CheckUser("aaa", u.PinCode, group)
 	ast.Nil(err)
+	// 添加一个ldap组
+	group3 := "group3"
+	authData = map[string]interface{}{
+		"type": "ldap",
+		"ldap": map[string]interface{}{
+			"addr":        "192.168.8.12:389",
+			"tls":         true,
+			"bind_name":   "userfind@abc.com",
+			"bind_pwd":    "afdbfdsafds",
+			"base_dn":     "dc=abc,dc=com",
+			"search_attr": "sAMAccountName",
+			"member_of":   "cn=vpn,cn=user,dc=abc,dc=com",
+		},
+	}
+	g3 := Group{Name: group3, Status: 1, ClientDns: dns, RouteInclude: route, Auth: authData}
+	err = SetGroup(&g3)
+	ast.Nil(err)
+	err = CheckUser("aaa", "bbbbbbb", group3)
+	if ast.NotNil(err) {
+		ast.Equal("aaa LDAP服务器连接异常, 请检测服务器和端口", err.Error())
+	}
 }
