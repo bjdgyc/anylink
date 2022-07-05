@@ -45,7 +45,7 @@ func (auth AuthLdap) checkData(authData map[string]interface{}) error {
 		return errors.New("LDAP的用户查询密码不能为空")
 	}
 	if auth.BaseDn == "" || !ValidateDN(auth.BaseDn) {
-		return errors.New("LDAP的BaseName填写有误")
+		return errors.New("LDAP的BaseDN填写有误")
 	}
 	if auth.SearchAttr == "" {
 		return errors.New("LDAP的搜索属性不能为空")
@@ -117,7 +117,6 @@ func (auth AuthLdap) checkUser(name, pwd string, g *Group) error {
 		return fmt.Errorf("LDAP发现 %s 用户，存在多个账号", name)
 	}
 	userDN := sr.Entries[0].DN
-	fmt.Println(userDN)
 	err = l.Bind(userDN, pwd)
 	if err != nil {
 		return fmt.Errorf("%s LDAP 登入失败，请检查登入的账号或密码 %s", name, err.Error())

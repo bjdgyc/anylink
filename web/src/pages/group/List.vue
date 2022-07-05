@@ -168,10 +168,11 @@
         title="用户组"
         :visible.sync="user_edit_dialog"
         width="750px"
+        @close='closeDialog'
         center>
 
       <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="ruleForm">
-        <el-tabs v-model="activeTab">
+        <el-tabs v-model="activeTab" :before-leave="beforeTabLeave">
            <el-tab-pane label="通用" name="general">      
                 <el-form-item label="用户组ID" prop="id">
                 <el-input v-model="ruleForm.id" disabled></el-input>
@@ -359,7 +360,7 @@
             </el-tab-pane>
             <el-form-item>
             <el-button type="primary" @click="submitForm('ruleForm')">保存</el-button>
-            <el-button @click="disVisible">取消</el-button>
+            <el-button @click="closeDialog">取消</el-button>
             </el-form-item>
           </el-tabs>
         </el-form> 
@@ -473,10 +474,9 @@ export default {
         console.log(error);
       });
     },
-    handleEdit(row) {
+    handleEdit(row) {      
       !this.$refs['ruleForm'] || this.$refs['ruleForm'].resetFields();
-      console.log(row)
-      this.activeTab = "general"
+      console.log(row)      
       this.user_edit_dialog = true
       if (!row) {
         this.setAuthData(row)
@@ -561,6 +561,24 @@ export default {
     },
     authTypeChange() {
       this.$refs['ruleForm'].clearValidate();
+    },
+    beforeTabLeave() {
+      var isSwitch = true
+      if (! this.user_edit_dialog) {
+        return isSwitch;
+      }      
+      this.$refs['ruleForm'].validate((valid) => {
+        if (!valid) {
+          this.$message.error("错误：您有必填项没有填写。")
+          isSwitch = false;
+          return false;
+        }
+      });      
+      return isSwitch;
+    },
+    closeDialog() {
+      this.user_edit_dialog = false;
+      this.activeTab = "general";
     }
   },
 }
