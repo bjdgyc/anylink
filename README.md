@@ -97,6 +97,7 @@ sudo ./anylink
 - [x] IP 访问审计功能
 - [x] 域名动态拆分隧道（域名路由功能）
 - [x] radius认证支持
+- [x] LDAP认证支持
 - [ ] 基于 ipvtap 设备的桥接访问模式
 
 ## Config
