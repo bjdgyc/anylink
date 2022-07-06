@@ -4,6 +4,8 @@ go 1.16
 
 require (
 	github.com/StackExchange/wmi v1.2.1 // indirect
+	github.com/go-ldap/ldap v3.0.3+incompatible // indirect
+	github.com/go-ldap/ldap/v3 v3.4.3 // indirect
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/golang-jwt/jwt/v4 v4.0.0
 	github.com/google/gopacket v1.1.19
@@ -22,9 +24,10 @@ require (
 	github.com/tklauser/go-sysconf v0.3.7 // indirect
 	github.com/xhit/go-simple-mail/v2 v2.10.0
 	github.com/xlzd/gotp v0.0.0-20181030022105-c8557ba2c119
-	golang.org/x/crypto v0.0.0-20210711020723-a769d52b0f97
-	golang.org/x/net v0.0.0-20210805182204-aaa1db679c0d
+	golang.org/x/crypto v0.0.0-20220331220935-ae2d96664a29
+	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2
 	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac
+	gopkg.in/asn1-ber.v1 v1.0.0-20181015200546-f715ec2f112d // indirect
 	layeh.com/radius v0.0.0-20210819152912-ad72663a72ab
 	xorm.io/xorm v1.2.2
 )
