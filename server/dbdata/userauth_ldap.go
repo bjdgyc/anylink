@@ -74,10 +74,11 @@ func (auth AuthLdap) checkUser(name, pwd string, g *Group) error {
 		return fmt.Errorf("%s %s", name, "LDAP Unmarshal出现错误")
 	}
 	// 检测服务器和端口的可用性
-	_, err = net.DialTimeout("tcp", auth.Addr, 3*time.Second)
+	con, err := net.DialTimeout("tcp", auth.Addr, 3*time.Second)
 	if err != nil {
 		return fmt.Errorf("%s %s", name, "LDAP服务器连接异常, 请检测服务器和端口")
 	}
+	defer con.Close()
 	// 连接LDAP
 	l, err := ldap.Dial("tcp", auth.Addr)
 	if err != nil {
