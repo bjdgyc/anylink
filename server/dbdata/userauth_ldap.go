@@ -39,19 +39,19 @@ func (auth AuthLdap) checkData(authData map[string]interface{}) error {
 		return errors.New("LDAP的服务器地址(含端口)填写有误")
 	}
 	if auth.BindName == "" {
-		return errors.New("LDAP的用户查询账号不能为空")
+		return errors.New("LDAP的管理员账号不能为空")
 	}
 	if auth.BindPwd == "" {
-		return errors.New("LDAP的用户查询密码不能为空")
+		return errors.New("LDAP的管理员密码不能为空")
 	}
 	if auth.BaseDn == "" || !ValidateDN(auth.BaseDn) {
-		return errors.New("LDAP的BaseDN填写有误")
+		return errors.New("LDAP的Base DN填写有误")
 	}
 	if auth.SearchAttr == "" {
-		return errors.New("LDAP的搜索属性不能为空")
+		return errors.New("LDAP的用户唯一ID不能为空")
 	}
 	if auth.MemberOf != "" && !ValidateDN(auth.MemberOf) {
-		return errors.New("LDAP的绑定DN填写有误")
+		return errors.New("LDAP的受限用户组填写有误")
 	}
 	return nil
 }
@@ -93,7 +93,7 @@ func (auth AuthLdap) checkUser(name, pwd string, g *Group) error {
 	}
 	err = l.Bind(auth.BindName, auth.BindPwd)
 	if err != nil {
-		return fmt.Errorf("%s LDAP 查询用户的账密有误,请重新检查 %s", name, err.Error())
+		return fmt.Errorf("%s LDAP 管理员账号或密码填写有误 %s", name, err.Error())
 	}
 	filterAttr := "(objectClass=person)"
 	filterAttr += "(" + auth.SearchAttr + "=" + name + ")"

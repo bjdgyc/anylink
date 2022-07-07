@@ -237,34 +237,34 @@
                 </el-form-item>   
                 <templete v-if="ruleForm.auth.type == 'radius'">
                   <el-form-item label="服务器地址" prop="auth.radius.addr" :rules="this.ruleForm.auth.type== 'radius' ? this.rules['auth.radius.addr'] : [{ required: false }]">
-                      <el-input v-model="ruleForm.auth.radius.addr" placeholder="输入IP和端口 192.168.2.1:1812"></el-input>
+                      <el-input v-model="ruleForm.auth.radius.addr" placeholder="例如 ip:1812"></el-input>
                   </el-form-item>                
                   <el-form-item label="密钥" prop="auth.radius.secret" :rules="this.ruleForm.auth.type== 'radius' ? this.rules['auth.radius.secret'] : [{ required: false }]">
-                      <el-input v-model="ruleForm.auth.radius.secret"></el-input>
+                      <el-input v-model="ruleForm.auth.radius.secret" placeholder=""></el-input>
                   </el-form-item>               
                 </templete>
 
                 <templete v-if="ruleForm.auth.type == 'ldap'">
                   <el-form-item label="服务器地址" prop="auth.ldap.addr" :rules="this.ruleForm.auth.type== 'ldap' ? this.rules['auth.ldap.addr'] : [{ required: false }]">
-                      <el-input v-model="ruleForm.auth.ldap.addr" placeholder="例如 192.168.2.1:389"></el-input>    
+                      <el-input v-model="ruleForm.auth.ldap.addr" placeholder="例如 ip:389 / 域名:389"></el-input>    
                   </el-form-item> 
                   <el-form-item label="开启TLS" prop="auth.ldap.tls">
                     <el-switch v-model="ruleForm.auth.ldap.tls"></el-switch>                      
                   </el-form-item>
-                  <el-form-item label="查询账号" prop="auth.ldap.bind_name" :rules="this.ruleForm.auth.type== 'ldap' ? this.rules['auth.ldap.bind_name'] : [{ required: false }]">
-                    <el-input v-model="ruleForm.auth.ldap.bind_name"></el-input>
+                  <el-form-item label="管理员账号" prop="auth.ldap.bind_name" :rules="this.ruleForm.auth.type== 'ldap' ? this.rules['auth.ldap.bind_name'] : [{ required: false }]">
+                    <el-input v-model="ruleForm.auth.ldap.bind_name" placeholder="例如 CN=bindadmin,DC=abc,DC=COM"></el-input>
                   </el-form-item>
-                  <el-form-item label="查询密码" prop="auth.ldap.bind_pwd" :rules="this.ruleForm.auth.type== 'ldap' ? this.rules['auth.ldap.bind_pwd'] : [{ required: false }]">
-                    <el-input type="password" v-model="ruleForm.auth.ldap.bind_pwd"></el-input>
+                  <el-form-item label="管理员密码" prop="auth.ldap.bind_pwd" :rules="this.ruleForm.auth.type== 'ldap' ? this.rules['auth.ldap.bind_pwd'] : [{ required: false }]">
+                    <el-input type="password" v-model="ruleForm.auth.ldap.bind_pwd" placeholder=""></el-input>
                   </el-form-item>                                                
-                  <el-form-item label="BaseDN" prop="auth.ldap.base_dn" :rules="this.ruleForm.auth.type== 'ldap' ? this.rules['auth.ldap.base_dn'] : [{ required: false }]">
+                  <el-form-item label="Base DN" prop="auth.ldap.base_dn" :rules="this.ruleForm.auth.type== 'ldap' ? this.rules['auth.ldap.base_dn'] : [{ required: false }]">
                     <el-input v-model="ruleForm.auth.ldap.base_dn" placeholder="例如 DC=abc,DC=com"></el-input>
                   </el-form-item>  
-                  <el-form-item label="搜索属性" prop="auth.ldap.search_attr" :rules="this.ruleForm.auth.type== 'ldap' ? this.rules['auth.ldap.search_attr'] : [{ required: false }]">
-                    <el-input v-model="ruleForm.auth.ldap.search_attr" placeholder="例如 sAMAccountName"></el-input>
+                  <el-form-item label="用户唯一ID" prop="auth.ldap.search_attr" :rules="this.ruleForm.auth.type== 'ldap' ? this.rules['auth.ldap.search_attr'] : [{ required: false }]">
+                    <el-input v-model="ruleForm.auth.ldap.search_attr" placeholder="例如 sAMAccountName 或 uid"></el-input>
                   </el-form-item>    
-                  <el-form-item label="绑定DN" prop="auth.ldap.member_of">
-                    <el-input v-model="ruleForm.auth.ldap.member_of" placeholder="例如 CN=test,CN=User,DC=abc,DC=com"></el-input>
+                  <el-form-item label="受限用户组" prop="auth.ldap.member_of">
+                    <el-input v-model="ruleForm.auth.ldap.member_of" placeholder="选填, 只允许指定组登入, 例如 CN=HomeWork,DC=abc,DC=com"></el-input>
                   </el-form-item>                                                                      
                 </templete>                 
             </el-tab-pane>  
@@ -437,16 +437,16 @@ export default {
           {required: true, message: '请输入服务器地址(含端口)', trigger: 'blur'}
         ],  
         "auth.ldap.bind_name": [
-          {required: true, message: '请输入查询账号', trigger: 'blur'}
+          {required: true, message: '请输入管理员账号', trigger: 'blur'}
         ],
         "auth.ldap.bind_pwd": [
-          {required: true, message: '请输入查询密码', trigger: 'blur'}
+          {required: true, message: '请输入管理员密码', trigger: 'blur'}
         ],         
         "auth.ldap.base_dn": [
-          {required: true, message: '请输入BaseDN值', trigger: 'blur'}
+          {required: true, message: '请输入Base DN值', trigger: 'blur'}
         ],
         "auth.ldap.search_attr": [
-          {required: true, message: '请输入搜索属性', trigger: 'blur'}
+          {required: true, message: '请输入用户唯一ID', trigger: 'blur'}
         ],                                       
       },
     }
