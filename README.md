@@ -53,6 +53,8 @@ AnyLink 服务端仅在 CentOS 7、Ubuntu 18.04 测试通过，如需要安装�
 > 对于线上环境，必须申请安全的 https 证书，不支持私有证书连接
 >
 > 客户端请使用群共享文件的版本，其他版本没有测试过，不保证使用正常
+> 
+> 首次使用，请在浏览器访问 https://域名:443，浏览器提示安全后，在客户端输入 【域名:443】 即可
 
 ### 自行编译安装
 
@@ -72,6 +74,7 @@ sudo ./anylink
 # https://host:8800
 # 默认账号 密码
 # admin 123456
+
 
 ```
 
@@ -97,6 +100,7 @@ sudo ./anylink
 - [x] IP 访问审计功能
 - [x] 域名动态拆分隧道（域名路由功能）
 - [x] radius认证支持
+- [x] LDAP认证支持
 - [ ] 基于 ipvtap 设备的桥接访问模式
 
 ## Config
@@ -288,9 +292,11 @@ sh bridge-init.sh
 
 ## Discussion
 
-添加 QQ 群: 567510628
+添加微信群: 群共享文件有相关软件下载
 
-QQ 群共享文件有相关软件下载
+![contact_me_qr](doc/screenshot/contact_me_qr.png)
+
+
 
 ## Contribution
 

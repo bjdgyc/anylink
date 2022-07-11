@@ -136,10 +136,11 @@
         :visible.sync="user_edit_dialog"
         width="750px"
         top="50px"
+        @close='closeDialog'
         center>
 
       <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="ruleForm">
-        <el-tabs v-model="activeTab">
+        <el-tabs v-model="activeTab" :before-leave="beforeTabLeave">
            <el-tab-pane label="通用" name="general">
                 <el-form-item label="ID" prop="id">
                 <el-input v-model="ruleForm.id" disabled></el-input>
@@ -283,7 +284,7 @@ export default {
         re_upper_limit : 0,        
       },
       rules: {
-        name: [
+        username: [
           {required: true, message: '请输入用户名', trigger: 'blur'},
           {max: 30, message: '长度小于 30 个字符', trigger: 'blur'}
         ],
@@ -398,7 +399,25 @@ export default {
       } else {
         this.$set(this.readMore, id, true);
       }
-    },    
+    },
+    beforeTabLeave() {
+      var isSwitch = true
+      if (! this.user_edit_dialog) {
+        return isSwitch;
+      }      
+      this.$refs['ruleForm'].validate((valid) => {
+        if (!valid) {
+          this.$message.error("错误：您有必填项没有填写。")
+          isSwitch = false;
+          return false;
+        }
+      });      
+      return isSwitch;
+    },
+    closeDialog() {
+      this.user_edit_dialog = false;
+      this.activeTab = "general";
+    },        
   },
 
 }
