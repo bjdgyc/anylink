@@ -292,10 +292,15 @@ sh bridge-init.sh
 
 ## Discussion
 
+添加QQ群: 567510628
+
+群共享文件有相关软件下载
+
+<!--
 添加微信群: 群共享文件有相关软件下载
 
 ![contact_me_qr](doc/screenshot/contact_me_qr.png)
-
+-->
 
 
 ## Contribution
