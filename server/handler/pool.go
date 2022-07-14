@@ -87,3 +87,25 @@ func putByte34(b *[]byte) {
 	*b = (*b)[:34]
 	byte34Pool.Put(b)
 }
+
+type BufferPool struct {
+	sync.Pool
+}
+
+// 长度 290 对象
+var byte290Pool = sync.Pool{
+	New: func() interface{} {
+		b := make([]byte, 290)
+		return &b
+	},
+}
+
+func getByte290() *[]byte {
+	b := byte290Pool.Get().(*[]byte)
+	return b
+}
+
+func putByte290(b *[]byte) {
+	*b = (*b)[:290]
+	byte290Pool.Put(b)
+}
