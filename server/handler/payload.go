@@ -1,13 +1,22 @@
 package handler
 
 import (
+	"crypto/md5"
 	"encoding/binary"
+	"encoding/hex"
 
 	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/dbdata"
 	"github.com/bjdgyc/anylink/pkg/utils"
 	"github.com/bjdgyc/anylink/sessdata"
 	"github.com/songgao/water/waterutil"
+)
+
+const (
+	acc_proto_udp = iota + 1
+	acc_proto_tcp
+	acc_proto_https
+	acc_proto_http
 )
 
 func payloadIn(cSess *sessdata.ConnSession, pl *sessdata.Payload) bool {
@@ -105,10 +114,14 @@ func logAudit(cSess *sessdata.ConnSession, pl *sessdata.Payload) {
 	}
 
 	ipProto := waterutil.IPv4Protocol(pl.Data)
+	// 访问协议
+	var accessProto uint8
 	// 只统计 tcp和udp 的访问
 	switch ipProto {
 	case waterutil.TCP:
+		accessProto = acc_proto_tcp
 	case waterutil.UDP:
+		accessProto = acc_proto_udp
 	default:
 		return
 	}
@@ -117,12 +130,21 @@ func logAudit(cSess *sessdata.ConnSession, pl *sessdata.Payload) {
 	ipDst := waterutil.IPv4Destination(pl.Data)
 	ipPort := waterutil.IPv4DestinationPort(pl.Data)
 
-	b := getByte34()
+	b := getByte51()
 	key := *b
 	copy(key[:16], ipSrc)
 	copy(key[16:32], ipDst)
 	binary.BigEndian.PutUint16(key[32:34], ipPort)
 
+	info := ""
+	if ipProto == waterutil.TCP {
+		accessProto, info = onTCP(waterutil.IPv4Payload(pl.Data))
+	}
+	key[34] = byte(accessProto)
+	if info != "" {
+		md5Sum := md5.Sum([]byte(info))
+		copy(key[35:51], hex.EncodeToString(md5Sum[:]))
+	}
 	s := utils.BytesToString(key)
 	nu := utils.NowSec().Unix()
 
@@ -130,19 +152,21 @@ func logAudit(cSess *sessdata.ConnSession, pl *sessdata.Payload) {
 	v, ok := cSess.IpAuditMap[s]
 	if ok && nu-v < int64(base.Cfg.AuditInterval) {
 		// 回收byte对象
-		putByte34(b)
+		putByte51(b)
 		return
 	}
 
 	cSess.IpAuditMap[s] = nu
 
 	audit := dbdata.AccessAudit{
-		Username:  cSess.Sess.Username,
-		Protocol:  uint8(ipProto),
-		Src:       ipSrc.String(),
-		Dst:       ipDst.String(),
-		DstPort:   ipPort,
-		CreatedAt: utils.NowSec(),
+		Username:    cSess.Sess.Username,
+		Protocol:    uint8(ipProto),
+		Src:         ipSrc.String(),
+		Dst:         ipDst.String(),
+		DstPort:     ipPort,
+		CreatedAt:   utils.NowSec(),
+		AccessProto: accessProto,
+		Info:        info,
 	}
 
 	_ = dbdata.Add(audit)
