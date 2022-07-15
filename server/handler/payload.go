@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"crypto/md5"
 	"encoding/binary"
+	"encoding/hex"
 
 	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/dbdata"
@@ -127,7 +129,7 @@ func logAudit(cSess *sessdata.ConnSession, pl *sessdata.Payload) {
 	ipDst := waterutil.IPv4Destination(pl.Data)
 	ipPort := waterutil.IPv4DestinationPort(pl.Data)
 
-	b := getByte290()
+	b := getByte51()
 	key := *b
 	copy(key[:16], ipSrc)
 	copy(key[16:32], ipDst)
@@ -139,9 +141,9 @@ func logAudit(cSess *sessdata.ConnSession, pl *sessdata.Payload) {
 	}
 	key[34] = byte(accessProto)
 	if info != "" {
-		copy(key[35:35+len(info)], info)
+		md5Sum := md5.Sum([]byte(info))
+		copy(key[35:51], hex.EncodeToString(md5Sum[:]))
 	}
-
 	s := utils.BytesToString(key)
 	nu := utils.NowSec().Unix()
 
@@ -149,7 +151,7 @@ func logAudit(cSess *sessdata.ConnSession, pl *sessdata.Payload) {
 	v, ok := cSess.IpAuditMap[s]
 	if ok && nu-v < int64(base.Cfg.AuditInterval) {
 		// 回收byte对象
-		putByte290(b)
+		putByte51(b)
 		return
 	}
 

@@ -16,39 +16,50 @@
 
         <el-table-column
             prop="username"
-            label="用户名">
-        </el-table-column>
-
-
-        <el-table-column
-            prop="protocol"
-            label="协议">
+            label="用户名"
+            width="120">
         </el-table-column>
 
         <el-table-column
             prop="src"
-            label="源IP地址">
+            label="源IP地址"
+            width="140">
         </el-table-column>
 
         <el-table-column
             prop="dst"
-            label="目的IP地址">
+            label="目的IP地址"
+            width="140">
         </el-table-column>
 
         <el-table-column
             prop="dst_port"
-            label="目的端口">
+            label="目的端口"
+            width="85">
         </el-table-column>
+
+        <el-table-column
+            prop="access_proto"
+            label="访问协议"
+            width="85"
+            :formatter="protoFormat">
+        </el-table-column>
+
+        <el-table-column
+            prop="info"
+            label="详情">
+        </el-table-column>        
 
         <el-table-column
             prop="created_at"
             label="创建时间"
+            width="150"
             :formatter="tableDateFormat">
         </el-table-column>
 
         <el-table-column
             label="操作"
-            width="150">
+            width="100">
           <template slot-scope="scope">
             <el-popconfirm
                 class="m-left-10"
@@ -89,7 +100,7 @@ export default {
   mixins: [],
   created() {
     this.$emit('update:route_path', this.$route.path)
-    this.$emit('update:route_name', ['基础信息', 'IP审计'])
+    this.$emit('update:route_name', ['基础信息', '审计日志'])
   },
   mounted() {
     this.getData(1)
@@ -99,6 +110,7 @@ export default {
       tableData: [],
       count: 10,
       nowIndex: 0,
+      accessProtoArr:["", "UDP", "TCP", "HTTPS", "HTTP"], 
     }
   },
   methods: {
@@ -135,6 +147,16 @@ export default {
         this.$message.error('哦，请求出错');
         console.log(error);
       });
+    },
+    protoFormat(row) {
+        var access_proto = row.access_proto
+        if (row.access_proto == 0) {
+            switch (row.protocol) {
+                case 6: access_proto = 2; break;
+                case 17: access_proto = 1; break;
+            }
+        }
+        return this.accessProtoArr[access_proto]
     },
   },
 }

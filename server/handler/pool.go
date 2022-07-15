@@ -92,20 +92,20 @@ type BufferPool struct {
 	sync.Pool
 }
 
-// 长度 290 对象
-var byte290Pool = sync.Pool{
+// 长度 51 小对象
+var byte51Pool = sync.Pool{
 	New: func() interface{} {
-		b := make([]byte, 290)
+		b := make([]byte, 51)
 		return &b
 	},
 }
 
-func getByte290() *[]byte {
-	b := byte290Pool.Get().(*[]byte)
+func getByte51() *[]byte {
+	b := byte51Pool.Get().(*[]byte)
 	return b
 }
 
-func putByte290(b *[]byte) {
-	*b = (*b)[:290]
-	byte290Pool.Put(b)
+func putByte51(b *[]byte) {
+	*b = (*b)[:51]
+	byte51Pool.Put(b)
 }
