@@ -115,10 +115,11 @@ func logAudit(cSess *sessdata.ConnSession, pl *sessdata.Payload) {
 
 	ipProto := waterutil.IPv4Protocol(pl.Data)
 	// 访问协议
-	var accessProto uint8 = acc_proto_tcp
+	var accessProto uint8
 	// 只统计 tcp和udp 的访问
 	switch ipProto {
 	case waterutil.TCP:
+		accessProto = acc_proto_tcp
 	case waterutil.UDP:
 		accessProto = acc_proto_udp
 	default:
