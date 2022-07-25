@@ -12,7 +12,7 @@
         </el-form-item>
 
         <el-form-item label="用户名:">
-          <el-input size="small" v-model="searchData" placeholder="请输入内容"></el-input>
+          <el-input size="small" v-model="searchData" placeholder="请输入内容" @keydown.enter.native="searchEnterFun"></el-input>
         </el-form-item>
 
         <el-form-item>
@@ -25,7 +25,7 @@
           <el-button
               size="small"
               icon="el-icon-refresh"
-              @click="searchData=''">重置搜索
+              @click="reset">重置搜索
           </el-button>
         </el-form-item>
       </el-form>
@@ -401,7 +401,17 @@ export default {
     },
     resetForm(formName) {
       this.$refs[formName].resetFields();
-    }
+    },
+    searchEnterFun(e) {
+        var keyCode = window.event ? e.keyCode : e.which;
+        if (keyCode == 13) {
+            this.handleSearch()
+        }
+    }, 
+    reset() {
+        this.searchData = "";
+        this.handleSearch();
+    },       
   },
 }
 </script>
