@@ -7,6 +7,7 @@ require (
 	github.com/go-ldap/ldap v3.0.3+incompatible // indirect
 	github.com/go-ldap/ldap/v3 v3.4.3 // indirect
 	github.com/go-sql-driver/mysql v1.6.0
+	github.com/gocarina/gocsv v0.0.0-20220712153207-8b2118da4570 // indirect
 	github.com/golang-jwt/jwt/v4 v4.0.0
 	github.com/google/gopacket v1.1.19
 	github.com/gorilla/mux v1.8.0

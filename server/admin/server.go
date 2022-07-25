@@ -39,6 +39,7 @@ func StartAdmin() {
 	r.HandleFunc("/set/other/smtp", SetOtherSmtp)
 	r.HandleFunc("/set/other/smtp/edit", SetOtherSmtpEdit)
 	r.HandleFunc("/set/audit/list", SetAuditList)
+	r.HandleFunc("/set/audit/export", SetAuditExport)
 
 	r.HandleFunc("/user/list", UserList)
 	r.HandleFunc("/user/detail", UserDetail)

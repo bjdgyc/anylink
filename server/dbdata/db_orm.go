@@ -3,6 +3,8 @@ package dbdata
 import (
 	"errors"
 	"reflect"
+
+	"xorm.io/xorm"
 )
 
 const PageSize = 10
@@ -81,4 +83,13 @@ func Prefix(fieldName string, prefix string, data interface{}, limit, page int) 
 
 	start := (page - 1) * limit
 	return where.Limit(limit, start).Find(data)
+}
+
+func FindAndCount(session *xorm.Session, data interface{}, limit, page int) (int64, error) {
+	if limit == 0 {
+		return session.FindAndCount(data)
+	}
+	start := (page - 1) * limit
+	totalCount, err := session.Limit(limit, start).FindAndCount(data)
+	return totalCount, err
 }

@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/bjdgyc/anylink/dbdata"
+	"github.com/gocarina/gocsv"
 )
 
 func SetAuditList(w http.ResponseWriter, r *http.Request) {
@@ -14,15 +15,13 @@ func SetAuditList(w http.ResponseWriter, r *http.Request) {
 	if page < 1 {
 		page = 1
 	}
-
 	var datas []dbdata.AccessAudit
-	count := dbdata.CountAll(&dbdata.AccessAudit{})
-	err := dbdata.Find(&datas, dbdata.PageSize, page)
+	session := dbdata.GetAuditSession(r.FormValue("search"))
+	count, err := dbdata.FindAndCount(session, &datas, dbdata.PageSize, page)
 	if err != nil && !dbdata.CheckErrNotFound(err) {
 		RespError(w, RespInternalErr, err)
 		return
 	}
-
 	data := map[string]interface{}{
 		"count":     count,
 		"page_size": dbdata.PageSize,
@@ -30,4 +29,25 @@ func SetAuditList(w http.ResponseWriter, r *http.Request) {
 	}
 
 	RespSucess(w, data)
+}
+
+func SetAuditExport(w http.ResponseWriter, r *http.Request) {
+	var datas []dbdata.AccessAudit
+	maxNum := 1000000
+	session := dbdata.GetAuditSession(r.FormValue("search"))
+	count, err := dbdata.FindAndCount(session, &datas, maxNum, 0)
+	if err != nil && !dbdata.CheckErrNotFound(err) {
+		RespError(w, RespInternalErr, err)
+		return
+	}
+	if count == 0 {
+		RespError(w, RespParamErr, "你导出的总数量为0条，请调整搜索条件，再导出")
+		return
+	}
+	if count > int64(maxNum) {
+		RespError(w, RespParamErr, "你导出的数据量超过100万条，请调整搜索条件，再导出")
+		return
+	}
+	gocsv.Marshal(datas, w)
+
 }
