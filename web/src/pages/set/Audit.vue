@@ -48,6 +48,11 @@
               icon="el-icon-refresh"
               @click="rest">重置搜索
           </el-button>
+          <el-button
+              size="small"
+              icon="el-icon-download"
+              @click="handleExport">导出
+          </el-button>          
         </el-form-item>
         </div>
       </el-form>
@@ -55,6 +60,9 @@
       <el-table
           ref="multipleTable"
           :data="tableData"
+          v-loading="loading"
+          element-loading-text="玩命搜索中"
+          element-loading-spinner="el-icon-loading"
           border>
 
         <el-table-column
@@ -171,6 +179,7 @@ export default {
             { text: 'HTTPS', value: '3' },
             { text: 'HTTP', value: '4' },
       ],
+      loading: false,
       rules: {
         username: [
           {max: 30, message: '长度小于 30 个字符', trigger: 'blur'}
@@ -204,6 +213,7 @@ export default {
         }
     },        
     getData(p) {
+      this.loading = true
       if (! this.searchForm.date) {
         this.searchForm.date = ["", ""];
       }        
@@ -217,6 +227,7 @@ export default {
         console.log(data);
         this.tableData = data.datas;
         this.count = data.count
+        this.loading = false
       }).catch(error => {
         this.$message.error('哦，请求出错');
         console.log(error);
@@ -241,6 +252,45 @@ export default {
         console.log(error);
       });
     },
+    handleExport() {
+      if (! this.searchForm.date) {
+        this.searchForm.date = ["", ""];
+      }
+      const exporting = this.$loading({
+            lock: true,
+            text: '玩命导出中，请稍等片刻...',
+            spinner: 'el-icon-loading',
+            background: 'rgba(0, 0, 0, 0.7)'
+      });
+      axios.get('/set/audit/export', {
+        params: {
+          search: this.searchForm,
+        }
+      }).then(resp => {
+        var rdata = resp.data
+        if (rdata.code && rdata.code != 0) {
+            exporting.close();
+            this.$message.error(rdata.msg);
+            return ;
+        }
+        exporting.close();
+        this.$message.success("成功导出CSV文件")
+        let csvData = 'data:text/csv;charset=utf-8,\uFEFF' + rdata
+        this.createDownLoadClick(csvData, `anylink_audit_log_` + Date.parse(new Date()) + `.csv`)
+      }).catch(error => {
+        exporting.close();
+        this.$message.error('哦，请求出错');
+        console.log(error);
+      });
+    },
+    createDownLoadClick(content, fileName) {
+        const link = document.createElement('a')
+        link.href = encodeURI(content)
+        link.download = fileName
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+    },    
     protoFormat(row) {
         var access_proto = row.access_proto
         if (row.access_proto == 0) {
