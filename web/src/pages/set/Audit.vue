@@ -61,7 +61,7 @@
           ref="multipleTable"
           :data="tableData"
           v-loading="loading"
-          element-loading-text="玩命搜索中"
+          element-loading-text="玩命加载中"
           element-loading-spinner="el-icon-loading"
           border>
 
@@ -179,6 +179,7 @@ export default {
             { text: 'HTTPS', value: '3' },
             { text: 'HTTP', value: '4' },
       ],
+      maxExportNum: 1000000,
       loading: false,
       rules: {
         username: [
@@ -253,6 +254,13 @@ export default {
       });
     },
     handleExport() {
+      if (this.count > this.maxExportNum) {
+        var formatNum = (this.maxExportNum + "").replace(/\d{1,3}(?=(\d{3})+$)/g,function(s){
+           return s+','
+        })
+        this.$message.error("你导出的数据量超过" + formatNum + "条，请调整搜索条件，再导出");
+        return ;
+      }
       if (! this.searchForm.date) {
         this.searchForm.date = ["", ""];
       }
