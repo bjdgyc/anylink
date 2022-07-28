@@ -66,8 +66,8 @@ type AccessAudit struct {
 	SrcPort     uint16    `json:"src_port" xorm:"not null"`
 	Dst         string    `json:"dst" xorm:"varchar(60) not null"`
 	DstPort     uint16    `json:"dst_port" xorm:"not null"`
-	AccessProto uint8     `json:"access_proto" xorm:"not null"`      // 访问协议
-	Info        string    `json:"info" xorm:"varchar(255) not null"` // 详情
+	AccessProto uint8     `json:"access_proto" xorm:"not null default 0 Int(10)"` // 访问协议
+	Info        string    `json:"info" xorm:"varchar(255) not null"`              // 详情
 	CreatedAt   time.Time `json:"created_at" xorm:"DateTime"`
 }
 
