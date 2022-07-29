@@ -46,6 +46,7 @@ var configs = []config{
 	{Typ: cfgStr, Name: "ipv4_start", Usage: "IPV4开始地址", ValStr: "192.168.10.100"},
 	{Typ: cfgStr, Name: "ipv4_end", Usage: "IPV4结束", ValStr: "192.168.10.200"},
 	{Typ: cfgStr, Name: "default_group", Usage: "默认用户组", ValStr: "one"},
+	{Typ: cfgStr, Name: "default_domain", Usage: "要发布的默认域", ValStr: ""},
 
 	{Typ: cfgInt, Name: "ip_lease", Usage: "IP租期(秒)", ValInt: 1209600},
 	{Typ: cfgInt, Name: "max_client", Usage: "最大用户连接", ValInt: 100},
