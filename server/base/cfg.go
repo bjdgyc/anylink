@@ -67,6 +67,7 @@ type ServerConfig struct {
 	MobileKeepalive int    `json:"mobile_keepalive"`
 	MobileDpd       int    `json:"mobile_dpd"`
 	Mtu             int    `json:"mtu"`
+	DefaultDomain   string `json:"default_domain"`
 
 	SessionTimeout int `json:"session_timeout"` // in seconds
 	// AuthTimeout    int `json:"auth_timeout"`    // in seconds

@@ -64,6 +64,10 @@ mobile_dpd = 50
 #设置最大传输单元
 mtu = 1460
 
+# 要发布的默认域
+default_domain = "example.com"
+#default_domain = "example.com abc.example.com"
+
 #session过期时间，用于断线重连，0永不过期
 session_timeout = 3600
 auth_timeout = 0
