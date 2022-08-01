@@ -44,8 +44,7 @@ func (m *ConcurrentMap) Set(key string, value interface{}) {
 }
 
 func (m *ConcurrentMap) Get(key string) (interface{}, bool) {
-	v, ok := m.m.Get(key)
-	return v, ok
+	return m.m.Get(key)
 }
 
 func (m *ConcurrentMap) Del(key string) {
@@ -63,21 +62,21 @@ type RWLockMap struct {
 
 func (m *RWLockMap) Set(key string, value interface{}) {
 	m.lock.Lock()
+	defer m.lock.Unlock()
 	m.m[key] = value
-	m.lock.Unlock()
 }
 
 func (m *RWLockMap) Get(key string) (interface{}, bool) {
 	m.lock.RLock()
+	defer m.lock.RUnlock()
 	v, ok := m.m[key]
-	m.lock.RUnlock()
 	return v, ok
 }
 
 func (m *RWLockMap) Del(key string) {
 	m.lock.Lock()
+	defer m.lock.Unlock()
 	delete(m.m, key)
-	m.lock.Unlock()
 }
 
 /**

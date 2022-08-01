@@ -15,42 +15,22 @@ const (
 
 func TestMaps(t *testing.T) {
 	assert := assert.New(t)
-	var v interface{}
 	var ipAuditMap IMaps
 	key := "one"
 	value := 100
 
-	ipAuditMap = NewMap("", 512)
-	ipAuditMap.Set(key, value)
-	v, _ = ipAuditMap.Get(key)
-	assert.Equal(v.(int), value)
-	ipAuditMap.Del(key)
-	v, _ = ipAuditMap.Get(key)
-	assert.Nil(v)
-
-	ipAuditMap = NewMap("cmap", 0)
-	ipAuditMap.Set(key, value)
-	v, _ = ipAuditMap.Get(key)
-	assert.Equal(v.(int), value)
-	ipAuditMap.Del(key)
-	v, _ = ipAuditMap.Get(key)
-	assert.Nil(v)
-
-	ipAuditMap = NewMap("rwmap", 512)
-	ipAuditMap.Set(key, value)
-	v, _ = ipAuditMap.Get(key)
-	assert.Equal(v.(int), value)
-	ipAuditMap.Del(key)
-	v, _ = ipAuditMap.Get(key)
-	assert.Nil(v)
-
-	ipAuditMap = NewMap("syncmap", 0)
-	ipAuditMap.Set(key, value)
-	v, _ = ipAuditMap.Get(key)
-	assert.Equal(v.(int), value)
-	ipAuditMap.Del(key)
-	v, _ = ipAuditMap.Get(key)
-	assert.Nil(v)
+	testMapData := map[string]int{"basemap": 512, "cmap": 0, "rwmap": 512, "syncmap": 0}
+	for name, len := range testMapData {
+		ipAuditMap = NewMap(name, len)
+		ipAuditMap.Set(key, value)
+		v, ok := ipAuditMap.Get(key)
+		assert.Equal(v.(int), value)
+		assert.True(ok)
+		ipAuditMap.Del(key)
+		v, ok = ipAuditMap.Get(key)
+		assert.Nil(v)
+		assert.False(ok)
+	}
 }
 
 func benchmarkMap(b *testing.B, hm IMaps) {
