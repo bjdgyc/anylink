@@ -13,6 +13,7 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/lib/pq v1.10.2
 	github.com/mattn/go-sqlite3 v1.14.8
+	github.com/orcaman/concurrent-map v1.0.0 // indirect
 	github.com/pion/dtls/v2 v2.0.9
 	github.com/pion/logging v0.2.2
 	github.com/shirou/gopsutil v3.21.7+incompatible
