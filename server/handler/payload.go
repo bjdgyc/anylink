@@ -149,14 +149,14 @@ func logAudit(cSess *sessdata.ConnSession, pl *sessdata.Payload) {
 	nu := utils.NowSec().Unix()
 
 	// 判断已经存在，并且没有过期
-	v, ok := cSess.IpAuditMap[s]
-	if ok && nu-v < int64(base.Cfg.AuditInterval) {
+	v, ok := cSess.IpAuditMap.Get(s)
+	if ok && nu-v.(int64) < int64(base.Cfg.AuditInterval) {
 		// 回收byte对象
 		putByte51(b)
 		return
 	}
 
-	cSess.IpAuditMap[s] = nu
+	cSess.IpAuditMap.Set(s, nu)
 
 	audit := dbdata.AccessAudit{
 		Username:    cSess.Sess.Username,

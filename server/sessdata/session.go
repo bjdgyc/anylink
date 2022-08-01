@@ -13,6 +13,7 @@ import (
 
 	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/dbdata"
+	"github.com/bjdgyc/anylink/pkg/utils"
 )
 
 var (
@@ -46,9 +47,9 @@ type ConnSession struct {
 	closeOnce           sync.Once
 	CloseChan           chan struct{}
 	PayloadIn           chan *Payload
-	PayloadOutCstp      chan *Payload    // Cstp的数据
-	PayloadOutDtls      chan *Payload    // Dtls的数据
-	IpAuditMap          map[string]int64 // 审计的ip数据
+	PayloadOutCstp      chan *Payload // Cstp的数据
+	PayloadOutDtls      chan *Payload // Dtls的数据
+	IpAuditMap          utils.IMaps   // 审计的ip数据
 
 	// dSess *DtlsSession
 	dSess *atomic.Value
@@ -191,7 +192,11 @@ func (s *Session) NewConn() *ConnSession {
 
 	// ip 审计
 	if base.Cfg.AuditInterval >= 0 {
-		cSess.IpAuditMap = make(map[string]int64, 512)
+		if base.Cfg.ServerDTLS {
+			cSess.IpAuditMap = utils.NewMap("cmap", 0)
+		} else {
+			cSess.IpAuditMap = utils.NewMap("", 512)
+		}
 	}
 
 	dSess := &DtlsSession{
