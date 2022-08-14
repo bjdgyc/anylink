@@ -2,7 +2,7 @@
   <div class="home">
     <el-row :gutter="40" class="panel-group">
       <el-col :span="6" class="card-panel-col">
-        <div class="card-panel">
+        <div class="card-panel" v-on:click="jump('/admin/user/online')">
           <i class="el-icon-user-solid" style="font-size:50px;color: #f4516c;"></i>
           <div class="card-panel-description">
             <div class="card-panel-text">在线数</div>
@@ -12,7 +12,7 @@
       </el-col>
 
       <el-col :span="6" class="card-panel-col">
-        <div class="card-panel">
+        <div class="card-panel" v-on:click="jump('/admin/user/list')">
           <i class="el-icon-user-solid" style="font-size:50px;color: #36a3f7"></i>
           <div class="card-panel-description">
             <div class="card-panel-text">用户数</div>
@@ -22,7 +22,7 @@
       </el-col>
 
       <el-col :span="6" class="card-panel-col">
-        <div class="card-panel">
+        <div class="card-panel" v-on:click="jump('/admin/group/list')">
           <i class="el-icon-wallet" style="font-size:50px;color:#34bfa3"></i>
           <div class="card-panel-description">
             <div class="card-panel-text">用户组数</div>
@@ -32,7 +32,7 @@
       </el-col>
 
       <el-col :span="6" class="card-panel-col">
-        <div class="card-panel">
+        <div class="card-panel" v-on:click="jump('/admin/user/ip_map')">
           <i class="el-icon-s-order" style="font-size:50px;color:#40c9c6"></i>
           <div class="card-panel-description">
             <div class="card-panel-text">IP映射数</div>
@@ -114,6 +114,9 @@ export default {
         console.log(error);
       });
     },
+    jump(path) {
+        this.$router.push(path);
+    },    
   },
 }
 </script>
@@ -130,6 +133,11 @@ export default {
   /*box-shadow: 4px 4px 40px rgba(0, 0, 0, .05);*/
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, .12), 0 0 3px 0 rgba(0, 0, 0, .04);
   border-color: rgba(0, 0, 0, .05);
+}
+
+.card-panel:hover {
+    box-shadow: 0 3px 5px 2px rgba(0, 0, 0, .12), 0 0 5px 0 rgba(0, 0, 0, .04);
+    cursor:pointer;
 }
 
 .card-panel-description {
