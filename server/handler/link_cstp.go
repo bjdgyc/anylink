@@ -67,6 +67,11 @@ func LinkCstp(conn net.Conn, bufRW *bufio.ReadWriter, cSess *sessdata.ConnSessio
 		case 0x00: // DATA
 			// 获取数据长度
 			dataLen = binary.BigEndian.Uint16(pl.Data[4:6]) // 4,5
+			// 修复 cstp 数据长度溢出报错
+			if 8+dataLen > BufferSize {
+				base.Error("recv error dataLen", dataLen)
+				continue
+			}
 			// 去除数据头
 			copy(pl.Data, pl.Data[8:8+dataLen])
 			// 更新切片长度
