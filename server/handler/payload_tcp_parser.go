@@ -17,6 +17,9 @@ var (
 )
 
 func onTCP(payload []byte) (uint8, string) {
+	if len(payload) < 13 {
+		return acc_proto_tcp, ""
+	}	
 	ihl := (payload[12] & 0xf0) >> 2
 	data := payload[ihl:]
 	for _, parser := range tcpParsers {
