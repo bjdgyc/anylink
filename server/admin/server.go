@@ -8,6 +8,7 @@ import (
 	"net/http/pprof"
 
 	"github.com/bjdgyc/anylink/base"
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
 
@@ -18,6 +19,7 @@ func StartAdmin() {
 
 	r := mux.NewRouter()
 	r.Use(authMiddleware)
+	r.Use(handlers.CompressHandler)
 
 	// 监控检测
 	r.HandleFunc("/status.html", func(w http.ResponseWriter, r *http.Request) {
@@ -63,6 +65,8 @@ func StartAdmin() {
 	r.HandleFunc("/group/detail", GroupDetail)
 	r.HandleFunc("/group/set", GroupSet)
 	r.HandleFunc("/group/del", GroupDel)
+
+	r.HandleFunc("/statsinfo/list", StatsInfoList)
 
 	// pprof
 	if base.Cfg.Pprof {

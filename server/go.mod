@@ -4,16 +4,16 @@ go 1.16
 
 require (
 	github.com/StackExchange/wmi v1.2.1 // indirect
-	github.com/go-ldap/ldap v3.0.3+incompatible // indirect
-	github.com/go-ldap/ldap/v3 v3.4.3 // indirect
+	github.com/go-ldap/ldap v3.0.3+incompatible
 	github.com/go-sql-driver/mysql v1.6.0
-	github.com/gocarina/gocsv v0.0.0-20220712153207-8b2118da4570 // indirect
+	github.com/gocarina/gocsv v0.0.0-20220712153207-8b2118da4570
 	github.com/golang-jwt/jwt/v4 v4.0.0
 	github.com/google/gopacket v1.1.19
+	github.com/gorilla/handlers v1.5.1
 	github.com/gorilla/mux v1.8.0
 	github.com/lib/pq v1.10.2
 	github.com/mattn/go-sqlite3 v1.14.8
-	github.com/orcaman/concurrent-map v1.0.0 // indirect
+	github.com/orcaman/concurrent-map v1.0.0
 	github.com/pion/dtls/v2 v2.0.9
 	github.com/pion/logging v0.2.2
 	github.com/shirou/gopsutil v3.21.7+incompatible

@@ -70,6 +70,15 @@ func Find(data interface{}, limit, page int) error {
 	return xdb.Limit(limit, start).Find(data)
 }
 
+func FindWhere(data interface{}, limit int, page int, where string, args ...interface{}) error {
+	if limit == 0 {
+		return xdb.Where(where, args...).Find(data)
+	}
+
+	start := (page - 1) * limit
+	return xdb.Where(where, args...).Limit(limit, start).Find(data)
+}
+
 func CountPrefix(fieldName string, prefix string, data interface{}) int {
 	n, _ := xdb.Where(fieldName+" like ?", prefix+"%").Count(data)
 	return int(n)

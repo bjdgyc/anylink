@@ -39,18 +39,63 @@
             <countTo :startVal='0' :endVal='counts.ip_map' :duration='2000' class="panel-num"></countTo>
           </div>
         </div>
-      </el-col>
+      </el-col>    
 
     </el-row>
 
-    <el-row class="line-chart">
-      <LineChart :chart-data="lineChartUser"/>
+    <el-row class="line-chart-box" gutter="20">
+        <el-col :span="12" class="line-chart-col">            
+            <LineChart :chart-data="lineChart.online"/>
+            <div class="time-range">
+                <el-radio-group v-model="lineChartScope.online" size="mini" @change="((label)=>{lineChartScopeChange('online', label)})">
+                    <el-radio-button label="rt" >实时</el-radio-button>
+                    <el-radio-button label="1h">1小时</el-radio-button>
+                    <el-radio-button label="24h">24小时</el-radio-button>
+                    <el-radio-button label="7d">7天</el-radio-button>
+                    <el-radio-button label="30d">30天</el-radio-button>
+                </el-radio-group>
+            </div>
+        </el-col>
+        <el-col :span="12" class="line-chart-col">
+            <LineChart :chart-data="lineChart.network"/>
+            <div class="time-range">
+                <el-radio-group v-model="lineChartScope.network" size="mini" @change="((label)=>{lineChartScopeChange('network', label)})">
+                    <el-radio-button label="rt" >实时</el-radio-button>
+                    <el-radio-button label="1h">1小时</el-radio-button>
+                    <el-radio-button label="24h">24小时</el-radio-button>
+                    <el-radio-button label="7d">7天</el-radio-button>
+                    <el-radio-button label="30d">30天</el-radio-button>
+                </el-radio-group>
+            </div>            
+        </el-col>
     </el-row>
 
-    <el-row class="line-chart">
-      <LineChart :chart-data="lineChartOrder"/>
-    </el-row>
-
+    <el-row class="line-chart-box" gutter="20">
+        <el-col :span="12" class="line-chart-col">            
+            <LineChart :chart-data="lineChart.cpu"/>
+            <div class="time-range">
+                <el-radio-group v-model="lineChartScope.cpu" size="mini" @change="((label)=>{lineChartScopeChange('cpu', label)})">
+                    <el-radio-button label="rt" >实时</el-radio-button>
+                    <el-radio-button label="1h">1小时</el-radio-button>
+                    <el-radio-button label="24h">24小时</el-radio-button>
+                    <el-radio-button label="7d">7天</el-radio-button>
+                    <el-radio-button label="30d">30天</el-radio-button>
+                </el-radio-group>
+            </div>
+        </el-col>
+        <el-col :span="12" class="line-chart-col">
+            <LineChart :chart-data="lineChart.mem"/>
+            <div class="time-range">
+                <el-radio-group v-model="lineChartScope.mem" size="mini" @change="((label)=>{lineChartScopeChange('mem', label)})">
+                    <el-radio-button label="rt" >实时</el-radio-button>
+                    <el-radio-button label="1h">1小时</el-radio-button>
+                    <el-radio-button label="24h">24小时</el-radio-button>
+                    <el-radio-button label="7d">7天</el-radio-button>
+                    <el-radio-button label="30d">30天</el-radio-button>
+                </el-radio-group>
+            </div>            
+        </el-col>
+    </el-row>    
   </div>
 </template>
 
@@ -59,24 +104,6 @@
 import countTo from 'vue-count-to';
 import LineChart from "@/components/LineChart";
 import axios from "axios";
-
-const lineChartUser = {
-  title: '每日在线统计',
-  xname: ['2019-12-13', '2019-12-14', '2019-12-15', '2019-12-16', '2019-12-17', '2019-12-18', '2019-12-19'],
-  xdata: {
-    'test1': [10, 120, 11, 134, 105, 10, 15],
-    'test2': [10, 82, 91, 14, 162, 10, 15]
-  }
-}
-
-const lineChartOrder = {
-  title: '每日流量统计',
-  xname: ['2019-12-13', '2019-12-14', '2019-12-15', '2019-12-16', '2019-12-17', '2019-12-18', '2019-12-19'],
-  xdata: {
-    'test1': [100, 120, 161, 134, 105, 160, 165],
-    'test2': [120, 82, 91, 154, 162, 140, 145]
-  }
-}
 
 export default {
   name: "Home",
@@ -92,8 +119,48 @@ export default {
         group: 0,
         ip_map: 0,
       },
-      lineChartUser: lineChartUser,
-      lineChartOrder: lineChartOrder,
+      lineChart: {
+        online: {
+            title: '用户在线数',
+            xname: [],
+            xdata: {
+                '在线人数': [],
+            },
+            yminInterval: 1,
+            yname:"人数"
+        },
+        network: {
+            title: '网络吞吐量',
+            xname: [],
+            xdata: {
+                '下行流量': [],
+                '上行流量': [],                
+            },
+            yname:"Mbps"
+        },
+        cpu: {
+            title: 'CPU占用比例',
+            xname: [],
+            xdata: {
+                'CPU': [],
+            },
+            yname:"%"
+        },
+        mem: {
+                title: '内存占用比例',
+                xname: [],
+                xdata: {
+                    '内存': [],
+                },
+                yname:"%"
+        }
+      },
+      lineChartScope : { 
+            online: "rt",
+            network : "rt",
+            cpu : "rt",
+            mem : "rt"  
+      },   
     }
   },
   created() {
@@ -102,6 +169,13 @@ export default {
   },
   mounted() {
     this.getData()
+    this.getAllStats() 
+    const chartsTimer = setInterval(() => {
+        this.getAllStats()                                      
+    }, 5000);
+    this.$once('hook:beforeDestroy', () => {
+      clearInterval(chartsTimer);
+    })    
   },
   methods: {
     getData() {
@@ -114,9 +188,108 @@ export default {
         console.log(error);
       });
     },
+    getAllStats() {
+        for (var action in this.lineChartScope){
+           if (this.lineChartScope[action] == "rt") {
+               this.getStatsData(action);
+           }
+        }   
+    },
+    getStatsData(action, scope) {
+        if (!scope) {
+            scope = "rt"
+        }
+        let getData = {params:{"action": action, "scope": scope}}
+        axios.get('/statsinfo/list', getData).then(resp => {
+            var data = resp.data.data
+            if (! data.datas) return ;
+            data.action = action
+            data.scope = scope
+            switch(action) {
+                case "online": this.formatOnline(data); break;
+                case "network": this.formatNetwork(data); break;
+                case "cpu": this.formatCpu(data); break;
+                case "mem": this.formatMem(data); break;
+            }
+        }).catch(error => {
+            this.$message.error('哦，请求出错');
+            console.log(error);
+        });
+    },
+    formatOnline(data) {
+        let timeFormat = data.scope == "rt" || data.scope == "1h" || data.scope == "24h" ? "h:i:s" : "m/d h:i:s"
+        let datas = data.datas
+        this.lineChart.online.xname = []
+        this.lineChart.online.xdata["在线人数"] = []
+        for(var i=0; i<datas.length;i++){
+            this.lineChart.online.xname[i] = this.dateFormat(datas[i].created_at, timeFormat)
+            this.lineChart.online.xdata["在线人数"][i] = datas[i].num
+        }
+        // 实时更新在线数
+        if (data.scope == "rt") {
+            this.counts.online = datas[datas.length - 1].num
+        }
+    },    
+    formatNetwork(data) {
+        let timeFormat = data.scope == "rt" || data.scope == "1h" || data.scope == "24h" ? "h:i:s" : "m/d h:i:s"
+        let datas = data.datas
+        this.lineChart.network.xname = []
+        this.lineChart.network.xdata["上行流量"] = []
+        this.lineChart.network.xdata["下行流量"] = []
+        for(var i=0; i<datas.length;i++){
+            this.lineChart.network.xname[i] = this.dateFormat(datas[i].created_at, timeFormat)
+            this.lineChart.network.xdata["上行流量"][i] = this.toMbps(datas[i].up)
+            this.lineChart.network.xdata["下行流量"][i] = this.toMbps(datas[i].down)
+        }
+    },
+    formatCpu(data) {
+        let timeFormat = data.scope == "rt" || data.scope == "1h" || data.scope == "24h" ? "h:i:s" : "m/d h:i:s"
+        let datas = data.datas
+        this.lineChart.cpu.xname = []
+        this.lineChart.cpu.xdata["CPU"] = []        
+        for(var i=0; i<datas.length;i++){
+            this.lineChart.cpu.xname[i] = this.dateFormat(datas[i].created_at, timeFormat)
+            this.lineChart.cpu.xdata["CPU"][i] = this.toDecimal(datas[i].percent)
+        }
+    }, 
+    formatMem(data) {
+        let timeFormat = data.scope == "rt" || data.scope == "1h" || data.scope == "24h" ? "h:i:s" : "m/d h:i:s"
+        let datas = data.datas
+        this.lineChart.mem.xname = []
+        this.lineChart.mem.xdata["内存"] = []        
+        for(var i=0; i<datas.length;i++){
+            this.lineChart.mem.xname[i] = this.dateFormat(datas[i].created_at, timeFormat)
+            this.lineChart.mem.xdata["内存"][i] = this.toDecimal(datas[i].percent)
+        }
+    },        
+    toMbps(bytes) {
+        if (bytes == 0) return 0
+        return (bytes / Math.pow(1024, 2) * 8).toFixed(2) * 1
+    },
+    toDecimal(f) {
+        return Math.floor(f * 100) / 100
+    },
+    lineChartScopeChange(action, label) {
+        this.lineChartScope[action] = label;
+        this.getStatsData(action, label);  
+    },     
+    dateFormat(p, format) {
+        var da = new Date(p);
+        var year = da.getFullYear();
+        var month = da.getMonth() + 1;
+        var dt = da.getDate();
+        var h = ('0'+da.getHours()).slice(-2);
+        var m = ('0'+da.getMinutes()).slice(-2)
+        var s = ('0'+da.getSeconds()).slice(-2);
+        switch (format) {
+            case "h:i:s":  return h + ':' + m + ':' + s;
+            case "m/d h:i:s":  return month + '/' + dt + ' ' + h + ':' + m + ':' + s;
+        }
+        return year + '-' + month + '-' + dt + ' ' + h + ':' + m + ':' + s;
+    },    
     jump(path) {
         this.$router.push(path);
-    },    
+    },
   },
 }
 </script>
@@ -124,6 +297,7 @@ export default {
 <style scoped>
 .card-panel {
   display: flex;
+  border-radius: 12px;
   justify-content: space-around;
   border: 1px solid red;
   padding: 30px 0;
@@ -158,11 +332,26 @@ export default {
   font-weight: 700;
 }
 
+.line-chart-box {
+  padding: 0px 0px;
+  margin-top: 10px; 
+}
+
+.line-chart-col {
+    position: relative;
+}
+
 .line-chart {
+  border-radius: 12px;
   background: #fff;
-  padding: 0 16px;
-  margin-top: 40px;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, .12), 0 0 3px 0 rgba(0, 0, 0, .04);
   border-color: rgba(0, 0, 0, .05);
+  padding:5px 5px;
+}
+
+.time-range {
+    position: absolute;
+    right: 5px;
+    top: 10px;
 }
 </style>
