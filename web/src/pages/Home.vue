@@ -217,51 +217,62 @@ export default {
         });
     },
     formatOnline(data) {
-        let timeFormat = data.scope == "rt" || data.scope == "1h" || data.scope == "24h" ? "h:i:s" : "m/d h:i:s"
-        let datas = data.datas
-        this.lineChart.online.xname = []
-        this.lineChart.online.xdata["在线人数"] = []
+        let timeFormat = this.getTimeFormat(data.scope)
+        let chartData = this.lineChart[data.action]
+        let datas = data.datas        
+        chartData.xname = []
+        chartData.xdata["在线人数"] = []
         for(var i=0; i<datas.length;i++){
-            this.lineChart.online.xname[i] = this.dateFormat(datas[i].created_at, timeFormat)
-            this.lineChart.online.xdata["在线人数"][i] = datas[i].num
+            chartData.xname[i] = this.dateFormat(datas[i].created_at, timeFormat)
+            chartData.xdata["在线人数"][i] = datas[i].num
         }
         // 实时更新在线数
         if (data.scope == "rt") {
             this.counts.online = datas[datas.length - 1].num
         }
+        this.lineChart[data.action] = chartData
     },    
     formatNetwork(data) {
-        let timeFormat = data.scope == "rt" || data.scope == "1h" || data.scope == "24h" ? "h:i:s" : "m/d h:i:s"
-        let datas = data.datas
-        this.lineChart.network.xname = []
-        this.lineChart.network.xdata["上行流量"] = []
-        this.lineChart.network.xdata["下行流量"] = []
+        let timeFormat = this.getTimeFormat(data.scope)
+        let chartData = this.lineChart[data.action]
+        let datas = data.datas        
+        chartData.xname = []
+        chartData.xdata["上行流量"] = []
+        chartData.xdata["下行流量"] = []
         for(var i=0; i<datas.length;i++){
-            this.lineChart.network.xname[i] = this.dateFormat(datas[i].created_at, timeFormat)
-            this.lineChart.network.xdata["上行流量"][i] = this.toMbps(datas[i].up)
-            this.lineChart.network.xdata["下行流量"][i] = this.toMbps(datas[i].down)
+            chartData.xname[i] = this.dateFormat(datas[i].created_at, timeFormat)
+            chartData.xdata["上行流量"][i] = this.toMbps(datas[i].up)
+            chartData.xdata["下行流量"][i] = this.toMbps(datas[i].down)
         }
+        this.lineChart[data.action] = chartData
     },
     formatCpu(data) {
-        let timeFormat = data.scope == "rt" || data.scope == "1h" || data.scope == "24h" ? "h:i:s" : "m/d h:i:s"
-        let datas = data.datas
-        this.lineChart.cpu.xname = []
-        this.lineChart.cpu.xdata["CPU"] = []        
+        let timeFormat = this.getTimeFormat(data.scope)
+        let chartData = this.lineChart[data.action]
+        let datas = data.datas        
+        chartData.xname = []
+        chartData.xdata["CPU"] = []        
         for(var i=0; i<datas.length;i++){
-            this.lineChart.cpu.xname[i] = this.dateFormat(datas[i].created_at, timeFormat)
-            this.lineChart.cpu.xdata["CPU"][i] = this.toDecimal(datas[i].percent)
+            chartData.xname[i] = this.dateFormat(datas[i].created_at, timeFormat)
+            chartData.xdata["CPU"][i] = this.toDecimal(datas[i].percent)
         }
+        this.lineChart[data.action] = chartData
     }, 
     formatMem(data) {
-        let timeFormat = data.scope == "rt" || data.scope == "1h" || data.scope == "24h" ? "h:i:s" : "m/d h:i:s"
-        let datas = data.datas
-        this.lineChart.mem.xname = []
-        this.lineChart.mem.xdata["内存"] = []        
+        let timeFormat = this.getTimeFormat(data.scope)
+        let chartData = this.lineChart[data.action]
+        let datas = data.datas        
+        chartData.xname = []
+        chartData.xdata["内存"] = []        
         for(var i=0; i<datas.length;i++){
-            this.lineChart.mem.xname[i] = this.dateFormat(datas[i].created_at, timeFormat)
-            this.lineChart.mem.xdata["内存"][i] = this.toDecimal(datas[i].percent)
+            chartData.xname[i] = this.dateFormat(datas[i].created_at, timeFormat)
+            chartData.xdata["内存"][i] = this.toDecimal(datas[i].percent)
         }
-    },        
+        this.lineChart[data.action] = chartData
+    },  
+    getTimeFormat(scope) {
+        return (scope == "rt" || scope == "1h" || scope == "24h") ? "h:i:s" : "m/d h:i:s"
+    },   
     toMbps(bytes) {
         if (bytes == 0) return 0
         return (bytes / Math.pow(1024, 2) * 8).toFixed(2) * 1
