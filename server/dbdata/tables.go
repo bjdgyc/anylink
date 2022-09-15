@@ -84,3 +84,31 @@ type Policy struct {
 	CreatedAt        time.Time `json:"created_at" xorm:"DateTime created"`
 	UpdatedAt        time.Time `json:"updated_at" xorm:"DateTime updated"`
 }
+
+type StatsOnline struct {
+	Id        int       `json:"id" xorm:"pk autoincr not null"`
+	Num       int       `json:"num" xorm:"Int"`
+	NumGroups string    `json:"num_groups" xorm:"varchar(500) not null"`
+	CreatedAt time.Time `json:"created_at" xorm:"DateTime created index"`
+}
+
+type StatsNetwork struct {
+	Id         int       `json:"id" xorm:"pk autoincr not null"`
+	Up         uint32    `json:"up" xorm:"Int"`
+	Down       uint32    `json:"down" xorm:"Int"`
+	UpGroups   string    `json:"up_groups" xorm:"varchar(500) not null"`
+	DownGroups string    `json:"down_groups" xorm:"varchar(500) not null"`
+	CreatedAt  time.Time `json:"created_at" xorm:"DateTime created index"`
+}
+
+type StatsCpu struct {
+	Id        int       `json:"id" xorm:"pk autoincr not null"`
+	Percent   float64   `json:"percent" xorm:"Float"`
+	CreatedAt time.Time `json:"created_at" xorm:"DateTime created index"`
+}
+
+type StatsMem struct {
+	Id        int       `json:"id" xorm:"pk autoincr not null"`
+	Percent   float64   `json:"percent" xorm:"Float"`
+	CreatedAt time.Time `json:"created_at" xorm:"DateTime created index"`
+}
