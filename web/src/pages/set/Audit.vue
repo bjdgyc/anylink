@@ -66,16 +66,15 @@
           border>
 
         <el-table-column
-            sortable="true"
             prop="id"
             label="ID"
-            width="60">
+            width="100">
         </el-table-column>
 
         <el-table-column
             prop="username"
             label="用户名"
-            width="120">
+            width="140">
         </el-table-column>
 
         <el-table-column
@@ -99,7 +98,7 @@
         <el-table-column
             prop="access_proto"
             label="访问协议"
-            width="85"
+            width="80"
             :formatter="protoFormat">
         </el-table-column>
 
@@ -113,24 +112,6 @@
             label="创建时间"
             width="150"
             :formatter="tableDateFormat">
-        </el-table-column>
-
-        <el-table-column
-            label="操作"
-            width="100">
-          <template slot-scope="scope">
-            <el-popconfirm
-                class="m-left-10"
-                @confirm="handleDel(scope.row)"
-                title="确定要删除审计日志吗？">
-              <el-button
-                  slot="reference"
-                  size="mini"
-                  type="danger">删除
-              </el-button>
-            </el-popconfirm>
-
-          </template>
         </el-table-column>
       </el-table>
 
@@ -236,22 +217,6 @@ export default {
     },
     pageChange(p) {
       this.getData(p)
-    },
-
-    handleDel(row) {
-      axios.post('/set/audit/del?id=' + row.id).then(resp => {
-        var rdata = resp.data
-        if (rdata.code === 0) {
-          this.$message.success(rdata.msg);
-          this.getData(1);
-        } else {
-          this.$message.error(rdata.msg);
-        }
-        console.log(rdata);
-      }).catch(error => {
-        this.$message.error('哦，请求出错');
-        console.log(error);
-      });
     },
     handleExport() {
       if (this.count > this.maxExportNum) {
