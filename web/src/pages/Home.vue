@@ -306,12 +306,15 @@ export default {
 </script>
 
 <style scoped>
+.panel-group {
+    margin-bottom: 20px;
+}
 .card-panel {
   display: flex;
   border-radius: 12px;
   justify-content: space-around;
   border: 1px solid red;
-  padding: 30px 0;
+  padding: 20px 0;
 
   color: #666;
   background: #fff;
@@ -363,6 +366,6 @@ export default {
 .time-range {
     position: absolute;
     right: 5px;
-    top: 10px;
+    top: 5px;
 }
 </style>

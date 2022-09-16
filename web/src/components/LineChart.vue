@@ -29,8 +29,10 @@
     },
     mounted() {
       this.initChart()
+      window.addEventListener('resize', this.listenerResize)
     },
     beforeDestroy() {
+      window.removeEventListener('resize', this.listenerResize)
     },
     watch: {
         chartData:{
@@ -41,6 +43,9 @@
         }
     },
     methods: {
+      listenerResize() {
+        this.chart.resize()
+      },
       initChart() {
         this.chart = echarts.init(this.$el)
 
