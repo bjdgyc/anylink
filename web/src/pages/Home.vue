@@ -363,6 +363,6 @@ export default {
 .time-range {
     position: absolute;
     right: 5px;
-    top: 10px;
+    top: 5px;
 }
 </style>
