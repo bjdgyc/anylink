@@ -62,6 +62,7 @@ func StartAdmin() {
 
 	r.HandleFunc("/group/list", GroupList)
 	r.HandleFunc("/group/names", GroupNames)
+	r.HandleFunc("/group/names_ids", GroupNamesIds)
 	r.HandleFunc("/group/detail", GroupDetail)
 	r.HandleFunc("/group/set", GroupSet)
 	r.HandleFunc("/group/del", GroupDel)

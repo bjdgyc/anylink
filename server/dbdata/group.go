@@ -32,6 +32,11 @@ type ValData struct {
 	Note   string `json:"note"`
 }
 
+type GroupNameId struct {
+	Id   int    `json:"id"`
+	Name string `json:"name"`
+}
+
 // type Group struct {
 // 	Id               int                    `json:"id" xorm:"pk autoincr not null"`
 // 	Name             string                 `json:"name" xorm:"varchar(60) not null unique"`
@@ -60,6 +65,20 @@ func GetGroupNames() []string {
 	var names []string
 	for _, v := range datas {
 		names = append(names, v.Name)
+	}
+	return names
+}
+
+func GetGroupNamesIds() []GroupNameId {
+	var datas []Group
+	err := Find(&datas, 0, 0)
+	if err != nil {
+		base.Error(err)
+		return nil
+	}
+	var names []GroupNameId
+	for _, v := range datas {
+		names = append(names, GroupNameId{Id: v.Id, Name: v.Name})
 	}
 	return names
 }

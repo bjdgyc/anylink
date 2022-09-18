@@ -22,9 +22,9 @@ func saveStatsInfo() {
 		for range tick.C {
 			up := uint32(0)
 			down := uint32(0)
-			upGroups := make(map[string]uint32)
-			downGroups := make(map[string]uint32)
-			numGroups := make(map[string]int)
+			upGroups := make(map[int]uint32)
+			downGroups := make(map[int]uint32)
+			numGroups := make(map[int]int)
 			onlineNum := 0
 			sessMux.Lock()
 			for _, v := range sessions {
@@ -32,12 +32,16 @@ func saveStatsInfo() {
 				if v.IsActive {
 					// 在线人数
 					onlineNum += 1
-					numGroups[v.Group] += 1
+					numGroups[v.CSess.Group.Id] += 1
 					// 网络吞吐
 					userUp := atomic.LoadUint32(&v.CSess.BandwidthUpPeriod)
 					userDown := atomic.LoadUint32(&v.CSess.BandwidthDownPeriod)
-					upGroups[v.Group] += userUp
-					downGroups[v.Group] += userDown
+					if userUp > 0 {
+						upGroups[v.CSess.Group.Id] += userUp
+					}
+					if userDown > 0 {
+						downGroups[v.CSess.Group.Id] += userDown
+					}
 					up += userUp
 					down += userDown
 				}
