@@ -63,4 +63,10 @@ func TestGetGroupNames(t *testing.T) {
 	for _, v := range gs {
 		ast.Equal(true, utils.InArrStr(gAll, v))
 	}
+
+	gni := GetGroupNamesIds()
+	for _, v := range gni {
+		ast.NotEqual(0, v.Id)
+		ast.Equal(true, utils.InArrStr(gAll, v.Name))
+	}
 }

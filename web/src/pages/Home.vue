@@ -46,6 +46,12 @@
     <el-row class="line-chart-box" gutter="20">
         <el-col :span="12" class="line-chart-col">            
             <LineChart :chart-data="lineChart.online"/>
+            <div class="chart-group-name">
+                <el-select size="mini" v-model="lineChartGroup.online" @change="lineChartGroupChange('online')">
+                    <el-option v-for="(item,index) in groupNames" :key="index" :label="item.text" :value="item.value">
+                    </el-option>
+                </el-select> 
+            </div>           
             <div class="time-range">
                 <el-radio-group v-model="lineChartScope.online" size="mini" @change="((label)=>{lineChartScopeChange('online', label)})">
                     <el-radio-button label="rt" >实时</el-radio-button>
@@ -58,6 +64,12 @@
         </el-col>
         <el-col :span="12" class="line-chart-col">
             <LineChart :chart-data="lineChart.network"/>
+            <div class="chart-group-name">
+                <el-select size="mini" v-model="lineChartGroup.network" @change="lineChartGroupChange('network')">
+                    <el-option v-for="(item,index) in groupNames" :key="index" :label="item.text" :value="item.value">
+                    </el-option>
+                </el-select> 
+            </div>            
             <div class="time-range">
                 <el-radio-group v-model="lineChartScope.network" size="mini" @change="((label)=>{lineChartScopeChange('network', label)})">
                     <el-radio-button label="rt" >实时</el-radio-button>
@@ -119,6 +131,7 @@ export default {
         group: 0,
         ip_map: 0,
       },
+      groupNames:[],
       lineChart: {
         online: {
             title: '用户在线数',
@@ -160,7 +173,11 @@ export default {
             network : "rt",
             cpu : "rt",
             mem : "rt"  
-      },   
+      }, 
+      lineChartGroup : {
+            online: "",
+            network: "",
+      }  
     }
   },
   created() {
@@ -169,6 +186,7 @@ export default {
   },
   mounted() {
     this.getData()
+    this.getGroups()
     this.getAllStats() 
     const chartsTimer = setInterval(() => {
         this.getAllStats()                                      
@@ -219,15 +237,22 @@ export default {
     formatOnline(data) {
         let timeFormat = this.getTimeFormat(data.scope)
         let chartData = this.lineChart[data.action]
-        let datas = data.datas        
+        let chooseGroup = this.lineChartGroup[data.action]
+        let datas = data.datas
+        let xnum = 0     
         chartData.xname = []
         chartData.xdata["在线人数"] = []
         for(var i=0; i<datas.length;i++){
-            chartData.xname[i] = this.dateFormat(datas[i].created_at, timeFormat)
-            chartData.xdata["在线人数"][i] = datas[i].num
+            chartData.xname[i] = this.dateFormat(datas[i].created_at, timeFormat)  
+            xnum = datas[i].num
+            if (chooseGroup != "" && xnum > 0) {
+                let num_groups = JSON.parse(datas[i].num_groups)
+                xnum = ! num_groups[chooseGroup] ? 0 : num_groups[chooseGroup]
+            }
+            chartData.xdata["在线人数"][i] = xnum
         }
         // 实时更新在线数
-        if (data.scope == "rt") {
+        if (data.scope == "rt" && chooseGroup == "") {
             this.counts.online = datas[datas.length - 1].num
         }
         this.lineChart[data.action] = chartData
@@ -235,14 +260,28 @@ export default {
     formatNetwork(data) {
         let timeFormat = this.getTimeFormat(data.scope)
         let chartData = this.lineChart[data.action]
-        let datas = data.datas        
+        let chooseGroup = this.lineChartGroup[data.action]
+        let datas = data.datas
+        let xnumUp = 0, xnumDown = 0
         chartData.xname = []
         chartData.xdata["上行流量"] = []
         chartData.xdata["下行流量"] = []
         for(var i=0; i<datas.length;i++){
             chartData.xname[i] = this.dateFormat(datas[i].created_at, timeFormat)
-            chartData.xdata["上行流量"][i] = this.toMbps(datas[i].up)
-            chartData.xdata["下行流量"][i] = this.toMbps(datas[i].down)
+            xnumUp = datas[i].up
+            xnumDown = datas[i].down             
+            if (chooseGroup != "") {
+                if (xnumUp > 0) {
+                    let upGroups = JSON.parse(datas[i].up_groups)
+                    xnumUp = ! upGroups[chooseGroup] ? 0 : upGroups[chooseGroup]
+                }
+                if (xnumDown > 0) {
+                    let downGroups = JSON.parse(datas[i].down_groups)
+                    xnumDown = ! downGroups[chooseGroup] ? 0 : downGroups[chooseGroup]
+                }
+            }
+            chartData.xdata["上行流量"][i] = this.toMbps(xnumUp)
+            chartData.xdata["下行流量"][i] = this.toMbps(xnumDown)
         }
         this.lineChart[data.action] = chartData
     },
@@ -301,6 +340,23 @@ export default {
     jump(path) {
         this.$router.push(path);
     },
+    getGroups() {
+      axios.get('/group/names_ids', {}).then(resp => {
+        var data = resp.data.data
+        var groupNames = []
+        groupNames[0] = {text:"全部", value:""}
+        for(var i=0; i<data.datas.length;i++){
+            groupNames[i+1] = {text:data.datas[i].name, value:data.datas[i].id}
+        }
+        this.groupNames = groupNames
+      }).catch(error => {
+        this.$message.error('哦，请求出错');
+        console.log(error);
+      });
+    }, 
+    lineChartGroupChange(action) {
+        this.getStatsData(action, this.lineChartScope[action]);
+    }
   },
 }
 </script>
@@ -309,6 +365,7 @@ export default {
 .panel-group {
     margin-bottom: 20px;
 }
+
 .card-panel {
   display: flex;
   border-radius: 12px;
@@ -367,5 +424,18 @@ export default {
     position: absolute;
     right: 5px;
     top: 5px;
+}
+
+.chart-group-name {
+    position: absolute;
+    left: 110px;
+    top: 5px;
+    width: 130px;
+    font-size: 10px;
+}
+
+/deep/ .el-radio-button--mini .el-radio-button__inner {
+    padding: 7px 8px;    
+    font-size: 10px;
 }
 </style>
