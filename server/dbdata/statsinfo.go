@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/bjdgyc/anylink/base"
@@ -20,6 +21,7 @@ type StatsInfo struct {
 	RealtimeData map[string]*list.List
 	Actions      []string
 	Scopes       []string
+	mux          sync.Mutex
 }
 
 type ScopeDetail struct {
@@ -65,6 +67,9 @@ func (s *StatsInfo) ValidScope(scope string) bool {
 
 // 设置实时统计数据
 func (s *StatsInfo) SetRealTime(action string, val interface{}) {
+	s.mux.Lock()
+	defer s.mux.Unlock()
+
 	if s.RealtimeData[action].Len() >= RealTimeMaxSize {
 		ele := s.RealtimeData[action].Front()
 		s.RealtimeData[action].Remove(ele)
@@ -74,6 +79,9 @@ func (s *StatsInfo) SetRealTime(action string, val interface{}) {
 
 // 获取实时统计数据
 func (s *StatsInfo) GetRealTime(action string) (res []interface{}) {
+	s.mux.Lock()
+	defer s.mux.Unlock()
+
 	for e := s.RealtimeData[action].Front(); e != nil; e = e.Next() {
 		res = append(res, e.Value)
 	}
@@ -81,7 +89,7 @@ func (s *StatsInfo) GetRealTime(action string) (res []interface{}) {
 }
 
 // 保存数据至数据库
-func (s *StatsInfo) SaveStatsInfo(so *StatsOnline, sn *StatsNetwork, sc *StatsCpu, sm *StatsMem) {
+func (s *StatsInfo) SaveStatsInfo(so StatsOnline, sn StatsNetwork, sc StatsCpu, sm StatsMem) {
 	if so.Num != 0 {
 		_ = Add(so)
 	}

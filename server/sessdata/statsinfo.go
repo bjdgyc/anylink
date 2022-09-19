@@ -52,15 +52,15 @@ func saveStatsInfo() {
 			tNow := time.Now()
 			// online
 			numData, _ := json.Marshal(numGroups)
-			so := &dbdata.StatsOnline{Num: onlineNum, NumGroups: string(numData), CreatedAt: tNow}
+			so := dbdata.StatsOnline{Num: onlineNum, NumGroups: string(numData), CreatedAt: tNow}
 			// network
 			upData, _ := json.Marshal(upGroups)
 			downData, _ := json.Marshal(downGroups)
-			sn := &dbdata.StatsNetwork{Up: up, Down: down, UpGroups: string(upData), DownGroups: string(downData), CreatedAt: tNow}
+			sn := dbdata.StatsNetwork{Up: up, Down: down, UpGroups: string(upData), DownGroups: string(downData), CreatedAt: tNow}
 			// cpu
-			sc := &dbdata.StatsCpu{Percent: getCpuPercent(), CreatedAt: tNow}
+			sc := dbdata.StatsCpu{Percent: getCpuPercent(), CreatedAt: tNow}
 			// mem
-			sm := &dbdata.StatsMem{Percent: getMemPercent(), CreatedAt: tNow}
+			sm := dbdata.StatsMem{Percent: getMemPercent(), CreatedAt: tNow}
 			count++
 			// 是否保存至数据库
 			save := count*StatsCycleSec >= AddCycleSec
@@ -74,7 +74,7 @@ func saveStatsInfo() {
 	}()
 }
 
-func setStatsData(save bool, so *dbdata.StatsOnline, sn *dbdata.StatsNetwork, sc *dbdata.StatsCpu, sm *dbdata.StatsMem) {
+func setStatsData(save bool, so dbdata.StatsOnline, sn dbdata.StatsNetwork, sc dbdata.StatsCpu, sm dbdata.StatsMem) {
 	// 实时数据
 	dbdata.StatsInfoIns.SetRealTime("online", so)
 	dbdata.StatsInfoIns.SetRealTime("network", sn)
