@@ -14,7 +14,7 @@ require (
 	github.com/lib/pq v1.10.2
 	github.com/mattn/go-sqlite3 v1.14.8
 	github.com/orcaman/concurrent-map v1.0.0
-	github.com/pion/dtls/v2 v2.0.9
+	github.com/pion/dtls/v2 v2.1.5
 	github.com/pion/logging v0.2.2
 	github.com/shirou/gopsutil v3.21.7+incompatible
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
@@ -26,12 +26,10 @@ require (
 	github.com/tklauser/go-sysconf v0.3.7 // indirect
 	github.com/xhit/go-simple-mail/v2 v2.10.0
 	github.com/xlzd/gotp v0.0.0-20181030022105-c8557ba2c119
-	golang.org/x/crypto v0.0.0-20220331220935-ae2d96664a29
-	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2
+	golang.org/x/crypto v0.0.0-20220427172511-eb4f295cb31f
+	golang.org/x/net v0.0.0-20220425223048-2871e0cb64e4
 	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac
 	gopkg.in/asn1-ber.v1 v1.0.0-20181015200546-f715ec2f112d // indirect
 	layeh.com/radius v0.0.0-20210819152912-ad72663a72ab
 	xorm.io/xorm v1.2.2
 )
-
-replace github.com/pion/dtls/v2 => ../dtls-2.0.9

@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/tls"
 	"encoding/hex"
-	"fmt"
 	"net"
 	"time"
 
@@ -14,11 +13,6 @@ import (
 	"github.com/pion/dtls/v2/pkg/crypto/selfsign"
 	"github.com/pion/logging"
 )
-
-// 因本项目对 github.com/pion/dtls 的代码，进行了大量的修改
-// 且短时间内无法合并到上游项目
-// 所以本项目暂时copy了一份代码
-// 最后,感谢 github.com/pion/dtls 对golang生态做出的贡献
 
 func startDtls() {
 	if !base.Cfg.ServerDTLS {
@@ -34,6 +28,9 @@ func startDtls() {
 	// logf.DefaultLogLevel = logging.LogLevelTrace
 	logf.DefaultLogLevel = logging.LogLevelInfo
 
+	// https://github.com/pion/dtls/pull/369
+	sessStore := &sessionStore{}
+
 	config := &dtls.Config{
 		Certificates:         []tls.Certificate{certificate},
 		InsecureSkipVerify:   true,
@@ -41,13 +38,7 @@ func startDtls() {
 		CipherSuites:         []dtls.CipherSuiteID{dtls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256},
 		LoggerFactory:        logf,
 		MTU:                  BufferSize,
-		CiscoCompat: func(sessid []byte) ([]byte, error) {
-			masterSecret := sessdata.Dtls2MasterSecret(hex.EncodeToString(sessid))
-			if masterSecret == "" {
-				return nil, fmt.Errorf("masterSecret is err")
-			}
-			return hex.DecodeString(masterSecret)
-		},
+		SessionStore:         sessStore,
 		ConnectContextMaker: func() (context.Context, func()) {
 			return context.WithTimeout(context.Background(), 5*time.Second)
 		},
@@ -79,4 +70,26 @@ func startDtls() {
 			LinkDtls(conn, sess.CSess)
 		}()
 	}
+}
+
+// https://github.com/pion/dtls/blob/master/session.go
+type sessionStore struct{}
+
+func (ms *sessionStore) Set(key []byte, s dtls.Session) error {
+	return nil
+}
+
+func (ms *sessionStore) Get(key []byte) (dtls.Session, error) {
+	k := hex.EncodeToString(key)
+	secret := sessdata.Dtls2MasterSecret(k)
+	if secret != "" {
+		masterSecret, _ := hex.DecodeString(secret)
+		return dtls.Session{ID: key, Secret: masterSecret}, nil
+	}
+
+	return dtls.Session{}, nil
+}
+
+func (ms *sessionStore) Del(key []byte) error {
+	return nil
 }
