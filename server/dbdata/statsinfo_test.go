@@ -25,15 +25,15 @@ func TestStatsInfo(t *testing.T) {
 	numGroups := map[int]int{1: 5}
 	// online
 	numData, _ := json.Marshal(numGroups)
-	so := &StatsOnline{Num: 1, NumGroups: string(numData)}
+	so := StatsOnline{Num: 1, NumGroups: string(numData)}
 	// network
 	upData, _ := json.Marshal(upGroups)
 	downData, _ := json.Marshal(downGroups)
-	sn := &StatsNetwork{Up: up, Down: down, UpGroups: string(upData), DownGroups: string(downData)}
+	sn := StatsNetwork{Up: up, Down: down, UpGroups: string(upData), DownGroups: string(downData)}
 	// cpu
-	sc := &StatsCpu{Percent: 0.3}
+	sc := StatsCpu{Percent: 0.3}
 	// mem
-	sm := &StatsMem{Percent: 24.50}
+	sm := StatsMem{Percent: 24.50}
 
 	StatsInfoIns.SetRealTime("online", so)
 	StatsInfoIns.GetRealTime("online")
