@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"encoding/hex"
+	"errors"
 	"net"
 	"time"
 
@@ -82,12 +83,12 @@ func (ms *sessionStore) Set(key []byte, s dtls.Session) error {
 func (ms *sessionStore) Get(key []byte) (dtls.Session, error) {
 	k := hex.EncodeToString(key)
 	secret := sessdata.Dtls2MasterSecret(k)
-	if secret != "" {
-		masterSecret, _ := hex.DecodeString(secret)
-		return dtls.Session{ID: key, Secret: masterSecret}, nil
+	if secret == "" {
+		return dtls.Session{}, errors.New("Dtls2MasterSecret is nil")
 	}
 
-	return dtls.Session{}, nil
+	masterSecret, _ := hex.DecodeString(secret)
+	return dtls.Session{ID: key, Secret: masterSecret}, nil
 }
 
 func (ms *sessionStore) Del(key []byte) error {
