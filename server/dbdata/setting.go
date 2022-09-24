@@ -22,6 +22,7 @@ type SettingSmtp struct {
 type SettingOther struct {
 	LinkAddr    string `json:"link_addr"`
 	Banner      string `json:"banner"`
+	Homeindex   string `json:"homeindex"`
 	AccountMail string `json:"account_mail"`
 }
 

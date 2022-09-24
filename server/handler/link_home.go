@@ -6,13 +6,14 @@ import (
 	"strings"
 
 	"github.com/bjdgyc/anylink/admin"
+	"github.com/bjdgyc/anylink/dbdata"
 )
 
 func LinkHome(w http.ResponseWriter, r *http.Request) {
 	// fmt.Println(r.RemoteAddr)
 	// hu, _ := httputil.DumpRequest(r, true)
 	// fmt.Println("DumpHome: ", string(hu))
-
+	index := &dbdata.SettingOther
 	connection := strings.ToLower(r.Header.Get("Connection"))
 	userAgent := strings.ToLower(r.UserAgent())
 	if connection == "close" && (strings.Contains(userAgent, "anyconnect") || strings.Contains(userAgent, "openconnect")) {
@@ -22,7 +23,8 @@ func LinkHome(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintln(w, "AnyLink 是一个企业级远程办公 sslvpn 的软件，可以支持多人同时在线使用。")
+	fmt.Fprintln(w, index.Homeindex)
+	// fmt.Fprintln(w, "AnyLink 是一个企业级远程办公 sslvpn 的软件，可以支持多人同时在线使用。")
 }
 
 func LinkOtpQr(w http.ResponseWriter, r *http.Request) {
