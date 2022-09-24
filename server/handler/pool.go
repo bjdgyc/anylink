@@ -55,38 +55,38 @@ var bytePool = sync.Pool{
 	},
 }
 
-func getByteZero() *[]byte {
-	b := bytePool.Get().(*[]byte)
-	*b = (*b)[:0]
-	return b
-}
+// func getByteZero() *[]byte {
+// 	b := bytePool.Get().(*[]byte)
+// 	*b = (*b)[:0]
+// 	return b
+// }
 
-func getByteFull() *[]byte {
-	b := bytePool.Get().(*[]byte)
-	return b
-}
-func putByte(b *[]byte) {
-	*b = (*b)[:BufferSize]
-	bytePool.Put(b)
-}
+// func getByteFull() *[]byte {
+// 	b := bytePool.Get().(*[]byte)
+// 	return b
+// }
+// func putByte(b *[]byte) {
+// 	*b = (*b)[:BufferSize]
+// 	bytePool.Put(b)
+// }
 
-// 长度 34 小对象
-var byte34Pool = sync.Pool{
-	New: func() interface{} {
-		b := make([]byte, 34)
-		return &b
-	},
-}
+// // 长度 34 小对象
+// var byte34Pool = sync.Pool{
+// 	New: func() interface{} {
+// 		b := make([]byte, 34)
+// 		return &b
+// 	},
+// }
 
-func getByte34() *[]byte {
-	b := byte34Pool.Get().(*[]byte)
-	return b
-}
+// func getByte34() *[]byte {
+// 	b := byte34Pool.Get().(*[]byte)
+// 	return b
+// }
 
-func putByte34(b *[]byte) {
-	*b = (*b)[:34]
-	byte34Pool.Put(b)
-}
+// func putByte34(b *[]byte) {
+// 	*b = (*b)[:34]
+// 	byte34Pool.Put(b)
+// }
 
 type BufferPool struct {
 	sync.Pool
