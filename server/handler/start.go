@@ -37,6 +37,8 @@ func Start() {
 	go admin.StartAdmin()
 	go startTls()
 	go startDtls()
+
+	go logAuditBatch()
 }
 
 func Stop() {
