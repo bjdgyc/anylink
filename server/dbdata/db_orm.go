@@ -16,6 +16,11 @@ func Add(data interface{}) error {
 	return err
 }
 
+func AddBatch(data interface{}) error {
+	_, err := xdb.Insert(data)
+	return err
+}
+
 func Update(fieldName string, value interface{}, data interface{}) error {
 	_, err := xdb.Where(fieldName+"=?", value).Update(data)
 	return err
