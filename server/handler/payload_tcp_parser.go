@@ -15,9 +15,6 @@ var tcpParsers = []func([]byte) (uint8, string){
 
 func onTCP(payload []byte) (uint8, string) {
 	size := len(payload)
-	if size < 13 {
-		return acc_proto_tcp, ""
-	}
 	ihl := (payload[12] & 0xf0) >> 2
 	if int(ihl) > size {
 		return acc_proto_tcp, ""

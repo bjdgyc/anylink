@@ -111,6 +111,7 @@ func logAudit(cSess *sessdata.ConnSession, pl *sessdata.Payload) {
 	binary.BigEndian.PutUint16(key[32:34], ipPort)
 
 	info := ""
+	nu := utils.NowSec().Unix()
 	if ipProto == waterutil.TCP {
 		plData := waterutil.IPv4Payload(pl.Data)
 		if len(plData) < 14 {
@@ -119,34 +120,55 @@ func logAudit(cSess *sessdata.ConnSession, pl *sessdata.Payload) {
 		flags := plData[13]
 		switch flags {
 		case flags & 0x20:
-			// base.Debug("URG "+info, "#", str)
+			// URG
+			return
+		case flags & 0x14:
+			// RST ACK
+			return
+		case flags & 0x12:
+			// SYN ACK
+			return
+		case flags & 0x11:
+			// Client FIN
 			return
 		case flags & 0x10:
-			// base.Debug("ACK  ", ipSrc, "#", ipDst, "#", ipPort)
+			// ACK
 			return
 		case flags & 0x08:
-			// base.Debug("PSH  "+info, "#", str)
+			// PSH
 			return
 		case flags & 0x04:
-			// base.Debug("RST "+info, "#", str)
+			// RST
 			return
 		case flags & 0x02:
-			// base.Debug("SYNC "+info, "#", str)
+			// SYN
 			return
 		case flags & 0x01:
-			// base.Debug("FIN "+info, "#", str)
+			// FIN
 			return
-		default:
+		case flags & 0x18:
+			// PSH ACK
 			accessProto, info = onTCP(plData)
+			if info != "" {
+				// 提前存储只含ip数据的key, 避免即记录域名又记录一笔IP数据的记录
+				ipKey := make([]byte, 51)
+				copy(ipKey, key)
+				ipS := utils.BytesToString(ipKey)
+				cSess.IpAuditMap.Set(ipS, nu)
+				// 存储含域名的key
+				key[34] = byte(accessProto)
+				md5Sum := md5.Sum([]byte(info))
+				copy(key[35:51], hex.EncodeToString(md5Sum[:]))
+			}
+		case flags & 0x19:
+			// URG
+			return
+		case flags & 0xC2:
+			// SYN-ECE-CWR
+			return
 		}
 	}
-	key[34] = byte(accessProto)
-	if info != "" {
-		md5Sum := md5.Sum([]byte(info))
-		copy(key[35:51], hex.EncodeToString(md5Sum[:]))
-	}
 	s := utils.BytesToString(key)
-	nu := utils.NowSec().Unix()
 
 	// 判断已经存在，并且没有过期
 	v, ok := cSess.IpAuditMap.Get(s)
