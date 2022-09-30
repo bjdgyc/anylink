@@ -190,7 +190,7 @@ export default {
     this.getAllStats() 
     const chartsTimer = setInterval(() => {
         this.getAllStats()                                      
-    }, 5000);
+    }, 10000);
     this.$once('hook:beforeDestroy', () => {
       clearInterval(chartsTimer);
     })    

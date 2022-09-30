@@ -1,9 +1,11 @@
 package handler
 
 import (
+	"crypto/md5"
 	"encoding/xml"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"strings"
 	"text/template"
@@ -87,6 +89,15 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	sess.Group = cr.GroupSelect
 	sess.MacAddr = strings.ToLower(cr.MacAddressList.MacAddress)
 	sess.UniqueIdGlobal = cr.DeviceId.UniqueIdGlobal
+	// 获取客户端mac地址
+	macHw, err := net.ParseMAC(sess.MacAddr)
+	if err != nil {
+		sum := md5.Sum([]byte(sess.UniqueIdGlobal))
+		macHw = sum[0:5] // 5个byte
+		macHw = append([]byte{0x02}, macHw...)
+		sess.MacAddr = macHw.String()
+	}
+	sess.MacHw = macHw
 	other := &dbdata.SettingOther{}
 	_ = dbdata.SettingGet(other)
 	rd := RequestData{SessionId: sess.Sid, SessionToken: sess.Sid + "@" + sess.Token,

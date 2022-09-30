@@ -12,6 +12,7 @@ import (
 )
 
 func LinkCstp(conn net.Conn, bufRW *bufio.ReadWriter, cSess *sessdata.ConnSession) {
+	base.Debug("LinkCstp connect ip:", cSess.IpAddr, "user:", cSess.Username, "rip:", conn.RemoteAddr())
 	defer func() {
 		base.Debug("LinkCstp return", cSess.IpAddr)
 		_ = conn.Close()

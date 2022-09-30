@@ -1,7 +1,6 @@
 package sessdata
 
 import (
-	"crypto/md5"
 	"fmt"
 	"math/rand"
 	"net"
@@ -32,6 +31,7 @@ type ConnSession struct {
 	IpAddr              net.IP // 分配的ip地址
 	LocalIp             net.IP
 	MacHw               net.HardwareAddr // 客户端mac地址,从Session取出
+	Username            string
 	RemoteAddr          string
 	Mtu                 int
 	IfName              string
@@ -70,6 +70,7 @@ type Session struct {
 	DtlsSid        string // dtls协议的 session_id
 	MacAddr        string // 客户端mac地址
 	UniqueIdGlobal string // 客户端唯一标示
+	MacHw          net.HardwareAddr
 	Username       string // 用户名
 	Group          string
 	AuthStep       string
@@ -147,6 +148,7 @@ func (s *Session) NewConn() *ConnSession {
 	s.mux.RLock()
 	active := s.IsActive
 	macAddr := s.MacAddr
+	macHw := s.MacHw
 	username := s.Username
 	s.mux.RUnlock()
 	if active {
@@ -157,14 +159,6 @@ func (s *Session) NewConn() *ConnSession {
 	if !limit {
 		return nil
 	}
-	// 获取客户端mac地址
-	macHw, err := net.ParseMAC(macAddr)
-	if err != nil {
-		sum := md5.Sum([]byte(s.UniqueIdGlobal))
-		macHw = sum[0:5] // 5个byte
-		macHw = append([]byte{0x02}, macHw...)
-		macAddr = macHw.String()
-	}
 	ip := AcquireIp(username, macAddr)
 	if ip == nil {
 		LimitClient(username, true)
@@ -173,7 +167,7 @@ func (s *Session) NewConn() *ConnSession {
 
 	// 查询group信息
 	group := &dbdata.Group{}
-	err = dbdata.One("Name", s.Group, group)
+	err := dbdata.One("Name", s.Group, group)
 	if err != nil {
 		base.Error(err)
 		return nil
@@ -182,6 +176,7 @@ func (s *Session) NewConn() *ConnSession {
 	cSess := &ConnSession{
 		Sess:           s,
 		MacHw:          macHw,
+		Username:       username,
 		IpAddr:         ip,
 		closeOnce:      sync.Once{},
 		CloseChan:      make(chan struct{}),
@@ -229,6 +224,11 @@ func (cs *ConnSession) Close() {
 		cs.Sess.LastLogin = time.Now()
 		cs.Sess.CSess = nil
 
+		dSess := cs.GetDtlsSession()
+		if dSess != nil {
+			dSess.Close()
+		}
+
 		ReleaseIp(cs.IpAddr, cs.Sess.MacAddr)
 		LimitClient(cs.Sess.Username, true)
 	})
@@ -272,7 +272,7 @@ func (cs *ConnSession) GetDtlsSession() *DtlsSession {
 	return nil
 }
 
-const BandwidthPeriodSec = 2 // 流量速率统计周期(秒)
+const BandwidthPeriodSec = 10 // 流量速率统计周期(秒)
 
 func (cs *ConnSession) ratePeriod() {
 	tick := time.NewTicker(time.Second * BandwidthPeriodSec)

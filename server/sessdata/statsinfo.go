@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	StatsCycleSec = 5  // 统计周期（秒）
+	StatsCycleSec = 10 // 统计周期（秒）
 	AddCycleSec   = 60 // 记录到数据表周期（秒）
 )
 

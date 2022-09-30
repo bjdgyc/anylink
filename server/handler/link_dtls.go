@@ -10,7 +10,7 @@ import (
 )
 
 func LinkDtls(conn net.Conn, cSess *sessdata.ConnSession) {
-	base.Debug("LinkDtls connect ip:", cSess.IpAddr, "udp-rip:", conn.RemoteAddr())
+	base.Debug("LinkDtls connect ip:", cSess.IpAddr, "user:", cSess.Username, "udp-rip:", conn.RemoteAddr())
 	dSess := cSess.NewDtlsConn()
 	if dSess == nil {
 		// 创建失败，直接关闭链接
