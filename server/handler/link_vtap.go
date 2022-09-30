@@ -33,7 +33,7 @@ func checkMacvtap() {
 
 	ifName := "anylinkMacvtap"
 	// 加载 macvtap
-	cmdstr0 := fmt.Sprintf("modprobe -i macvtap")
+	cmdstr0 := fmt.Sprintln("modprobe -i macvtap")
 	// 开启主网卡混杂模式
 	cmdstr1 := fmt.Sprintf("ip link set dev %s promisc on", base.Cfg.Ipv4Master)
 	// 测试 macvtap 功能
@@ -66,9 +66,9 @@ func LinkMacvtap(cSess *sessdata.ConnSession) error {
 	return createVtap(cSess, ifName)
 }
 
-func checkIpvtap() {
+// func checkIpvtap() {
 
-}
+// }
 
 // 创建 Ipvtap 网卡
 func LinkIpvtap(cSess *sessdata.ConnSession) error {

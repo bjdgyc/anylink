@@ -51,6 +51,15 @@
             </el-input>
           </el-form-item>
 
+          <el-form-item label="自定义首页" prop="homeindex">
+            <el-input
+                type="textarea"
+                :rows="5"
+                placeholder="请输入内容"
+                v-model="dataOther.homeindex">
+            </el-input>
+          </el-form-item>
+
           <el-form-item label="账户开通邮件" prop="account_mail">
             <el-input
                 type="textarea"
