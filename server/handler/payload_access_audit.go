@@ -163,6 +163,9 @@ func logAudit(cSess *sessdata.ConnSession, pl *sessdata.Payload) {
 		case flags & 0x19:
 			// URG
 			return
+		case flags & 0xC2:
+			// SYN-ECE-CWR
+			return
 		}
 	}
 	s := utils.BytesToString(key)
