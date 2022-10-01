@@ -7,7 +7,7 @@ RUN yarn install \
     && ls /web/ui
 
 # server
-FROM golang:1.17-alpine as builder_golang
+FROM golang:1.18-alpine as builder_golang
 #TODO 本地打包时使用镜像
 ENV GOPROXY=https://goproxy.io
 ENV GOOS=linux
