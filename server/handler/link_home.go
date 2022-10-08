@@ -23,8 +23,10 @@ func LinkHome(w http.ResponseWriter, r *http.Request) {
 	index := &dbdata.SettingOther{}
 	dbdata.SettingGet(index)
 	w.WriteHeader(http.StatusOK)
+	if index.Homeindex == "" {
+		index.Homeindex = "AnyLink 是一个企业级远程办公 SSL VPN 软件，可以支持多人同时在线使用。"
+	}	
 	fmt.Fprintln(w, index.Homeindex)
-	// fmt.Fprintln(w, "AnyLink 是一个企业级远程办公 sslvpn 的软件，可以支持多人同时在线使用。")
 }
 
 func LinkOtpQr(w http.ResponseWriter, r *http.Request) {
