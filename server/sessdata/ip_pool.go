@@ -14,11 +14,11 @@ var (
 	IpPool   = &ipPoolConfig{}
 	ipActive = map[string]bool{}
 	// ipKeep and ipLease  ipAddr => type
-	ipLease = map[string]bool{}
+	ipLease   = map[string]bool{}
+	ipPoolMux sync.Mutex
 )
 
 type ipPoolConfig struct {
-	mux sync.Mutex
 	// 计算动态ip
 	Ipv4Gateway net.IP
 	Ipv4Mask    net.IP
@@ -69,17 +69,18 @@ func getIpLease() {
 		base.Error(err)
 	}
 	// fmt.Println(keepIpMaps)
-	IpPool.mux.Lock()
+	ipPoolMux.Lock()
+	ipLease = map[string]bool{}
 	for _, v := range keepIpMaps {
 		ipLease[v.IpAddr] = true
 	}
-	IpPool.mux.Unlock()
+	ipPoolMux.Unlock()
 }
 
 // AcquireIp 获取动态ip
 func AcquireIp(username, macAddr string) net.IP {
-	IpPool.mux.Lock()
-	defer IpPool.mux.Unlock()
+	ipPoolMux.Lock()
+	defer ipPoolMux.Unlock()
 
 	tNow := time.Now()
 
@@ -143,8 +144,8 @@ func AcquireIp(username, macAddr string) net.IP {
 
 // 回收ip
 func ReleaseIp(ip net.IP, macAddr string) {
-	IpPool.mux.Lock()
-	defer IpPool.mux.Unlock()
+	ipPoolMux.Lock()
+	defer ipPoolMux.Unlock()
 
 	delete(ipActive, ip.String())
 
