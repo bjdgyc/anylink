@@ -181,7 +181,7 @@ func logAudit(cSess *sessdata.ConnSession, pl *sessdata.Payload) {
 	cSess.IpAuditMap.Set(s, nu)
 
 	audit := dbdata.AccessAudit{
-		Username:    cSess.Sess.Username,
+		Username:    cSess.Username,
 		Protocol:    uint8(ipProto),
 		Src:         ipSrc.String(),
 		Dst:         ipDst.String(),

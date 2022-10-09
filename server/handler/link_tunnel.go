@@ -104,7 +104,7 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 设置用户策略
-	SetUserPolicy(sess.Username, cSess.Group)
+	SetUserPolicy(cSess.Username, cSess.Group)
 
 	// 允许本地LAN访问vpn网络，必须放在路由的第一个
 	if cSess.Group.AllowLan {

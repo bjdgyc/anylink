@@ -230,7 +230,7 @@ func (cs *ConnSession) Close() {
 		}
 
 		ReleaseIp(cs.IpAddr, cs.Sess.MacAddr)
-		LimitClient(cs.Sess.Username, true)
+		LimitClient(cs.Username, true)
 	})
 }
 
