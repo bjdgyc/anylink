@@ -13,6 +13,8 @@ import (
 var (
 	IpPool   = &ipPoolConfig{}
 	ipActive = map[string]bool{}
+	// ipKeep and ipLease  ipAddr => type
+	ipLease = map[string]bool{}
 )
 
 type ipPoolConfig struct {
@@ -45,6 +47,33 @@ func initIpPool() {
 	// ip地址池
 	IpPool.IpLongMin = utils.Ip2long(net.ParseIP(base.Cfg.Ipv4Start))
 	IpPool.IpLongMax = utils.Ip2long(net.ParseIP(base.Cfg.Ipv4End))
+
+	// 获取IpLease数据
+	go cronIpLease()
+}
+
+func cronIpLease() {
+	getIpLease()
+	tick := time.NewTicker(time.Minute * 30)
+	for range tick.C {
+		getIpLease()
+	}
+}
+
+func getIpLease() {
+	xdb := dbdata.GetXdb()
+	keepIpMaps := []dbdata.IpMap{}
+	sNow := time.Now().Add(-1 * time.Duration(base.Cfg.IpLease) * time.Second)
+	err := xdb.Cols("ip_addr").Where("keep=?", true).Or("last_login>?", sNow).Find(&keepIpMaps)
+	if err != nil {
+		base.Error(err)
+	}
+	// fmt.Println(keepIpMaps)
+	IpPool.mux.Lock()
+	for _, v := range keepIpMaps {
+		ipLease[v.IpAddr] = true
+	}
+	IpPool.mux.Unlock()
 }
 
 // AcquireIp 获取动态ip
@@ -54,30 +83,28 @@ func AcquireIp(username, macAddr string) net.IP {
 
 	tNow := time.Now()
 
-	// 判断已经分配过
+	// 判断是否已经分配过
 	mi := &dbdata.IpMap{}
 	err := dbdata.One("mac_addr", macAddr, mi)
+	// 存在ip记录
 	if err == nil {
 		ipStr := mi.IpAddr
 		ip := net.ParseIP(ipStr)
 		// 跳过活跃连接
-		_, ok := ipActive[ipStr]
+		// _, ok := ipActive[ipStr]
 		// 检测原有ip是否在新的ip池内
-		if IpPool.Ipv4IPNet.Contains(ip) && !ok {
+		if IpPool.Ipv4IPNet.Contains(ip) {
 			mi.Username = username
 			mi.LastLogin = tNow
 			// 回写db数据
-			_ = dbdata.Add(mi)
+			_ = dbdata.Set(mi)
 			ipActive[ipStr] = true
 			return ip
 		}
-
 		_ = dbdata.Del(mi)
-
 	}
 
-	farIp := &dbdata.IpMap{LastLogin: tNow}
-	// 全局遍历超过租期ip
+	// 全局遍历超过租期和未保留的ip
 	for i := IpPool.IpLongMin; i <= IpPool.IpLongMax; i++ {
 		ip := utils.Long2ip(i)
 		ipStr := ip.String()
@@ -86,55 +113,32 @@ func AcquireIp(username, macAddr string) net.IP {
 		if _, ok := ipActive[ipStr]; ok {
 			continue
 		}
-
-		v := &dbdata.IpMap{}
-		err = dbdata.One("ip_addr", ipStr, v)
-		if err != nil {
-			if dbdata.CheckErrNotFound(err) {
-				// 该ip没有被使用
-				mi = &dbdata.IpMap{IpAddr: ipStr, MacAddr: macAddr, Username: username, LastLogin: tNow}
-				_ = dbdata.Add(mi)
-				ipActive[ipStr] = true
-				return ip
-			}
-			base.Error(err)
-			return nil
-		}
-
-		// 跳过ip保留
-		if v.Keep {
+		// 跳过ip租期内数据
+		if _, ok := ipLease[ipStr]; ok {
 			continue
 		}
 
-		// 已经超过租期
-		if tNow.Sub(v.LastLogin) > time.Duration(base.Cfg.IpLease)*time.Second {
-			_ = dbdata.Del(v)
+		v := &dbdata.IpMap{}
+		err = dbdata.One("ip_addr", ipStr, v)
+		if err == nil {
+			// 存在记录直接跳过
+			continue
+		}
+
+		if dbdata.CheckErrNotFound(err) {
+			// 该ip没有被使用
 			mi = &dbdata.IpMap{IpAddr: ipStr, MacAddr: macAddr, Username: username, LastLogin: tNow}
-			// 重写db数据
 			_ = dbdata.Add(mi)
 			ipActive[ipStr] = true
 			return ip
 		}
-
-		// 其他情况判断最早登陆
-		if v.LastLogin.Before(farIp.LastLogin) {
-			farIp = v
-		}
-	}
-
-	// 全都在线，没有数据可用
-	if farIp.Id == 0 {
+		// 查询报错
+		base.Error(err)
 		return nil
 	}
 
-	// 使用最早登陆的mac ip
-	ipStr := farIp.IpAddr
-	ip := net.ParseIP(ipStr)
-	mi = &dbdata.IpMap{IpAddr: ipStr, MacAddr: macAddr, Username: username, LastLogin: tNow}
-	// 回写db数据
-	_ = dbdata.Add(mi)
-	ipActive[ipStr] = true
-	return ip
+	base.Error("no ip available, please del ip_map table row")
+	return nil
 }
 
 // 回收ip
@@ -143,10 +147,11 @@ func ReleaseIp(ip net.IP, macAddr string) {
 	defer IpPool.mux.Unlock()
 
 	delete(ipActive, ip.String())
+
 	mi := &dbdata.IpMap{}
 	err := dbdata.One("ip_addr", ip.String(), mi)
 	if err == nil {
 		mi.LastLogin = time.Now()
-		_ = dbdata.Add(mi)
+		_ = dbdata.Set(mi)
 	}
 }

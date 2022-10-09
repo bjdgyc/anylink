@@ -59,6 +59,8 @@ var configs = []config{
 	{Typ: cfgInt, Name: "session_timeout", Usage: "session过期时间(秒)", ValInt: 3600},
 	// {Typ: cfgInt, Name: "auth_timeout", Usage: "auth_timeout", ValInt: 0},
 	{Typ: cfgInt, Name: "audit_interval", Usage: "审计去重间隔(秒),-1关闭", ValInt: -1},
+
+	{Typ: cfgBool, Name: "show_sql", Usage: "显示sql语句，用于调试", ValBool: false},
 }
 
 var envs = map[string]string{}

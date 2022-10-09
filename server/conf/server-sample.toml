@@ -73,6 +73,7 @@ session_timeout = 3600
 auth_timeout = 0
 audit_interval = -1
 
+show_sql = false
 
 
 

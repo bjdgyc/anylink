@@ -47,7 +47,7 @@ type IpMap struct {
 	Keep      bool      `json:"keep" xorm:"Bool"` // 保留 ip-mac 绑定
 	KeepTime  time.Time `json:"keep_time" xorm:"DateTime"`
 	Note      string    `json:"note" xorm:"varchar(255)"` // 备注
-	LastLogin time.Time `json:"last_login" xorm:"DateTime updated"`
+	LastLogin time.Time `json:"last_login" xorm:"DateTime"`
 	UpdatedAt time.Time `json:"updated_at" xorm:"DateTime updated"`
 }
 
