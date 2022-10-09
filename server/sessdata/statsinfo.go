@@ -2,7 +2,6 @@ package sessdata
 
 import (
 	"encoding/json"
-	"sync/atomic"
 	"time"
 
 	"github.com/bjdgyc/anylink/dbdata"
@@ -34,8 +33,8 @@ func saveStatsInfo() {
 					onlineNum += 1
 					numGroups[v.CSess.Group.Id] += 1
 					// 网络吞吐
-					userUp := atomic.LoadUint32(&v.CSess.BandwidthUpPeriod)
-					userDown := atomic.LoadUint32(&v.CSess.BandwidthDownPeriod)
+					userUp := v.CSess.BandwidthUpPeriod.Load()
+					userDown := v.CSess.BandwidthDownPeriod.Load()
 					if userUp > 0 {
 						upGroups[v.CSess.Group.Id] += userUp
 					}

@@ -14,6 +14,7 @@ import (
 	"github.com/bjdgyc/anylink/dbdata"
 	"github.com/bjdgyc/anylink/pkg/utils"
 	"github.com/ivpusic/grpool"
+	atomic2 "go.uber.org/atomic"
 )
 
 var (
@@ -39,12 +40,12 @@ type ConnSession struct {
 	CstpDpd             int
 	Group               *dbdata.Group
 	Limit               *LimitRater
-	BandwidthUp         uint32 // 使用上行带宽 Byte
-	BandwidthDown       uint32 // 使用下行带宽 Byte
-	BandwidthUpPeriod   uint32 // 前一周期的总量
-	BandwidthDownPeriod uint32
-	BandwidthUpAll      uint64 // 使用上行带宽总量
-	BandwidthDownAll    uint64 // 使用下行带宽总量
+	BandwidthUp         atomic2.Uint32 // 使用上行带宽 Byte
+	BandwidthDown       atomic2.Uint32 // 使用下行带宽 Byte
+	BandwidthUpPeriod   atomic2.Uint32 // 前一周期的总量
+	BandwidthDownPeriod atomic2.Uint32
+	BandwidthUpAll      atomic2.Uint64 // 使用上行带宽总量
+	BandwidthDownAll    atomic2.Uint64 // 使用下行带宽总量
 	closeOnce           sync.Once
 	CloseChan           chan struct{}
 	PayloadIn           chan *Payload
@@ -286,14 +287,14 @@ func (cs *ConnSession) ratePeriod() {
 		}
 
 		// 实时流量清零
-		rtUp := atomic.SwapUint32(&cs.BandwidthUp, 0)
-		rtDown := atomic.SwapUint32(&cs.BandwidthDown, 0)
+		rtUp := cs.BandwidthUp.Swap(0)
+		rtDown := cs.BandwidthDown.Swap(0)
 		// 设置上一周期每秒的流量
-		atomic.SwapUint32(&cs.BandwidthUpPeriod, rtUp/BandwidthPeriodSec)
-		atomic.SwapUint32(&cs.BandwidthDownPeriod, rtDown/BandwidthPeriodSec)
+		cs.BandwidthUpPeriod.Swap(rtUp / BandwidthPeriodSec)
+		cs.BandwidthDownPeriod.Swap(rtDown / BandwidthPeriodSec)
 		// 累加所有流量
-		atomic.AddUint64(&cs.BandwidthUpAll, uint64(rtUp))
-		atomic.AddUint64(&cs.BandwidthDownAll, uint64(rtDown))
+		cs.BandwidthUpAll.Add(uint64(rtUp))
+		cs.BandwidthDownAll.Add(uint64(rtDown))
 	}
 }
 
@@ -323,11 +324,11 @@ func (cs *ConnSession) SetIfName(name string) {
 
 func (cs *ConnSession) RateLimit(byt int, isUp bool) error {
 	if isUp {
-		atomic.AddUint32(&cs.BandwidthUp, uint32(byt))
+		cs.BandwidthUp.Add(uint32(byt))
 		return nil
 	}
 	// 只对下行速率限制
-	atomic.AddUint32(&cs.BandwidthDown, uint32(byt))
+	cs.BandwidthDown.Add(uint32(byt))
 	if cs.Limit == nil {
 		return nil
 	}

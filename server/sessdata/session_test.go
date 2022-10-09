@@ -30,9 +30,9 @@ func TestConnSession(t *testing.T) {
 
 	err := cSess.RateLimit(100, true)
 	ast.Nil(err)
-	ast.Equal(cSess.BandwidthUp, uint32(100))
+	ast.Equal(cSess.BandwidthUp.Load(), uint32(100))
 	err = cSess.RateLimit(200, false)
 	ast.Nil(err)
-	ast.Equal(cSess.BandwidthDown, uint32(200))
+	ast.Equal(cSess.BandwidthDown.Load(), uint32(200))
 	cSess.Close()
 }
