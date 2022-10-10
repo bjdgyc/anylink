@@ -49,9 +49,10 @@
         <span>运行环境</span>
       </div>
       <Cell left="软件版本" :right="system.sys.appVersion" divider/>
-      <Cell left="GO版本" :right="system.sys.goOs" divider/>
+      <Cell left="软件CommitId" :right="system.sys.appCommitId" divider/>
+      <Cell left="GO系统" :right="system.sys.goOs" divider/>
       <Cell left="GoArch" :right="system.sys.goArch" divider/>
-      <Cell left="GoVersion" :right="system.sys.goVersion" divider/>
+      <Cell left="GO版本" :right="system.sys.goVersion" divider/>
       <Cell left="Goroutine" :right="system.sys.goroutine"/>
     </el-card>
 
