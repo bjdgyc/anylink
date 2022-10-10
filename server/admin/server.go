@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/pprof"
 
+	"github.com/arl/statsviz"
 	"github.com/bjdgyc/anylink/base"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -77,6 +78,9 @@ func StartAdmin() {
 		r.HandleFunc("/debug/pprof/trace", pprof.Trace).Name("debug")
 		r.HandleFunc("/debug/pprof", location("/debug/pprof/")).Name("debug")
 		r.PathPrefix("/debug/pprof/").HandlerFunc(pprof.Index).Name("debug")
+		// statsviz
+		r.Path("/debug/statsviz/ws").Name("debug").HandlerFunc(statsviz.Ws)
+		r.PathPrefix("/debug/statsviz/").Name("debug").Handler(statsviz.Index)
 	}
 
 	base.Info("Listen admin", base.Cfg.AdminAddr)
