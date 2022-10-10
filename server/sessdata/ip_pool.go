@@ -138,7 +138,7 @@ func AcquireIp(username, macAddr string) net.IP {
 		return nil
 	}
 
-	base.Error("no ip available, please del ip_map table row")
+	base.Error("no ip available, please see ip_map table row")
 	return nil
 }
 

@@ -59,8 +59,9 @@ func TestIpPool(t *testing.T) {
 	assert.Nil(ip)
 
 	ReleaseIp(net.IPv4(192, 168, 3, 88), "mac-88")
-	ReleaseIp(net.IPv4(192, 168, 3, 77), "mac-77")
+	ReleaseIp(net.IPv4(192, 168, 3, 188), "mac-188")
 	// 从头循环获取可用ip
-	ip = AcquireIp("user", "mac-release-new")
-	assert.True(net.IPv4(192, 168, 3, 77).Equal(ip))
+	ip = AcquireIp("user", "mac-188")
+	t.Log("mac-188", ip)
+	assert.True(net.IPv4(192, 168, 3, 188).Equal(ip))
 }
