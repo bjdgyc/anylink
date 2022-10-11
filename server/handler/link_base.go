@@ -25,8 +25,9 @@ type ClientRequest struct {
 }
 
 type auth struct {
-	Username string `xml:"username"`
-	Password string `xml:"password"`
+	Username          string `xml:"username"`
+	Password          string `xml:"password"`
+	SecondaryPassword string `xml:"secondary_password"`
 }
 
 type deviceId struct {
