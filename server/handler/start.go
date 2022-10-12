@@ -7,6 +7,7 @@ import (
 
 	"github.com/bjdgyc/anylink/admin"
 	"github.com/bjdgyc/anylink/base"
+	"github.com/bjdgyc/anylink/cron"
 	"github.com/bjdgyc/anylink/dbdata"
 	"github.com/bjdgyc/anylink/sessdata"
 )
@@ -14,6 +15,7 @@ import (
 func Start() {
 	dbdata.Start()
 	sessdata.Start()
+	cron.Start()
 
 	switch base.Cfg.LinkMode {
 	case base.LinkModeTUN:

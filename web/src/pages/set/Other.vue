@@ -32,6 +32,32 @@
         </el-form>
       </el-tab-pane>
 
+      <el-tab-pane label="审计日志" name="dataAuditLog">
+        <el-form :model="dataAuditLog" ref="dataAuditLog" :rules="rules" label-width="100px" class="tab-one">
+          <el-form-item label="存储时长" prop="life_day">
+                <el-input-number v-model="dataAuditLog.life_day" :min="0" :max="365" size="small" label="天数"></el-input-number>  天
+                <p class="input_tip">范围: 0 ~ 365天 , <strong style="color:#EA3323;">0 代表永久保存</strong></p>
+          </el-form-item>
+          <el-form-item label="清理时间" prop="clear_time">
+            <el-time-select
+                v-model="dataAuditLog.clear_time"
+                :picker-options="{
+                    start: '00:00',
+                    step: '01:00',
+                    end: '23:00'
+                }"
+                editable=false,
+                size="small"
+                placeholder="请选择"
+                style="width:130px;">
+                </el-time-select>  
+            </el-form-item>
+          <el-form-item>
+            <el-button type="primary" @click="submitForm('dataAuditLog')">保存</el-button>
+            <el-button @click="resetForm('dataAuditLog')">重置</el-button>
+          </el-form-item>          
+        </el-form>
+      </el-tab-pane>     
       <el-tab-pane label="其他设置" name="dataOther">
         <el-form :model="dataOther" ref="dataOther" :rules="rules" label-width="100px" class="tab-one">
 
@@ -104,6 +130,7 @@ export default {
     return {
       activeName: 'dataSmtp',
       dataSmtp: {},
+      dataAuditLog: {},
       dataOther: {},
       rules: {
         host: {required: true, message: '请输入服务器地址', trigger: 'blur'},
@@ -122,9 +149,12 @@ export default {
         case "dataSmtp":
           this.getSmtp()
           break
+        case "dataAuditLog":
+          this.getAuditLog()
+          break          
         case "dataOther":
           this.getOther()
-          break
+          break          
       }
     },
     getSmtp() {
@@ -141,6 +171,20 @@ export default {
         console.log(error);
       });
     },
+    getAuditLog() {
+      axios.get('/set/other/audit_log').then(resp => {
+        let rdata = resp.data
+        console.log(rdata)
+        if (rdata.code !== 0) {
+          this.$message.error(rdata.msg);
+          return;
+        }
+        this.dataAuditLog = rdata.data
+      }).catch(error => {
+        this.$message.error('哦，请求出错');
+        console.log(error);
+      });
+    },     
     getOther() {
       axios.get('/set/other').then(resp => {
         let rdata = resp.data
@@ -174,6 +218,17 @@ export default {
 
             })
             break;
+          case "dataAuditLog":
+            axios.post('/set/other/audit_log/edit', this.dataAuditLog).then(resp => {
+              var rdata = resp.data
+              console.log(rdata);
+              if (rdata.code === 0) {
+                this.$message.success(rdata.msg);
+              } else {
+                this.$message.error(rdata.msg);
+              }
+            })
+            break;
           case "dataOther":
             axios.post('/set/other/edit', this.dataOther).then(resp => {
               var rdata = resp.data
@@ -199,6 +254,11 @@ export default {
 <style scoped>
 .tab-one {
   width: 600px;
+}
+
+.input_tip {
+    line-height: 1.428;    
+    margin:2px 0 0 0;
 }
 
 </style>

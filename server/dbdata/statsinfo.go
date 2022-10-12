@@ -203,7 +203,6 @@ func (s *StatsInfo) getScopeDetail(scope string) (sd *ScopeDetail) {
 	switch base.Cfg.DbType {
 	case "sqlite3", "postgres":
 		sd.fsTime = sd.sTime.UTC().Format(LayoutTimeFormat)
-		sd.feTime = sd.eTime.UTC().Format(LayoutTimeFormat)
 	}
 	return
 }
@@ -236,4 +235,18 @@ func (s *StatsInfo) getStatsWhere(sd *ScopeDetail) (where string) {
 		where = ""
 	}
 	return
+}
+
+func (s *StatsInfo) ClearStatsInfo(action string, ts string) (affected int64, err error) {
+	switch action {
+	case "online":
+		affected, err = xdb.Where("created_at < '" + ts + "'").Delete(&StatsOnline{})
+	case "network":
+		affected, err = xdb.Where("created_at < '" + ts + "'").Delete(&StatsNetwork{})
+	case "cpu":
+		affected, err = xdb.Where("created_at < '" + ts + "'").Delete(&StatsCpu{})
+	case "mem":
+		affected, err = xdb.Where("created_at < '" + ts + "'").Delete(&StatsMem{})
+	}
+	return affected, err
 }
