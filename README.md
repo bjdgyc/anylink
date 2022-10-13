@@ -71,6 +71,7 @@ cd anylink-deploy
 sudo ./anylink
 
 # 默认管理后台访问地址
+# 注意该host为anylink的内网ip,不能跟客户端请求的ip一样
 # https://host:8800
 # 默认账号 密码
 # admin 123456
