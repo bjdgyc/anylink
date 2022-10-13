@@ -87,6 +87,13 @@ func addInitData() error {
 		return err
 	}
 
+	// SettingAuditLog
+	auditLog := SettingGetAuditLogDefault()
+	err = SettingSessAdd(sess, auditLog)
+	if err != nil {
+		return err
+	}
+
 	// SettingOther
 	other := &SettingOther{
 		LinkAddr:    "vpn.xx.com",
