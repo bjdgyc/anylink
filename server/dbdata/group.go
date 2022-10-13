@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"github.com/bjdgyc/anylink/base"
+	"golang.org/x/text/language"
+	"golang.org/x/text/message"
 )
 
 const (
@@ -16,6 +18,9 @@ const (
 	Deny  = "deny"
 	All   = "all"
 )
+
+// 域名分流最大字符2万
+const DsMaxLen = 20000
 
 type GroupLinkAcl struct {
 	// 自上而下匹配 默认 allow * *
@@ -145,10 +150,10 @@ func SetGroup(g *Group) error {
 			clientDns = append(clientDns, v)
 		}
 	}
-	if len(routeInclude) == 0 || (len(routeInclude) == 1 && routeInclude[0].Val == "all") {
-		if len(clientDns) == 0 {
-			return errors.New("默认路由，必须设置一个DNS")
-		}
+	// 是否默认路由
+	isDefRoute := len(routeInclude) == 0 || (len(routeInclude) == 1 && routeInclude[0].Val == "all")
+	if isDefRoute && len(clientDns) == 0 {
+		return errors.New("默认路由，必须设置一个DNS")
 	}
 	g.ClientDns = clientDns
 	// 域名拆分隧道，不能同时填写
@@ -166,6 +171,9 @@ func SetGroup(g *Group) error {
 	err = CheckDomainNames(g.DsExcludeDomains)
 	if err != nil {
 		return errors.New("排除域名有误：" + err.Error())
+	}
+	if isDefRoute && g.DsIncludeDomains != "" {
+		return errors.New("默认路由, 不允许设置\"包含域名\", 请重新配置")
 	}
 	// 处理登入方式的逻辑
 	defAuth := map[string]interface{}{
@@ -219,6 +227,7 @@ func CheckDomainNames(domains string) error {
 	if domains == "" {
 		return nil
 	}
+	strLen := 0
 	str_slice := strings.Split(domains, ",")
 	for _, val := range str_slice {
 		if val == "" {
@@ -227,6 +236,11 @@ func CheckDomainNames(domains string) error {
 		if !ValidateDomainName(val) {
 			return errors.New(val + " 域名有误")
 		}
+		strLen += len(val)
+	}
+	if strLen > DsMaxLen {
+		p := message.NewPrinter(language.English)
+		return fmt.Errorf("字符长度超出限制，最大%s个(不包含逗号), 请删减一些域名", p.Sprintf("%d", DsMaxLen))
 	}
 	return nil
 }
