@@ -13,6 +13,7 @@ import (
 	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/dbdata"
 	"github.com/bjdgyc/anylink/pkg/utils"
+	mapset "github.com/deckarep/golang-set"
 	"github.com/ivpusic/grpool"
 	atomic2 "go.uber.org/atomic"
 )
@@ -111,6 +112,21 @@ func checkSession() {
 			sessMux.Unlock()
 		}
 	}()
+}
+
+// 状态为过期的用户踢下线
+func CloseUserLimittimeSession() {
+	y := dbdata.CheckUserlimittime()
+	s := mapset.NewSetFromSlice(y)
+	for k, v := range sessions {
+		sessMux.Lock()
+		v.mux.Lock()
+		if !v.IsActive && s.Contains(v.Username) {
+			delete(sessions, k)
+		}
+		v.mux.Unlock()
+		sessMux.Unlock()
+	}
 }
 
 func GenToken() string {

@@ -104,7 +104,12 @@ func checkLocalUser(name, pwd, group string) error {
 	v := &User{}
 	err := One("Username", name, v)
 	if err != nil || v.Status != 1 {
-		return fmt.Errorf("%s %s", name, "用户名错误")
+		switch v.Status {
+		case 0:
+			return fmt.Errorf("%s %s", name, "用户不存在或用户已停用")
+		case 2:
+			return fmt.Errorf("%s %s", name, "用户已过期")
+		}
 	}
 	// 判断用户组信息
 	if !utils.InArrStr(v.Groups, group) {

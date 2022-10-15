@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/arl/statsviz v0.5.1
+	github.com/deckarep/golang-set v1.8.0
 	github.com/go-co-op/gocron v1.17.0
 	github.com/go-ldap/ldap v3.0.3+incompatible
 	github.com/go-sql-driver/mysql v1.6.0
@@ -30,6 +31,7 @@ require (
 	go.uber.org/atomic v1.10.0
 	golang.org/x/crypto v0.0.0-20220427172511-eb4f295cb31f
 	golang.org/x/net v0.0.0-20220425223048-2871e0cb64e4
+	golang.org/x/text v0.3.7
 	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac
 	layeh.com/radius v0.0.0-20210819152912-ad72663a72ab
 	xorm.io/xorm v1.2.2
@@ -66,7 +68,6 @@ require (
 	github.com/tklauser/numcpus v0.2.3 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e // indirect
-	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/asn1-ber.v1 v1.0.0-20181015200546-f715ec2f112d // indirect
 	gopkg.in/ini.v1 v1.62.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect

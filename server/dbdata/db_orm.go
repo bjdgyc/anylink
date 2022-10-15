@@ -3,6 +3,7 @@ package dbdata
 import (
 	"errors"
 	"reflect"
+	"time"
 
 	"xorm.io/xorm"
 )
@@ -59,6 +60,19 @@ func One(fieldName string, value interface{}, data interface{}) error {
 	}
 
 	return nil
+}
+
+// 用户过期时间到达后，更新用户状态，并返回一个状态为过期的用户切片
+func CheckUserlimittime() []interface{} {
+	var user map[int64]User
+	var limitUser []interface{}
+	u := &User{Status: 2}
+	xdb.Where("limittime < ?", time.Now()).And("status = ?", 1).Update(u)
+	xdb.Where("status= ?", 2).Find(u)
+	for _, v := range user {
+		limitUser = append(limitUser, v.Username)
+	}
+	return limitUser
 }
 
 func CountAll(data interface{}) int {
