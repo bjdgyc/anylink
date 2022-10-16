@@ -189,6 +189,7 @@
             type="date"
             size="small"
             align="center"
+            style="width:130px"
             placeholder="选择日期">
           </el-date-picker>
         </el-form-item>
