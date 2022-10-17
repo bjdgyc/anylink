@@ -139,7 +139,7 @@ func CheckUserlimittime() []interface{} {
 	xdb.Where("limittime <= ?", time.Now()).And("status = ?", 1).Update(u)
 	user := make(map[int64]User)
 	limitUser := make([]interface{}, 0)
-	xdb.Where("status= ?", 2).Find(user)
+	xdb.Where("status != ?", 1).Find(user)
 	for _, v := range user {
 		limitUser = append(limitUser, v.Username)
 	}
