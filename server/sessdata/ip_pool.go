@@ -92,9 +92,9 @@ func AcquireIp(username, macAddr string) net.IP {
 		ipStr := mi.IpAddr
 		ip := net.ParseIP(ipStr)
 		// 跳过活跃连接
-		// _, ok := ipActive[ipStr]
+		_, ok := ipActive[ipStr]
 		// 检测原有ip是否在新的ip池内
-		if IpPool.Ipv4IPNet.Contains(ip) &&
+		if IpPool.Ipv4IPNet.Contains(ip) && !ok &&
 			utils.Ip2long(ip) >= IpPool.IpLongMin &&
 			utils.Ip2long(ip) <= IpPool.IpLongMax {
 			mi.Username = username

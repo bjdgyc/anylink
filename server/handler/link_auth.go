@@ -92,7 +92,12 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	// 获取客户端mac地址
 	macHw, err := net.ParseMAC(sess.MacAddr)
 	if err != nil {
-		sum := md5.Sum([]byte(sess.UniqueIdGlobal))
+		var sum [16]byte
+		if sess.UniqueIdGlobal != "" {
+			sum = md5.Sum([]byte(sess.UniqueIdGlobal))
+		} else {
+			sum = md5.Sum([]byte(sess.Token))
+		}
 		macHw = sum[0:5] // 5个byte
 		macHw = append([]byte{0x02}, macHw...)
 		sess.MacAddr = macHw.String()
