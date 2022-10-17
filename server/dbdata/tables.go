@@ -47,7 +47,7 @@ type IpMap struct {
 	Keep      bool      `json:"keep" xorm:"Bool"` // 保留 ip-mac 绑定
 	KeepTime  time.Time `json:"keep_time" xorm:"DateTime"`
 	Note      string    `json:"note" xorm:"varchar(255)"` // 备注
-	LastLogin time.Time `json:"last_login" xorm:"DateTime updated"`
+	LastLogin time.Time `json:"last_login" xorm:"DateTime"`
 	UpdatedAt time.Time `json:"updated_at" xorm:"DateTime updated"`
 }
 
@@ -59,14 +59,16 @@ type Setting struct {
 }
 
 type AccessAudit struct {
-	Id        int       `json:"id" xorm:"pk autoincr not null"`
-	Username  string    `json:"username" xorm:"varchar(60) not null"`
-	Protocol  uint8     `json:"protocol" xorm:"not null"`
-	Src       string    `json:"src" xorm:"varchar(60) not null"`
-	SrcPort   uint16    `json:"src_port" xorm:"not null"`
-	Dst       string    `json:"dst" xorm:"varchar(60) not null"`
-	DstPort   uint16    `json:"dst_port" xorm:"not null"`
-	CreatedAt time.Time `json:"created_at" xorm:"DateTime"`
+	Id          int       `json:"id" xorm:"pk autoincr not null"`
+	Username    string    `json:"username" xorm:"varchar(60) not null"`
+	Protocol    uint8     `json:"protocol" xorm:"not null"`
+	Src         string    `json:"src" xorm:"varchar(60) not null"`
+	SrcPort     uint16    `json:"src_port" xorm:"not null"`
+	Dst         string    `json:"dst" xorm:"varchar(60) not null"`
+	DstPort     uint16    `json:"dst_port" xorm:"not null"`
+	AccessProto uint8     `json:"access_proto" xorm:"default 0"`                // 访问协议
+	Info        string    `json:"info" xorm:"varchar(255) not null default ''"` // 详情
+	CreatedAt   time.Time `json:"created_at" xorm:"DateTime"`
 }
 
 type Policy struct {
@@ -81,4 +83,32 @@ type Policy struct {
 	Status           int8      `json:"status" xorm:"Int"` // 1正常 0 禁用
 	CreatedAt        time.Time `json:"created_at" xorm:"DateTime created"`
 	UpdatedAt        time.Time `json:"updated_at" xorm:"DateTime updated"`
+}
+
+type StatsOnline struct {
+	Id        int       `json:"id" xorm:"pk autoincr not null"`
+	Num       int       `json:"num" xorm:"Int"`
+	NumGroups string    `json:"num_groups" xorm:"varchar(500) not null"`
+	CreatedAt time.Time `json:"created_at" xorm:"DateTime created index"`
+}
+
+type StatsNetwork struct {
+	Id         int       `json:"id" xorm:"pk autoincr not null"`
+	Up         uint32    `json:"up" xorm:"Int"`
+	Down       uint32    `json:"down" xorm:"Int"`
+	UpGroups   string    `json:"up_groups" xorm:"varchar(500) not null"`
+	DownGroups string    `json:"down_groups" xorm:"varchar(500) not null"`
+	CreatedAt  time.Time `json:"created_at" xorm:"DateTime created index"`
+}
+
+type StatsCpu struct {
+	Id        int       `json:"id" xorm:"pk autoincr not null"`
+	Percent   float64   `json:"percent" xorm:"Float"`
+	CreatedAt time.Time `json:"created_at" xorm:"DateTime created index"`
+}
+
+type StatsMem struct {
+	Id        int       `json:"id" xorm:"pk autoincr not null"`
+	Percent   float64   `json:"percent" xorm:"Float"`
+	CreatedAt time.Time `json:"created_at" xorm:"DateTime created index"`
 }

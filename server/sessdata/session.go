@@ -1,7 +1,6 @@
 package sessdata
 
 import (
-	"crypto/md5"
 	"fmt"
 	"math/rand"
 	"net"
@@ -13,6 +12,9 @@ import (
 
 	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/dbdata"
+	"github.com/bjdgyc/anylink/pkg/utils"
+	"github.com/ivpusic/grpool"
+	atomic2 "go.uber.org/atomic"
 )
 
 var (
@@ -30,6 +32,7 @@ type ConnSession struct {
 	IpAddr              net.IP // 分配的ip地址
 	LocalIp             net.IP
 	MacHw               net.HardwareAddr // 客户端mac地址,从Session取出
+	Username            string
 	RemoteAddr          string
 	Mtu                 int
 	IfName              string
@@ -37,19 +40,19 @@ type ConnSession struct {
 	CstpDpd             int
 	Group               *dbdata.Group
 	Limit               *LimitRater
-	BandwidthUp         uint32 // 使用上行带宽 Byte
-	BandwidthDown       uint32 // 使用下行带宽 Byte
-	BandwidthUpPeriod   uint32 // 前一周期的总量
-	BandwidthDownPeriod uint32
-	BandwidthUpAll      uint64 // 使用上行带宽总量
-	BandwidthDownAll    uint64 // 使用下行带宽总量
+	BandwidthUp         atomic2.Uint32 // 使用上行带宽 Byte
+	BandwidthDown       atomic2.Uint32 // 使用下行带宽 Byte
+	BandwidthUpPeriod   atomic2.Uint32 // 前一周期的总量
+	BandwidthDownPeriod atomic2.Uint32
+	BandwidthUpAll      atomic2.Uint64 // 使用上行带宽总量
+	BandwidthDownAll    atomic2.Uint64 // 使用下行带宽总量
 	closeOnce           sync.Once
 	CloseChan           chan struct{}
 	PayloadIn           chan *Payload
-	PayloadOutCstp      chan *Payload    // Cstp的数据
-	PayloadOutDtls      chan *Payload    // Dtls的数据
-	IpAuditMap          map[string]int64 // 审计的ip数据
-
+	PayloadOutCstp      chan *Payload // Cstp的数据
+	PayloadOutDtls      chan *Payload // Dtls的数据
+	IpAuditMap          utils.IMaps   // 审计的ip数据
+	IpAuditPool         *grpool.Pool  // 审计的IP包解析池
 	// dSess *DtlsSession
 	dSess *atomic.Value
 }
@@ -68,6 +71,7 @@ type Session struct {
 	DtlsSid        string // dtls协议的 session_id
 	MacAddr        string // 客户端mac地址
 	UniqueIdGlobal string // 客户端唯一标示
+	MacHw          net.HardwareAddr
 	Username       string // 用户名
 	Group          string
 	AuthStep       string
@@ -145,6 +149,7 @@ func (s *Session) NewConn() *ConnSession {
 	s.mux.RLock()
 	active := s.IsActive
 	macAddr := s.MacAddr
+	macHw := s.MacHw
 	username := s.Username
 	s.mux.RUnlock()
 	if active {
@@ -155,14 +160,6 @@ func (s *Session) NewConn() *ConnSession {
 	if !limit {
 		return nil
 	}
-	// 获取客户端mac地址
-	macHw, err := net.ParseMAC(macAddr)
-	if err != nil {
-		sum := md5.Sum([]byte(s.UniqueIdGlobal))
-		macHw = sum[0:5] // 5个byte
-		macHw = append([]byte{0x02}, macHw...)
-		macAddr = macHw.String()
-	}
 	ip := AcquireIp(username, macAddr)
 	if ip == nil {
 		LimitClient(username, true)
@@ -171,7 +168,7 @@ func (s *Session) NewConn() *ConnSession {
 
 	// 查询group信息
 	group := &dbdata.Group{}
-	err = dbdata.One("Name", s.Group, group)
+	err := dbdata.One("Name", s.Group, group)
 	if err != nil {
 		base.Error(err)
 		return nil
@@ -180,6 +177,7 @@ func (s *Session) NewConn() *ConnSession {
 	cSess := &ConnSession{
 		Sess:           s,
 		MacHw:          macHw,
+		Username:       username,
 		IpAddr:         ip,
 		closeOnce:      sync.Once{},
 		CloseChan:      make(chan struct{}),
@@ -191,7 +189,8 @@ func (s *Session) NewConn() *ConnSession {
 
 	// ip 审计
 	if base.Cfg.AuditInterval >= 0 {
-		cSess.IpAuditMap = make(map[string]int64, 512)
+		cSess.IpAuditMap = utils.NewMap("cmap", 0)
+		cSess.IpAuditPool = grpool.NewPool(1, 600)
 	}
 
 	dSess := &DtlsSession{
@@ -226,8 +225,13 @@ func (cs *ConnSession) Close() {
 		cs.Sess.LastLogin = time.Now()
 		cs.Sess.CSess = nil
 
+		dSess := cs.GetDtlsSession()
+		if dSess != nil {
+			dSess.Close()
+		}
+
 		ReleaseIp(cs.IpAddr, cs.Sess.MacAddr)
-		LimitClient(cs.Sess.Username, true)
+		LimitClient(cs.Username, true)
 	})
 }
 
@@ -269,7 +273,7 @@ func (cs *ConnSession) GetDtlsSession() *DtlsSession {
 	return nil
 }
 
-const BandwidthPeriodSec = 2 // 流量速率统计周期(秒)
+const BandwidthPeriodSec = 10 // 流量速率统计周期(秒)
 
 func (cs *ConnSession) ratePeriod() {
 	tick := time.NewTicker(time.Second * BandwidthPeriodSec)
@@ -283,14 +287,14 @@ func (cs *ConnSession) ratePeriod() {
 		}
 
 		// 实时流量清零
-		rtUp := atomic.SwapUint32(&cs.BandwidthUp, 0)
-		rtDown := atomic.SwapUint32(&cs.BandwidthDown, 0)
+		rtUp := cs.BandwidthUp.Swap(0)
+		rtDown := cs.BandwidthDown.Swap(0)
 		// 设置上一周期每秒的流量
-		atomic.SwapUint32(&cs.BandwidthUpPeriod, rtUp/BandwidthPeriodSec)
-		atomic.SwapUint32(&cs.BandwidthDownPeriod, rtDown/BandwidthPeriodSec)
+		cs.BandwidthUpPeriod.Swap(rtUp / BandwidthPeriodSec)
+		cs.BandwidthDownPeriod.Swap(rtDown / BandwidthPeriodSec)
 		// 累加所有流量
-		atomic.AddUint64(&cs.BandwidthUpAll, uint64(rtUp))
-		atomic.AddUint64(&cs.BandwidthDownAll, uint64(rtDown))
+		cs.BandwidthUpAll.Add(uint64(rtUp))
+		cs.BandwidthDownAll.Add(uint64(rtDown))
 	}
 }
 
@@ -320,11 +324,11 @@ func (cs *ConnSession) SetIfName(name string) {
 
 func (cs *ConnSession) RateLimit(byt int, isUp bool) error {
 	if isUp {
-		atomic.AddUint32(&cs.BandwidthUp, uint32(byt))
+		cs.BandwidthUp.Add(uint32(byt))
 		return nil
 	}
 	// 只对下行速率限制
-	atomic.AddUint32(&cs.BandwidthDown, uint32(byt))
+	cs.BandwidthDown.Add(uint32(byt))
 	if cs.Limit == nil {
 		return nil
 	}

@@ -3,6 +3,8 @@ package dbdata
 import (
 	"errors"
 	"reflect"
+
+	"xorm.io/xorm"
 )
 
 const PageSize = 10
@@ -11,6 +13,11 @@ var ErrNotFound = errors.New("ErrNotFound")
 
 func Add(data interface{}) error {
 	_, err := xdb.InsertOne(data)
+	return err
+}
+
+func AddBatch(data interface{}) error {
+	_, err := xdb.Insert(data)
 	return err
 }
 
@@ -68,6 +75,15 @@ func Find(data interface{}, limit, page int) error {
 	return xdb.Limit(limit, start).Find(data)
 }
 
+func FindWhere(data interface{}, limit int, page int, where string, args ...interface{}) error {
+	if limit == 0 {
+		return xdb.Where(where, args...).Find(data)
+	}
+
+	start := (page - 1) * limit
+	return xdb.Where(where, args...).Limit(limit, start).Find(data)
+}
+
 func CountPrefix(fieldName string, prefix string, data interface{}) int {
 	n, _ := xdb.Where(fieldName+" like ?", prefix+"%").Count(data)
 	return int(n)
@@ -81,4 +97,13 @@ func Prefix(fieldName string, prefix string, data interface{}, limit, page int) 
 
 	start := (page - 1) * limit
 	return where.Limit(limit, start).Find(data)
+}
+
+func FindAndCount(session *xorm.Session, data interface{}, limit, page int) (int64, error) {
+	if limit == 0 {
+		return session.FindAndCount(data)
+	}
+	start := (page - 1) * limit
+	totalCount, err := session.Limit(limit, start).FindAndCount(data)
+	return totalCount, err
 }

@@ -58,7 +58,7 @@ AnyLink 服务端仅在 CentOS 7、Ubuntu 18.04 测试通过，如需要安装�
 
 ### 自行编译安装
 
-> 需要提前安装好 golang >= 1.17 和 nodejs >= 14.x 和 yarn >= v1.22.x
+> 需要提前安装好 golang >= 1.18 和 nodejs >= 14.x 和 yarn >= v1.22.x
 
 ```shell
 git clone https://github.com/bjdgyc/anylink.git
@@ -71,6 +71,7 @@ cd anylink-deploy
 sudo ./anylink
 
 # 默认管理后台访问地址
+# 注意该host为anylink的内网ip,不能跟客户端请求的ip一样
 # https://host:8800
 # 默认账号 密码
 # admin 123456
@@ -151,7 +152,7 @@ sysctl -w net.ipv4.ip_forward=1
 cat /proc/sys/net/ipv4/ip_forward
 ```
 
-2. 设置 nat 转发规则
+2.1 设置 nat 转发规则(二选一)
 
 ```shell
 systemctl stop firewalld.service
@@ -164,6 +165,24 @@ iptables -t nat -A POSTROUTING -s 192.168.10.0/24 -o eth0 -j MASQUERADE
 # 查看设置是否生效
 iptables -nL -t nat
 ```
+
+2.2 使用全局路由转发(二选一)
+
+```shell
+# 假设anylink所在服务器的内网ip: 10.1.0.10
+
+# 传统网络架构，在华三交换机添加以下静态路由规则
+ip route-static 192.168.10.0 255.255.255.0 10.1.0.10
+# 其他品牌的交换机命令，请参考以下地址
+https://cloud.tencent.com/document/product/216/62007
+
+# 公有云环境下，需设置vpc下的路由表，添加以下路由策略
+目的端: 192.168.10.0/24
+下一跳类型: 云服务器
+下一跳: 10.1.0.10
+
+```
+
 
 3. 使用 AnyConnect 客户端连接即可
 
@@ -183,6 +202,9 @@ ipv4_gateway = "192.168.10.1"
 ipv4_start = "192.168.10.100"
 ipv4_end = "192.168.10.200"
 ```
+
+<details>
+<summary>tap设置</summary>
 
 ### ~~tap 设置~~
 
@@ -208,6 +230,7 @@ eth_gateway="192.168.10.1"
 ```
 sh bridge-init.sh
 ```
+</details>
 
 ## Systemd
 

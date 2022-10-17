@@ -97,11 +97,14 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	HttpSetHeader(w, "X-CSTP-Address", cSess.IpAddr.String())             // 分配的ip地址
 	HttpSetHeader(w, "X-CSTP-Netmask", sessdata.IpPool.Ipv4Mask.String()) // 子网掩码
 	HttpSetHeader(w, "X-CSTP-Hostname", hn)                               // 机器名称
-	//HttpSetHeader(w, "X-CSTP-Default-Domain", cSess.LocalIp)
 	HttpSetHeader(w, "X-CSTP-Base-MTU", cstpBaseMtu)
+	// 要发布的默认域
+	if base.Cfg.DefaultDomain != "" {
+		HttpSetHeader(w, "X-CSTP-Default-Domain", base.Cfg.DefaultDomain)
+	}
 
 	// 设置用户策略
-	SetUserPolicy(sess.Username, cSess.Group)
+	SetUserPolicy(cSess.Username, cSess.Group)
 
 	// 允许本地LAN访问vpn网络，必须放在路由的第一个
 	if cSess.Group.AllowLan {

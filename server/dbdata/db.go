@@ -19,13 +19,16 @@ func GetXdb() *xorm.Engine {
 func initDb() {
 	var err error
 	xdb, err = xorm.NewEngine(base.Cfg.DbType, base.Cfg.DbSource)
-	// xdb.ShowSQL(true)
 	if err != nil {
 		base.Fatal(err)
 	}
 
+	if base.Cfg.ShowSQL {
+		xdb.ShowSQL(true)
+	}
+
 	// 初始化数据库
-	err = xdb.Sync2(&User{}, &Setting{}, &Group{}, &IpMap{}, &AccessAudit{}, &Policy{})
+	err = xdb.Sync2(&User{}, &Setting{}, &Group{}, &IpMap{}, &AccessAudit{}, &Policy{}, &StatsNetwork{}, &StatsCpu{}, &StatsMem{}, &StatsOnline{})
 	if err != nil {
 		base.Fatal(err)
 	}
@@ -84,10 +87,18 @@ func addInitData() error {
 		return err
 	}
 
+	// SettingAuditLog
+	auditLog := SettingGetAuditLogDefault()
+	err = SettingSessAdd(sess, auditLog)
+	if err != nil {
+		return err
+	}
+
 	// SettingOther
 	other := &SettingOther{
 		LinkAddr:    "vpn.xx.com",
 		Banner:      "您已接入公司网络，请按照公司规定使用。\n请勿进行非工作下载及视频行为！",
+		Homeindex:   "AnyLink 是一个企业级远程办公 sslvpn 的软件，可以支持多人同时在线使用。",
 		AccountMail: accountMail,
 	}
 	err = SettingSessAdd(sess, other)

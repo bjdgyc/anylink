@@ -47,6 +47,16 @@ func GroupNames(w http.ResponseWriter, r *http.Request) {
 	RespSucess(w, data)
 }
 
+func GroupNamesIds(w http.ResponseWriter, r *http.Request) {
+	var names = dbdata.GetGroupNamesIds()
+	data := map[string]interface{}{
+		"count":     len(names),
+		"page_size": 0,
+		"datas":     names,
+	}
+	RespSucess(w, data)
+}
+
 func GroupDetail(w http.ResponseWriter, r *http.Request) {
 	_ = r.ParseForm()
 	idS := r.FormValue("id")

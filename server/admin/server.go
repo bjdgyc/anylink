@@ -7,7 +7,9 @@ import (
 	"net/http"
 	"net/http/pprof"
 
+	"github.com/arl/statsviz"
 	"github.com/bjdgyc/anylink/base"
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
 
@@ -18,6 +20,7 @@ func StartAdmin() {
 
 	r := mux.NewRouter()
 	r.Use(authMiddleware)
+	r.Use(handlers.CompressHandler)
 
 	// 监控检测
 	r.HandleFunc("/status.html", func(w http.ResponseWriter, r *http.Request) {
@@ -38,7 +41,10 @@ func StartAdmin() {
 	r.HandleFunc("/set/other/edit", SetOtherEdit)
 	r.HandleFunc("/set/other/smtp", SetOtherSmtp)
 	r.HandleFunc("/set/other/smtp/edit", SetOtherSmtpEdit)
+	r.HandleFunc("/set/other/audit_log", SetOtherAuditLog)
+	r.HandleFunc("/set/other/audit_log/edit", SetOtherAuditLogEdit)
 	r.HandleFunc("/set/audit/list", SetAuditList)
+	r.HandleFunc("/set/audit/export", SetAuditExport)
 
 	r.HandleFunc("/user/list", UserList)
 	r.HandleFunc("/user/detail", UserDetail)
@@ -59,9 +65,12 @@ func StartAdmin() {
 
 	r.HandleFunc("/group/list", GroupList)
 	r.HandleFunc("/group/names", GroupNames)
+	r.HandleFunc("/group/names_ids", GroupNamesIds)
 	r.HandleFunc("/group/detail", GroupDetail)
 	r.HandleFunc("/group/set", GroupSet)
 	r.HandleFunc("/group/del", GroupDel)
+
+	r.HandleFunc("/statsinfo/list", StatsInfoList)
 
 	// pprof
 	if base.Cfg.Pprof {
@@ -71,6 +80,9 @@ func StartAdmin() {
 		r.HandleFunc("/debug/pprof/trace", pprof.Trace).Name("debug")
 		r.HandleFunc("/debug/pprof", location("/debug/pprof/")).Name("debug")
 		r.PathPrefix("/debug/pprof/").HandlerFunc(pprof.Index).Name("debug")
+		// statsviz
+		r.Path("/debug/statsviz/ws").Name("debug").HandlerFunc(statsviz.Ws)
+		r.PathPrefix("/debug/statsviz/").Name("debug").Handler(statsviz.Index)
 	}
 
 	base.Info("Listen admin", base.Cfg.AdminAddr)

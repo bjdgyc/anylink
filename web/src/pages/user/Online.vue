@@ -128,7 +128,7 @@ export default {
 
     const chatTimer = setInterval(() => {
       this.getData();
-    }, 2000);
+    }, 10000);
 
     this.$once('hook:beforeDestroy', () => {
       clearInterval(chatTimer);

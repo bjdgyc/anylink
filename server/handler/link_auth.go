@@ -1,10 +1,11 @@
 package handler
 
 import (
+	"crypto/md5"
 	"encoding/xml"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"net"
 	"net/http"
 	"strings"
 	"text/template"
@@ -28,7 +29,7 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -88,6 +89,20 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	sess.Group = cr.GroupSelect
 	sess.MacAddr = strings.ToLower(cr.MacAddressList.MacAddress)
 	sess.UniqueIdGlobal = cr.DeviceId.UniqueIdGlobal
+	// 获取客户端mac地址
+	macHw, err := net.ParseMAC(sess.MacAddr)
+	if err != nil {
+		var sum [16]byte
+		if sess.UniqueIdGlobal != "" {
+			sum = md5.Sum([]byte(sess.UniqueIdGlobal))
+		} else {
+			sum = md5.Sum([]byte(sess.Token))
+		}
+		macHw = sum[0:5] // 5个byte
+		macHw = append([]byte{0x02}, macHw...)
+		sess.MacAddr = macHw.String()
+	}
+	sess.MacHw = macHw
 	other := &dbdata.SettingOther{}
 	_ = dbdata.SettingGet(other)
 	rd := RequestData{SessionId: sess.Sid, SessionToken: sess.Sid + "@" + sess.Token,
@@ -188,39 +203,40 @@ var auth_complete = `<?xml version="1.0" encoding="UTF-8"?>
 </config-auth>
 `
 
-var auth_profile = `<?xml version="1.0" encoding="UTF-8"?>
-<AnyConnectProfile xmlns="http://schemas.xmlsoap.org/encoding/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.xmlsoap.org/encoding/ AnyConnectProfile.xsd">
+// var auth_profile = `<?xml version="1.0" encoding="UTF-8"?>
+// <AnyConnectProfile xmlns="http://schemas.xmlsoap.org/encoding/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.xmlsoap.org/encoding/ AnyConnectProfile.xsd">
 
-	<ClientInitialization>
-		<UseStartBeforeLogon UserControllable="false">false</UseStartBeforeLogon>
-		<StrictCertificateTrust>false</StrictCertificateTrust>
-		<RestrictPreferenceCaching>false</RestrictPreferenceCaching>
-		<RestrictTunnelProtocols>IPSec</RestrictTunnelProtocols>
-		<BypassDownloader>true</BypassDownloader>
-		<WindowsVPNEstablishment>AllowRemoteUsers</WindowsVPNEstablishment>
-		<CertEnrollmentPin>pinAllowed</CertEnrollmentPin>
-		<CertificateMatch>
-			<KeyUsage>
-				<MatchKey>Digital_Signature</MatchKey>
-			</KeyUsage>
-			<ExtendedKeyUsage>
-				<ExtendedMatchKey>ClientAuth</ExtendedMatchKey>
-			</ExtendedKeyUsage>
-		</CertificateMatch>
+// 	<ClientInitialization>
+// 		<UseStartBeforeLogon UserControllable="false">false</UseStartBeforeLogon>
+// 		<StrictCertificateTrust>false</StrictCertificateTrust>
+// 		<RestrictPreferenceCaching>false</RestrictPreferenceCaching>
+// 		<RestrictTunnelProtocols>IPSec</RestrictTunnelProtocols>
+// 		<BypassDownloader>true</BypassDownloader>
+// 		<WindowsVPNEstablishment>AllowRemoteUsers</WindowsVPNEstablishment>
+// 		<CertEnrollmentPin>pinAllowed</CertEnrollmentPin>
+// 		<CertificateMatch>
+// 			<KeyUsage>
+// 				<MatchKey>Digital_Signature</MatchKey>
+// 			</KeyUsage>
+// 			<ExtendedKeyUsage>
+// 				<ExtendedMatchKey>ClientAuth</ExtendedMatchKey>
+// 			</ExtendedKeyUsage>
+// 		</CertificateMatch>
 
-		<BackupServerList>
-	            <HostAddress>localhost</HostAddress>
-		</BackupServerList>
-	</ClientInitialization>
+// 		<BackupServerList>
+// 	            <HostAddress>localhost</HostAddress>
+// 		</BackupServerList>
+// 	</ClientInitialization>
 
-	<ServerList>
-		<HostEntry>
-	            <HostName>VPN Server</HostName>
-	            <HostAddress>localhost</HostAddress>
-		</HostEntry>
-	</ServerList>
-</AnyConnectProfile>
-`
+//	<ServerList>
+//		<HostEntry>
+//	            <HostName>VPN Server</HostName>
+//	            <HostAddress>localhost</HostAddress>
+//		</HostEntry>
+//	</ServerList>
+//
+// </AnyConnectProfile>
+// `
 var ds_domains_xml = `
 <?xml version="1.0" encoding="UTF-8"?>
 <config-auth client="vpn" type="complete" aggregate-auth-version="2">

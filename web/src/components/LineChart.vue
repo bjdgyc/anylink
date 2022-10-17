@@ -1,5 +1,5 @@
 <template>
-  <div id="line-chart" :style="{height:height,width:width}"/>
+  <div class="line-chart" :style="{height:height,width:width}" />
 </template>
 
 <script>
@@ -14,7 +14,7 @@
       },
       height: {
         type: String,
-        default: '350px'
+        default: '240px'
       },
       // title,xAxis,series
       chartData: {
@@ -23,29 +23,48 @@
       }
     },
     data() {
-      return {}
+      return {
+        chart:null
+      }
     },
     mounted() {
       this.initChart()
+      window.addEventListener('resize', this.listenerResize)
     },
     beforeDestroy() {
+      window.removeEventListener('resize', this.listenerResize)
+    },
+    watch: {
+        chartData:{
+            handler(){
+                this.initChart()
+            },
+            deep:true
+        }
     },
     methods: {
+      listenerResize() {
+        this.chart.resize()
+      },
       initChart() {
-        let chart = echarts.init(this.$el)
+        this.chart = echarts.init(this.$el)
 
-        const option = {
+        let option = {
+          color: ['#2D5CF6','#50B142'],
           title: {
-            text: this.chartData.title || '折线图'
+            text: this.chartData.title || '折线图',
+            textStyle:{fontWeight:'normal',fontSize:16, color:'#8C8C8C'}
           },
           tooltip: {
             trigger: 'axis'
           },
-          legend: {},
+          legend: {
+            bottom: 0,
+          },
           grid: {
             left: '3%',
             right: '4%',
-            bottom: '3%',
+            bottom: '10%',
             containLabel: true
           },
           // toolbox: {
@@ -56,27 +75,47 @@
           xAxis: {
             type: 'category',
             boundaryGap: false,
-            data: this.chartData.xname
+            data: this.chartData.xname, 
+            splitLine: {
+                show: false
+            }                                                     
           },
           yAxis: {
-            type: 'value'
+            type: 'value',
+            minInterval: undefined,
+            name: this.chartData.yname,
+            splitLine: {
+                lineStyle: {
+                    color: "#F0F0F0",
+                },
+            },            
+            axisLabel: {
+                // formatter: (value) => {
+                //     value = value + " MB"
+                //     return value
+                // }
+            }            
           },
           series: [],
         };
-
+        if (this.chartData.yminInterval != undefined) {
+            option.yAxis.minInterval = this.chartData.yminInterval
+        }
         let xdata = this.chartData.xdata
         for (let key in xdata) {
           // window.console.log(key);
           let a = {
             name: key,
             type: 'line',
+            showSymbol: false,
             data: xdata[key]
           };
           option.series.push(a)
         }
 
-        chart.setOption(option)
+
+        this.chart.setOption(option)
       },
-    }
-  }
+    }    
+  } 
 </script>

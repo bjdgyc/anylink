@@ -3,6 +3,7 @@ package dbdata
 import (
 	"encoding/json"
 	"reflect"
+
 	"xorm.io/xorm"
 )
 
@@ -19,9 +20,15 @@ type SettingSmtp struct {
 	Encryption string `json:"encryption"`
 }
 
+type SettingAuditLog struct {
+	LifeDay   int    `json:"life_day"`
+	ClearTime string `json:"clear_time"`
+}
+
 type SettingOther struct {
 	LinkAddr    string `json:"link_addr"`
 	Banner      string `json:"banner"`
+	Homeindex   string `json:"homeindex"`
 	AccountMail string `json:"account_mail"`
 }
 
@@ -62,4 +69,31 @@ func SettingGet(data interface{}) error {
 	}
 	err = json.Unmarshal(s.Data, data)
 	return err
+}
+
+func SettingGetAuditLog() (SettingAuditLog, error) {
+	data := SettingAuditLog{}
+	err := SettingGet(&data)
+	if err == nil {
+		return data, err
+	}
+	if !CheckErrNotFound(err) {
+		return data, err
+	}
+	sess := xdb.NewSession()
+	defer sess.Close()
+	auditLog := SettingGetAuditLogDefault()
+	err = SettingSessAdd(sess, auditLog)
+	if err != nil {
+		return data, err
+	}
+	return auditLog, nil
+}
+
+func SettingGetAuditLogDefault() SettingAuditLog {
+	auditLog := SettingAuditLog{
+		LifeDay:   0,
+		ClearTime: "05:00",
+	}
+	return auditLog
 }
