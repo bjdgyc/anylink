@@ -9,7 +9,7 @@ import (
 )
 
 var tcpParsers = []func([]byte) (uint8, string){
-	sniNewParser,
+	sniParser,
 	httpParser,
 }
 
