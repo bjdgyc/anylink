@@ -254,6 +254,8 @@ sh bridge-init.sh
 1. 获取镜像
 
    ```bash
+   # 具体tag可以从docker hub获取
+   # https://hub.docker.com/r/bjdgyc/anylink/tags
    docker pull bjdgyc/anylink:latest
    ```
 
