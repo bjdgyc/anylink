@@ -117,14 +117,10 @@ func checkSession() {
 // 状态为过期的用户踢下线
 func CloseUserLimittimeSession() {
 	s := mapset.NewSetFromSlice(dbdata.CheckUserlimittime())
-	for k, v := range sessions {
-		sessMux.Lock()
-		v.mux.Lock()
-		if !v.IsActive && s.Contains(v.Username) {
-			delete(sessions, k)
+	for _, v := range sessions {
+		if v.IsActive && s.Contains(v.Username) {
+			CloseSess(v.Token)
 		}
-		v.mux.Unlock()
-		sessMux.Unlock()
 	}
 }
 

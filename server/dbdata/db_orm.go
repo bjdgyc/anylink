@@ -67,11 +67,11 @@ func CheckUserlimittime() []interface{} {
 	//初始化xorm时区
 	xdb.DatabaseTZ = time.Local
 	xdb.TZLocation = time.Local
-	var user map[int64]User
-	var limitUser []interface{}
 	u := &User{Status: 2}
 	xdb.Where("limittime <= ?", time.Now()).And("status = ?", 1).Update(u)
-	xdb.Where("status= ?", 2).Find(u)
+	user := make(map[int64]User)
+	limitUser := make([]interface{}, 0)
+	xdb.Where("status= ?", 2).Find(user)
 	for _, v := range user {
 		limitUser = append(limitUser, v.Username)
 	}
