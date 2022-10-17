@@ -16,6 +16,11 @@ func setOtherGet(data interface{}, w http.ResponseWriter) {
 		RespError(w, RespInternalErr, err)
 		return
 	}
+	// 不明文输出SMTP的密码
+	switch dbdata.StructName(data) {
+	case "SettingSmtp":
+		data.(*dbdata.SettingSmtp).Password = ""
+	}
 	RespSucess(w, data)
 }
 
@@ -34,7 +39,15 @@ func setOtherEdit(data interface{}, w http.ResponseWriter, r *http.Request) {
 	}
 
 	// fmt.Println(data)
-
+	switch dbdata.StructName(data) {
+	case "SettingSmtp":
+		// 密码为空时则不修改
+		smtp := &dbdata.SettingSmtp{}
+		err := dbdata.SettingGet(smtp)
+		if err == nil && data.(*dbdata.SettingSmtp).Password == "" {
+			data.(*dbdata.SettingSmtp).Password = smtp.Password
+		}
+	}
 	err = dbdata.SettingSet(data)
 	if err != nil {
 		RespError(w, RespInternalErr, err)

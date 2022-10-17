@@ -13,7 +13,7 @@
             <el-input v-model="dataSmtp.username"></el-input>
           </el-form-item>
           <el-form-item label="密码" prop="password">
-            <el-input v-model="dataSmtp.password"></el-input>
+            <el-input type="password" v-model="dataSmtp.password" placeholder="密码为空则不修改"></el-input>
           </el-form-item>
           <el-form-item label="加密类型" prop="encryption">
             <el-radio-group v-model="dataSmtp.encryption">
