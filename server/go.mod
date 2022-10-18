@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/arl/statsviz v0.5.1
+	github.com/deckarep/golang-set v1.8.0
 	github.com/go-co-op/gocron v1.17.0
 	github.com/go-ldap/ldap v3.0.3+incompatible
 	github.com/go-sql-driver/mysql v1.6.0

@@ -1,6 +1,8 @@
 package dbdata
 
 import (
+	"time"
+
 	"github.com/bjdgyc/anylink/base"
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
@@ -19,6 +21,9 @@ func GetXdb() *xorm.Engine {
 func initDb() {
 	var err error
 	xdb, err = xorm.NewEngine(base.Cfg.DbType, base.Cfg.DbSource)
+	// 初始化xorm时区
+	xdb.DatabaseTZ = time.Local
+	xdb.TZLocation = time.Local
 	if err != nil {
 		base.Fatal(err)
 	}

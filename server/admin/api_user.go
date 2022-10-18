@@ -107,7 +107,8 @@ func UserSet(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-
+	//修改用户资料后执行过期用户检测
+	sessdata.CloseUserLimittimeSession()
 	RespSucess(w, nil)
 }
 
