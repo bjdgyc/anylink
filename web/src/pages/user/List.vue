@@ -190,6 +190,7 @@
             size="small"
             align="center"
             style="width:130px"
+            :picker-options="pickerOptions"
             placeholder="选择日期">
           </el-date-picker>
         </el-form-item>
@@ -258,6 +259,11 @@ export default {
       grouNames: [],
       tableData: [],
       count: 10,
+      pickerOptions: {
+        disabledDate(time) {
+            return time.getTime() < Date.now();
+        }
+      },
       searchData: '',
       otpImgData: {visible: false, username: '', nickname: '', base64Img: ''},
       ruleForm: {
