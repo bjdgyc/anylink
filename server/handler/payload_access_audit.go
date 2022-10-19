@@ -3,7 +3,6 @@ package handler
 import (
 	"crypto/md5"
 	"encoding/binary"
-	"encoding/hex"
 	"time"
 
 	"github.com/bjdgyc/anylink/base"
@@ -109,6 +108,7 @@ func logAudit(cSess *sessdata.ConnSession, pl *sessdata.Payload) {
 	copy(key[:16], ipSrc)
 	copy(key[16:32], ipDst)
 	binary.BigEndian.PutUint16(key[32:34], ipPort)
+	key[34] = byte(accessProto)
 
 	info := ""
 	nu := utils.NowSec().Unix()
@@ -149,16 +149,23 @@ func logAudit(cSess *sessdata.ConnSession, pl *sessdata.Payload) {
 		case flags & 0x18:
 			// PSH ACK
 			accessProto, info = onTCP(plData)
-			if info != "" {
+			// HTTPS or HTTP
+			if accessProto != acc_proto_tcp {
 				// 提前存储只含ip数据的key, 避免即记录域名又记录一笔IP数据的记录
 				ipKey := make([]byte, 51)
 				copy(ipKey, key)
 				ipS := utils.BytesToString(ipKey)
 				cSess.IpAuditMap.Set(ipS, nu)
-				// 存储含域名的key
+
 				key[34] = byte(accessProto)
-				md5Sum := md5.Sum([]byte(info))
-				copy(key[35:51], hex.EncodeToString(md5Sum[:]))
+				// 存储含域名的key
+				if info != "" {
+					md5Sum := md5.Sum([]byte(info))
+					copy(key[35:51], md5Sum[:])
+				}
+			} else {
+				// 清空数据, 碰到使用上一个域名信息的问题
+				copy(key[35:51], []byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
 			}
 		case flags & 0x19:
 			// URG
