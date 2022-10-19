@@ -51,22 +51,26 @@ func BenchmarkNewHttpParser(b *testing.B) {
 func TestNewSniParser(t *testing.T) {
 	ast := assert.New(t)
 	data := handlerTcpPayload(httpsPacket)
-	_, sni := sniNewParser(data)
+	proto, sni := sniNewParser(data)
 	ast.Equal(sni, httpsSni)
+	ast.Equal(int(proto), acc_proto_https)
 }
 
 func TestNewHttpParser(t *testing.T) {
 	ast := assert.New(t)
 	// Host
 	data := handlerTcpPayload(httpPacket)
-	_, hostname := httpNewParser(data)
+	proto, hostname := httpNewParser(data)
 	ast.Equal(hostname, httpHost)
+	ast.Equal(int(proto), acc_proto_http)
 	// HOST
 	data = handlerTcpPayload(httpPacket2)
-	_, hostname = httpNewParser(data)
+	proto, hostname = httpNewParser(data)
 	ast.Equal(hostname, httpHost)
+	ast.Equal(int(proto), acc_proto_http)
 	// GET http://www.google.com/index.html HTTP/1.1
 	data = handlerTcpPayload(httpPacket3)
-	_, hostname = httpNewParser(data)
+	proto, hostname = httpNewParser(data)
 	ast.Equal(hostname, httpHost)
+	ast.Equal(int(proto), acc_proto_http)
 }
