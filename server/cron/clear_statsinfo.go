@@ -43,10 +43,5 @@ func getTimeAgo(days int) string {
 	ts := time.Now().AddDate(0, 0, -days)
 	tsZero := time.Date(ts.Year(), ts.Month(), ts.Day(), 0, 0, 0, 0, time.Local)
 	timeS = tsZero.Format(dbdata.LayoutTimeFormat)
-	// UTC
-	switch base.Cfg.DbType {
-	case "sqlite3", "postgres":
-		timeS = tsZero.UTC().Format(dbdata.LayoutTimeFormat)
-	}
 	return timeS
 }
