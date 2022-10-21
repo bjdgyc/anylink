@@ -15,7 +15,7 @@ func TestSearchAudit(t *testing.T) {
 	defer closeIpdata()
 
 	currDateVal := "2022-07-24 00:00:00"
-	CreatedAt, _ := time.Parse("2006-01-02 15:04:05", currDateVal)
+	CreatedAt, _ := time.ParseInLocation("2006-01-02 15:04:05", currDateVal, time.Local)
 
 	dataTest := AccessAudit{
 		Username:    "Test",
