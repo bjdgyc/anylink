@@ -199,12 +199,6 @@ func (s *StatsInfo) getScopeDetail(scope string) (sd *ScopeDetail) {
 	}
 	sd.fsTime = sd.sTime.Format(LayoutTimeFormat)
 	sd.feTime = sd.eTime.Format(LayoutTimeFormat)
-	// UTC
-	switch base.Cfg.DbType {
-	case "sqlite3", "postgres":
-		sd.fsTime = sd.sTime.UTC().Format(LayoutTimeFormat)
-		sd.feTime = sd.eTime.UTC().Format(LayoutTimeFormat)
-	}
 	return
 }
 
