@@ -39,7 +39,8 @@ func UploadUser(file string) error {
 		limittime, _ := time.Parse("2006-01-02 15:04:05", row[5])
 		disableOtp, _ := strconv.ParseBool(row[7])
 		group := []string{row[8]}
-		status, _ := strconv.Atoi(row[9])
+		s, _ := strconv.Atoi(row[9])
+		status := int8(s)
 		sendmail, _ := strconv.ParseBool(row[10])
 		// createdAt, _ := time.Parse("2006-01-02 03:04:05", row[11])
 		// updatedAt, _ := time.Parse("2006-01-02 03:04:05", row[12])
@@ -53,7 +54,7 @@ func UploadUser(file string) error {
 			OtpSecret:  row[6],
 			DisableOtp: disableOtp,
 			Groups:     group,
-			Status:     int8(status),
+			Status:     status,
 			SendEmail:  sendmail,
 			// CreatedAt:  createdAt,
 			// UpdatedAt:  updatedAt,
