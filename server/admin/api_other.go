@@ -3,7 +3,7 @@ package admin
 import (
 	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"regexp"
 
@@ -20,7 +20,7 @@ func setOtherGet(data interface{}, w http.ResponseWriter) {
 }
 
 func setOtherEdit(data interface{}, w http.ResponseWriter, r *http.Request) {
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		RespError(w, RespInternalErr, err)
 		return
@@ -73,7 +73,7 @@ func SetOtherAuditLog(w http.ResponseWriter, r *http.Request) {
 }
 
 func SetOtherAuditLogEdit(w http.ResponseWriter, r *http.Request) {
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		RespError(w, RespInternalErr, err)
 		return

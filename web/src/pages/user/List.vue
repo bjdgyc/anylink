@@ -10,7 +10,17 @@
               @click="handleEdit('')">添加
           </el-button>
         </el-form-item>
-
+        <el-form-item>
+          <el-upload
+              class="uploaduser"
+              action="upoaduser"
+              accept=".xlsx, .xls"
+              :http-request="upLoadUser"
+              :limit="1"
+              :show-file-list="false">
+              <el-button size="mini"  icon="el-icon-upload2" type="primary">批量添加</el-button>
+          </el-upload>
+        </el-form-item>
         <el-form-item label="用户名:">
           <el-input size="small" v-model="searchData" placeholder="请输入内容" @keydown.enter.native="searchEnterFun"></el-input>
         </el-form-item>
@@ -297,6 +307,24 @@ export default {
   },
 
   methods: {
+    upLoadUser(item) {
+      const formData = new FormData();
+      formData.append("file", item.file);
+      axios.post('/user/uploaduser', formData, {
+         headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }).then(resp => {
+        if (resp.data.code === 0) {
+          this.$message.success(resp.data.data);
+          this.getData(1);
+        } else {
+          this.$message.error(resp.data.msg);
+          this.getData(1);
+        }
+        console.log(resp.data);
+      })
+    },
     getOtpImg(row) {
       // this.base64Img = Buffer.from(data).toString('base64');
       this.otpImgData.visible = true
