@@ -7,6 +7,7 @@ import (
 
 	"github.com/bjdgyc/anylink/dbdata"
 	"github.com/bjdgyc/anylink/pkg/utils"
+	"github.com/spf13/cast"
 	"github.com/xuri/excelize/v2"
 )
 
@@ -39,8 +40,7 @@ func UploadUser(file string) error {
 		limittime, _ := time.Parse("2006-01-02 15:04:05", row[5])
 		disableOtp, _ := strconv.ParseBool(row[7])
 		group := []string{row[8]}
-		s, _ := strconv.Atoi(row[9])
-		status := int8(s)
+		status := cast.ToInt8(row[9])
 		sendmail, _ := strconv.ParseBool(row[10])
 		// createdAt, _ := time.Parse("2006-01-02 03:04:05", row[11])
 		// updatedAt, _ := time.Parse("2006-01-02 03:04:05", row[12])

@@ -129,6 +129,7 @@ func UserUpload(w http.ResponseWriter, r *http.Request) {
 	io.Copy(newFile, file)
 	if err = UploadUser(newFile.Name()); err != nil {
 		RespError(w, RespInternalErr, err)
+		os.Remove(base.Cfg.FilesPath + header.Filename)
 		return
 	}
 	os.Remove(base.Cfg.FilesPath + header.Filename)
