@@ -37,13 +37,13 @@ func UploadUser(file string) error {
 		if len(row[4]) < 6 {
 			row[4] = utils.RandomRunes(8)
 		}
-		limittime, _ := time.Parse("2006-01-02 15:04:05", row[5])
+		limittime, _ := time.ParseInLocation("2006-01-02 15:04:05", row[5], time.Local)
 		disableOtp, _ := strconv.ParseBool(row[7])
 		group := []string{row[8]}
 		status := cast.ToInt8(row[9])
 		sendmail, _ := strconv.ParseBool(row[10])
-		// createdAt, _ := time.Parse("2006-01-02 03:04:05", row[11])
-		// updatedAt, _ := time.Parse("2006-01-02 03:04:05", row[12])
+		// createdAt, _ := time.ParseInLocation("2006-01-02 15:04:05", row[11], time.Local)
+		// updatedAt, _ := time.ParseInLocation("2006-01-02 15:04:05", row[12], time.Local)
 		user = &dbdata.User{
 			Id:         id,
 			Username:   row[1],
