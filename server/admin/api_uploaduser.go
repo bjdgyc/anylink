@@ -89,10 +89,8 @@ func UploadUser(file string) error {
 		if err := dbdata.AddBatch(user); err != nil {
 			return fmt.Errorf("请检查是否导入有重复用户")
 		}
-		if user.SendEmail {
-			if err := userAccountMail(user); err != nil {
-				return err
-			}
+		if err := userAccountMail(user); user.SendEmail && err != nil {
+			return err
 		}
 	}
 	return nil
