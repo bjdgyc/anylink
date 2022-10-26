@@ -8,7 +8,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"os"
 	"strconv"
 	"strings"
 	"text/template"
@@ -112,29 +111,7 @@ func UserSet(w http.ResponseWriter, r *http.Request) {
 	sessdata.CloseUserLimittimeSession()
 	RespSucess(w, nil)
 }
-func UserUpload(w http.ResponseWriter, r *http.Request) {
-	r.ParseMultipartForm(8 << 20)
-	file, header, err := r.FormFile("file")
-	if err != nil || !strings.Contains(header.Filename, ".xlsx") || !strings.Contains(header.Filename, ".xls") {
-		RespError(w, RespInternalErr, "文件解析失败:仅支持xlsx或xls文件")
-		return
-	}
-	defer file.Close()
-	newFile, err := os.Create(base.Cfg.FilesPath + header.Filename)
-	if err != nil {
-		RespError(w, RespInternalErr, "创建文件失败:", err)
-		return
-	}
-	defer newFile.Close()
-	io.Copy(newFile, file)
-	if err = UploadUser(newFile.Name()); err != nil {
-		RespError(w, RespInternalErr, err)
-		os.Remove(base.Cfg.FilesPath + header.Filename)
-		return
-	}
-	os.Remove(base.Cfg.FilesPath + header.Filename)
-	RespSucess(w, "批量添加成功")
-}
+
 func UserDel(w http.ResponseWriter, r *http.Request) {
 	_ = r.ParseForm()
 	idS := r.FormValue("id")

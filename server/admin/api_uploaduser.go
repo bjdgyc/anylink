@@ -2,17 +2,44 @@ package admin
 
 import (
 	"fmt"
+	"io"
+	"net/http"
+	"os"
 	"strconv"
+	"strings"
 	"time"
 
+	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/dbdata"
 	"github.com/bjdgyc/anylink/pkg/utils"
 	"github.com/spf13/cast"
 	"github.com/xuri/excelize/v2"
 )
 
+func UserUpload(w http.ResponseWriter, r *http.Request) {
+	r.ParseMultipartForm(8 << 20)
+	file, header, err := r.FormFile("file")
+	if err != nil || !strings.Contains(header.Filename, ".xlsx") || !strings.Contains(header.Filename, ".xls") {
+		RespError(w, RespInternalErr, "文件解析失败:仅支持xlsx或xls文件")
+		return
+	}
+	defer file.Close()
+	newFile, err := os.Create(base.Cfg.FilesPath + header.Filename)
+	if err != nil {
+		RespError(w, RespInternalErr, "创建文件失败:", err)
+		return
+	}
+	defer newFile.Close()
+	io.Copy(newFile, file)
+	if err = UploadUser(newFile.Name()); err != nil {
+		RespError(w, RespInternalErr, err)
+		os.Remove(base.Cfg.FilesPath + header.Filename)
+		return
+	}
+	os.Remove(base.Cfg.FilesPath + header.Filename)
+	RespSucess(w, "批量添加成功")
+}
 func UploadUser(file string) error {
-	user := &dbdata.User{}
 	f, err := excelize.OpenFile(file)
 	if err != nil {
 		return err
@@ -44,7 +71,7 @@ func UploadUser(file string) error {
 		sendmail, _ := strconv.ParseBool(row[10])
 		// createdAt, _ := time.ParseInLocation("2006-01-02 15:04:05", row[11], time.Local)
 		// updatedAt, _ := time.ParseInLocation("2006-01-02 15:04:05", row[12], time.Local)
-		user = &dbdata.User{
+		user := &dbdata.User{
 			Id:         id,
 			Username:   row[1],
 			Nickname:   row[2],
@@ -62,10 +89,9 @@ func UploadUser(file string) error {
 		if err := dbdata.AddBatch(user); err != nil {
 			return fmt.Errorf("请检查是否导入有重复用户")
 		}
-	}
-	if user.SendEmail {
-		err := userAccountMail(user)
-		return err
+		if err := userAccountMail(user); user.SendEmail && err != nil {
+			return err
+		}
 	}
 	return nil
 }
