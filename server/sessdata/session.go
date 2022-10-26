@@ -244,7 +244,7 @@ func (cs *ConnSession) Close() {
 		cs.Sess.LastLogin = time.Now()
 		cs.Sess.CSess = nil
 
-		if base.Cfg.AuditInterval >= 0 {
+		if cs.IpAuditPool != nil {
 			cs.IpAuditPool.Release()
 		}
 
