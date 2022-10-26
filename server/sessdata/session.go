@@ -240,6 +240,7 @@ func (cs *ConnSession) Close() {
 		defer cs.Sess.mux.Unlock()
 
 		close(cs.CloseChan)
+		cs.IpAuditPool.Release()
 		cs.Sess.IsActive = false
 		cs.Sess.LastLogin = time.Now()
 		cs.Sess.CSess = nil
