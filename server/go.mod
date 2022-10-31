@@ -36,7 +36,7 @@ require (
 	golang.org/x/text v0.3.7
 	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac
 	layeh.com/radius v0.0.0-20210819152912-ad72663a72ab
-	xorm.io/xorm v1.2.2
+	xorm.io/xorm v1.2.5
 )
 
 require (
