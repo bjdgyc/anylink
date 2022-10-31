@@ -244,6 +244,10 @@ func (cs *ConnSession) Close() {
 		cs.Sess.LastLogin = time.Now()
 		cs.Sess.CSess = nil
 
+		if cs.IpAuditPool != nil {
+			cs.IpAuditPool.Release()
+		}
+
 		dSess := cs.GetDtlsSession()
 		if dSess != nil {
 			dSess.Close()

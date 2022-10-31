@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"regexp"
 
+	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/dbdata"
 )
 
@@ -82,6 +83,7 @@ func SetOtherAuditLog(w http.ResponseWriter, r *http.Request) {
 		RespError(w, RespInternalErr, err)
 		return
 	}
+	data.AuditInterval = base.Cfg.AuditInterval
 	RespSucess(w, data)
 }
 
