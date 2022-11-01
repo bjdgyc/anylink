@@ -21,24 +21,20 @@ const (
 )
 
 var (
-	logAuditSink *LogSink
 	auditPayload *AuditPayload
+	logBatch     *LogBatch
 )
 
-// 审计日志
+// 分析审计日志
 type AuditPayload struct {
 	Pool       *grpool.Pool
 	IpAuditMap utils.IMaps
 }
 
-// 保存批量的审计日志
+// 保存审计日志
 type LogBatch struct {
-	Logs []dbdata.AccessAudit
-}
-
-// 批量日志池
-type LogSink struct {
-	logChan chan dbdata.AccessAudit
+	Logs    []dbdata.AccessAudit
+	LogChan chan dbdata.AccessAudit
 }
 
 // 异步写入pool
@@ -69,17 +65,16 @@ func logAuditBatch() {
 	if base.Cfg.AuditInterval < 0 {
 		return
 	}
-	logAuditSink = &LogSink{
-		logChan: make(chan dbdata.AccessAudit, 5000),
-	}
 	auditPayload = &AuditPayload{
 		Pool:       grpool.NewPool(10, 500),
 		IpAuditMap: utils.NewMap("cmap", 0),
 	}
+	logBatch = &LogBatch{
+		LogChan: make(chan dbdata.AccessAudit, 5000),
+	}
 	var (
 		limit       = 100 // 超过上限批量写入数据表
 		outTime     = time.NewTimer(time.Second)
-		logBatch    = &LogBatch{}
 		accessAudit = dbdata.AccessAudit{}
 	)
 
@@ -87,7 +82,7 @@ func logAuditBatch() {
 		// 重置超时 时间
 		outTime.Reset(time.Second * 1)
 		select {
-		case accessAudit = <-logAuditSink.logChan:
+		case accessAudit = <-logBatch.LogChan:
 			logBatch.Logs = append(logBatch.Logs, accessAudit)
 			if len(logBatch.Logs) >= limit {
 				if !outTime.Stop() {
@@ -178,5 +173,5 @@ func logAudit(userName string, bPlData *[]byte) {
 		AccessProto: accessProto,
 		Info:        info,
 	}
-	logAuditSink.logChan <- audit
+	logBatch.LogChan <- audit
 }
