@@ -51,8 +51,17 @@ func (p *AuditPayload) Add(userName string, pl *sessdata.Payload) {
 }
 
 // 数据落盘
-func (p *AuditPayload) Write(logs []dbdata.AccessAudit) {
-	_ = dbdata.AddBatch(logs)
+func (l *LogBatch) Write() {
+	if len(l.Logs) == 0 {
+		return
+	}
+	_ = dbdata.AddBatch(l.Logs)
+	l.Reset()
+}
+
+// 清空数据
+func (l *LogBatch) Reset() {
+	l.Logs = []dbdata.AccessAudit{}
 }
 
 // 开启批量写入数据功能
@@ -84,14 +93,10 @@ func logAuditBatch() {
 				if !outTime.Stop() {
 					<-outTime.C
 				}
-				auditPayload.Write(logBatch.Logs)
-				logBatch.Logs = []dbdata.AccessAudit{}
+				logBatch.Write()
 			}
 		case <-outTime.C:
-			if len(logBatch.Logs) > 0 {
-				auditPayload.Write(logBatch.Logs)
-				logBatch.Logs = []dbdata.AccessAudit{}
-			}
+			logBatch.Write()
 		}
 	}
 }
