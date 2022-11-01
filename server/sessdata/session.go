@@ -12,9 +12,7 @@ import (
 
 	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/dbdata"
-	"github.com/bjdgyc/anylink/pkg/utils"
 	mapset "github.com/deckarep/golang-set"
-	"github.com/ivpusic/grpool"
 	atomic2 "go.uber.org/atomic"
 )
 
@@ -52,8 +50,6 @@ type ConnSession struct {
 	PayloadIn           chan *Payload
 	PayloadOutCstp      chan *Payload // Cstp的数据
 	PayloadOutDtls      chan *Payload // Dtls的数据
-	IpAuditMap          utils.IMaps   // 审计的ip数据
-	IpAuditPool         *grpool.Pool  // 审计的IP包解析池
 	// dSess *DtlsSession
 	dSess *atomic.Value
 }
@@ -206,12 +202,6 @@ func (s *Session) NewConn() *ConnSession {
 		dSess:          &atomic.Value{},
 	}
 
-	// ip 审计
-	if base.Cfg.AuditInterval >= 0 {
-		cSess.IpAuditMap = utils.NewMap("cmap", 0)
-		cSess.IpAuditPool = grpool.NewPool(1, 600)
-	}
-
 	dSess := &DtlsSession{
 		isActive: -1,
 	}
@@ -243,10 +233,6 @@ func (cs *ConnSession) Close() {
 		cs.Sess.IsActive = false
 		cs.Sess.LastLogin = time.Now()
 		cs.Sess.CSess = nil
-
-		if cs.IpAuditPool != nil {
-			cs.IpAuditPool.Release()
-		}
 
 		dSess := cs.GetDtlsSession()
 		if dSess != nil {
