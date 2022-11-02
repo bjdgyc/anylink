@@ -16,9 +16,7 @@ func payloadIn(cSess *sessdata.ConnSession, pl *sessdata.Payload) bool {
 			return false
 		}
 		if base.Cfg.AuditInterval >= 0 {
-			cSess.IpAuditPool.JobQueue <- func() {
-				logAudit(cSess, pl)
-			}
+			auditPayload.Add(cSess.Username, pl)
 		}
 	}
 
