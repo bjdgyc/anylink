@@ -40,11 +40,12 @@ var (
 			2: "Linux",
 			3: "Android",
 			4: "iOS",
+			5: "Unknown",
 		},
 		ClientOps: []string{ // 客户端
 			0: "AnyConnect",
 			1: "OpenConnect",
-			2: "unknown",
+			2: "Unknown",
 		},
 		InfoOps: []string{ // 信息
 			0: "用户掉线",
@@ -56,6 +57,7 @@ var (
 
 // 异步写入用户操作日志
 func (ua *UserActLogProcess) Add(u UserActLog, userAgent string) {
+	// os, client, ver
 	os_idx, client_idx, ver := ua.ParseUserAgent(userAgent)
 	u.Os = os_idx
 	u.Client = client_idx
@@ -107,6 +109,10 @@ func (ua *UserActLogProcess) GetInfoOpsById(id uint8) string {
 }
 
 func (ua *UserActLogProcess) ParseUserAgent(userAgent string) (os_idx, client_idx uint8, ver string) {
+	// Unknown
+	if len(userAgent) == 0 {
+		return 5, 2, ""
+	}
 	// os
 	os_idx = 2
 	if strings.Contains(userAgent, "windows") {
