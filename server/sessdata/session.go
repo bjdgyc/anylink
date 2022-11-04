@@ -36,6 +36,9 @@ type ConnSession struct {
 	Mtu                 int
 	IfName              string
 	Client              string // 客户端  mobile pc
+	UserAgent           string // 客户端信息
+	UserDisconnect      bool   // 用户/客户端主动登出
+	UserKickout         bool   // 被踢下线
 	CstpDpd             int
 	Group               *dbdata.Group
 	Limit               *LimitRater
@@ -241,6 +244,7 @@ func (cs *ConnSession) Close() {
 
 		ReleaseIp(cs.IpAddr, cs.Sess.MacAddr)
 		LimitClient(cs.Username, true)
+		AddUserActLog(cs)
 	})
 }
 
@@ -396,6 +400,7 @@ func CloseSess(token string) {
 	}
 
 	delete(sessions, token)
+	sess.CSess.UserKickout = true
 	sess.CSess.Close()
 }
 
@@ -417,4 +422,23 @@ func DelSessByStoken(stoken string) {
 	sessMux.Lock()
 	delete(sessions, token)
 	sessMux.Unlock()
+}
+
+func AddUserActLog(cs *ConnSession) {
+	ua := dbdata.UserActLog{
+		Username:   cs.Sess.Username,
+		GroupName:  cs.Sess.Group,
+		IpAddr:     cs.IpAddr.String(),
+		RemoteAddr: cs.RemoteAddr,
+		Status:     dbdata.UserLogout,
+	}
+	infoId := uint8(0)
+	switch {
+	case cs.UserDisconnect:
+		infoId = 1
+	case cs.UserKickout:
+		infoId = 2
+	}
+	ua.Info = dbdata.UserActLogIns.GetInfoOpsById(infoId)
+	dbdata.UserActLogIns.Add(ua, cs.UserAgent)
 }

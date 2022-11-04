@@ -57,6 +57,7 @@ func LinkDtls(conn net.Conn, cSess *sessdata.ConnSession) {
 			// do nothing
 			// base.Debug("recv keepalive", cSess.IpAddr)
 		case 0x05: // DISCONNECT
+			cSess.UserDisconnect = true
 			base.Debug("DISCONNECT DTLS", cSess.IpAddr)
 			return
 		case 0x03: // DPD-REQ

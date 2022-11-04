@@ -66,16 +66,27 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-
+	// 用户活动日志
+	ua := dbdata.UserActLog{
+		Username:   cr.Auth.Username,
+		GroupName:  cr.GroupSelect,
+		RemoteAddr: r.RemoteAddr,
+		Status:     dbdata.UserAuthSuccess,
+	}
 	// TODO 用户密码校验
 	err = dbdata.CheckUser(cr.Auth.Username, cr.Auth.Password, cr.GroupSelect)
 	if err != nil {
 		base.Warn(err)
+		ua.Info = err.Error()
+		ua.Status = dbdata.UserAuthFail
+		dbdata.UserActLogIns.Add(ua, userAgent)
+
 		w.WriteHeader(http.StatusOK)
 		data := RequestData{Group: cr.GroupSelect, Groups: dbdata.GetGroupNames(), Error: "用户名或密码错误"}
 		tplRequest(tpl_request, w, data)
 		return
 	}
+	dbdata.UserActLogIns.Add(ua, userAgent)
 	// if !ok {
 	//	w.WriteHeader(http.StatusOK)
 	//	data := RequestData{Group: cr.GroupSelect, Groups: base.Cfg.UserGroups, Error: "请先激活用户"}
@@ -109,7 +120,7 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 		Banner: other.Banner, ProfileHash: profileHash}
 	w.WriteHeader(http.StatusOK)
 	tplRequest(tpl_complete, w, rd)
-	base.Debug("login", cr.Auth.Username)
+	base.Debug("login", cr.Auth.Username, userAgent)
 }
 
 const (
