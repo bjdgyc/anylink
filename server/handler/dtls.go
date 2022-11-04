@@ -66,9 +66,13 @@ func startDtls() {
 		go func() {
 			// time.Sleep(1 * time.Second)
 			cc := conn.(*dtls.Conn)
-			sessid := hex.EncodeToString(cc.ConnectionState().SessionID)
-			sess := sessdata.Dtls2Sess(sessid)
-			LinkDtls(conn, sess.CSess)
+			did := hex.EncodeToString(cc.ConnectionState().SessionID)
+			cSess := sessdata.Dtls2CSess(did)
+			if cSess == nil {
+				conn.Close()
+				return
+			}
+			LinkDtls(conn, cSess)
 		}()
 	}
 }

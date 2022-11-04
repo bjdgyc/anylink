@@ -49,6 +49,7 @@ func StartAdmin() {
 	r.HandleFunc("/user/list", UserList)
 	r.HandleFunc("/user/detail", UserDetail)
 	r.HandleFunc("/user/set", UserSet)
+	r.HandleFunc("/user/uploaduser", UserUpload).Methods(http.MethodPost)
 	r.HandleFunc("/user/del", UserDel)
 	r.HandleFunc("/user/online", UserOnline)
 	r.HandleFunc("/user/offline", UserOffline)

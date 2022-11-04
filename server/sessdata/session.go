@@ -97,18 +97,24 @@ func checkSession() {
 		timeout := time.Duration(base.Cfg.SessionTimeout) * time.Second
 		tick := time.NewTicker(time.Second * 60)
 		for range tick.C {
-			sessMux.Lock()
+			outToken := []string{}
+			sessMux.RLock()
 			t := time.Now()
 			for k, v := range sessions {
-				v.mux.Lock()
+				v.mux.RLock()
 				if !v.IsActive {
 					if t.Sub(v.LastLogin) > timeout {
-						delete(sessions, k)
+						outToken = append(outToken, k)
 					}
 				}
-				v.mux.Unlock()
+				v.mux.RUnlock()
 			}
-			sessMux.Unlock()
+			sessMux.RUnlock()
+
+			// 删除过期session
+			for _, v := range outToken {
+				CloseSess(v)
+			}
 		}
 	}()
 }
@@ -369,6 +375,20 @@ func Dtls2Sess(did string) *Session {
 	return sessions[token]
 }
 
+func Dtls2CSess(did string) *ConnSession {
+	sessMux.RLock()
+	defer sessMux.RUnlock()
+	token := dtlsIds[did]
+	sess := sessions[token]
+	if sess == nil {
+		return nil
+	}
+
+	sess.mux.RLock()
+	defer sess.mux.RUnlock()
+	return sess.CSess
+}
+
 func Dtls2MasterSecret(did string) string {
 	sessMux.RLock()
 	token := dtlsIds[did]
@@ -400,7 +420,8 @@ func CloseSess(token string) {
 	}
 
 	delete(sessions, token)
-	sess.CSess.UserKickout = true
+	delete(dtlsIds, sess.DtlsSid)
+  sess.CSess.UserKickout = true
 	sess.CSess.Close()
 }
 
@@ -419,9 +440,7 @@ func DelSessByStoken(stoken string) {
 	stoken = strings.TrimSpace(stoken)
 	sarr := strings.Split(stoken, "@")
 	token := sarr[1]
-	sessMux.Lock()
-	delete(sessions, token)
-	sessMux.Unlock()
+	CloseSess(token)
 }
 
 func AddUserActLog(cs *ConnSession) {

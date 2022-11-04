@@ -1,5 +1,5 @@
 # web
-FROM node:lts-alpine as builder_node
+FROM node:16.17.1-alpine3.15 as builder_node
 WORKDIR /web
 COPY ./web /web
 RUN yarn install \

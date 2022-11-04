@@ -5,7 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -80,7 +80,7 @@ func UserDetail(w http.ResponseWriter, r *http.Request) {
 func UserSet(w http.ResponseWriter, r *http.Request) {
 	_ = r.ParseForm()
 
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		RespError(w, RespInternalErr, err)
 		return
