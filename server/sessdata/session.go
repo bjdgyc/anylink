@@ -417,7 +417,10 @@ func CloseSess(token string) {
 
 	delete(sessions, token)
 	delete(dtlsIds, sess.DtlsSid)
-	sess.CSess.Close()
+
+	if sess.CSess != nil {
+		sess.CSess.Close()
+	}
 }
 
 func CloseCSess(token string) {
@@ -428,7 +431,9 @@ func CloseCSess(token string) {
 		return
 	}
 
-	sess.CSess.Close()
+	if sess.CSess != nil {
+		sess.CSess.Close()
+	}
 }
 
 func DelSessByStoken(stoken string) {
