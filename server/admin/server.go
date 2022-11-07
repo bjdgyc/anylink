@@ -63,6 +63,7 @@ func StartAdmin() {
 	r.HandleFunc("/user/policy/detail", PolicyDetail)
 	r.HandleFunc("/user/policy/set", PolicySet)
 	r.HandleFunc("/user/policy/del", PolicyDel)
+	r.HandleFunc("/user/act_log/list", UserActLogList)
 
 	r.HandleFunc("/group/list", GroupList)
 	r.HandleFunc("/group/names", GroupNames)
