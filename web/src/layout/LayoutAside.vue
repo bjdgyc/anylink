@@ -56,7 +56,7 @@
       <el-menu-item index="/admin/group/list">用户组列表</el-menu-item>
     </el-submenu>
 
-    <el-submenu index="3">
+    <el-submenu index="4">
       <template slot="title">
         <i class="el-icon-s-order"></i>
         <span slot="title">调试信息</span>
@@ -90,5 +90,10 @@ export default {
 <style scoped>
 .layout-menu {
   height: 100%;
+}
+
+.el-menu-item a {
+  display: block;
+  color: #fff;
 }
 </style>
