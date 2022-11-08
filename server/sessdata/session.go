@@ -37,8 +37,7 @@ type ConnSession struct {
 	IfName              string
 	Client              string // 客户端  mobile pc
 	UserAgent           string // 客户端信息
-	UserDisconnect      bool   // 用户/客户端主动登出
-	UserKickout         bool   // 被踢下线
+	UserLogoutCode      uint8  // 用户/客户端主动登出
 	CstpDpd             int
 	Group               *dbdata.Group
 	Limit               *LimitRater
@@ -76,6 +75,8 @@ type Session struct {
 	Group          string
 	AuthStep       string
 	AuthPass       string
+	RemoteAddr     string
+	UserAgent      string
 
 	LastLogin time.Time
 	IsActive  bool
@@ -113,7 +114,7 @@ func checkSession() {
 
 			// 删除过期session
 			for _, v := range outToken {
-				CloseSess(v)
+				CloseSess(v, dbdata.UserLogoutTimeout)
 			}
 		}
 	}()
@@ -133,7 +134,7 @@ func CloseUserLimittimeSession() {
 	}
 	sessMux.RUnlock()
 	for _, v := range limitTimeToken {
-		CloseSess(v)
+		CloseSess(v, dbdata.UserLogoutExpire)
 	}
 }
 
@@ -411,7 +412,7 @@ func DelSess(token string) {
 	// sessions.Delete(token)
 }
 
-func CloseSess(token string) {
+func CloseSess(token string, code ...uint8) {
 	sessMux.Lock()
 	defer sessMux.Unlock()
 	sess, ok := sessions[token]
@@ -421,8 +422,15 @@ func CloseSess(token string) {
 
 	delete(sessions, token)
 	delete(dtlsIds, sess.DtlsSid)
-  sess.CSess.UserKickout = true
-	sess.CSess.Close()
+
+	if sess.CSess != nil {
+		if len(code) > 0 {
+			sess.CSess.UserLogoutCode = code[0]
+		}
+		sess.CSess.Close()
+		return
+	}
+	AddUserActLogBySess(sess)
 }
 
 func CloseCSess(token string) {
@@ -433,14 +441,16 @@ func CloseCSess(token string) {
 		return
 	}
 
-	sess.CSess.Close()
+	if sess.CSess != nil {
+		sess.CSess.Close()
+	}
 }
 
 func DelSessByStoken(stoken string) {
 	stoken = strings.TrimSpace(stoken)
 	sarr := strings.Split(stoken, "@")
 	token := sarr[1]
-	CloseSess(token)
+	CloseSess(token, dbdata.UserLogoutBanner)
 }
 
 func AddUserActLog(cs *ConnSession) {
@@ -451,13 +461,18 @@ func AddUserActLog(cs *ConnSession) {
 		RemoteAddr: cs.RemoteAddr,
 		Status:     dbdata.UserLogout,
 	}
-	infoId := uint8(0)
-	switch {
-	case cs.UserDisconnect:
-		infoId = 1
-	case cs.UserKickout:
-		infoId = 2
-	}
-	ua.Info = dbdata.UserActLogIns.GetInfoOpsById(infoId)
+	ua.Info = dbdata.UserActLogIns.GetInfoOpsById(cs.UserLogoutCode)
 	dbdata.UserActLogIns.Add(ua, cs.UserAgent)
+}
+
+func AddUserActLogBySess(sess *Session) {
+	ua := dbdata.UserActLog{
+		Username:   sess.Username,
+		GroupName:  sess.Group,
+		IpAddr:     "",
+		RemoteAddr: sess.RemoteAddr,
+		Status:     dbdata.UserLogout,
+	}
+	ua.Info = dbdata.UserActLogIns.GetInfoOpsById(1)
+	dbdata.UserActLogIns.Add(ua, sess.UserAgent)
 }

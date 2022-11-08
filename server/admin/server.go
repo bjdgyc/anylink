@@ -45,6 +45,7 @@ func StartAdmin() {
 	r.HandleFunc("/set/other/audit_log/edit", SetOtherAuditLogEdit)
 	r.HandleFunc("/set/audit/list", SetAuditList)
 	r.HandleFunc("/set/audit/export", SetAuditExport)
+	r.HandleFunc("/set/audit/act_log_list", UserActLogList)
 
 	r.HandleFunc("/user/list", UserList)
 	r.HandleFunc("/user/detail", UserDetail)
@@ -63,7 +64,6 @@ func StartAdmin() {
 	r.HandleFunc("/user/policy/detail", PolicyDetail)
 	r.HandleFunc("/user/policy/set", PolicySet)
 	r.HandleFunc("/user/policy/del", PolicyDel)
-	r.HandleFunc("/user/act_log/list", UserActLogList)
 
 	r.HandleFunc("/group/list", GroupList)
 	r.HandleFunc("/group/names", GroupNames)

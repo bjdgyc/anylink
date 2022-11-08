@@ -178,7 +178,7 @@ func UserOnline(w http.ResponseWriter, r *http.Request) {
 func UserOffline(w http.ResponseWriter, r *http.Request) {
 	_ = r.ParseForm()
 	token := r.FormValue("token")
-	sessdata.CloseSess(token)
+	sessdata.CloseSess(token, 4)
 	RespSucess(w, nil)
 }
 

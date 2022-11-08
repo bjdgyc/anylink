@@ -193,7 +193,7 @@ export default {
     getData(page) {
       console.log(this.searchForm)
       this.page = page
-      axios.get('/user/act_log/list', {
+      axios.get('/set/audit/act_log_list', {
         params: {
           page: page,
           username: this.searchForm.username || '',

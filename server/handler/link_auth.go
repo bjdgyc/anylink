@@ -43,7 +43,6 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// fmt.Printf("%+v \n", cr)
-
 	setCommonHeader(w)
 	if cr.Type == "logout" {
 		// 退出删除session信息
@@ -100,6 +99,8 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	sess.Group = cr.GroupSelect
 	sess.MacAddr = strings.ToLower(cr.MacAddressList.MacAddress)
 	sess.UniqueIdGlobal = cr.DeviceId.UniqueIdGlobal
+	sess.UserAgent = userAgent
+	sess.RemoteAddr = r.RemoteAddr
 	// 获取客户端mac地址
 	macHw, err := net.ParseMAC(sess.MacAddr)
 	if err != nil {
