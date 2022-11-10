@@ -45,6 +45,7 @@ func StartAdmin() {
 	r.HandleFunc("/set/other/audit_log/edit", SetOtherAuditLogEdit)
 	r.HandleFunc("/set/audit/list", SetAuditList)
 	r.HandleFunc("/set/audit/export", SetAuditExport)
+	r.HandleFunc("/set/audit/act_log_list", UserActLogList)
 
 	r.HandleFunc("/user/list", UserList)
 	r.HandleFunc("/user/detail", UserDetail)

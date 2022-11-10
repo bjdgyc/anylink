@@ -69,6 +69,7 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	cSess.SetMtu(cstpMtu)
 	cSess.MasterSecret = masterSecret
 	cSess.RemoteAddr = r.RemoteAddr
+	cSess.UserAgent = strings.ToLower(r.UserAgent())
 	cSess.LocalIp = net.ParseIP(localIp)
 	cstpKeepalive := base.Cfg.CstpKeepalive
 	cstpDpd := base.Cfg.CstpDpd
@@ -194,6 +195,13 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 		base.Error(err)
 		return
 	}
+	dbdata.UserActLogIns.Add(dbdata.UserActLog{
+		Username:   sess.Username,
+		GroupName:  sess.Group,
+		IpAddr:     cSess.IpAddr.String(),
+		RemoteAddr: cSess.RemoteAddr,
+		Status:     dbdata.UserConnected,
+	}, cSess.UserAgent)
 
 	go LinkCstp(conn, bufRW, cSess)
 }

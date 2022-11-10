@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/bjdgyc/anylink/base"
+	"github.com/bjdgyc/anylink/dbdata"
 	"github.com/bjdgyc/anylink/pkg/utils"
 	"github.com/bjdgyc/anylink/sessdata"
 )
@@ -57,6 +58,7 @@ func LinkDtls(conn net.Conn, cSess *sessdata.ConnSession) {
 			// do nothing
 			// base.Debug("recv keepalive", cSess.IpAddr)
 		case 0x05: // DISCONNECT
+			cSess.UserLogoutCode = dbdata.UserLogoutClient
 			base.Debug("DISCONNECT DTLS", cSess.IpAddr)
 			return
 		case 0x03: // DPD-REQ

@@ -43,7 +43,6 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// fmt.Printf("%+v \n", cr)
-
 	setCommonHeader(w)
 	if cr.Type == "logout" {
 		// 退出删除session信息
@@ -66,16 +65,27 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-
+	// 用户活动日志
+	ua := dbdata.UserActLog{
+		Username:   cr.Auth.Username,
+		GroupName:  cr.GroupSelect,
+		RemoteAddr: r.RemoteAddr,
+		Status:     dbdata.UserAuthSuccess,
+	}
 	// TODO 用户密码校验
 	err = dbdata.CheckUser(cr.Auth.Username, cr.Auth.Password, cr.GroupSelect)
 	if err != nil {
 		base.Warn(err)
+		ua.Info = err.Error()
+		ua.Status = dbdata.UserAuthFail
+		dbdata.UserActLogIns.Add(ua, userAgent)
+
 		w.WriteHeader(http.StatusOK)
 		data := RequestData{Group: cr.GroupSelect, Groups: dbdata.GetGroupNames(), Error: "用户名或密码错误"}
 		tplRequest(tpl_request, w, data)
 		return
 	}
+	dbdata.UserActLogIns.Add(ua, userAgent)
 	// if !ok {
 	//	w.WriteHeader(http.StatusOK)
 	//	data := RequestData{Group: cr.GroupSelect, Groups: base.Cfg.UserGroups, Error: "请先激活用户"}
@@ -89,6 +99,8 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	sess.Group = cr.GroupSelect
 	sess.MacAddr = strings.ToLower(cr.MacAddressList.MacAddress)
 	sess.UniqueIdGlobal = cr.DeviceId.UniqueIdGlobal
+	sess.UserAgent = userAgent
+	sess.RemoteAddr = r.RemoteAddr
 	// 获取客户端mac地址
 	macHw, err := net.ParseMAC(sess.MacAddr)
 	if err != nil {
@@ -109,7 +121,7 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 		Banner: other.Banner, ProfileHash: profileHash}
 	w.WriteHeader(http.StatusOK)
 	tplRequest(tpl_complete, w, rd)
-	base.Debug("login", cr.Auth.Username)
+	base.Debug("login", cr.Auth.Username, userAgent)
 }
 
 const (
