@@ -134,7 +134,7 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	HttpSetHeader(w, "X-CSTP-Keep", "true")
 	HttpSetHeader(w, "X-CSTP-Tunnel-All-DNS", "false")
 
-	HttpSetHeader(w, "X-CSTP-Rekey-Time", "172800")
+	HttpSetHeader(w, "X-CSTP-Rekey-Time", "21600") // 172800
 	HttpSetHeader(w, "X-CSTP-Rekey-Method", "new-tunnel")
 
 	HttpSetHeader(w, "X-CSTP-DPD", fmt.Sprintf("%d", cstpDpd))
@@ -150,7 +150,7 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	HttpSetHeader(w, "X-DTLS-Port", dtlsPort)
 	HttpSetHeader(w, "X-DTLS-DPD", fmt.Sprintf("%d", cstpDpd))
 	HttpSetHeader(w, "X-DTLS-Keepalive", fmt.Sprintf("%d", cstpKeepalive))
-	HttpSetHeader(w, "X-DTLS-Rekey-Time", "5400")
+	HttpSetHeader(w, "X-DTLS-Rekey-Time", "21600")
 	HttpSetHeader(w, "X-DTLS12-CipherSuite", "ECDHE-ECDSA-AES128-GCM-SHA256")
 
 	HttpSetHeader(w, "X-CSTP-License", "accept")
