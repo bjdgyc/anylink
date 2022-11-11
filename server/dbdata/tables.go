@@ -49,7 +49,7 @@ type UserActLog struct {
 	Os              uint8     `json:"os" xorm:"not null default 0 Int"`
 	Client          uint8     `json:"client" xorm:"not null default 0 Int"`
 	Version         string    `json:"version" xorm:"varchar(15)"`
-	DeviceType      string    `json:"device_type" xorm:"varchar(60) not null default ''"`
+	DeviceType      string    `json:"device_type" xorm:"varchar(128) not null default ''"`
 	PlatformVersion string    `json:"platform_version" xorm:"varchar(15) not null default ''"`
 	Status          uint8     `json:"status" xorm:"not null default 0 Int"`
 	Info            string    `json:"info" xorm:"varchar(255) not null default ''"` // 详情
