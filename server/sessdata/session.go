@@ -479,6 +479,6 @@ func AddUserActLogBySess(sess *Session) {
 		PlatformVersion: sess.PlatformVersion,
 		Status:          dbdata.UserLogout,
 	}
-	ua.Info = dbdata.UserActLogIns.GetInfoOpsById(1)
+	ua.Info = dbdata.UserActLogIns.GetInfoOpsById(dbdata.UserLogoutBanner)
 	dbdata.UserActLogIns.Add(ua, sess.UserAgent)
 }
