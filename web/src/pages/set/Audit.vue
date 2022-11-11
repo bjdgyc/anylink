@@ -2,11 +2,11 @@
   <div>
     <el-card>    
     <el-tabs v-model="activeName" @tab-click="handleClick">
-        <el-tab-pane label="用户访问日志" name="access_audit">
-            <AuditAccess ref="auditAccess"></AuditAccess>
-        </el-tab-pane>
         <el-tab-pane label="用户活动日志" name="act_log">
             <AuditActLog ref="auditActLog"></AuditActLog>
+        </el-tab-pane>        
+        <el-tab-pane label="用户访问日志" name="access_audit">
+            <AuditAccess ref="auditAccess"></AuditAccess>
         </el-tab-pane>
     </el-tabs>
     </el-card>      
@@ -33,7 +33,7 @@ export default {
   },
   data() {
     return {
-      activeName: "access_audit",
+      activeName: "act_log",
     }
   },
   methods: {  

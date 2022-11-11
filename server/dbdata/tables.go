@@ -41,17 +41,19 @@ type User struct {
 }
 
 type UserActLog struct {
-	Id         int       `json:"id" xorm:"pk autoincr not null"`
-	Username   string    `json:"username" xorm:"varchar(60)"`
-	GroupName  string    `json:"group_name" xorm:"varchar(60)"`
-	IpAddr     string    `json:"ip_addr" xorm:"varchar(32)"`
-	RemoteAddr string    `json:"remote_addr" xorm:"varchar(32)"`
-	Os         uint8     `json:"os" xorm:"not null default 0 Int"`
-	Client     uint8     `json:"client" xorm:"not null default 0 Int"`
-	Version    string    `json:"version" xorm:"varchar(15)"`
-	Status     uint8     `json:"status" xorm:"not null default 0 Int"`
-	Info       string    `json:"info" xorm:"varchar(255) not null default ''"` // 详情
-	CreatedAt  time.Time `json:"created_at" xorm:"DateTime created"`
+	Id              int       `json:"id" xorm:"pk autoincr not null"`
+	Username        string    `json:"username" xorm:"varchar(60)"`
+	GroupName       string    `json:"group_name" xorm:"varchar(60)"`
+	IpAddr          string    `json:"ip_addr" xorm:"varchar(32)"`
+	RemoteAddr      string    `json:"remote_addr" xorm:"varchar(32)"`
+	Os              uint8     `json:"os" xorm:"not null default 0 Int"`
+	Client          uint8     `json:"client" xorm:"not null default 0 Int"`
+	Version         string    `json:"version" xorm:"varchar(15)"`
+	DeviceType      string    `json:"device_type" xorm:"varchar(60) not null default ''"`
+	PlatformVersion string    `json:"platform_version" xorm:"varchar(15) not null default ''"`
+	Status          uint8     `json:"status" xorm:"not null default 0 Int"`
+	Info            string    `json:"info" xorm:"varchar(255) not null default ''"` // 详情
+	CreatedAt       time.Time `json:"created_at" xorm:"DateTime created"`
 }
 
 type IpMap struct {

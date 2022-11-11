@@ -67,10 +67,12 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	}
 	// 用户活动日志
 	ua := dbdata.UserActLog{
-		Username:   cr.Auth.Username,
-		GroupName:  cr.GroupSelect,
-		RemoteAddr: r.RemoteAddr,
-		Status:     dbdata.UserAuthSuccess,
+		Username:        cr.Auth.Username,
+		GroupName:       cr.GroupSelect,
+		RemoteAddr:      r.RemoteAddr,
+		Status:          dbdata.UserAuthSuccess,
+		DeviceType:      cr.DeviceId.DeviceType,
+		PlatformVersion: cr.DeviceId.PlatformVersion,
 	}
 	// TODO 用户密码校验
 	err = dbdata.CheckUser(cr.Auth.Username, cr.Auth.Password, cr.GroupSelect)
@@ -100,6 +102,8 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	sess.MacAddr = strings.ToLower(cr.MacAddressList.MacAddress)
 	sess.UniqueIdGlobal = cr.DeviceId.UniqueIdGlobal
 	sess.UserAgent = userAgent
+	sess.DeviceType = ua.DeviceType
+	sess.PlatformVersion = ua.PlatformVersion
 	sess.RemoteAddr = r.RemoteAddr
 	// 获取客户端mac地址
 	macHw, err := net.ParseMAC(sess.MacAddr)
