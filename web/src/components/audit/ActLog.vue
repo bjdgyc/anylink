@@ -67,12 +67,12 @@
             prop="id"
             label="ID"
             sortable="custom"
-            width="60">
+            width="100">
         </el-table-column>
         <el-table-column
             prop="username"
             label="用户名"
-            width="80">
+            width="140">
         </el-table-column>
         <el-table-column
             prop="group_name"
@@ -88,21 +88,36 @@
                         <el-tag size="small" v-if="row.status == item.key" disable-transitions :type="item.tag">{{item.value}}</el-tag>
                     </span>
                 </template>            
-        </el-table-column>               
+        </el-table-column> 
+        <el-table-column
+            prop="info"
+            label="操作详情"
+            min-width="200">
+        </el-table-column> 
+        <el-table-column
+            prop="created_at"
+            label="操作时间"
+            width="150"
+            :formatter="tableDateFormat">
+        </el-table-column>                                          
         <el-table-column
             prop="os"
             label="操作系统"
-            width="82">
+            min-width="210">
                 <template slot-scope="{ row }">
                     <span v-for="(value, item, index) in osOps" :key="index">
                     {{ row.os == item? value: "" }}
                     </span>
+                    <div class="sub_txt">型号: 
+                        <span v-if="row.device_type != ''">{{ row.device_type }} / {{ row.platform_version }}</span>
+                        <span v-else> - </span>
+                    </div>
                 </template>             
-        </el-table-column>    
+        </el-table-column>         
         <el-table-column
             prop="client"
             label="客户端"
-            width="100">
+            width="150">
                 <template slot-scope="{ row }">
                     <span v-for="(value, item, index) in clientOps" :key="index">
                     {{ row.client == item? value: "" }}
@@ -119,19 +134,8 @@
             prop="remote_addr"
             label="外网IP"
             width="120">
-        </el-table-column>  
-        <el-table-column
-            prop="info"
-            label="详情">
-        </el-table-column>         
-        <el-table-column
-            prop="created_at"
-            label="操作时间"
-            width="130"
-            :formatter="tableDateFormat">
-        </el-table-column>                                  
+        </el-table-column>                                                  
       </el-table>
-
       <div class="sh-20"></div>
         <el-pagination
             background
@@ -252,5 +256,8 @@ export default {
 }
 /deep/ .el-table td {
     padding: 5px 0;
+}
+.sub_txt {
+    color: #88909B;
 }
 </style>

@@ -48,18 +48,18 @@ func TestParseUserAgent(t *testing.T) {
 		},
 		{
 			name: "linux",
-			args: args{userAgent: "open anyconnect vpn agent v7.08"},
+			args: args{userAgent: "cisco anyconnect vpn agent for linux v7.08"},
 			want: res{os_idx: 2, client_idx: 0, ver: "7.08"},
 		},
 		{
 			name: "openconnect",
 			args: args{userAgent: "openconnect-gui 1.5.3 v7.08"},
-			want: res{os_idx: 2, client_idx: 1, ver: "7.08"},
+			want: res{os_idx: 5, client_idx: 1, ver: "7.08"},
 		},
 		{
 			name: "unknown",
 			args: args{userAgent: "unknown 1.4.3 aabcd"},
-			want: res{os_idx: 2, client_idx: 2, ver: ""},
+			want: res{os_idx: 5, client_idx: 2, ver: ""},
 		},
 	}
 	for _, tt := range tests {

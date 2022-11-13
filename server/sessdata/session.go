@@ -64,19 +64,21 @@ type DtlsSession struct {
 }
 
 type Session struct {
-	mux            sync.RWMutex
-	Sid            string // auth返回的 session-id
-	Token          string // session信息的唯一token
-	DtlsSid        string // dtls协议的 session_id
-	MacAddr        string // 客户端mac地址
-	UniqueIdGlobal string // 客户端唯一标示
-	MacHw          net.HardwareAddr
-	Username       string // 用户名
-	Group          string
-	AuthStep       string
-	AuthPass       string
-	RemoteAddr     string
-	UserAgent      string
+	mux             sync.RWMutex
+	Sid             string // auth返回的 session-id
+	Token           string // session信息的唯一token
+	DtlsSid         string // dtls协议的 session_id
+	MacAddr         string // 客户端mac地址
+	UniqueIdGlobal  string // 客户端唯一标示
+	MacHw           net.HardwareAddr
+	Username        string // 用户名
+	Group           string
+	AuthStep        string
+	AuthPass        string
+	RemoteAddr      string
+	UserAgent       string
+	DeviceType      string
+	PlatformVersion string
 
 	LastLogin time.Time
 	IsActive  bool
@@ -455,11 +457,13 @@ func DelSessByStoken(stoken string) {
 
 func AddUserActLog(cs *ConnSession) {
 	ua := dbdata.UserActLog{
-		Username:   cs.Sess.Username,
-		GroupName:  cs.Sess.Group,
-		IpAddr:     cs.IpAddr.String(),
-		RemoteAddr: cs.RemoteAddr,
-		Status:     dbdata.UserLogout,
+		Username:        cs.Sess.Username,
+		GroupName:       cs.Sess.Group,
+		IpAddr:          cs.IpAddr.String(),
+		RemoteAddr:      cs.RemoteAddr,
+		DeviceType:      cs.Sess.DeviceType,
+		PlatformVersion: cs.Sess.PlatformVersion,
+		Status:          dbdata.UserLogout,
 	}
 	ua.Info = dbdata.UserActLogIns.GetInfoOpsById(cs.UserLogoutCode)
 	dbdata.UserActLogIns.Add(ua, cs.UserAgent)
@@ -467,12 +471,14 @@ func AddUserActLog(cs *ConnSession) {
 
 func AddUserActLogBySess(sess *Session) {
 	ua := dbdata.UserActLog{
-		Username:   sess.Username,
-		GroupName:  sess.Group,
-		IpAddr:     "",
-		RemoteAddr: sess.RemoteAddr,
-		Status:     dbdata.UserLogout,
+		Username:        sess.Username,
+		GroupName:       sess.Group,
+		IpAddr:          "",
+		RemoteAddr:      sess.RemoteAddr,
+		DeviceType:      sess.DeviceType,
+		PlatformVersion: sess.PlatformVersion,
+		Status:          dbdata.UserLogout,
 	}
-	ua.Info = dbdata.UserActLogIns.GetInfoOpsById(1)
+	ua.Info = dbdata.UserActLogIns.GetInfoOpsById(dbdata.UserLogoutBanner)
 	dbdata.UserActLogIns.Add(ua, sess.UserAgent)
 }

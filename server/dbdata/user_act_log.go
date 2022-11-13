@@ -55,7 +55,7 @@ var (
 		},
 		InfoOps: []string{ // 信息
 			UserLogoutLose:    "用户掉线",
-			UserLogoutBanner:  "用户取消弹窗",
+			UserLogoutBanner:  "用户取消弹窗/客户端发起的logout",
 			UserLogoutClient:  "用户/客户端主动断开",
 			UserLogoutTimeout: "Session过期被踢下线",
 			UserLogoutAdmin:   "账号被管理员踢下线",
@@ -121,8 +121,8 @@ func (ua *UserActLogProcess) ParseUserAgent(userAgent string) (os_idx, client_id
 	if len(userAgent) == 0 {
 		return 5, 2, ""
 	}
-	// os
-	os_idx = 2
+	// OS
+	os_idx = 5
 	if strings.Contains(userAgent, "windows") {
 		os_idx = 0
 	} else if strings.Contains(userAgent, "mac os") || strings.Contains(userAgent, "darwin_i386") {
@@ -131,15 +131,17 @@ func (ua *UserActLogProcess) ParseUserAgent(userAgent string) (os_idx, client_id
 		os_idx = 4
 	} else if strings.Contains(userAgent, "android") {
 		os_idx = 3
+	} else if strings.Contains(userAgent, "linux") {
+		os_idx = 2
 	}
-	// client
+	// Client
 	client_idx = 2
 	if strings.Contains(userAgent, "anyconnect") {
 		client_idx = 0
 	} else if strings.Contains(userAgent, "openconnect") {
 		client_idx = 1
 	}
-	// ver
+	// Verion
 	uaSlice := strings.Split(userAgent, " ")
 	ver = uaSlice[len(uaSlice)-1]
 	if ver[0] == 'v' {
