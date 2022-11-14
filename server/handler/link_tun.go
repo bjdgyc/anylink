@@ -5,6 +5,7 @@ import (
 
 	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/sessdata"
+	"github.com/coreos/go-iptables/iptables"
 	"github.com/songgao/water"
 )
 
@@ -26,6 +27,26 @@ func checkTun() {
 	if err != nil {
 		base.Fatal("testTun err: ", err)
 	}
+	//开启服务器转发
+	if err := execCmd([]string{"sysctl -w net.ipv4.ip_forward=1"}); err != nil {
+		base.Error(err)
+	}
+	//添加NAT转发规则
+	ipt, err := iptables.New()
+	if err != nil {
+		base.Error(err)
+		return
+	}
+	rule := []string{"-s", base.Cfg.Ipv4CIDR, "-o", base.Cfg.Ipv4Master, "-j", "MASQUERADE"}
+	rule1 := []string{"-j", "ACCEPT"}
+	if exists, _ := ipt.Exists("nat", "POSTROUTING", rule...); !exists {
+		ipt.Insert("nat", "POSTROUTING", 1, rule...)
+	}
+	if exists, _ := ipt.Exists("filter", "FORWARD", rule1...); !exists {
+		ipt.Insert("filter", "FORWARD", 1, rule1...)
+	}
+	base.Info(ipt.List("nat", "POSTROUTING"))
+	base.Info(ipt.List("filter", "FORWARD"))
 }
 
 // 创建tun网卡
