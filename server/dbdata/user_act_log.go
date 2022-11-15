@@ -41,17 +41,18 @@ var (
 			UserLogout:      "用户登出",
 		},
 		OsOps: []string{ // 操作系统
-			0: "Windows",
-			1: "macOS",
-			2: "Linux",
-			3: "Android",
-			4: "iOS",
-			5: "Unknown",
+			0: "Unknown",
+			1: "Windows",
+			2: "macOS",
+			3: "Linux",
+			4: "Android",
+			5: "iOS",
 		},
 		ClientOps: []string{ // 客户端
-			0: "AnyConnect",
-			1: "OpenConnect",
-			2: "Unknown",
+			0: "Unknown",
+			1: "AnyConnect",
+			2: "OpenConnect",
+			3: "AnyLink",
 		},
 		InfoOps: []string{ // 信息
 			UserLogoutLose:    "用户掉线",
@@ -119,27 +120,29 @@ func (ua *UserActLogProcess) GetInfoOpsById(id uint8) string {
 func (ua *UserActLogProcess) ParseUserAgent(userAgent string) (os_idx, client_idx uint8, ver string) {
 	// Unknown
 	if len(userAgent) == 0 {
-		return 5, 2, ""
+		return 0, 0, ""
 	}
 	// OS
-	os_idx = 5
+	os_idx = 0
 	if strings.Contains(userAgent, "windows") {
-		os_idx = 0
-	} else if strings.Contains(userAgent, "mac os") || strings.Contains(userAgent, "darwin_i386") {
 		os_idx = 1
-	} else if strings.Contains(userAgent, "darwin_arm") || strings.Contains(userAgent, "apple") {
-		os_idx = 4
-	} else if strings.Contains(userAgent, "android") {
-		os_idx = 3
-	} else if strings.Contains(userAgent, "linux") {
+	} else if strings.Contains(userAgent, "mac os") || strings.Contains(userAgent, "darwin_i386") {
 		os_idx = 2
+	} else if strings.Contains(userAgent, "darwin_arm") || strings.Contains(userAgent, "apple") {
+		os_idx = 5
+	} else if strings.Contains(userAgent, "android") {
+		os_idx = 4
+	} else if strings.Contains(userAgent, "linux") {
+		os_idx = 3
 	}
 	// Client
-	client_idx = 2
+	client_idx = 0
 	if strings.Contains(userAgent, "anyconnect") {
-		client_idx = 0
-	} else if strings.Contains(userAgent, "openconnect") {
 		client_idx = 1
+	} else if strings.Contains(userAgent, "openconnect") {
+		client_idx = 2
+	} else if strings.Contains(userAgent, "anylink") {
+		client_idx = 3
 	}
 	// Verion
 	uaSlice := strings.Split(userAgent, " ")
