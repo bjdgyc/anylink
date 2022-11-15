@@ -61,6 +61,16 @@ func TestParseUserAgent(t *testing.T) {
 			args: args{userAgent: "unknown 1.4.3 aabcd"},
 			want: res{os_idx: 0, client_idx: 0, ver: ""},
 		},
+		{
+			name: "unknown 2",
+			args: args{userAgent: ""},
+			want: res{os_idx: 0, client_idx: 0, ver: ""},
+		},
+		{
+			name: "anylink",
+			args: args{userAgent: "anylink vpn agent for linux v1.0"},
+			want: res{os_idx: 3, client_idx: 3, ver: "1.0"},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
