@@ -349,7 +349,7 @@ sh bridge-init.sh
 
 ## License
 
-本项目采用 MIT 开源授权许可证，完整的授权说明已放置在 LICENSE 文件中。
+本项目采用 AGPL-3.0 开源授权许可证，完整的授权说明已放置在 LICENSE 文件中。
 
 ## Thank
 
