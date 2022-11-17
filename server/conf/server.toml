@@ -26,5 +26,11 @@ server_addr = ":443"
 admin_addr = ":8800"
 
 
+#客户端分配的ip地址池
+ipv4_master = "eth0"
+ipv4_cidr = "192.168.10.0/24"
+ipv4_gateway = "192.168.10.1"
+ipv4_start = "192.168.10.100"
+ipv4_end = "192.168.10.200"
 
 
