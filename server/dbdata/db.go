@@ -128,6 +128,7 @@ func addInitData() error {
 		AllowLan:     true,
 		ClientDns:    []ValData{{Val: "114.114.114.114"}},
 		RouteInclude: []ValData{{Val: All}},
+		Status:       1,
 	}
 	err = SetGroup(&g1)
 	if err != nil {
