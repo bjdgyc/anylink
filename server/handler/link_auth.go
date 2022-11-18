@@ -55,7 +55,7 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 
 	if cr.Type == "init" {
 		w.WriteHeader(http.StatusOK)
-		data := RequestData{Group: cr.GroupSelect, Groups: dbdata.GetGroupNames()}
+		data := RequestData{Group: cr.GroupSelect, Groups: dbdata.GetGroupNamesNormal()}
 		tplRequest(tpl_request, w, data)
 		return
 	}
@@ -83,7 +83,7 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 		dbdata.UserActLogIns.Add(ua, userAgent)
 
 		w.WriteHeader(http.StatusOK)
-		data := RequestData{Group: cr.GroupSelect, Groups: dbdata.GetGroupNames(), Error: "用户名或密码错误"}
+		data := RequestData{Group: cr.GroupSelect, Groups: dbdata.GetGroupNamesNormal(), Error: "用户名或密码错误"}
 		tplRequest(tpl_request, w, data)
 		return
 	}
