@@ -3,6 +3,7 @@ package handler
 import (
 	"crypto/tls"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"net/http"
@@ -88,6 +89,10 @@ func initRoute() http.Handler {
 			http.FileServer(http.Dir(base.Cfg.FilesPath)),
 		),
 	)
+	// 健康检测
+	r.HandleFunc("/status", func(w http.ResponseWriter, r *http.Request) {
+		io.WriteString(w, "ok")
+	}).Methods(http.MethodGet)
 	r.NotFoundHandler = http.HandlerFunc(notFound)
 	return r
 }
