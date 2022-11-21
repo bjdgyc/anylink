@@ -61,6 +61,7 @@ var configs = []config{
 	{Typ: cfgInt, Name: "audit_interval", Usage: "审计去重间隔(秒),-1关闭", ValInt: -1},
 
 	{Typ: cfgBool, Name: "show_sql", Usage: "显示sql语句，用于调试", ValBool: false},
+	{Typ: cfgBool, Name: "iptables_nat", Usage: "是否自动添加NAT", ValBool: false},
 }
 
 var envs = map[string]string{}
