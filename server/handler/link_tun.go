@@ -5,6 +5,7 @@ import (
 
 	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/sessdata"
+	"github.com/coreos/go-iptables/iptables"
 	"github.com/songgao/water"
 )
 
@@ -25,6 +26,26 @@ func checkTun() {
 	err = execCmd([]string{cmdstr})
 	if err != nil {
 		base.Fatal("testTun err: ", err)
+	}
+	//开启服务器转发
+	if err := execCmd([]string{"sysctl -w net.ipv4.ip_forward=1"}); err != nil {
+		base.Error(err)
+	}
+	if base.Cfg.IptablesNat {
+		//添加NAT转发规则
+		ipt, err := iptables.New()
+		if err != nil {
+			base.Error(err)
+			return
+		}
+		natRule := []string{"-s", base.Cfg.Ipv4CIDR, "-o", base.Cfg.Ipv4Master, "-j", "MASQUERADE"}
+		forwardRule := []string{"-j", "ACCEPT"}
+		if natExists, _ := ipt.Exists("filter", "FORWARD", forwardRule...); !natExists {
+			ipt.Insert("nat", "POSTROUTING", 1, natRule...)
+		}
+		if forwardExists, _ := ipt.Exists("filter", "FORWARD", natRule...); !forwardExists {
+			ipt.Insert("filter", "FORWARD", 1, forwardRule...)
+		}
 	}
 }
 
