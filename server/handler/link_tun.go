@@ -40,12 +40,14 @@ func checkTun() {
 		}
 		natRule := []string{"-s", base.Cfg.Ipv4CIDR, "-o", base.Cfg.Ipv4Master, "-j", "MASQUERADE"}
 		forwardRule := []string{"-j", "ACCEPT"}
-		if natExists, _ := ipt.Exists("filter", "FORWARD", forwardRule...); !natExists {
+		if natExists, _ := ipt.Exists("nat", "POSTROUTING", natRule...); !natExists {
 			ipt.Insert("nat", "POSTROUTING", 1, natRule...)
 		}
-		if forwardExists, _ := ipt.Exists("filter", "FORWARD", natRule...); !forwardExists {
+		if forwardExists, _ := ipt.Exists("filter", "FORWARD", forwardRule...); !forwardExists {
 			ipt.Insert("filter", "FORWARD", 1, forwardRule...)
 		}
+		base.Info(ipt.List("nat", "POSTROUTING"))
+		base.Info(ipt.List("filter", "FORWARD"))
 	}
 }
 
