@@ -108,7 +108,7 @@ func tunWrite(ifce *water.Interface, cSess *sessdata.ConnSession) {
 			return
 		}
 
-		putPayload(pl)
+		putPayloadInBefore(cSess, pl)
 	}
 }
 
