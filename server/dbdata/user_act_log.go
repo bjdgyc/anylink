@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/bjdgyc/anylink/base"
 	"github.com/ivpusic/grpool"
 	"github.com/spf13/cast"
 	"xorm.io/xorm"
@@ -85,8 +86,17 @@ func (ua *UserActLogProcess) Add(u UserActLog, userAgent string) {
 			u.Info = u.Info[2:]
 		}
 	}
+	// limit the max length of char
+	u.Version = substr(u.Version, 0, 15)
+	u.DeviceType = substr(u.DeviceType, 0, 128)
+	u.PlatformVersion = substr(u.PlatformVersion, 0, 128)
+	u.Info = substr(u.Info, 0, 255)
+
 	UserActLogIns.Pool.JobQueue <- func() {
-		_ = Add(u)
+		err := Add(u)
+		if err != nil {
+			base.Error("Add UserActLog error: ", err)
+		}
 	}
 }
 
@@ -117,6 +127,7 @@ func (ua *UserActLogProcess) GetInfoOpsById(id uint8) string {
 	return ua.InfoOps[id]
 }
 
+// 解析user agent
 func (ua *UserActLogProcess) ParseUserAgent(userAgent string) (os_idx, client_idx uint8, ver string) {
 	// Unknown
 	if len(userAgent) == 0 {
@@ -186,4 +197,14 @@ func (ua *UserActLogProcess) GetSession(values url.Values) *xorm.Session {
 		session.OrderBy("id asc")
 	}
 	return session
+}
+
+// 截取字符串
+func substr(s string, pos, length int) string {
+	runes := []rune(s)
+	l := pos + length
+	if l > len(runes) {
+		l = len(runes)
+	}
+	return string(runes[pos:l])
 }
