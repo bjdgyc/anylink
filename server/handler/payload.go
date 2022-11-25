@@ -15,9 +15,6 @@ func payloadIn(cSess *sessdata.ConnSession, pl *sessdata.Payload) bool {
 			// 校验不通过直接丢弃
 			return false
 		}
-		if base.Cfg.AuditInterval >= 0 {
-			auditPayload.Add(cSess.Username, pl)
-		}
 	}
 
 	closed := false
@@ -28,6 +25,15 @@ func payloadIn(cSess *sessdata.ConnSession, pl *sessdata.Payload) bool {
 	}
 
 	return closed
+}
+
+func putPayloadInBefore(cSess *sessdata.ConnSession, pl *sessdata.Payload) {
+	// 异步审计日志
+	if base.Cfg.AuditInterval >= 0 {
+		auditPayload.Add(cSess.Username, pl)
+		return
+	}
+	putPayload(pl)
 }
 
 func payloadOut(cSess *sessdata.ConnSession, pl *sessdata.Payload) bool {

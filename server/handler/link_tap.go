@@ -175,7 +175,7 @@ func allTapWrite(ifce LinkDriver, cSess *sessdata.ConnSession) {
 			return
 		}
 
-		putPayload(pl)
+		putPayloadInBefore(cSess, pl)
 	}
 }
 
