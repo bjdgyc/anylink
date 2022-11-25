@@ -50,7 +50,7 @@ type UserActLog struct {
 	Client          uint8     `json:"client" xorm:"not null default 0 Int"`
 	Version         string    `json:"version" xorm:"varchar(15)"`
 	DeviceType      string    `json:"device_type" xorm:"varchar(128) not null default ''"`
-	PlatformVersion string    `json:"platform_version" xorm:"varchar(15) not null default ''"`
+	PlatformVersion string    `json:"platform_version" xorm:"varchar(128) not null default ''"`
 	Status          uint8     `json:"status" xorm:"not null default 0 Int"`
 	Info            string    `json:"info" xorm:"varchar(255) not null default ''"` // 详情
 	CreatedAt       time.Time `json:"created_at" xorm:"DateTime created"`
