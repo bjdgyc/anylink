@@ -20,7 +20,7 @@ func LinkDtls(conn net.Conn, cSess *sessdata.ConnSession) {
 	}
 
 	defer func() {
-		base.Debug("LinkDtls return", cSess.IpAddr)
+		base.Debug("LinkDtls return", cSess.Username, cSess.IpAddr)
 		_ = conn.Close()
 		dSess.Close()
 	}()
@@ -36,14 +36,14 @@ func LinkDtls(conn net.Conn, cSess *sessdata.ConnSession) {
 	for {
 		err = conn.SetReadDeadline(utils.NowSec().Add(dead))
 		if err != nil {
-			base.Error("SetDeadline: ", err)
+			base.Error("SetDeadline: ", cSess.Username, err)
 			return
 		}
 
 		pl := getPayload()
 		n, err = conn.Read(pl.Data)
 		if err != nil {
-			base.Error("read hdata: ", err)
+			base.Error("read hdata: ", cSess.Username, err)
 			return
 		}
 
@@ -59,7 +59,7 @@ func LinkDtls(conn net.Conn, cSess *sessdata.ConnSession) {
 			// base.Debug("recv keepalive", cSess.IpAddr)
 		case 0x05: // DISCONNECT
 			cSess.UserLogoutCode = dbdata.UserLogoutClient
-			base.Debug("DISCONNECT DTLS", cSess.IpAddr)
+			base.Debug("DISCONNECT DTLS", cSess.Username, cSess.IpAddr)
 			return
 		case 0x03: // DPD-REQ
 			// base.Debug("recv DPD-REQ", cSess.IpAddr)
@@ -85,7 +85,7 @@ func LinkDtls(conn net.Conn, cSess *sessdata.ConnSession) {
 
 func dtlsWrite(conn net.Conn, dSess *sessdata.DtlsSession, cSess *sessdata.ConnSession) {
 	defer func() {
-		base.Debug("dtlsWrite return", cSess.IpAddr)
+		base.Debug("dtlsWrite return", cSess.Username, cSess.IpAddr)
 		_ = conn.Close()
 		dSess.Close()
 	}()
@@ -122,7 +122,7 @@ func dtlsWrite(conn net.Conn, dSess *sessdata.DtlsSession, cSess *sessdata.ConnS
 		}
 		n, err := conn.Write(pl.Data)
 		if err != nil {
-			base.Error("write err", err)
+			base.Error("write err", cSess.Username, err)
 			return
 		}
 
