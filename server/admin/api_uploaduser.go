@@ -12,6 +12,7 @@ import (
 	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/dbdata"
 	"github.com/bjdgyc/anylink/pkg/utils"
+	mapset "github.com/deckarep/golang-set"
 	"github.com/spf13/cast"
 	"github.com/xuri/excelize/v2"
 )
@@ -56,7 +57,11 @@ func UploadUser(file string) error {
 	if rows[0][0] != "id" || rows[0][1] != "username" || rows[0][2] != "nickname" || rows[0][3] != "email" || rows[0][4] != "pin_code" || rows[0][5] != "limittime" || rows[0][6] != "otp_secret" || rows[0][7] != "disable_otp" || rows[0][8] != "groups" || rows[0][9] != "status" || rows[0][10] != "send_email" {
 		return fmt.Errorf("批量添加失败，表格格式不正确")
 	}
-	for index, row := range rows[:] {
+	var k []interface{}
+	for _, v := range dbdata.GetGroupNames() {
+		k = append(k, v)
+	}
+	for index, row := range rows {
 		if index == 0 {
 			continue
 		}
@@ -66,7 +71,17 @@ func UploadUser(file string) error {
 		}
 		limittime, _ := time.ParseInLocation("2006-01-02 15:04:05", row[5], time.Local)
 		disableOtp, _ := strconv.ParseBool(row[7])
-		group := []string{row[8]}
+		var group []string
+		if row[8] == "" {
+			return fmt.Errorf("第%d行数据错误，用户组不允许为空", index)
+		}
+		for _, v := range strings.Split(row[8], ",") {
+			if s := mapset.NewSetFromSlice(k); s.Contains(v) {
+				group = append(group, v)
+			} else {
+				return fmt.Errorf("用户组【%s】不存在,请检查第%d行数据", v, index)
+			}
+		}
 		status := cast.ToInt8(row[9])
 		sendmail, _ := strconv.ParseBool(row[10])
 		// createdAt, _ := time.ParseInLocation("2006-01-02 15:04:05", row[11], time.Local)
@@ -87,10 +102,12 @@ func UploadUser(file string) error {
 			// UpdatedAt:  updatedAt,
 		}
 		if err := dbdata.AddBatch(user); err != nil {
-			return fmt.Errorf("请检查是否导入有重复用户")
+			return fmt.Errorf("请检查第%d行数据是否导入有重复用户", index)
 		}
-		if err := userAccountMail(user); user.SendEmail && err != nil {
-			return err
+		if user.SendEmail {
+			if err := userAccountMail(user); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
