@@ -126,7 +126,8 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	for _, v := range cSess.Group.RouteExclude {
 		HttpAddHeader(w, "X-CSTP-Split-Exclude", v.IpMask)
 	}
-	HttpSetHeader(w, "X-CSTP-Lease-Duration", fmt.Sprintf("%d", base.Cfg.IpLease)) // ip地址租期
+
+	HttpSetHeader(w, "X-CSTP-Lease-Duration", "1209600") // ip地址租期
 	HttpSetHeader(w, "X-CSTP-Session-Timeout", "none")
 	HttpSetHeader(w, "X-CSTP-Session-Timeout-Alert-Interval", "60")
 	HttpSetHeader(w, "X-CSTP-Session-Timeout-Remaining", "none")
@@ -135,8 +136,10 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	HttpSetHeader(w, "X-CSTP-Keep", "true")
 	HttpSetHeader(w, "X-CSTP-Tunnel-All-DNS", "false")
 
-	HttpSetHeader(w, "X-CSTP-Rekey-Time", "21600") // 172800
+	HttpSetHeader(w, "X-CSTP-Rekey-Time", "43200") // 172800
 	HttpSetHeader(w, "X-CSTP-Rekey-Method", "new-tunnel")
+	HttpSetHeader(w, "X-DTLS-Rekey-Time", "43200")
+	HttpSetHeader(w, "X-DTLS-Rekey-Method", "new-tunnel")
 
 	HttpSetHeader(w, "X-CSTP-DPD", fmt.Sprintf("%d", cstpDpd))
 	HttpSetHeader(w, "X-CSTP-Keepalive", fmt.Sprintf("%d", cstpKeepalive))
@@ -151,7 +154,6 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	HttpSetHeader(w, "X-DTLS-Port", dtlsPort)
 	HttpSetHeader(w, "X-DTLS-DPD", fmt.Sprintf("%d", cstpDpd))
 	HttpSetHeader(w, "X-DTLS-Keepalive", fmt.Sprintf("%d", cstpKeepalive))
-	HttpSetHeader(w, "X-DTLS-Rekey-Time", "21600")
 	HttpSetHeader(w, "X-DTLS12-CipherSuite", "ECDHE-ECDSA-AES128-GCM-SHA256")
 
 	HttpSetHeader(w, "X-CSTP-License", "accept")

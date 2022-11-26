@@ -89,7 +89,7 @@ sudo ./anylink
 - [x] 基于 tun 设备的 nat 访问模式
 - [x] 基于 tap 设备的桥接访问模式
 - [x] 基于 macvtap 设备的桥接访问模式
-- [x] 支持 [proxy protocol v1](http://www.haproxy.org/download/2.2/doc/proxy-protocol.txt) 协议
+- [x] 支持 [proxy protocol v1&v2](http://www.haproxy.org/download/2.2/doc/proxy-protocol.txt) 协议
 - [x] 用户组支持
 - [x] 多用户支持
 - [x] 用户策略支持

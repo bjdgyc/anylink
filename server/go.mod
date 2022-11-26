@@ -19,6 +19,7 @@ require (
 	github.com/orcaman/concurrent-map v1.0.0
 	github.com/pion/dtls/v2 v2.1.5
 	github.com/pion/logging v0.2.2
+	github.com/pires/go-proxyproto v0.6.2
 	github.com/shirou/gopsutil v3.21.7+incompatible
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/songgao/packets v0.0.0-20160404182456-549a10cd4091

@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"github.com/bjdgyc/anylink/base"
-	"github.com/bjdgyc/anylink/pkg/proxyproto"
 	"github.com/gorilla/mux"
+	"github.com/pires/go-proxyproto"
 )
 
 func startTls() {
@@ -64,7 +64,10 @@ func startTls() {
 	defer ln.Close()
 
 	if base.Cfg.ProxyProtocol {
-		ln = &proxyproto.Listener{Listener: ln, ProxyHeaderTimeout: time.Second * 5}
+		ln = &proxyproto.Listener{
+			Listener:          ln,
+			ReadHeaderTimeout: 20 * time.Second,
+		}
 	}
 
 	base.Info("listen server", addr)
