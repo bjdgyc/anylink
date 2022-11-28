@@ -28,10 +28,10 @@ admin_addr = ":8800"
 
 #客户端分配的ip地址池
 ipv4_master = "eth0"
-ipv4_cidr = "192.168.10.0/24"
-ipv4_gateway = "192.168.10.1"
-ipv4_start = "192.168.10.100"
-ipv4_end = "192.168.10.200"
+ipv4_cidr = "192.168.90.0/24"
+ipv4_gateway = "192.168.90.1"
+ipv4_start = "192.168.90.100"
+ipv4_end = "192.168.90.200"
 
 #是否自动添加nat
 iptables_nat = false

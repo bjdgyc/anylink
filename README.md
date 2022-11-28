@@ -159,9 +159,9 @@ systemctl stop firewalld.service
 systemctl disable firewalld.service
 
 # 请根据服务器内网网卡替换 eth0
-iptables -t nat -A POSTROUTING -s 192.168.10.0/24 -o eth0 -j MASQUERADE
+iptables -t nat -A POSTROUTING -s 192.168.90.0/24 -o eth0 -j MASQUERADE
 # 如果执行第一个命令不生效，可以继续执行下面的命令
-# iptables -A FORWARD -i eth0 -s 192.168.10.0/24 -j ACCEPT
+# iptables -A FORWARD -i eth0 -s 192.168.90.0/24 -j ACCEPT
 # 查看设置是否生效
 iptables -nL -t nat
 ```
@@ -169,17 +169,17 @@ iptables -nL -t nat
 2.2 使用全局路由转发(二选一)
 
 ```shell
-# 假设anylink所在服务器的内网ip: 10.1.0.10
+# 假设anylink所在服务器的内网ip: 10.1.2.10
 
 # 传统网络架构，在华三交换机添加以下静态路由规则
-ip route-static 192.168.10.0 255.255.255.0 10.1.0.10
+ip route-static 192.168.90.0 255.255.255.0 10.1.2.10
 # 其他品牌的交换机命令，请参考以下地址
 https://cloud.tencent.com/document/product/216/62007
 
 # 公有云环境下，需设置vpc下的路由表，添加以下路由策略
-目的端: 192.168.10.0/24
+目的端: 192.168.90.0/24
 下一跳类型: 云服务器
-下一跳: 10.1.0.10
+下一跳: 10.1.2.10
 
 ```
 
@@ -197,46 +197,19 @@ https://cloud.tencent.com/document/product/216/62007
 #内网主网卡名称
 ipv4_master = "eth0"
 #以下网段需要跟ipv4_master网卡设置成一样
-ipv4_cidr = "192.168.10.0/24"
-ipv4_gateway = "192.168.10.1"
-ipv4_start = "192.168.10.100"
-ipv4_end = "192.168.10.200"
+ipv4_cidr = "10.1.2.0/24"
+ipv4_gateway = "10.1.2.1"
+ipv4_start = "10.1.2.100"
+ipv4_end = "10.1.2.200"
 ```
 
-<details>
-<summary>tap设置</summary>
-
-### ~~tap 设置~~
-
-1. 创建桥接网卡
-
-```
-注意 server.toml 的ip参数，需要与 bridge-init.sh 的配置参数一致
-```
-
-2. 修改 bridge-init.sh 内的参数
-
-> 以下参数可以通过执行 `ip a` 查看
-
-```
-eth="eth0"
-eth_ip="192.168.10.4/24"
-eth_broadcast="192.168.10.255"
-eth_gateway="192.168.10.1"
-```
-
-3. 执行 bridge-init.sh 文件
-
-```
-sh bridge-init.sh
-```
-</details>
 
 ## Systemd
 
 1. 添加 anylink 程序
 
     - anylink 程序目录放入 `/usr/local/anylink-deploy`
+    - 添加执行权限 `chmod +x /usr/local/anylink-deploy/anylink`
 
 2. systemd/anylink.service 脚本放入：
 
