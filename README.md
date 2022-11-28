@@ -158,18 +158,23 @@ cat /proc/sys/net/ipv4/ip_forward
 systemctl stop firewalld.service
 systemctl disable firewalld.service
 
+# 新版本支持自动设置nat转发，如有其他需求可以参考下面的命令配置
+
 # 请根据服务器内网网卡替换 eth0
-iptables -t nat -A POSTROUTING -s 192.168.90.0/24 -o eth0 -j MASQUERADE
+# iptables -t nat -A POSTROUTING -s 192.168.90.0/24 -o eth0 -j MASQUERADE
 # 如果执行第一个命令不生效，可以继续执行下面的命令
 # iptables -A FORWARD -i eth0 -s 192.168.90.0/24 -j ACCEPT
 # 查看设置是否生效
-iptables -nL -t nat
+# iptables -nL -t nat
 ```
 
 2.2 使用全局路由转发(二选一)
 
 ```shell
 # 假设anylink所在服务器的内网ip: 10.1.2.10
+
+# 首先关闭nat转发功能
+iptables_nat = false
 
 # 传统网络架构，在华三交换机添加以下静态路由规则
 ip route-static 192.168.90.0 255.255.255.0 10.1.2.10
@@ -255,9 +260,7 @@ ipv4_end = "10.1.2.200"
 5. 启动容器
 
    ```bash
-   # -e IPV4_CIDR=192.168.10.0/24 这个参数要与配置文件内的网段一致
    docker run -itd --name anylink --privileged \
-       -e IPV4_CIDR=192.168.10.0/24
        -p 443:443 -p 8800:8800 \
        --restart=always \
        bjdgyc/anylink
@@ -267,7 +270,6 @@ ipv4_end = "10.1.2.200"
    ```bash
    # 参数可以参考 -h 命令
    docker run -itd --name anylink --privileged \
-       -e IPV4_CIDR=192.168.10.0/24 \
        -p 443:443 -p 8800:8800 \
        --restart=always \
        bjdgyc/anylink \
@@ -280,7 +282,7 @@ ipv4_end = "10.1.2.200"
    #获取仓库源码
    git clone https://github.com/bjdgyc/anylink.git
    # 构建镜像
-   docker build -t anylink .
+   docker build -t anylink -f docker/Dockerfile .
    ```
 
 

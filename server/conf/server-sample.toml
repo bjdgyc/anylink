@@ -76,6 +76,6 @@ audit_interval = -1
 show_sql = false
 
 #是否自动添加nat
-iptables_nat = false
+iptables_nat = true
 
 
