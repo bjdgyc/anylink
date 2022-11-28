@@ -199,6 +199,9 @@ https://cloud.tencent.com/document/product/216/62007
 > 以下参数可以通过执行 `ip a` 查看
 
 ```
+# 首先关闭nat转发功能
+iptables_nat = false
+
 #内网主网卡名称
 ipv4_master = "eth0"
 #以下网段需要跟ipv4_master网卡设置成一样
