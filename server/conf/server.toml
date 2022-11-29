@@ -33,4 +33,5 @@ ipv4_gateway = "192.168.90.1"
 ipv4_start = "192.168.90.100"
 ipv4_end = "192.168.90.200"
 
-
+#是否自动添加nat
+iptables_nat = true
