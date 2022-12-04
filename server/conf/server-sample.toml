@@ -30,7 +30,7 @@ jwt_secret = "abcdef.0123456789.abcdef"
 server_addr = ":443"
 #开启 DTLS, 默认关闭
 server_dtls = false
-server_dtls_addr = ":4433"
+server_dtls_addr = ":443"
 #后台服务监听地址
 admin_addr = ":8800"
 #开启tcp proxy protocol协议
