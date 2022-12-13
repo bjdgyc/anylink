@@ -191,7 +191,7 @@
                     <template slot="append">BYTE/S</template>
                 </el-input>
                 </el-form-item>
-                <el-form-item label="本地网络" prop="allow_lan">
+                <el-form-item label="排除本地网络" prop="allow_lan">
                 <el-switch
                     v-model="ruleForm.allow_lan">
                 </el-switch>
