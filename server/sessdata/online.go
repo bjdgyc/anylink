@@ -14,6 +14,7 @@ type Online struct {
 	Username         string    `json:"username"`
 	Group            string    `json:"group"`
 	MacAddr          string    `json:"mac_addr"`
+	UniqueMac        bool      `json:"unique_mac"`
 	Ip               net.IP    `json:"ip"`
 	RemoteAddr       string    `json:"remote_addr"`
 	TunName          string    `json:"tun_name"`
@@ -52,6 +53,7 @@ func OnlineSess() []Online {
 				Username:         v.Username,
 				Group:            v.Group,
 				MacAddr:          v.MacAddr,
+				UniqueMac:        v.UniqueMac,
 				RemoteAddr:       v.CSess.RemoteAddr,
 				TunName:          v.CSess.IfName,
 				Mtu:              v.CSess.Mtu,

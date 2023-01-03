@@ -60,6 +60,7 @@ type IpMap struct {
 	Id        int       `json:"id" xorm:"pk autoincr not null"`
 	IpAddr    string    `json:"ip_addr" xorm:"varchar(32) not null unique"`
 	MacAddr   string    `json:"mac_addr" xorm:"varchar(32) not null unique"`
+	UniqueMac bool      `json:"unique_mac" xorm:"Bool index"`
 	Username  string    `json:"username" xorm:"varchar(60)"`
 	Keep      bool      `json:"keep" xorm:"Bool"` // 保留 ip-mac 绑定
 	KeepTime  time.Time `json:"keep_time" xorm:"DateTime"`

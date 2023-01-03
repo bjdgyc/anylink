@@ -36,6 +36,14 @@
         </el-table-column>
 
         <el-table-column
+            prop="unique_mac"
+            label="唯一MAC">
+            <template slot-scope="scope">
+                <el-tag v-if="scope.row.unique_mac" type="success">是</el-tag>
+            </template>
+        </el-table-column>
+
+        <el-table-column
             prop="username"
             label="用户名">
         </el-table-column>

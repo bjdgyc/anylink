@@ -18,6 +18,10 @@ import (
 var profileHash = ""
 
 func LinkAuth(w http.ResponseWriter, r *http.Request) {
+	// TODO 调试信息输出
+	//hd, _ := httputil.DumpRequest(r, true)
+	//base.Debug("DumpRequest: ", string(hd))
+
 	// 判断anyconnect客户端
 	userAgent := strings.ToLower(r.UserAgent())
 	xAggregateAuth := r.Header.Get("X-Aggregate-Auth")
@@ -106,6 +110,7 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	sess.PlatformVersion = ua.PlatformVersion
 	sess.RemoteAddr = r.RemoteAddr
 	// 获取客户端mac地址
+	sess.UniqueMac = true
 	macHw, err := net.ParseMAC(sess.MacAddr)
 	if err != nil {
 		var sum [16]byte
@@ -113,6 +118,7 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 			sum = md5.Sum([]byte(sess.UniqueIdGlobal))
 		} else {
 			sum = md5.Sum([]byte(sess.Token))
+			sess.UniqueMac = false
 		}
 		macHw = sum[0:5] // 5个byte
 		macHw = append([]byte{0x02}, macHw...)

@@ -71,6 +71,7 @@ type Session struct {
 	MacAddr         string // 客户端mac地址
 	UniqueIdGlobal  string // 客户端唯一标示
 	MacHw           net.HardwareAddr
+	UniqueMac       bool   // 客户端获取到真实设备mac
 	Username        string // 用户名
 	Group           string
 	AuthStep        string
@@ -178,6 +179,7 @@ func (s *Session) NewConn() *ConnSession {
 	macAddr := s.MacAddr
 	macHw := s.MacHw
 	username := s.Username
+	uniqueMac := s.UniqueMac
 	s.mux.RUnlock()
 	if active {
 		s.CSess.Close()
@@ -187,7 +189,7 @@ func (s *Session) NewConn() *ConnSession {
 	if !limit {
 		return nil
 	}
-	ip := AcquireIp(username, macAddr)
+	ip := AcquireIp(username, macAddr, uniqueMac)
 	if ip == nil {
 		LimitClient(username, true)
 		return nil

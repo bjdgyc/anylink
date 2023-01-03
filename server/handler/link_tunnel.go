@@ -34,9 +34,8 @@ func HttpAddHeader(w http.ResponseWriter, key string, value string) {
 
 func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	// TODO 调试信息输出
-	// hd, _ := httputil.DumpRequest(r, true)
-	// fmt.Println("DumpRequest: ", string(hd))
-	// fmt.Println("LinkTunnel", r.RemoteAddr)
+	//hd, _ := httputil.DumpRequest(r, true)
+	//base.Debug("DumpRequest: ", string(hd))
 
 	// 判断session-token的值
 	cookie, err := r.Cookie("webvpn")

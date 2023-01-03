@@ -66,7 +66,7 @@ func startTls() {
 	if base.Cfg.ProxyProtocol {
 		ln = &proxyproto.Listener{
 			Listener:          ln,
-			ReadHeaderTimeout: 20 * time.Second,
+			ReadHeaderTimeout: 40 * time.Second,
 		}
 	}
 
