@@ -149,8 +149,12 @@ const accountMail = `<p>您好:</p>
     用户组: <b>{{.Group}}</b> <br/>
     用户名: <b>{{.Username}}</b> <br/>
     用户PIN码: <b>{{.PinCode}}</b> <br/>
+    <!-- 
     用户动态码(3天后失效):<br/>
     <img src="{{.OtpImg}}"/>
+    -->
+    用户动态码(请妥善保存):<br/>
+    <img src="{{.OtpImgBase64}}"/>
 </p>
 <div>
     使用说明:
