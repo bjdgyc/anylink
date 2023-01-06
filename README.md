@@ -1,6 +1,6 @@
 # AnyLink
 
-[![Go](https://github.com/bjdgyc/anylink/workflows/Go/badge.svg?branch=master)](https://github.com/bjdgyc/anylink/actions)
+[![Go](https://github.com/bjdgyc/anylink/workflows/Go/badge.svg?branch=main)](https://github.com/bjdgyc/anylink/actions)
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/bjdgyc/anylink)](https://pkg.go.dev/github.com/bjdgyc/anylink)
 [![Go Report Card](https://goreportcard.com/badge/github.com/bjdgyc/anylink)](https://goreportcard.com/report/github.com/bjdgyc/anylink)
 [![codecov](https://codecov.io/gh/bjdgyc/anylink/branch/master/graph/badge.svg?token=JTFLIIIBQ0)](https://codecov.io/gh/bjdgyc/anylink)
