@@ -47,21 +47,21 @@ func TestIpPool(t *testing.T) {
 	var ip net.IP
 
 	for i := 1; i <= 100; i++ {
-		_ = AcquireIp("user", fmt.Sprintf("mac-%d", i))
+		_ = AcquireIp("user", fmt.Sprintf("mac-%d", i), true)
 	}
-	ip = AcquireIp("user", "mac-new")
+	ip = AcquireIp("user", "mac-new", true)
 	assert.True(net.IPv4(192, 168, 3, 101).Equal(ip))
 	for i := 102; i <= 199; i++ {
-		ip = AcquireIp("user", fmt.Sprintf("mac-%d", i))
+		ip = AcquireIp("user", fmt.Sprintf("mac-%d", i), true)
 	}
 	assert.True(net.IPv4(192, 168, 3, 199).Equal(ip))
-	ip = AcquireIp("user", "mac-nil")
+	ip = AcquireIp("user", "mac-nil", true)
 	assert.Nil(ip)
 
 	ReleaseIp(net.IPv4(192, 168, 3, 88), "mac-88")
 	ReleaseIp(net.IPv4(192, 168, 3, 188), "mac-188")
 	// 从头循环获取可用ip
-	ip = AcquireIp("user", "mac-188")
+	ip = AcquireIp("user", "mac-188", true)
 	t.Log("mac-188", ip)
 	assert.True(net.IPv4(192, 168, 3, 188).Equal(ip))
 }

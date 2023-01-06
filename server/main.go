@@ -1,5 +1,6 @@
 // AnyLink 是一个企业级远程办公vpn软件，可以支持多人同时在线使用。
 
+//go:build !windows
 // +build !windows
 
 package main

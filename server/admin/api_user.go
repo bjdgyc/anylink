@@ -5,7 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -80,7 +80,7 @@ func UserDetail(w http.ResponseWriter, r *http.Request) {
 func UserSet(w http.ResponseWriter, r *http.Request) {
 	_ = r.ParseForm()
 
-	body, err := ioutil.ReadAll(r.Body)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		RespError(w, RespInternalErr, err)
 		return
@@ -107,7 +107,8 @@ func UserSet(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-
+	//修改用户资料后执行过期用户检测
+	sessdata.CloseUserLimittimeSession()
 	RespSucess(w, nil)
 }
 
@@ -132,33 +133,44 @@ func UserDel(w http.ResponseWriter, r *http.Request) {
 
 func UserOtpQr(w http.ResponseWriter, r *http.Request) {
 	_ = r.ParseForm()
-	b64 := r.FormValue("b64")
+	b64S := r.FormValue("b64")
 	idS := r.FormValue("id")
 	id, _ := strconv.Atoi(idS)
-	var user dbdata.User
-	err := dbdata.One("Id", id, &user)
+
+	var b64 bool
+	if b64S == "1" {
+		b64 = true
+	}
+	data, err := userOtpQr(id, b64)
 	if err != nil {
-		RespError(w, RespInternalErr, err)
-		return
+		base.Error(err)
+	}
+	io.WriteString(w, data)
+}
+
+func userOtpQr(uid int, b64 bool) (string, error) {
+	var user dbdata.User
+	err := dbdata.One("Id", uid, &user)
+	if err != nil {
+		return "", err
 	}
 
 	issuer := url.QueryEscape(base.Cfg.Issuer)
 	qrstr := fmt.Sprintf("otpauth://totp/%s:%s?issuer=%s&secret=%s", issuer, user.Email, issuer, user.OtpSecret)
 	qr, _ := qrcode.New(qrstr, qrcode.High)
 
-	if b64 == "1" {
-		data, _ := qr.PNG(300)
-		s := base64.StdEncoding.EncodeToString(data)
-		_, err = fmt.Fprint(w, s)
+	if b64 {
+		data, err := qr.PNG(300)
 		if err != nil {
-			base.Error(err)
+			return "", err
 		}
-		return
+		s := base64.StdEncoding.EncodeToString(data)
+		return s, nil
 	}
-	err = qr.Write(300, w)
-	if err != nil {
-		base.Error(err)
-	}
+
+	buf := bytes.NewBuffer(nil)
+	err = qr.Write(300, buf)
+	return buf.String(), err
 }
 
 // 在线用户
@@ -177,7 +189,7 @@ func UserOnline(w http.ResponseWriter, r *http.Request) {
 func UserOffline(w http.ResponseWriter, r *http.Request) {
 	_ = r.ParseForm()
 	token := r.FormValue("token")
-	sessdata.CloseSess(token)
+	sessdata.CloseSess(token, dbdata.UserLogoutAdmin)
 	RespSucess(w, nil)
 }
 
@@ -189,12 +201,13 @@ func UserReline(w http.ResponseWriter, r *http.Request) {
 }
 
 type userAccountMailData struct {
-	Issuer   string
-	LinkAddr string
-	Group    string
-	Username string
-	PinCode  string
-	OtpImg   string
+	Issuer       string
+	LinkAddr     string
+	Group        string
+	Username     string
+	PinCode      string
+	OtpImg       string
+	OtpImgBase64 string
 }
 
 func userAccountMail(user *dbdata.User) error {
@@ -235,12 +248,15 @@ func userAccountMail(user *dbdata.User) error {
 		return err
 	}
 
+	otpData, _ := userOtpQr(user.Id, true)
+
 	data := userAccountMailData{
-		LinkAddr: setting.LinkAddr,
-		Group:    strings.Join(user.Groups, ","),
-		Username: user.Username,
-		PinCode:  user.PinCode,
-		OtpImg:   fmt.Sprintf("https://%s/otp_qr?id=%d&jwt=%s", setting.LinkAddr, user.Id, tokenString),
+		LinkAddr:     setting.LinkAddr,
+		Group:        strings.Join(user.Groups, ","),
+		Username:     user.Username,
+		PinCode:      user.PinCode,
+		OtpImg:       fmt.Sprintf("https://%s/otp_qr?id=%d&jwt=%s", setting.LinkAddr, user.Id, tokenString),
+		OtpImgBase64: "data:image/png;base64," + otpData,
 	}
 	w := bytes.NewBufferString("")
 	t, _ := template.New("auth_complete").Parse(htmlBody)

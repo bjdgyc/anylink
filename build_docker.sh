@@ -5,7 +5,8 @@ echo $ver
 
 #docker login -u bjdgyc
 
-docker build -t bjdgyc/anylink .
+#docker build -t bjdgyc/anylink .
+docker build -t bjdgyc/anylink -f docker/Dockerfile .
 
 docker tag bjdgyc/anylink:latest bjdgyc/anylink:$ver
 

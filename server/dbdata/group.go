@@ -74,6 +74,20 @@ func GetGroupNames() []string {
 	return names
 }
 
+func GetGroupNamesNormal() []string {
+	var datas []Group
+	err := FindWhere(&datas, 0, 0, "status=1")
+	if err != nil {
+		base.Error(err)
+		return nil
+	}
+	var names []string
+	for _, v := range datas {
+		names = append(names, v.Name)
+	}
+	return names
+}
+
 func GetGroupNamesIds() []GroupNameId {
 	var datas []Group
 	err := Find(&datas, 0, 0)

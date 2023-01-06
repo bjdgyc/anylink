@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/bjdgyc/anylink/base"
+	"github.com/bjdgyc/anylink/dbdata"
 	"github.com/bjdgyc/anylink/pkg/utils"
 	"github.com/bjdgyc/anylink/sessdata"
 )
@@ -14,7 +15,7 @@ import (
 func LinkCstp(conn net.Conn, bufRW *bufio.ReadWriter, cSess *sessdata.ConnSession) {
 	base.Debug("LinkCstp connect ip:", cSess.IpAddr, "user:", cSess.Username, "rip:", conn.RemoteAddr())
 	defer func() {
-		base.Debug("LinkCstp return", cSess.IpAddr)
+		base.Debug("LinkCstp return", cSess.Username, cSess.IpAddr)
 		_ = conn.Close()
 		cSess.Close()
 	}()
@@ -33,14 +34,14 @@ func LinkCstp(conn net.Conn, bufRW *bufio.ReadWriter, cSess *sessdata.ConnSessio
 		// 设置超时限制
 		err = conn.SetReadDeadline(utils.NowSec().Add(dead))
 		if err != nil {
-			base.Error("SetDeadline: ", err)
+			base.Error("SetDeadline: ", cSess.Username, err)
 			return
 		}
 		// hdata := make([]byte, BufferSize)
 		pl := getPayload()
 		n, err = bufRW.Read(pl.Data)
 		if err != nil {
-			base.Error("read hdata: ", err)
+			base.Error("read hdata: ", cSess.Username, err)
 			return
 		}
 
@@ -55,7 +56,8 @@ func LinkCstp(conn net.Conn, bufRW *bufio.ReadWriter, cSess *sessdata.ConnSessio
 			// do nothing
 			// base.Debug("recv keepalive", cSess.IpAddr)
 		case 0x05: // DISCONNECT
-			base.Debug("DISCONNECT", cSess.IpAddr)
+			cSess.UserLogoutCode = dbdata.UserLogoutClient
+			base.Debug("DISCONNECT", cSess.Username, cSess.IpAddr)
 			return
 		case 0x03: // DPD-REQ
 			// base.Debug("recv DPD-REQ", cSess.IpAddr)
@@ -70,7 +72,7 @@ func LinkCstp(conn net.Conn, bufRW *bufio.ReadWriter, cSess *sessdata.ConnSessio
 			dataLen = binary.BigEndian.Uint16(pl.Data[4:6]) // 4,5
 			// 修复 cstp 数据长度溢出报错
 			if 8+dataLen > BufferSize {
-				base.Error("recv error dataLen", dataLen)
+				base.Error("recv error dataLen", cSess.Username, dataLen)
 				continue
 			}
 			// 去除数据头
@@ -87,7 +89,7 @@ func LinkCstp(conn net.Conn, bufRW *bufio.ReadWriter, cSess *sessdata.ConnSessio
 
 func cstpWrite(conn net.Conn, bufRW *bufio.ReadWriter, cSess *sessdata.ConnSession) {
 	defer func() {
-		base.Debug("cstpWrite return", cSess.IpAddr)
+		base.Debug("cstpWrite return", cSess.Username, cSess.IpAddr)
 		_ = conn.Close()
 		cSess.Close()
 	}()
@@ -128,7 +130,7 @@ func cstpWrite(conn net.Conn, bufRW *bufio.ReadWriter, cSess *sessdata.ConnSessi
 
 		n, err = conn.Write(pl.Data)
 		if err != nil {
-			base.Error("write err", err)
+			base.Error("write err", cSess.Username, err)
 			return
 		}
 

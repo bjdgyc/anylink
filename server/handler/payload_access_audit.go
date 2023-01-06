@@ -3,13 +3,13 @@ package handler
 import (
 	"crypto/md5"
 	"encoding/binary"
-	"encoding/hex"
 	"time"
 
 	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/dbdata"
 	"github.com/bjdgyc/anylink/pkg/utils"
 	"github.com/bjdgyc/anylink/sessdata"
+	"github.com/ivpusic/grpool"
 	"github.com/songgao/water/waterutil"
 )
 
@@ -20,73 +20,92 @@ const (
 	acc_proto_http
 )
 
-// 保存批量的审计日志
+var (
+	auditPayload *AuditPayload
+	logBatch     *LogBatch
+)
+
+// 分析审计日志
+type AuditPayload struct {
+	Pool       *grpool.Pool
+	IpAuditMap utils.IMaps
+}
+
+// 保存审计日志
 type LogBatch struct {
-	Logs []dbdata.AccessAudit
+	Logs    []dbdata.AccessAudit
+	LogChan chan dbdata.AccessAudit
 }
 
-// 日志池
-type LogSink struct {
-	logChan        chan dbdata.AccessAudit
-	autoCommitChan chan *LogBatch // 超时通知
+// 异步写入pool
+func (p *AuditPayload) Add(userName string, pl *sessdata.Payload) {
+	select {
+	case p.Pool.JobQueue <- func() {
+		logAudit(userName, pl)
+	}:
+	default:
+		putPayload(pl)
+		base.Error("AccessAudit: AuditPayload channel is full")
+	}
 }
 
-var logAuditSink *LogSink
-
-// 写入日志通道
-func logAuditWrite(aa dbdata.AccessAudit) {
-	logAuditSink.logChan <- aa
+// 数据落盘
+func (l *LogBatch) Write() {
+	if len(l.Logs) == 0 {
+		return
+	}
+	_ = dbdata.AddBatch(l.Logs)
+	l.Reset()
 }
 
-// 批量写入数据表
+// 清空数据
+func (l *LogBatch) Reset() {
+	l.Logs = []dbdata.AccessAudit{}
+}
+
+// 开启批量写入数据功能
 func logAuditBatch() {
 	if base.Cfg.AuditInterval < 0 {
 		return
 	}
-	logAuditSink = &LogSink{
-		logChan:        make(chan dbdata.AccessAudit, 1000),
-		autoCommitChan: make(chan *LogBatch, 10),
+	auditPayload = &AuditPayload{
+		Pool:       grpool.NewPool(10, 10240),
+		IpAuditMap: utils.NewMap("cmap", 0),
+	}
+	logBatch = &LogBatch{
+		LogChan: make(chan dbdata.AccessAudit, 10240),
 	}
 	var (
-		limit        = 100 // 超过上限批量写入数据表
-		logAudit     dbdata.AccessAudit
-		logBatch     *LogBatch
-		commitTimer  *time.Timer // 超时自动提交
-		timeOutBatch *LogBatch
+		limit       = 100 // 超过上限批量写入数据表
+		outTime     = time.NewTimer(time.Second)
+		accessAudit = dbdata.AccessAudit{}
 	)
+
 	for {
+		// 重置超时 时间
+		outTime.Reset(time.Second * 1)
 		select {
-		case logAudit = <-logAuditSink.logChan:
-			if logBatch == nil {
-				logBatch = &LogBatch{}
-				commitTimer = time.AfterFunc(
-					1*time.Second, func(logBatch *LogBatch) func() {
-						return func() {
-							logAuditSink.autoCommitChan <- logBatch
-						}
-					}(logBatch),
-				)
-			}
-			logBatch.Logs = append(logBatch.Logs, logAudit)
+		case accessAudit = <-logBatch.LogChan:
+			logBatch.Logs = append(logBatch.Logs, accessAudit)
 			if len(logBatch.Logs) >= limit {
-				commitTimer.Stop()
-				_ = dbdata.AddBatch(logBatch.Logs)
-				logBatch = nil
+				if !outTime.Stop() {
+					<-outTime.C
+				}
+				logBatch.Write()
 			}
-		case timeOutBatch = <-logAuditSink.autoCommitChan:
-			if timeOutBatch != logBatch {
-				continue
-			}
-			if logBatch != nil {
-				_ = dbdata.AddBatch(logBatch.Logs)
-			}
-			logBatch = nil
+		case <-outTime.C:
+			logBatch.Write()
 		}
 	}
 }
 
 // 解析IP包的数据
-func logAudit(cSess *sessdata.ConnSession, pl *sessdata.Payload) {
+func logAudit(userName string, pl *sessdata.Payload) {
+	defer putPayload(pl)
+
+	if !(pl.LType == sessdata.LTypeIPData && pl.PType == 0x00) {
+		return
+	}
 	ipProto := waterutil.IPv4Protocol(pl.Data)
 	// 访问协议
 	var accessProto uint8
@@ -109,79 +128,48 @@ func logAudit(cSess *sessdata.ConnSession, pl *sessdata.Payload) {
 	copy(key[:16], ipSrc)
 	copy(key[16:32], ipDst)
 	binary.BigEndian.PutUint16(key[32:34], ipPort)
+	key[34] = byte(accessProto)
+	copy(key[35:51], []byte{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
 
 	info := ""
 	nu := utils.NowSec().Unix()
 	if ipProto == waterutil.TCP {
-		plData := waterutil.IPv4Payload(pl.Data)
-		if len(plData) < 14 {
+		tcpPlData := waterutil.IPv4Payload(pl.Data)
+		// 24 (ACK PSH)
+		if len(tcpPlData) < 14 || tcpPlData[13] != 24 {
 			return
 		}
-		flags := plData[13]
-		switch flags {
-		case flags & 0x20:
-			// URG
-			return
-		case flags & 0x14:
-			// RST ACK
-			return
-		case flags & 0x12:
-			// SYN ACK
-			return
-		case flags & 0x11:
-			// Client FIN
-			return
-		case flags & 0x10:
-			// ACK
-			return
-		case flags & 0x08:
-			// PSH
-			return
-		case flags & 0x04:
-			// RST
-			return
-		case flags & 0x02:
-			// SYN
-			return
-		case flags & 0x01:
-			// FIN
-			return
-		case flags & 0x18:
-			// PSH ACK
-			accessProto, info = onTCP(plData)
+		accessProto, info = onTCP(tcpPlData)
+		// HTTPS or HTTP
+		if accessProto != acc_proto_tcp {
+			// 提前存储只含ip数据的key, 避免即记录域名又记录一笔IP数据的记录
+			ipKey := make([]byte, 51)
+			copy(ipKey, key)
+			ipS := utils.BytesToString(ipKey)
+			auditPayload.IpAuditMap.Set(ipS, nu)
+
+			key[34] = byte(accessProto)
+			// 存储含域名的key
 			if info != "" {
-				// 提前存储只含ip数据的key, 避免即记录域名又记录一笔IP数据的记录
-				ipKey := make([]byte, 51)
-				copy(ipKey, key)
-				ipS := utils.BytesToString(ipKey)
-				cSess.IpAuditMap.Set(ipS, nu)
-				// 存储含域名的key
-				key[34] = byte(accessProto)
 				md5Sum := md5.Sum([]byte(info))
-				copy(key[35:51], hex.EncodeToString(md5Sum[:]))
+				copy(key[35:51], md5Sum[:])
 			}
-		case flags & 0x19:
-			// URG
-			return
-		case flags & 0xC2:
-			// SYN-ECE-CWR
-			return
 		}
 	}
 	s := utils.BytesToString(key)
 
 	// 判断已经存在，并且没有过期
-	v, ok := cSess.IpAuditMap.Get(s)
+	v, ok := auditPayload.IpAuditMap.Get(s)
 	if ok && nu-v.(int64) < int64(base.Cfg.AuditInterval) {
 		// 回收byte对象
 		putByte51(b)
 		return
 	}
 
-	cSess.IpAuditMap.Set(s, nu)
+	auditPayload.IpAuditMap.Set(s, nu)
 
 	audit := dbdata.AccessAudit{
-		Username:    cSess.Username,
+		Username:    userName,
 		Protocol:    uint8(ipProto),
 		Src:         ipSrc.String(),
 		Dst:         ipDst.String(),
@@ -190,5 +178,11 @@ func logAudit(cSess *sessdata.ConnSession, pl *sessdata.Payload) {
 		AccessProto: accessProto,
 		Info:        info,
 	}
-	logAuditWrite(audit)
+
+	select {
+	case logBatch.LogChan <- audit:
+	default:
+		base.Error("AccessAudit: LogChan channel is full")
+		return
+	}
 }

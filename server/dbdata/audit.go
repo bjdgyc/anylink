@@ -14,6 +14,7 @@ type SearchCon struct {
 	AccessProto string   `json:"access_proto"`
 	Date        []string `json:"date"`
 	Info        string   `json:"info"`
+	Sort        int      `json:"sort"`
 }
 
 func GetAuditSession(search string) *xorm.Session {
@@ -46,6 +47,11 @@ func GetAuditSession(search string) *xorm.Session {
 	}
 	if searchData.Info != "" {
 		session.And("info LIKE ?", "%"+searchData.Info+"%")
+	}
+	if searchData.Sort == 1 {
+		session.OrderBy("id desc")
+	} else {
+		session.OrderBy("id asc")
 	}
 	return session
 }

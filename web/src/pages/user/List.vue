@@ -10,7 +10,24 @@
               @click="handleEdit('')">添加
           </el-button>
         </el-form-item>
-
+        <el-form-item>
+          <el-dropdown size="small" placement="bottom">
+            <el-upload
+              class="uploaduser"
+              action="uploaduser"
+              accept=".xlsx, .xls"
+              :http-request="upLoadUser"
+              :limit="1"
+              :show-file-list="false">
+              <el-button size="small"  icon="el-icon-upload2" type="primary">批量添加</el-button>
+            </el-upload>
+          <el-dropdown-menu slot="dropdown">
+            <el-dropdown-item>
+              <el-link style="font-size:12px;" type="success" href="批量添加用户模版.xlsx"><i class="el-icon-download"></i>下载模版</el-link>
+            </el-dropdown-item>
+          </el-dropdown-menu>
+          </el-dropdown>
+        </el-form-item>
         <el-form-item label="用户名:">
           <el-input size="small" v-model="searchData" placeholder="请输入内容" @keydown.enter.native="searchEnterFun"></el-input>
         </el-form-item>
@@ -87,7 +104,8 @@
             width="70">
           <template slot-scope="scope">
             <el-tag v-if="scope.row.status === 1" type="success">可用</el-tag>
-            <el-tag v-else type="danger">停用</el-tag>
+            <el-tag v-if="scope.row.status === 0" type="danger">停用</el-tag>
+            <el-tag v-if="scope.row.status === 2" >过期</el-tag>
           </template>
         </el-table-column>
 
@@ -182,6 +200,18 @@
           <el-input v-model="ruleForm.pin_code" placeholder="不填由系统自动生成"></el-input>
         </el-form-item>
 
+        <el-form-item label="过期时间" prop="limittime">
+          <el-date-picker
+            v-model="ruleForm.limittime"
+            type="date"
+            size="small"
+            align="center"
+            style="width:130px"
+            :picker-options="pickerOptions"
+            placeholder="选择日期">
+          </el-date-picker>
+        </el-form-item>
+        
         <el-form-item label="禁用OTP" prop="disable_otp">
           <el-switch
               v-model="ruleForm.disable_otp">
@@ -208,6 +238,7 @@
           <el-radio-group v-model="ruleForm.status">
             <el-radio :label="1" border>启用</el-radio>
             <el-radio :label="0" border>停用</el-radio>
+            <el-radio :label="2" border>过期</el-radio>
           </el-radio-group>
         </el-form-item>
 
@@ -245,6 +276,11 @@ export default {
       grouNames: [],
       tableData: [],
       count: 10,
+      pickerOptions: {
+        disabledDate(time) {
+            return time.getTime() < Date.now();
+        }
+      },
       searchData: '',
       otpImgData: {visible: false, username: '', nickname: '', base64Img: ''},
       ruleForm: {
@@ -264,7 +300,6 @@ export default {
           {required: true, message: '请输入用户邮箱', trigger: 'blur'},
           {type: 'email', message: '请输入正确的邮箱地址', trigger: ['blur', 'change']}
         ],
-
         password: [
           {min: 6, message: '长度大于 6 个字符', trigger: 'blur'}
         ],
@@ -285,6 +320,24 @@ export default {
   },
 
   methods: {
+    upLoadUser(item) {
+      const formData = new FormData();
+      formData.append("file", item.file);
+      axios.post('/user/uploaduser', formData, {
+         headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }).then(resp => {
+        if (resp.data.code === 0) {
+          this.$message.success(resp.data.data);
+          this.getData(1);
+        } else {
+          this.$message.error(resp.data.msg);
+          this.getData(1);
+        }
+        console.log(resp.data);
+      })
+    },
     getOtpImg(row) {
       // this.base64Img = Buffer.from(data).toString('base64');
       this.otpImgData.visible = true

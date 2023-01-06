@@ -21,8 +21,9 @@ type SettingSmtp struct {
 }
 
 type SettingAuditLog struct {
-	LifeDay   int    `json:"life_day"`
-	ClearTime string `json:"clear_time"`
+	AuditInterval int    `json:"audit_interval"`
+	LifeDay       int    `json:"life_day"`
+	ClearTime     string `json:"clear_time"`
 }
 
 type SettingOther struct {

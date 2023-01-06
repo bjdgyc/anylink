@@ -3,6 +3,7 @@ package handler
 import (
 	"crypto/tls"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"net/http"
@@ -10,8 +11,8 @@ import (
 	"time"
 
 	"github.com/bjdgyc/anylink/base"
-	"github.com/bjdgyc/anylink/pkg/proxyproto"
 	"github.com/gorilla/mux"
+	"github.com/pires/go-proxyproto"
 )
 
 func startTls() {
@@ -63,7 +64,10 @@ func startTls() {
 	defer ln.Close()
 
 	if base.Cfg.ProxyProtocol {
-		ln = &proxyproto.Listener{Listener: ln, ProxyHeaderTimeout: time.Second * 5}
+		ln = &proxyproto.Listener{
+			Listener:          ln,
+			ReadHeaderTimeout: 40 * time.Second,
+		}
 	}
 
 	base.Info("listen server", addr)
@@ -88,6 +92,10 @@ func initRoute() http.Handler {
 			http.FileServer(http.Dir(base.Cfg.FilesPath)),
 		),
 	)
+	// 健康检测
+	r.HandleFunc("/status", func(w http.ResponseWriter, r *http.Request) {
+		io.WriteString(w, "ok")
+	}).Methods(http.MethodGet)
 	r.NotFoundHandler = http.HandlerFunc(notFound)
 	return r
 }

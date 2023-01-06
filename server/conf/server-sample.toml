@@ -30,7 +30,7 @@ jwt_secret = "abcdef.0123456789.abcdef"
 server_addr = ":443"
 #开启 DTLS, 默认关闭
 server_dtls = false
-server_dtls_addr = ":4433"
+server_dtls_addr = ":443"
 #后台服务监听地址
 admin_addr = ":8800"
 #开启tcp proxy protocol协议
@@ -40,10 +40,10 @@ link_mode = "tun"
 
 #客户端分配的ip地址池
 ipv4_master = "eth0"
-ipv4_cidr = "192.168.10.0/24"
-ipv4_gateway = "192.168.10.1"
-ipv4_start = "192.168.10.100"
-ipv4_end = "192.168.10.200"
+ipv4_cidr = "192.168.90.0/24"
+ipv4_gateway = "192.168.90.1"
+ipv4_start = "192.168.90.100"
+ipv4_end = "192.168.90.200"
 
 #最大客户端数量
 max_client = 100
@@ -56,10 +56,10 @@ ip_lease = 1209600
 default_group = "one"
 
 #客户端失效检测时间(秒) dpd > keepalive
-cstp_keepalive = 20
-cstp_dpd = 30
-mobile_keepalive = 40
-mobile_dpd = 50
+cstp_keepalive = 6
+cstp_dpd = 10
+mobile_keepalive = 15
+mobile_dpd = 20
 
 #设置最大传输单元
 mtu = 1460
@@ -75,5 +75,7 @@ audit_interval = -1
 
 show_sql = false
 
+#是否自动添加nat
+iptables_nat = true
 
 

@@ -34,6 +34,10 @@
 
       <el-tab-pane label="审计日志" name="dataAuditLog">
         <el-form :model="dataAuditLog" ref="dataAuditLog" :rules="rules" label-width="100px" class="tab-one">
+          <el-form-item label="审计去重间隔" prop="audit_interval">
+                <el-input-number v-model="dataAuditLog.audit_interval" :min="-1" size="small" label="秒" :disabled="true"></el-input-number>  秒
+                <p class="input_tip">请手动修改配置文件中的 audit_interval 参数后，再重启服务, <strong style="color:#EA3323;">-1 代表关闭审计日志</strong></p>
+          </el-form-item>            
           <el-form-item label="存储时长" prop="life_day">
                 <el-input-number v-model="dataAuditLog.life_day" :min="0" :max="365" size="small" label="天数"></el-input-number>  天
                 <p class="input_tip">范围: 0 ~ 365天 , <strong style="color:#EA3323;">0 代表永久保存</strong></p>
@@ -253,7 +257,7 @@ export default {
 
 <style scoped>
 .tab-one {
-  width: 600px;
+  width: 700px;
 }
 
 .input_tip {

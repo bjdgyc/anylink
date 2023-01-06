@@ -45,10 +45,12 @@ func StartAdmin() {
 	r.HandleFunc("/set/other/audit_log/edit", SetOtherAuditLogEdit)
 	r.HandleFunc("/set/audit/list", SetAuditList)
 	r.HandleFunc("/set/audit/export", SetAuditExport)
+	r.HandleFunc("/set/audit/act_log_list", UserActLogList)
 
 	r.HandleFunc("/user/list", UserList)
 	r.HandleFunc("/user/detail", UserDetail)
 	r.HandleFunc("/user/set", UserSet)
+	r.HandleFunc("/user/uploaduser", UserUpload).Methods(http.MethodPost)
 	r.HandleFunc("/user/del", UserDel)
 	r.HandleFunc("/user/online", UserOnline)
 	r.HandleFunc("/user/offline", UserOffline)

@@ -44,6 +44,7 @@ type macAddressList struct {
 
 func setCommonHeader(w http.ResponseWriter) {
 	// Content-Length Date 默认已经存在
+	w.Header().Set("Server", "AnyLink")
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Header().Set("Cache-Control", "no-store,no-cache")
 	w.Header().Set("Pragma", "no-cache")

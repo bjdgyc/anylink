@@ -2,7 +2,7 @@ package admin
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http/httptest"
 	"testing"
 
@@ -15,7 +15,7 @@ func TestRespSucess(t *testing.T) {
 	RespSucess(w, "data")
 	// fmt.Println(w)
 	assert.Equal(w.Code, 200)
-	body, _ := ioutil.ReadAll(w.Body)
+	body, _ := io.ReadAll(w.Body)
 	res := Resp{}
 	err := json.Unmarshal(body, &res)
 	assert.Nil(err)
@@ -30,7 +30,7 @@ func TestRespError(t *testing.T) {
 	RespError(w, 10, "err-msg")
 	// fmt.Println(w)
 	assert.Equal(w.Code, 200)
-	body, _ := ioutil.ReadAll(w.Body)
+	body, _ := io.ReadAll(w.Body)
 	res := Resp{}
 	err := json.Unmarshal(body, &res)
 	assert.Nil(err)

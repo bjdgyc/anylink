@@ -1,6 +1,8 @@
 package dbdata
 
 import (
+	"time"
+
 	"github.com/bjdgyc/anylink/base"
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
@@ -19,6 +21,9 @@ func GetXdb() *xorm.Engine {
 func initDb() {
 	var err error
 	xdb, err = xorm.NewEngine(base.Cfg.DbType, base.Cfg.DbSource)
+	// 初始化xorm时区
+	xdb.DatabaseTZ = time.Local
+	xdb.TZLocation = time.Local
 	if err != nil {
 		base.Fatal(err)
 	}
@@ -28,7 +33,7 @@ func initDb() {
 	}
 
 	// 初始化数据库
-	err = xdb.Sync2(&User{}, &Setting{}, &Group{}, &IpMap{}, &AccessAudit{}, &Policy{}, &StatsNetwork{}, &StatsCpu{}, &StatsMem{}, &StatsOnline{})
+	err = xdb.Sync2(&User{}, &Setting{}, &Group{}, &IpMap{}, &AccessAudit{}, &Policy{}, &StatsNetwork{}, &StatsCpu{}, &StatsMem{}, &StatsOnline{}, &UserActLog{})
 	if err != nil {
 		base.Fatal(err)
 	}
@@ -123,6 +128,7 @@ func addInitData() error {
 		AllowLan:     true,
 		ClientDns:    []ValData{{Val: "114.114.114.114"}},
 		RouteInclude: []ValData{{Val: All}},
+		Status:       1,
 	}
 	err = SetGroup(&g1)
 	if err != nil {
@@ -143,8 +149,12 @@ const accountMail = `<p>您好:</p>
     用户组: <b>{{.Group}}</b> <br/>
     用户名: <b>{{.Username}}</b> <br/>
     用户PIN码: <b>{{.PinCode}}</b> <br/>
+    <!-- 
     用户动态码(3天后失效):<br/>
     <img src="{{.OtpImg}}"/>
+    -->
+    用户动态码(请妥善保存):<br/>
+    <img src="{{.OtpImgBase64}}"/>
 </p>
 <div>
     使用说明:
