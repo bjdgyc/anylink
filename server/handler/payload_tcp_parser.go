@@ -56,7 +56,7 @@ func sniNewParser(b []byte) (uint8, string) {
 	sessionIDLength := int(rest[current])
 	current += 1
 	current += sessionIDLength
-	if current >= restLen {
+	if current+1 >= restLen {
 		return acc_proto_https, ""
 	}
 	cipherSuiteLength := (int(rest[current]) << 8) + int(rest[current+1])

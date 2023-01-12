@@ -8,6 +8,7 @@ import (
 	"net"
 	"reflect"
 	"regexp"
+	"strconv"
 	"time"
 
 	"github.com/go-ldap/ldap"
@@ -117,10 +118,40 @@ func (auth AuthLdap) checkUser(name, pwd string, g *Group) error {
 		}
 		return fmt.Errorf("LDAP发现 %s 用户，存在多个账号", name)
 	}
+	err = parseEntries(sr)
+	if err != nil {
+		return fmt.Errorf("LDAP %s 用户 %s", name, err.Error())
+	}
 	userDN := sr.Entries[0].DN
 	err = l.Bind(userDN, pwd)
 	if err != nil {
 		return fmt.Errorf("%s LDAP 登入失败，请检查登入的账号或密码 %s", name, err.Error())
+	}
+	return nil
+}
+
+func parseEntries(sr *ldap.SearchResult) error {
+	for _, attr := range sr.Entries[0].Attributes {
+		switch attr.Name {
+		case "shadowExpire":
+			// -1 启用, 1 停用, >1 从1970-01-01至到期日的天数
+			val, _ := strconv.ParseInt(attr.Values[0], 10, 64)
+			if val == -1 {
+				return nil
+			}
+			if val == 1 {
+				return fmt.Errorf("账号已停用")
+			}
+			if val > 1 {
+				expireTime := time.Unix(val*86400, 0)
+				t := time.Date(expireTime.Year(), expireTime.Month(), expireTime.Day(), 23, 59, 59, 0, time.Local)
+				if t.Before(time.Now()) {
+					return fmt.Errorf("账号已过期(过期日期: %s)", t.Format("2006-01-02"))
+				}
+				return nil
+			}
+			return fmt.Errorf("账号shadowExpire值异常: %d", val)
+		}
 	}
 	return nil
 }
