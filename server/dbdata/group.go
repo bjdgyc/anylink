@@ -225,6 +225,21 @@ func SetGroup(g *Group) error {
 	return err
 }
 
+func GroupAuthLogin(name, pwd string, authData map[string]interface{}) error {
+	g := &Group{Auth: authData}
+	authType := g.Auth["type"].(string)
+	if _, ok := authRegistry[authType]; !ok {
+		return errors.New("未知的认证方式: " + authType)
+	}
+	auth := makeInstance(authType).(IUserAuth)
+	err := auth.checkData(g.Auth)
+	if err != nil {
+		return err
+	}
+	err = auth.checkUser(name, pwd, g)
+	return err
+}
+
 func parseIpNet(s string) (string, *net.IPNet, error) {
 	ip, ipNet, err := net.ParseCIDR(s)
 	if err != nil {

@@ -70,13 +70,14 @@ func TestCheckUser(t *testing.T) {
 	authData = map[string]interface{}{
 		"type": "ldap",
 		"ldap": map[string]interface{}{
-			"addr":        "192.168.8.12:389",
-			"tls":         true,
-			"bind_name":   "userfind@abc.com",
-			"bind_pwd":    "afdbfdsafds",
-			"base_dn":     "dc=abc,dc=com",
-			"search_attr": "sAMAccountName",
-			"member_of":   "cn=vpn,cn=user,dc=abc,dc=com",
+			"addr":         "192.168.8.12:389",
+			"tls":          true,
+			"bind_name":    "userfind@abc.com",
+			"bind_pwd":     "afdbfdsafds",
+			"base_dn":      "dc=abc,dc=com",
+			"object_class": "person",
+			"search_attr":  "sAMAccountName",
+			"member_of":    "cn=vpn,cn=user,dc=abc,dc=com",
 		},
 	}
 	g3 := Group{Name: group3, Status: 1, ClientDns: dns, RouteInclude: route, Auth: authData}

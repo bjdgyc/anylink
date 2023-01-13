@@ -46,13 +46,14 @@ func TestGetGroupNames(t *testing.T) {
 	authData = map[string]interface{}{
 		"type": "ldap",
 		"ldap": map[string]interface{}{
-			"addr":        "192.168.8.12:389",
-			"tls":         true,
-			"bind_name":   "userfind@abc.com",
-			"bind_pwd":    "afdbfdsafds",
-			"base_dn":     "dc=abc,dc=com",
-			"search_attr": "sAMAccountName",
-			"member_of":   "cn=vpn,cn=user,dc=abc,dc=com",
+			"addr":         "192.168.8.12:389",
+			"tls":          true,
+			"bind_name":    "userfind@abc.com",
+			"bind_pwd":     "afdbfdsafds",
+			"base_dn":      "dc=abc,dc=com",
+			"object_class": "person",
+			"search_attr":  "sAMAccountName",
+			"member_of":    "cn=vpn,cn=user,dc=abc,dc=com",
 		},
 	}
 	g7 := Group{Name: "g7", ClientDns: []ValData{{Val: "114.114.114.114"}}, Auth: authData}
