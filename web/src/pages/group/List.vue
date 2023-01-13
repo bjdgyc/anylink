@@ -500,6 +500,9 @@ export default {
         this.ruleForm.auth = JSON.parse(JSON.stringify(this.defAuth));
         return ;
       }
+      if (row.auth.type == "ldap" && ! row.auth.ldap.object_class) {
+        row.auth.ldap.object_class = this.defAuth.ldap.object_class;
+      }      
       this.ruleForm.auth = Object.assign(JSON.parse(JSON.stringify(this.defAuth)), row.auth);
     },
     handleDel(row) {
@@ -602,18 +605,18 @@ export default {
             axios.post('/group/auth_login', {name:this.authLoginForm.name,
                                             pwd:this.authLoginForm.pwd,
                                             auth:this.ruleForm.auth}).then(resp => {
-            const rdata = resp.data;
-            if (rdata.code === 0) {
-                this.$message.success("登录成功");
-            } else {
-                this.$message.error(rdata.msg);
-                this.authLoginLoading = false;
-            }
-            console.log(rdata);
-            }).catch(error => {
-            this.$message.error('哦，请求出错');
-            console.log(error);
-            this.authLoginLoading = false;
+                    const rdata = resp.data;
+                    if (rdata.code === 0) {
+                        this.$message.success("登录成功");
+                    } else {
+                        this.$message.error(rdata.msg);                
+                    }
+                    this.authLoginLoading = false;
+                    console.log(rdata);
+                }).catch(error => {
+                    this.$message.error('哦，请求出错');
+                    console.log(error);
+                    this.authLoginLoading = false;
             });
         });
     },
