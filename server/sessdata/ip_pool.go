@@ -49,7 +49,7 @@ func initIpPool() {
 	IpPool.IpLongMax = utils.Ip2long(net.ParseIP(base.Cfg.Ipv4End))
 
 	// 获取IpLease数据
-	go cronIpLease()
+	//go cronIpLease()
 }
 
 func cronIpLease() {
@@ -84,64 +84,78 @@ func AcquireIp(username, macAddr string, uniqueMac bool) net.IP {
 	defer ipPoolMux.Unlock()
 
 	var (
-		err  error
-		tNow = time.Now()
-		sNow = time.Now().Add(-1 * time.Duration(base.Cfg.IpLease) * time.Second)
+		err       error
+		tNow      = time.Now()
+		leaseTime = time.Now().Add(-1 * time.Duration(base.Cfg.IpLease) * time.Second)
 	)
 
 	if uniqueMac {
 		// 判断是否已经分配过
 		mi := &dbdata.IpMap{}
 		err = dbdata.One("mac_addr", macAddr, mi)
+		// 查询报错
+		if err != nil {
+			if !dbdata.CheckErrNotFound(err) {
+				base.Error(err)
+				return nil
+			}
+		}
+
 		// 存在ip记录
-		if err == nil {
+		ipStr := mi.IpAddr
+		ip := net.ParseIP(ipStr)
+		// 跳过活跃连接
+		_, ok := ipActive[ipStr]
+		// 检测原有ip是否在新的ip池内
+		if IpPool.Ipv4IPNet.Contains(ip) && !ok &&
+			utils.Ip2long(ip) >= IpPool.IpLongMin &&
+			utils.Ip2long(ip) <= IpPool.IpLongMax {
+			mi.Username = username
+			mi.LastLogin = tNow
+			mi.UniqueMac = uniqueMac
+			// 回写db数据
+			_ = dbdata.Set(mi)
+			ipActive[ipStr] = true
+			return ip
+		}
+		_ = dbdata.Del(mi)
+
+	} else {
+		ipMaps := []dbdata.IpMap{}
+		err = dbdata.FindWhere(&ipMaps, 50, 1, "username=? and unique_mac=?", username, false)
+		// 查询报错
+		if err != nil {
+			if !dbdata.CheckErrNotFound(err) {
+				base.Error(err)
+				return nil
+			}
+		}
+
+		//遍历mac记录
+		for _, mi := range ipMaps {
 			ipStr := mi.IpAddr
 			ip := net.ParseIP(ipStr)
+
 			// 跳过活跃连接
-			_, ok := ipActive[ipStr]
-			// 检测原有ip是否在新的ip池内
-			if IpPool.Ipv4IPNet.Contains(ip) && !ok &&
+			if _, ok := ipActive[ipStr]; ok {
+				continue
+			}
+			//跳过保留ip
+			if mi.Keep {
+				continue
+			}
+
+			if IpPool.Ipv4IPNet.Contains(ip) &&
+				mi.LastLogin.Before(leaseTime) && // 说明已经超过租期，可以直接使用
 				utils.Ip2long(ip) >= IpPool.IpLongMin &&
 				utils.Ip2long(ip) <= IpPool.IpLongMax {
-				mi.Username = username
 				mi.LastLogin = tNow
+				mi.MacAddr = macAddr
 				mi.UniqueMac = uniqueMac
 				// 回写db数据
 				_ = dbdata.Set(mi)
 				ipActive[ipStr] = true
 				return ip
-			}
-			_ = dbdata.Del(mi)
-		}
-	} else {
-		ipMaps := []dbdata.IpMap{}
-		err = dbdata.FindWhere(&ipMaps, 50, 1, "username=? and unique_mac=?", username, false)
-		if err == nil {
-			//遍历mac记录
-			for _, mi := range ipMaps {
-				ipStr := mi.IpAddr
-				ip := net.ParseIP(ipStr)
-
-				// 跳过活跃连接
-				if _, ok := ipActive[ipStr]; ok {
-					continue
-				}
-				// 跳过ip租期内数据
-				if _, ok := ipLease[ipStr]; ok {
-					continue
-				}
-
-				if IpPool.Ipv4IPNet.Contains(ip) &&
-					utils.Ip2long(ip) >= IpPool.IpLongMin &&
-					utils.Ip2long(ip) <= IpPool.IpLongMax {
-					mi.LastLogin = tNow
-					mi.MacAddr = macAddr
-					mi.UniqueMac = uniqueMac
-					// 回写db数据
-					_ = dbdata.Set(mi)
-					ipActive[ipStr] = true
-					return ip
-				}
 			}
 		}
 	}
@@ -155,22 +169,24 @@ func AcquireIp(username, macAddr string, uniqueMac bool) net.IP {
 		if _, ok := ipActive[ipStr]; ok {
 			continue
 		}
-		// 跳过ip租期内数据
-		if _, ok := ipLease[ipStr]; ok {
-			continue
-		}
 
 		mi := &dbdata.IpMap{}
 		err = dbdata.One("ip_addr", ipStr, mi)
-		if err == nil && mi.LastLogin.Before(sNow) {
-			// 存在记录，说明已经超过租期，可以直接使用
-			mi.LastLogin = tNow
-			mi.MacAddr = macAddr
-			mi.UniqueMac = uniqueMac
-			// 回写db数据
-			_ = dbdata.Set(mi)
-			ipActive[ipStr] = true
-			return ip
+		if err == nil {
+			//跳过保留ip
+			if mi.Keep {
+				continue
+			}
+			if mi.LastLogin.Before(leaseTime) {
+				// 存在记录，说明已经超过租期，可以直接使用
+				mi.LastLogin = tNow
+				mi.MacAddr = macAddr
+				mi.UniqueMac = uniqueMac
+				// 回写db数据
+				_ = dbdata.Set(mi)
+				ipActive[ipStr] = true
+				return ip
+			}
 		}
 
 		if dbdata.CheckErrNotFound(err) {
@@ -180,9 +196,12 @@ func AcquireIp(username, macAddr string, uniqueMac bool) net.IP {
 			ipActive[ipStr] = true
 			return ip
 		}
+
 		// 查询报错
-		base.Error(err)
-		return nil
+		if err != nil {
+			base.Error(err)
+			return nil
+		}
 	}
 
 	base.Warn("no ip available, please see ip_map table row")
