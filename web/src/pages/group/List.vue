@@ -377,6 +377,7 @@
         title="测试用户登录"
         :visible.sync="authLoginDialog"
         width="600px"
+        custom-class="valgin-dialog"
         center>
         <el-form :model="authLoginForm" :rules="authLoginRules" ref="authLoginForm" label-width="100px">
             <el-form-item label="账号" prop="name">
@@ -389,6 +390,7 @@
                 <el-button type="primary" @click="testAuthLogin()" :loading="authLoginLoading">登录</el-button>
                 <el-button @click="authLoginDialog = false">取 消</el-button>
             </el-form-item>
+        </el-form>
     </el-dialog> 
   </div>
 </template>
@@ -681,5 +683,21 @@ export default {
 
 .el-select {
   width: 80px;
+}
+
+::v-deep .valgin-dialog{
+    display: flex;
+    flex-direction: column;
+    margin:0 !important;
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    max-height:calc(100% - 30px);
+    max-width:calc(100% - 30px);
+}
+::v-deep  .valgin-dialog .el-dialog__body{
+    flex:1;
+    overflow: auto;
 }
 </style>
