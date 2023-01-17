@@ -68,7 +68,23 @@ func LinkDtls(conn net.Conn, cSess *sessdata.ConnSession) {
 				return
 			}
 		case 0x04:
-			// base.Debug("recv DPD-RESP", cSess.IpAddr)
+		// base.Debug("recv DPD-RESP", cSess.IpAddr)
+		case 0x08: // decompress
+			if cSess.DtlsPickCmp == nil {
+				continue
+			}
+			dst := getByteFull()
+			n, err = cSess.DtlsPickCmp.Uncompress(pl.Data[1:], (*dst)[1:])
+			if err != nil {
+				base.Debug("dtls decompress error, size is ", n)
+				putByte(dst)
+				continue
+			}
+			n = n + 1
+			pl.Data = append(pl.Data[:0], (*dst)[:n]...)
+			putByte(dst)
+
+			fallthrough
 		case 0x00: // DATA
 			// 去除数据头
 			// copy(pl.Data, pl.Data[1:n])
@@ -108,14 +124,28 @@ func dtlsWrite(conn net.Conn, dSess *sessdata.DtlsSession, cSess *sessdata.ConnS
 
 		// header = []byte{payload.PType}
 		if pl.PType == 0x00 { // data
-			// 获取数据长度
-			l := len(pl.Data)
-			// 先扩容 +1
-			pl.Data = pl.Data[:l+1]
-			// 数据后移
-			copy(pl.Data[1:], pl.Data)
-			// 添加头信息
-			pl.Data[0] = pl.PType
+			isCompress := false
+			if cSess.DtlsPickCmp != nil && len(pl.Data) > base.Cfg.NoCompressLimit {
+				dst := getByteFull()
+				size, err := cSess.DtlsPickCmp.Compress(pl.Data, (*dst)[1:])
+				if err == nil && size < len(pl.Data) {
+					(*dst)[0] = 0x08
+					pl.Data = append(pl.Data[:0], (*dst)[:size+1]...)
+					isCompress = true
+				}
+				putByte(dst)
+			}
+			// 未压缩
+			if !isCompress {
+				// 获取数据长度
+				l := len(pl.Data)
+				// 先扩容 +1
+				pl.Data = pl.Data[:l+1]
+				// 数据后移
+				copy(pl.Data[1:], pl.Data)
+				// 添加头信息
+				pl.Data[0] = pl.PType
+			}
 		} else {
 			// 设置头类型
 			pl.Data = append(pl.Data[:0], pl.PType)

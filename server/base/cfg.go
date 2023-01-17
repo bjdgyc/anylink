@@ -73,8 +73,10 @@ type ServerConfig struct {
 	// AuthTimeout    int `json:"auth_timeout"`    // in seconds
 	AuditInterval int `json:"audit_interval"` // in seconds
 
-	ShowSQL     bool `json:"show_sql"` // bool
-	IptablesNat bool `json:"iptables_nat"`
+	ShowSQL         bool `json:"show_sql"` // bool
+	IptablesNat     bool `json:"iptables_nat"`
+	Compression     bool `json:"compression"`       // bool
+	NoCompressLimit int  `json:"no_compress_limit"` // int
 }
 
 func initServerCfg() {

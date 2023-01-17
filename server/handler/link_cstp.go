@@ -66,7 +66,23 @@ func LinkCstp(conn net.Conn, bufRW *bufio.ReadWriter, cSess *sessdata.ConnSessio
 				return
 			}
 		case 0x04:
-			// log.Println("recv DPD-RESP")
+		// log.Println("recv DPD-RESP")
+		case 0x08: // decompress
+			if cSess.CstpPickCmp == nil {
+				continue
+			}
+			dst := getByteFull()
+			n, err = cSess.CstpPickCmp.Uncompress(pl.Data[8:], (*dst)[8:])
+			if err != nil {
+				putByte(dst)
+				base.Debug("cstp decompress error", n)
+				continue
+			}
+			copy((*dst)[:8], pl.Data[:8])
+			binary.BigEndian.PutUint16((*dst)[4:6], uint16(n))
+			pl.Data = append(pl.Data[:0], (*dst)[:n+8]...)
+			putByte(dst)
+			fallthrough
 		case 0x00: // DATA
 			// 获取数据长度
 			dataLen = binary.BigEndian.Uint16(pl.Data[4:6]) // 4,5
@@ -112,16 +128,31 @@ func cstpWrite(conn net.Conn, bufRW *bufio.ReadWriter, cSess *sessdata.ConnSessi
 		}
 
 		if pl.PType == 0x00 {
-			// 获取数据长度
-			l := len(pl.Data)
-			// 先扩容 +8
-			pl.Data = pl.Data[:l+8]
-			// 数据后移
-			copy(pl.Data[8:], pl.Data)
-			// 添加头信息
-			copy(pl.Data[:8], plHeader)
-			// 更新头长度
-			binary.BigEndian.PutUint16(pl.Data[4:6], uint16(l))
+			isCompress := false
+			if cSess.CstpPickCmp != nil && len(pl.Data) > base.Cfg.NoCompressLimit {
+				dst := getByteFull()
+				size, err := cSess.CstpPickCmp.Compress(pl.Data, (*dst)[8:])
+				if err == nil && size < len(pl.Data) {
+					copy((*dst)[:8], plHeader)
+					binary.BigEndian.PutUint16((*dst)[4:6], uint16(size))
+					(*dst)[6] = 0x08
+					pl.Data = append(pl.Data[:0], (*dst)[:size+8]...)
+					isCompress = true
+				}
+				putByte(dst)
+			}
+			if !isCompress {
+				// 获取数据长度
+				l := len(pl.Data)
+				// 先扩容 +8
+				pl.Data = pl.Data[:l+8]
+				// 数据后移
+				copy(pl.Data[8:], pl.Data)
+				// 添加头信息
+				copy(pl.Data[:8], plHeader)
+				// 更新头长度
+				binary.BigEndian.PutUint16(pl.Data[4:6], uint16(l))
+			}
 		} else {
 			pl.Data = append(pl.Data[:0], plHeader...)
 			// 设置头类型

@@ -62,6 +62,8 @@ var configs = []config{
 
 	{Typ: cfgBool, Name: "show_sql", Usage: "显示sql语句，用于调试", ValBool: false},
 	{Typ: cfgBool, Name: "iptables_nat", Usage: "是否自动添加NAT", ValBool: true},
+	{Typ: cfgBool, Name: "compression", Usage: "启用压缩", ValBool: false},
+	{Typ: cfgInt, Name: "no_compress_limit", Usage: "低于及等于多少字节不压缩", ValInt: 256},
 }
 
 var envs = map[string]string{}
