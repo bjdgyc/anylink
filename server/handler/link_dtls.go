@@ -74,16 +74,15 @@ func LinkDtls(conn net.Conn, cSess *sessdata.ConnSession) {
 				continue
 			}
 			dst := getByteFull()
-			n, err = cSess.DtlsPickCmp.Uncompress(pl.Data[1:], (*dst)[1:])
+			nn, err := cSess.DtlsPickCmp.Uncompress(pl.Data[1:], *dst)
 			if err != nil {
-				base.Debug("dtls decompress error, size is ", n)
 				putByte(dst)
+				base.Error("dtls decompress error", err, n)
 				continue
 			}
-			n = n + 1
-			pl.Data = append(pl.Data[:0], (*dst)[:n]...)
+			pl.Data = append(pl.Data[:1], (*dst)[:nn]...)
 			putByte(dst)
-
+			n = nn + 1
 			fallthrough
 		case 0x00: // DATA
 			// 去除数据头

@@ -72,15 +72,14 @@ func LinkCstp(conn net.Conn, bufRW *bufio.ReadWriter, cSess *sessdata.ConnSessio
 				continue
 			}
 			dst := getByteFull()
-			n, err = cSess.CstpPickCmp.Uncompress(pl.Data[8:], (*dst)[8:])
+			nn, err := cSess.CstpPickCmp.Uncompress(pl.Data[8:], *dst)
 			if err != nil {
 				putByte(dst)
-				base.Debug("cstp decompress error", n)
+				base.Error("cstp decompress error", err, nn)
 				continue
 			}
-			copy((*dst)[:8], pl.Data[:8])
-			binary.BigEndian.PutUint16((*dst)[4:6], uint16(n))
-			pl.Data = append(pl.Data[:0], (*dst)[:n+8]...)
+			binary.BigEndian.PutUint16(pl.Data[4:6], uint16(nn))
+			pl.Data = append(pl.Data[:8], (*dst)[:nn]...)
 			putByte(dst)
 			fallthrough
 		case 0x00: // DATA
