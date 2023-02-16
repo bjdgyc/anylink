@@ -89,6 +89,14 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 
 	base.Debug(cSess.IpAddr, cSess.MacHw, sess.Username, mobile)
 
+	// 压缩
+	if cmpName, ok := cSess.SetPickCmp("cstp", r.Header.Get("X-Cstp-Accept-Encoding")); ok {
+		HttpSetHeader(w, "X-CSTP-Content-Encoding", cmpName)
+	}
+	if cmpName, ok := cSess.SetPickCmp("dtls", r.Header.Get("X-Dtls-Accept-Encoding")); ok {
+		HttpSetHeader(w, "X-DTLS-Content-Encoding", cmpName)
+	}
+
 	// 返回客户端数据
 	HttpSetHeader(w, "Server", fmt.Sprintf("%s %s", base.APP_NAME, base.APP_VER))
 	HttpSetHeader(w, "X-CSTP-Version", "1")
