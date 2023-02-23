@@ -34,7 +34,7 @@ require (
 	go.uber.org/atomic v1.10.0
 	golang.org/x/crypto v0.0.0-20220817201139-bc19a97f63c8
 	golang.org/x/net v0.0.0-20220812174116-3211cb980234
-	golang.org/x/text v0.3.7
+	golang.org/x/text v0.3.8
 	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac
 	layeh.com/radius v0.0.0-20210819152912-ad72663a72ab
 	xorm.io/xorm v1.3.2
