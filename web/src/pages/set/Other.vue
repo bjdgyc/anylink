@@ -61,6 +61,78 @@
             <el-button @click="resetForm('dataAuditLog')">重置</el-button>
           </el-form-item>          
         </el-form>
+      </el-tab-pane>
+      <el-tab-pane label="证书设置" name="dataCert">
+        <el-tabs tab-position="left">
+          <el-tab-pane label="自定义证书">
+            <el-form ref="customCert" :model="customCert" label-width="100px" size="small" class="tab-one">
+              <!-- <el-form-item> -->
+                <el-upload
+                  class="upload-demo"
+                  :before-upload="beforeCertUpload"
+                  :action="certUpload"
+                  :file-list="certFileList"
+                  multiple>
+                  <el-button size="mini" icon="el-icon-plus" slot="trigger">证书文件</el-button>
+                  <el-tooltip class="item" effect="dark" content="请上传 .pem 格式的 cert 文件" placement="top">
+                    <i class="el-icon-info"></i>
+                  </el-tooltip>
+                </el-upload>
+              <!-- </el-form-item> -->
+              <!-- <el-form-item> -->
+                <el-upload
+                  class="upload-demo"
+                  :before-upload="beforeKeyUpload"
+                  :action="certUpload"
+                  :file-list="keyFileList"
+                  multiple>
+                  <el-button size="mini" icon="el-icon-plus" slot="trigger">私钥文件</el-button>
+                  <el-tooltip class="item" effect="dark" content="请上传 .pem 格式的 key 文件" placement="top">
+                    <i class="el-icon-info"></i>
+                  </el-tooltip>
+                </el-upload>
+              <!-- </el-form-item> -->
+              <!-- <el-form-item> -->
+                <el-button size="small" icon="el-icon-upload" type="primary" @click="submitForm('customCert')">上传</el-button>
+              <!-- </el-form-item> -->
+            </el-form>
+          </el-tab-pane>
+          <el-tab-pane label="Let's Encrypt证书">
+            <el-form :model="dataCert" ref="dataCert" :rules="rules" label-width="120px" size="small" class="tab-one">
+              <el-form-item label="域名" prop="domain">
+                <el-input v-model="dataCert.domain"></el-input>
+              </el-form-item>
+              <el-form-item label="邮箱" prop="legomail">
+                <el-input v-model="dataCert.legomail"></el-input>
+              </el-form-item>
+              <el-form-item label="域名服务商" prop="name">
+                <el-radio-group v-model="dataCert.name">
+                  <el-radio label="aliyun">阿里云</el-radio>
+                  <el-radio label="txCloud">腾讯云</el-radio>
+                </el-radio-group>
+              </el-form-item>
+              <el-form-item label="AccessKeyId" prop="accessKeyId">
+                <el-input type="password" v-model="dataCert.accessKeyId"></el-input>
+              </el-form-item>
+              <el-form-item label="AccessKeySecret" prop="accessKeySecret">
+                <el-input type="password" v-model="dataCert.accessKeySecret"></el-input>
+              </el-form-item>
+              <el-form-item>
+                <el-switch
+                  style="display: block"
+                  v-model="dataCert.renew"
+                  active-color="#13ce66"
+                  inactive-color="#ff4949"
+                  inactive-text="自动续期">
+                </el-switch>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" @click="submitForm('dataCert')">申请</el-button>
+                <el-button @click="resetForm('dataCert')">重置</el-button>
+              </el-form-item> 
+            </el-form>
+          </el-tab-pane>
+        </el-tabs>
       </el-tab-pane>     
       <el-tab-pane label="其他设置" name="dataOther">
         <el-form :model="dataOther" ref="dataOther" :rules="rules" label-width="100px" class="tab-one">
@@ -80,7 +152,7 @@
                 v-model="dataOther.banner">
             </el-input>
           </el-form-item>
-
+          
           <el-form-item label="自定义首页" prop="homeindex">
             <el-input
                 type="textarea"
@@ -135,6 +207,8 @@ export default {
       activeName: 'dataSmtp',
       dataSmtp: {},
       dataAuditLog: {},
+      dataCert: { renew: true },
+      customCert: {cert:'',key:''},
       dataOther: {},
       rules: {
         host: {required: true, message: '请输入服务器地址', trigger: 'blur'},
@@ -142,8 +216,16 @@ export default {
           {required: true, message: '请输入服务器端口', trigger: 'blur'},
           {type: 'number', message: '请输入正确的服务器端口', trigger: ['blur', 'change']}
         ],
-        issuer: {required: true, message: '请输入系统名称', trigger: 'blur'},
+        issuer: { required: true, message: '请输入系统名称', trigger: 'blur' },
+        domain: {required: true, message: '请输入需要申请证书的域名', trigger: 'blur'},
+        legomail: { required: true, message: '请输入申请证书的邮箱地址', trigger: 'blur' },
+        name: { required: true, message: '请选择域名服务商', trigger: 'blur' },
+        accessKeyId: { required: true, message: '请输入正确的AccessKeyId', trigger: 'blur' },
+        accessKeySecret: { required: true, message: '请输入正确的AccessKeySecret', trigger: 'blur' },
       },
+      certUpload: "/set/other/customcert",
+      certFileList: [],
+      keyFileList: [],
     };
   },
   methods: {
@@ -155,12 +237,29 @@ export default {
           break
         case "dataAuditLog":
           this.getAuditLog()
-          break          
+          break    
+        case "dataCert":
+          this.getCert()
+          break        
         case "dataOther":
           this.getOther()
           break          
       }
     },
+    beforeCertUpload(file) {
+        // if (file.type !== 'application/x-pem-file') {
+        //   this.$message.error('只能上传 .pem 格式的证书文件')
+        //   return false
+        // }
+        this.customCert.cert = file
+      },
+      beforeKeyUpload(file) {
+        // if (file.type !== 'application/x-pem-file') {
+        //   this.$message.error('只能上传 .pem 格式的私钥文件')
+        //   return false
+        // }
+        this.customCert.key = file
+      },
     getSmtp() {
       axios.get('/set/other/smtp').then(resp => {
         let rdata = resp.data
@@ -188,7 +287,21 @@ export default {
         this.$message.error('哦，请求出错');
         console.log(error);
       });
-    },     
+    }, 
+    getCert() {
+      axios.get('/set/other/getcertset').then(resp => {
+        let rdata = resp.data
+        console.log(rdata)
+        if (rdata.code !== 0) {
+          this.$message.error(rdata.msg);
+          return;
+        }
+        this.dataCert = rdata.data
+      }).catch(error => {
+        this.$message.error('哦，请求出错');
+        console.log(error);
+      });
+    },
     getOther() {
       axios.get('/set/other').then(resp => {
         let rdata = resp.data
@@ -233,6 +346,31 @@ export default {
               }
             })
             break;
+          case "dataCert":
+            axios.post('/set/other/createcert', this.dataCert).then(resp => {
+              var rdata = resp.data
+              console.log(rdata);
+              if (rdata.code === 0) {
+                this.$message.success(rdata.msg);
+              } else {
+                this.$message.error(rdata.msg);
+              }
+            })
+            break;
+          case "customCert":
+            var formData = new FormData()
+            formData.append('cert', this.customCert.cert)
+            formData.append('key', this.customCert.key)
+            axios.post(this.certUpload, formData).then(resp => {
+              var rdata = resp.data
+              console.log(rdata);
+              if (rdata.code === 0) {
+                this.$message.success(rdata.msg);
+              } else {
+                this.$message.error(rdata.msg);
+              }
+            })
+            break;       
           case "dataOther":
             axios.post('/set/other/edit', this.dataOther).then(resp => {
               var rdata = resp.data

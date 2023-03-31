@@ -99,6 +99,18 @@ func addInitData() error {
 		return err
 	}
 
+	// SettingDnsProvider
+	provider := &SettingDnsProvider{
+		Legomail:        "legomail",
+		Name:            "aliyun OR TXCloud",
+		AccessKeyID:     "AccessKeyID",
+		AccessKeySecret: "AccessKeySecret",
+		Domain:          "vpn.xxx.com",
+	}
+	err = SettingSessAdd(sess, provider)
+	if err != nil {
+		return err
+	}
 	// SettingOther
 	other := &SettingOther{
 		LinkAddr:    "vpn.xx.com",

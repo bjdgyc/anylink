@@ -46,6 +46,9 @@ func StartAdmin() {
 	r.HandleFunc("/set/audit/list", SetAuditList)
 	r.HandleFunc("/set/audit/export", SetAuditExport)
 	r.HandleFunc("/set/audit/act_log_list", UserActLogList)
+	r.HandleFunc("/set/other/createcert", CreatCert)
+	r.HandleFunc("/set/other/getcertset", GetCertSetting)
+	r.HandleFunc("/set/other/customcert", CustomCert)
 
 	r.HandleFunc("/user/list", UserList)
 	r.HandleFunc("/user/detail", UserDetail)
@@ -101,13 +104,20 @@ func StartAdmin() {
 		NextProtos:   []string{"http/1.1"},
 		MinVersion:   tls.VersionTLS12,
 		CipherSuites: selectedCipherSuites,
+		GetCertificate: func(*tls.ClientHelloInfo) (*tls.Certificate, error) {
+			cert, err := tls.LoadX509KeyPair(base.Cfg.CertFile, base.Cfg.CertKey)
+			if err != nil {
+				return nil, err
+			}
+			return &cert, nil
+		},
 	}
 	srv := &http.Server{
 		Addr:      base.Cfg.AdminAddr,
 		Handler:   r,
 		TLSConfig: tlsConfig,
 	}
-	err := srv.ListenAndServeTLS(base.Cfg.CertFile, base.Cfg.CertKey)
+	err := srv.ListenAndServeTLS("", "")
 	if err != nil {
 		base.Fatal(err)
 	}

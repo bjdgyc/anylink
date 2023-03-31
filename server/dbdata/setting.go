@@ -33,6 +33,15 @@ type SettingOther struct {
 	AccountMail string `json:"account_mail"`
 }
 
+type SettingDnsProvider struct {
+	Legomail        string `json:"legomail"`
+	Name            string `json:"name"`
+	AccessKeyID     string `json:"accessKeyId"`
+	AccessKeySecret string `json:"accessKeySecret"`
+	Domain          string `json:"domain"`
+	Renew           bool   `json:"renew"`
+}
+
 func StructName(data interface{}) string {
 	ref := reflect.ValueOf(data)
 	s := &ref
