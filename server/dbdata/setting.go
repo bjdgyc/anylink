@@ -34,12 +34,23 @@ type SettingOther struct {
 }
 
 type SettingDnsProvider struct {
-	Legomail        string `json:"legomail"`
-	Name            string `json:"name"`
-	AccessKeyID     string `json:"accessKeyId"`
-	AccessKeySecret string `json:"accessKeySecret"`
-	Domain          string `json:"domain"`
-	Renew           bool   `json:"renew"`
+	Domain   string `json:"domain"`
+	Legomail string `json:"legomail"`
+	Name     string `json:"name"`
+	Renew    bool   `json:"renew"`
+	AliYun   struct {
+		APIKey    string `json:"apiKey"`
+		SecretKey string `json:"secretKey"`
+	} `json:"aliyun"`
+
+	TXCloud struct {
+		SecretID  string `json:"secretId"`
+		SecretKey string `json:"secretKey"`
+	} `json:"txcloud"`
+	CfCloud struct {
+		AuthEmail string `json:"authEmail"`
+		AuthKey   string `json:"authKey"`
+	} `json:"cfcloud"`
 }
 
 func StructName(data interface{}) string {

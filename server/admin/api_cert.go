@@ -22,6 +22,7 @@ import (
 	"github.com/go-acme/lego/v4/challenge/dns01"
 	"github.com/go-acme/lego/v4/lego"
 	"github.com/go-acme/lego/v4/providers/dns/alidns"
+	"github.com/go-acme/lego/v4/providers/dns/cloudflare"
 	"github.com/go-acme/lego/v4/providers/dns/tencentcloud"
 	"github.com/go-acme/lego/v4/registration"
 	"github.com/xenolf/lego/challenge"
@@ -84,8 +85,11 @@ func GetCertSetting(w http.ResponseWriter, r *http.Request) {
 	if err := dbdata.SettingGet(data); err != nil {
 		RespError(w, RespInternalErr, err)
 	}
-	data.AccessKeyID = Scrypt(data.AccessKeyID)
-	data.AccessKeySecret = Scrypt(data.AccessKeySecret)
+	data.AliYun.APIKey = Scrypt(data.AliYun.APIKey)
+	data.AliYun.SecretKey = Scrypt(data.AliYun.SecretKey)
+	data.TXCloud.SecretID = Scrypt(data.TXCloud.SecretID)
+	data.TXCloud.SecretKey = Scrypt(data.TXCloud.SecretKey)
+	data.CfCloud.AuthKey = Scrypt(data.CfCloud.AuthKey)
 	RespSucess(w, data)
 }
 func CreatCert(w http.ResponseWriter, r *http.Request) {
@@ -179,16 +183,17 @@ func NewLeGoClient(d *dbdata.SettingDnsProvider) (*LeGoClient, error) {
 		legoUser.Registration = reg
 	}
 	var Provider challenge.Provider
-	if d.Name == "" {
-		return nil, fmt.Errorf("%s", "DNS服务商名不允许为空")
-	}
 	switch d.Name {
 	case "aliyun":
-		if Provider, err = alidns.NewDNSProviderConfig(&alidns.Config{APIKey: d.AccessKeyID, SecretKey: d.AccessKeySecret, TTL: 600}); err != nil {
+		if Provider, err = alidns.NewDNSProviderConfig(&alidns.Config{APIKey: d.AliYun.APIKey, SecretKey: d.AliYun.SecretKey, TTL: 600}); err != nil {
 			return nil, err
 		}
-	case "txCloud":
-		if Provider, err = tencentcloud.NewDNSProviderConfig(&tencentcloud.Config{SecretID: d.AccessKeyID, SecretKey: d.AccessKeySecret, TTL: 600}); err != nil {
+	case "txcloud":
+		if Provider, err = tencentcloud.NewDNSProviderConfig(&tencentcloud.Config{SecretID: d.TXCloud.SecretID, SecretKey: d.TXCloud.SecretKey, TTL: 600}); err != nil {
+			return nil, err
+		}
+	case "cloudflare":
+		if Provider, err = cloudflare.NewDNSProviderConfig(&cloudflare.Config{AuthEmail: d.CfCloud.AuthEmail, AuthKey: d.CfCloud.AuthKey, TTL: 600}); err != nil {
 			return nil, err
 		}
 	}

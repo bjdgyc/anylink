@@ -46,11 +46,16 @@ require (
 require (
 	github.com/aliyun/alibaba-cloud-sdk-go v1.61.1755 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.0 // indirect
+	github.com/cloudflare/cloudflare-go v0.49.0 // indirect
 	github.com/felixge/httpsnoop v1.0.1 // indirect
 	github.com/go-acme/lego v2.7.2+incompatible // indirect
 	github.com/go-jose/go-jose/v3 v3.0.0 // indirect
+	github.com/google/go-querystring v1.1.0 // indirect
+	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
+	github.com/hashicorp/go-retryablehttp v0.7.1 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/miekg/dns v1.1.50 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common v1.0.490 // indirect
 	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/dnspod v1.0.490 // indirect
 	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4 // indirect
