@@ -1,4 +1,4 @@
-# 常见问题
+## 常见问题
 
 ### anyconnect 客户端问题
 > 客户端请使用群共享文件的版本，其他版本没有测试过，不保证使用正常
@@ -19,14 +19,32 @@
 ### dpd timeout 设置问题
 ```
 #客户端失效检测时间(秒) dpd > keepalive
-cstp_keepalive = 20
-cstp_dpd = 30
-mobile_keepalive = 40
-mobile_dpd = 50
+cstp_keepalive = 6
+cstp_dpd = 10
+mobile_keepalive = 15
+mobile_dpd = 20
 ```
 > 以上dpd参数为客户端的超时检测时间, 如一段时间内，没有数据传输，防火墙会主动关闭连接
 > 
 > 如经常出现 timeout 的错误信息，应根据当前防火墙的设置，适当减小dpd数值
+
+### 反向代理问题
+> anylink 仅支持四层反向代理，不支持七层反向代理
+> 
+> 如Nginx请使用 stream模块
+
+```conf
+stream {
+    upstream anylink_server {
+        server 127.0.0.1:8443;
+    }
+    server {
+        listen 443 tcp;
+        proxy_timeout 30s;
+        proxy_pass anylink_server;
+    }
+}
+```
 
 ### 性能问题
 ```
