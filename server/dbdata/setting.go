@@ -33,26 +33,6 @@ type SettingOther struct {
 	AccountMail string `json:"account_mail"`
 }
 
-type SettingDnsProvider struct {
-	Domain   string `json:"domain"`
-	Legomail string `json:"legomail"`
-	Name     string `json:"name"`
-	Renew    bool   `json:"renew"`
-	AliYun   struct {
-		APIKey    string `json:"apiKey"`
-		SecretKey string `json:"secretKey"`
-	} `json:"aliyun"`
-
-	TXCloud struct {
-		SecretID  string `json:"secretId"`
-		SecretKey string `json:"secretKey"`
-	} `json:"txcloud"`
-	CfCloud struct {
-		AuthEmail string `json:"authEmail"`
-		AuthKey   string `json:"authKey"`
-	} `json:"cfcloud"`
-}
-
 func StructName(data interface{}) string {
 	ref := reflect.ValueOf(data)
 	s := &ref
@@ -69,7 +49,6 @@ func SettingSessAdd(sess *xorm.Session, data interface{}) error {
 	v, _ := json.Marshal(data)
 	s := &Setting{Name: name, Data: v}
 	_, err := sess.InsertOne(s)
-
 	return err
 }
 

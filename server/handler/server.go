@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/bjdgyc/anylink/base"
+	"github.com/bjdgyc/anylink/dbdata"
 	"github.com/gorilla/mux"
 	"github.com/pires/go-proxyproto"
 )
@@ -49,11 +50,11 @@ func startTls() {
 		MinVersion:   tls.VersionTLS12,
 		CipherSuites: selectedCipherSuites,
 		GetCertificate: func(*tls.ClientHelloInfo) (*tls.Certificate, error) {
-			cert, err := tls.LoadX509KeyPair(base.Cfg.CertFile, base.Cfg.CertKey)
-			if err != nil {
-				return nil, err
-			}
-			return &cert, nil
+			// cert, err := tls.LoadX509KeyPair(base.Cfg.CertFile, base.Cfg.CertKey)
+			// if err != nil {
+			// 	return nil, err
+			// }
+			return dbdata.TLSCert, nil
 		},
 		// InsecureSkipVerify: true,
 	}

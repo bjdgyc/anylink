@@ -9,6 +9,7 @@ import (
 
 	"github.com/arl/statsviz"
 	"github.com/bjdgyc/anylink/base"
+	"github.com/bjdgyc/anylink/dbdata"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
@@ -99,17 +100,25 @@ func StartAdmin() {
 	for _, s := range cipherSuites {
 		selectedCipherSuites = append(selectedCipherSuites, s.ID)
 	}
+
+	if tlscert, _, err := ParseCert(); err != nil {
+		base.Error(err)
+		return
+	} else {
+		dbdata.TLSCert = tlscert
+	}
+
 	// 设置tls信息
 	tlsConfig := &tls.Config{
 		NextProtos:   []string{"http/1.1"},
 		MinVersion:   tls.VersionTLS12,
 		CipherSuites: selectedCipherSuites,
 		GetCertificate: func(*tls.ClientHelloInfo) (*tls.Certificate, error) {
-			cert, err := tls.LoadX509KeyPair(base.Cfg.CertFile, base.Cfg.CertKey)
-			if err != nil {
-				return nil, err
-			}
-			return &cert, nil
+			// cert, err := tls.LoadX509KeyPair(base.Cfg.CertFile, base.Cfg.CertKey)
+			// if err != nil {
+			// 	return nil, err
+			// }
+			return dbdata.TLSCert, nil
 		},
 	}
 	srv := &http.Server{

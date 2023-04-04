@@ -1,18 +1,14 @@
 package admin
 
 import (
-	"crypto"
-	"crypto/ecdsa"
-	"crypto/elliptic"
-	"crypto/rand"
 	"crypto/tls"
 	"crypto/x509"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/bjdgyc/anylink/base"
@@ -21,32 +17,15 @@ import (
 	"github.com/go-acme/lego/v4/certificate"
 	"github.com/go-acme/lego/v4/challenge/dns01"
 	"github.com/go-acme/lego/v4/lego"
-	"github.com/go-acme/lego/v4/providers/dns/alidns"
-	"github.com/go-acme/lego/v4/providers/dns/cloudflare"
-	"github.com/go-acme/lego/v4/providers/dns/tencentcloud"
 	"github.com/go-acme/lego/v4/registration"
-	"github.com/xenolf/lego/challenge"
-	"golang.org/x/crypto/scrypt"
 )
 
-type LegoUser struct {
-	Email        string
-	Registration *registration.Resource
-	key          crypto.PrivateKey
-}
 type LeGoClient struct {
+	mutex  sync.Mutex
 	Client *lego.Client
+	dbdata.LegoUserData
 }
 
-func (u *LegoUser) GetEmail() string {
-	return u.Email
-}
-func (u LegoUser) GetRegistration() *registration.Resource {
-	return u.Registration
-}
-func (u *LegoUser) GetPrivateKey() crypto.PrivateKey {
-	return u.key
-}
 func CustomCert(w http.ResponseWriter, r *http.Request) {
 	cert, _, err := r.FormFile("cert")
 	if err != nil {
@@ -78,18 +57,18 @@ func CustomCert(w http.ResponseWriter, r *http.Request) {
 		RespError(w, RespInternalErr, err)
 		return
 	}
+	if tlscert, _, err := ParseCert(); err != nil {
+		return
+	} else {
+		dbdata.TLSCert = tlscert
+	}
 	RespSucess(w, "上传成功")
 }
 func GetCertSetting(w http.ResponseWriter, r *http.Request) {
-	data := &dbdata.SettingDnsProvider{}
+	data := &dbdata.SettingLetsEncrypt{}
 	if err := dbdata.SettingGet(data); err != nil {
 		RespError(w, RespInternalErr, err)
 	}
-	data.AliYun.APIKey = Scrypt(data.AliYun.APIKey)
-	data.AliYun.SecretKey = Scrypt(data.AliYun.SecretKey)
-	data.TXCloud.SecretID = Scrypt(data.TXCloud.SecretID)
-	data.TXCloud.SecretKey = Scrypt(data.TXCloud.SecretKey)
-	data.CfCloud.AuthKey = Scrypt(data.CfCloud.AuthKey)
 	RespSucess(w, data)
 }
 func CreatCert(w http.ResponseWriter, r *http.Request) {
@@ -103,7 +82,7 @@ func CreatCert(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer r.Body.Close()
-	config := &dbdata.SettingDnsProvider{}
+	config := &dbdata.SettingLetsEncrypt{}
 	err = json.Unmarshal(body, config)
 	if err != nil {
 		RespError(w, RespInternalErr, err)
@@ -113,8 +92,8 @@ func CreatCert(w http.ResponseWriter, r *http.Request) {
 		RespError(w, RespInternalErr, err)
 		return
 	}
-	client, err := NewLeGoClient(config)
-	if err != nil {
+	client := LeGoClient{}
+	if err := client.NewClient(config); err != nil {
 		base.Error(err)
 		RespError(w, RespInternalErr, fmt.Sprintf("获取证书失败:%v", err))
 		return
@@ -128,13 +107,13 @@ func CreatCert(w http.ResponseWriter, r *http.Request) {
 }
 
 func ReNewCert() {
-	certtime, err := GetCerttime()
+	_, certtime, err := ParseCert()
 	if err != nil {
 		base.Error(err)
 		return
 	}
 	if certtime.AddDate(0, 0, -7).Before(time.Now()) {
-		config := &dbdata.SettingDnsProvider{}
+		config := &dbdata.SettingLetsEncrypt{}
 		if err := dbdata.SettingGet(config); err != nil {
 			base.Error(err)
 			return
@@ -143,8 +122,8 @@ func ReNewCert() {
 			return
 		}
 		if config.Renew {
-			client, err := NewLeGoClient(config)
-			if err != nil {
+			client := &LeGoClient{}
+			if err := client.NewClient(config); err != nil {
 				base.Error(err)
 				return
 			}
@@ -158,51 +137,38 @@ func ReNewCert() {
 	base.Info(fmt.Sprintf("证书过期时间：%s", certtime.Local().Format("2006-1-2 15:04:05")))
 }
 
-func NewLeGoClient(d *dbdata.SettingDnsProvider) (*LeGoClient, error) {
-	privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+func (c *LeGoClient) NewClient(l *dbdata.SettingLetsEncrypt) error {
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
+	legouser, err := c.GetUserData(l)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	legoUser := LegoUser{
-		Email: d.Legomail,
-		key:   privateKey,
-	}
-	config := lego.NewConfig(&legoUser)
+	config := lego.NewConfig(legouser)
 	config.CADirURL = lego.LEDirectoryProduction
 	config.Certificate.KeyType = certcrypto.RSA2048
 
 	client, err := lego.NewClient(config)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	if _, err := client.Registration.ResolveAccountByKey(); err != nil {
-		reg, err := client.Registration.Register(registration.RegisterOptions{TermsOfServiceAgreed: true})
-		if err != nil {
-			return nil, err
-		}
-		legoUser.Registration = reg
-	}
-	var Provider challenge.Provider
-	switch d.Name {
-	case "aliyun":
-		if Provider, err = alidns.NewDNSProviderConfig(&alidns.Config{APIKey: d.AliYun.APIKey, SecretKey: d.AliYun.SecretKey, TTL: 600}); err != nil {
-			return nil, err
-		}
-	case "txcloud":
-		if Provider, err = tencentcloud.NewDNSProviderConfig(&tencentcloud.Config{SecretID: d.TXCloud.SecretID, SecretKey: d.TXCloud.SecretKey, TTL: 600}); err != nil {
-			return nil, err
-		}
-	case "cloudflare":
-		if Provider, err = cloudflare.NewDNSProviderConfig(&cloudflare.Config{AuthEmail: d.CfCloud.AuthEmail, AuthKey: d.CfCloud.AuthKey, TTL: 600}); err != nil {
-			return nil, err
-		}
+	Provider, err := dbdata.GetDNSProvider(l)
+	if err != nil {
+		return err
 	}
 	if err := client.Challenge.SetDNS01Provider(Provider, dns01.AddRecursiveNameservers([]string{"114.114.114.114", "114.114.115.115"})); err != nil {
-		return nil, err
+		return err
 	}
-	return &LeGoClient{
-		Client: client,
-	}, nil
+	if legouser.Registration == nil {
+		reg, err := client.Registration.Register(registration.RegisterOptions{TermsOfServiceAgreed: true})
+		if err != nil {
+			return err
+		}
+		legouser.Registration = reg
+		c.SaveUserData(legouser)
+	}
+	c.Client = client
+	return nil
 }
 func (c *LeGoClient) GetCertificate(domain string) error {
 	// 申请证书
@@ -250,6 +216,11 @@ func SaveCertificate(cert *certificate.Resource) error {
 	if err != nil {
 		return err
 	}
+	if tlscert, _, err := ParseCert(); err != nil {
+		return err
+	} else {
+		dbdata.TLSCert = tlscert
+	}
 	return nil
 }
 
@@ -268,24 +239,24 @@ func LoadCertResource(certFile, keyFile string) (*certificate.Resource, error) {
 	}, nil
 }
 
-func GetCerttime() (*time.Time, error) {
+func ParseCert() (*tls.Certificate, *time.Time, error) {
 	cert, err := tls.LoadX509KeyPair(base.Cfg.CertFile, base.Cfg.CertKey)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	parseCert, err := x509.ParseCertificate(cert.Certificate[0])
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	certtime := parseCert.NotAfter
-	return &certtime, nil
+	return &cert, &certtime, nil
 }
 
-func Scrypt(passwd string) string {
-	salt := []byte{0xc8, 0x28, 0xf2, 0x58, 0xa7, 0x6a, 0xad, 0x7b}
-	hashPasswd, err := scrypt.Key([]byte(passwd), salt, 1<<15, 8, 1, 32)
-	if err != nil {
-		return err.Error()
-	}
-	return base64.StdEncoding.EncodeToString(hashPasswd)
-}
+// func Scrypt(passwd string) string {
+// 	salt := []byte{0xc8, 0x28, 0xf2, 0x58, 0xa7, 0x6a, 0xad, 0x7b}
+// 	hashPasswd, err := scrypt.Key([]byte(passwd), salt, 1<<15, 8, 1, 32)
+// 	if err != nil {
+// 		return err.Error()
+// 	}
+// 	return base64.StdEncoding.EncodeToString(hashPasswd)
+// }

@@ -100,25 +100,32 @@ func addInitData() error {
 	}
 
 	// SettingDnsProvider
-	provider := &SettingDnsProvider{
+	provider := &SettingLetsEncrypt{
 		Domain:   "vpn.xxx.com",
 		Legomail: "legomail",
-		Name:     "",
+		Name:     "aliyun",
 		Renew:    false,
-		AliYun: struct {
-			APIKey    string `json:"apiKey"`
-			SecretKey string `json:"secretKey"`
-		}{APIKey: "", SecretKey: ""},
-		TXCloud: struct {
-			SecretID  string `json:"secretId"`
-			SecretKey string `json:"secretKey"`
-		}{SecretID: "", SecretKey: ""},
-		CfCloud: struct {
-			AuthEmail string `json:"authEmail"`
-			AuthKey   string `json:"authKey"`
-		}{AuthEmail: "", AuthKey: ""},
+		DNSProvider: DNSProvider{
+			AliYun: struct {
+				APIKey    string `json:"apiKey"`
+				SecretKey string `json:"secretKey"`
+			}{APIKey: "", SecretKey: ""},
+			TXCloud: struct {
+				SecretID  string `json:"secretId"`
+				SecretKey string `json:"secretKey"`
+			}{SecretID: "", SecretKey: ""},
+			CfCloud: struct {
+				AuthEmail string `json:"authEmail"`
+				AuthKey   string `json:"authKey"`
+			}{AuthEmail: "", AuthKey: ""}},
 	}
 	err = SettingSessAdd(sess, provider)
+	if err != nil {
+		return err
+	}
+	// LegoUser
+	legouser := &LegoUserData{}
+	err = SettingSessAdd(sess, legouser)
 	if err != nil {
 		return err
 	}
