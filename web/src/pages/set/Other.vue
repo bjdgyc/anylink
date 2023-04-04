@@ -348,8 +348,6 @@ export default {
         name: { required: true, message: "请选择域名服务商", trigger: "blur" },
       },
       certUpload: "/set/other/customcert",
-      certFileList: [],
-      keyFileList: [],
       dnsProvider: {
         aliyun: [
           {

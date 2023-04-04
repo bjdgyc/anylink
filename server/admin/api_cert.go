@@ -1,11 +1,17 @@
 package admin
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
 	"crypto/tls"
 	"crypto/x509"
+	"crypto/x509/pkix"
 	"encoding/json"
+	"encoding/pem"
 	"fmt"
 	"io"
+	"math/big"
+	"net"
 	"net/http"
 	"os"
 	"sync"
@@ -58,6 +64,10 @@ func CustomCert(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if tlscert, _, err := ParseCert(); err != nil {
+		if err := PrivateCert(); err != nil {
+			base.Error(err)
+		}
+		RespError(w, RespInternalErr, fmt.Sprintf("证书不合法，请重新上传:%v", err))
 		return
 	} else {
 		dbdata.TLSCert = tlscert
@@ -240,6 +250,11 @@ func LoadCertResource(certFile, keyFile string) (*certificate.Resource, error) {
 }
 
 func ParseCert() (*tls.Certificate, *time.Time, error) {
+	_, certErr := os.Stat(base.Cfg.CertFile)
+	_, keyErr := os.Stat(base.Cfg.CertKey)
+	if os.IsNotExist(certErr) || os.IsNotExist(keyErr) {
+		PrivateCert()
+	}
 	cert, err := tls.LoadX509KeyPair(base.Cfg.CertFile, base.Cfg.CertKey)
 	if err != nil {
 		return nil, nil, err
@@ -250,6 +265,44 @@ func ParseCert() (*tls.Certificate, *time.Time, error) {
 	}
 	certtime := parseCert.NotAfter
 	return &cert, &certtime, nil
+}
+func PrivateCert() error {
+	// 创建一个RSA密钥对
+	priv, _ := rsa.GenerateKey(rand.Reader, 2048)
+	pub := &priv.PublicKey
+
+	// 生成一个自签名证书
+	template := x509.Certificate{
+		SerialNumber:          big.NewInt(1658),
+		Subject:               pkix.Name{CommonName: "localhost"},
+		NotBefore:             time.Now(),
+		NotAfter:              time.Now().Add(time.Hour * 24 * 365),
+		KeyUsage:              x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
+		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+		BasicConstraintsValid: true,
+		IPAddresses:           []net.IP{},
+	}
+
+	derBytes, err := x509.CreateCertificate(rand.Reader, &template, &template, pub, priv)
+	if err != nil {
+		return err
+	}
+
+	// 将证书编码为PEM格式并将其写入文件
+	certOut, _ := os.OpenFile(base.Cfg.CertFile, os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0600)
+	pem.Encode(certOut, &pem.Block{Type: "CERTIFICATE", Bytes: derBytes})
+	certOut.Close()
+
+	// 将私钥编码为PEM格式并将其写入文件
+	keyOut, _ := os.OpenFile(base.Cfg.CertKey, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
+	pem.Encode(keyOut, &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(priv)})
+	keyOut.Close()
+	cert, err := tls.LoadX509KeyPair(base.Cfg.CertFile, base.Cfg.CertKey)
+	if err != nil {
+		return err
+	}
+	dbdata.TLSCert = &cert
+	return nil
 }
 
 // func Scrypt(passwd string) string {
