@@ -50,10 +50,6 @@ func startTls() {
 		MinVersion:   tls.VersionTLS12,
 		CipherSuites: selectedCipherSuites,
 		GetCertificate: func(*tls.ClientHelloInfo) (*tls.Certificate, error) {
-			// cert, err := tls.LoadX509KeyPair(base.Cfg.CertFile, base.Cfg.CertKey)
-			// if err != nil {
-			// 	return nil, err
-			// }
 			return dbdata.TLSCert, nil
 		},
 		// InsecureSkipVerify: true,

@@ -100,8 +100,7 @@ func StartAdmin() {
 	for _, s := range cipherSuites {
 		selectedCipherSuites = append(selectedCipherSuites, s.ID)
 	}
-
-	if tlscert, _, err := ParseCert(); err != nil {
+	if tlscert, _, err := dbdata.ParseCert(); err != nil {
 		base.Error(err)
 		return
 	} else {
@@ -114,10 +113,6 @@ func StartAdmin() {
 		MinVersion:   tls.VersionTLS12,
 		CipherSuites: selectedCipherSuites,
 		GetCertificate: func(*tls.ClientHelloInfo) (*tls.Certificate, error) {
-			// cert, err := tls.LoadX509KeyPair(base.Cfg.CertFile, base.Cfg.CertKey)
-			// if err != nil {
-			// 	return nil, err
-			// }
 			return dbdata.TLSCert, nil
 		},
 	}
