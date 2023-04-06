@@ -175,7 +175,7 @@ func (c *LeGoClient) NewClient(l *SettingLetsEncrypt) error {
 		return err
 	}
 	config := lego.NewConfig(legouser)
-	config.CADirURL = lego.LEDirectoryStaging
+	config.CADirURL = lego.LEDirectoryProduction
 	config.Certificate.KeyType = certcrypto.RSA2048
 
 	client, err := lego.NewClient(config)
