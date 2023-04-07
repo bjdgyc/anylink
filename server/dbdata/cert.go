@@ -261,8 +261,12 @@ func (c *LeGoClient) SaveCert() error {
 }
 
 func ParseCert() (*tls.Certificate, *time.Time, error) {
-	os.Stat(base.Cfg.CertFile)
-	os.Stat(base.Cfg.CertKey)
+	_, errCert := os.Stat(base.Cfg.CertFile)
+	_, errKey := os.Stat(base.Cfg.CertKey)
+	if os.IsNotExist(errCert) || os.IsNotExist(errKey) {
+		PrivateCert()
+
+	}
 	cert, err := tls.LoadX509KeyPair(base.Cfg.CertFile, base.Cfg.CertKey)
 	if err != nil || errors.Is(err, os.ErrNotExist) {
 		PrivateCert()

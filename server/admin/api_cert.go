@@ -69,8 +69,7 @@ func CreatCert(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 	config := &dbdata.SettingLetsEncrypt{}
-	err = json.Unmarshal(body, config)
-	if err != nil {
+	if err := json.Unmarshal(body, config); err != nil {
 		RespError(w, RespInternalErr, err)
 		return
 	}
