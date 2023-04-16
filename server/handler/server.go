@@ -2,17 +2,20 @@ package handler
 
 import (
 	"crypto/tls"
+	"crypto/x509"
 	"fmt"
+	"github.com/pires/go-proxyproto"
 	"io"
 	"log"
 	"net"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/bjdgyc/anylink/base"
 	"github.com/gorilla/mux"
-	"github.com/pires/go-proxyproto"
+	"github.com/pion/dtls/v2/pkg/crypto/selfsign"
 )
 
 func startTls() {
@@ -23,6 +26,17 @@ func startTls() {
 		addr = base.Cfg.ServerAddr
 		ln   net.Listener
 	)
+
+	tempCert, _ := selfsign.GenerateSelfSignedWithDNS("localhost")
+
+	var certs []tls.Certificate
+	var nameToCertificate map[string]*tls.Certificate
+
+	// TODO 后续可以实现加载证书
+	cert, _ := tls.LoadX509KeyPair(base.Cfg.CertFile, base.Cfg.CertKey)
+	certs = append(certs, cert)
+
+	nameToCertificate = buildNameToCertificate(certs)
 
 	// 判断证书文件
 	// _, err = os.Stat(certFile)
@@ -48,6 +62,22 @@ func startTls() {
 		NextProtos:   []string{"http/1.1"},
 		MinVersion:   tls.VersionTLS12,
 		CipherSuites: selectedCipherSuites,
+		GetCertificate: func(clientHello *tls.ClientHelloInfo) (*tls.Certificate, error) {
+			// Copy from tls.Config getCertificate()
+			name := strings.ToLower(clientHello.ServerName)
+			if cert, ok := nameToCertificate[name]; ok {
+				return cert, nil
+			}
+			if len(name) > 0 {
+				labels := strings.Split(name, ".")
+				labels[0] = "*"
+				wildcardName := strings.Join(labels, ".")
+				if cert, ok := nameToCertificate[wildcardName]; ok {
+					return cert, nil
+				}
+			}
+			return &tempCert, nil
+		},
 		// InsecureSkipVerify: true,
 	}
 	srv := &http.Server{
@@ -71,10 +101,38 @@ func startTls() {
 	}
 
 	base.Info("listen server", addr)
-	err = srv.ServeTLS(ln, base.Cfg.CertFile, base.Cfg.CertKey)
+	err = srv.ServeTLS(ln, "", "")
 	if err != nil {
 		base.Fatal(err)
 	}
+}
+
+// Copy from tls.Config BuildNameToCertificate()
+func buildNameToCertificate(certificates []tls.Certificate) map[string]*tls.Certificate {
+	var certMap = make(map[string]*tls.Certificate)
+	for i := range certificates {
+		cert := &certificates[i]
+		x509Cert, err := x509.ParseCertificate(cert.Certificate[0])
+		if err != nil {
+			continue
+		}
+		startTime := x509Cert.NotBefore.String()
+		expiredTime := x509Cert.NotAfter.String()
+		if x509Cert.Subject.CommonName != "" && len(x509Cert.DNSNames) == 0 {
+			commonName := x509Cert.Subject.CommonName
+			fmt.Printf("┏ Load Certificate: %s\n", commonName)
+			fmt.Printf("┠╌╌ Start Time:     %s\n", startTime)
+			fmt.Printf("┖╌╌ Expired Time:   %s\n", expiredTime)
+			certMap[commonName] = cert
+		}
+		for _, san := range x509Cert.DNSNames {
+			fmt.Printf("┏ Load Certificate: %s\n", san)
+			fmt.Printf("┠╌╌ Start Time:     %s\n", startTime)
+			fmt.Printf("┖╌╌ Expired Time:   %s\n", expiredTime)
+			certMap[san] = cert
+		}
+	}
+	return certMap
 }
 
 func initRoute() http.Handler {
