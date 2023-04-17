@@ -104,7 +104,7 @@ func StartAdmin() {
 		base.Error(err)
 		return
 	} else {
-		dbdata.TLSCert = tlscert
+		dbdata.LoadCertificate(tlscert)
 	}
 
 	// 设置tls信息
@@ -112,8 +112,8 @@ func StartAdmin() {
 		NextProtos:   []string{"http/1.1"},
 		MinVersion:   tls.VersionTLS12,
 		CipherSuites: selectedCipherSuites,
-		GetCertificate: func(*tls.ClientHelloInfo) (*tls.Certificate, error) {
-			return dbdata.TLSCert, nil
+		GetCertificate: func(chi *tls.ClientHelloInfo) (*tls.Certificate, error) {
+			return dbdata.GetCertificateBySNI(chi.ServerName)
 		},
 	}
 	srv := &http.Server{
