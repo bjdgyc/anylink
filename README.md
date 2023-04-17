@@ -142,7 +142,7 @@ sudo ./anylink
 1. 开启服务器转发
 
 ```shell
-# flie: /etc/sysctl.conf
+# file: /etc/sysctl.conf
 net.ipv4.ip_forward = 1
 
 #执行如下命令

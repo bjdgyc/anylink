@@ -235,16 +235,16 @@
                         <el-radio label="ldap" border>LDAP</el-radio>
                     </el-radio-group>
                 </el-form-item>   
-                <templete v-if="ruleForm.auth.type == 'radius'">
+                <template v-if="ruleForm.auth.type == 'radius'">
                   <el-form-item label="服务器地址" prop="auth.radius.addr" :rules="this.ruleForm.auth.type== 'radius' ? this.rules['auth.radius.addr'] : [{ required: false }]">
                       <el-input v-model="ruleForm.auth.radius.addr" placeholder="例如 ip:1812"></el-input>
                   </el-form-item>                
                   <el-form-item label="密钥" prop="auth.radius.secret" :rules="this.ruleForm.auth.type== 'radius' ? this.rules['auth.radius.secret'] : [{ required: false }]">
                       <el-input v-model="ruleForm.auth.radius.secret" placeholder=""></el-input>
                   </el-form-item>               
-                </templete>
+                </template>
 
-                <templete v-if="ruleForm.auth.type == 'ldap'">
+                <template v-if="ruleForm.auth.type == 'ldap'">
                   <el-form-item label="服务器地址" prop="auth.ldap.addr" :rules="this.ruleForm.auth.type== 'ldap' ? this.rules['auth.ldap.addr'] : [{ required: false }]">
                       <el-input v-model="ruleForm.auth.ldap.addr" placeholder="例如 ip:389 / 域名:389"></el-input>    
                   </el-form-item> 
@@ -266,7 +266,7 @@
                   <el-form-item label="受限用户组" prop="auth.ldap.member_of">
                     <el-input v-model="ruleForm.auth.ldap.member_of" placeholder="选填, 只允许指定组登入, 例如 CN=HomeWork,DC=abc,DC=com"></el-input>
                   </el-form-item>                                                                      
-                </templete>                 
+                </template>                 
             </el-tab-pane>  
 
             <el-tab-pane label="路由设置" name="route">

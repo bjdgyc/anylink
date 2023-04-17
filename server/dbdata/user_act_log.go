@@ -155,7 +155,7 @@ func (ua *UserActLogProcess) ParseUserAgent(userAgent string) (os_idx, client_id
 	} else if strings.Contains(userAgent, "anylink") {
 		client_idx = 3
 	}
-	// Verion
+	// Version
 	uaSlice := strings.Split(userAgent, " ")
 	ver = uaSlice[len(uaSlice)-1]
 	if ver[0] == 'v' {
