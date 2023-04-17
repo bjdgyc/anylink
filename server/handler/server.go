@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/bjdgyc/anylink/base"
+	"github.com/bjdgyc/anylink/dbdata"
 	"github.com/gorilla/mux"
 	"github.com/pires/go-proxyproto"
 )
@@ -48,6 +49,9 @@ func startTls() {
 		NextProtos:   []string{"http/1.1"},
 		MinVersion:   tls.VersionTLS12,
 		CipherSuites: selectedCipherSuites,
+		GetCertificate: func(*tls.ClientHelloInfo) (*tls.Certificate, error) {
+			return dbdata.TLSCert, nil
+		},
 		// InsecureSkipVerify: true,
 	}
 	srv := &http.Server{
@@ -71,7 +75,7 @@ func startTls() {
 	}
 
 	base.Info("listen server", addr)
-	err = srv.ServeTLS(ln, base.Cfg.CertFile, base.Cfg.CertKey)
+	err = srv.ServeTLS(ln, "", "")
 	if err != nil {
 		base.Fatal(err)
 	}

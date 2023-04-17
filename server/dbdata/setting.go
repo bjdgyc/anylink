@@ -49,7 +49,6 @@ func SettingSessAdd(sess *xorm.Session, data interface{}) error {
 	v, _ := json.Marshal(data)
 	s := &Setting{Name: name, Data: v}
 	_, err := sess.InsertOne(s)
-
 	return err
 }
 
