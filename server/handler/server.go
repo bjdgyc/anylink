@@ -49,8 +49,8 @@ func startTls() {
 		NextProtos:   []string{"http/1.1"},
 		MinVersion:   tls.VersionTLS12,
 		CipherSuites: selectedCipherSuites,
-		GetCertificate: func(*tls.ClientHelloInfo) (*tls.Certificate, error) {
-			return dbdata.TLSCert, nil
+		GetCertificate: func(chi *tls.ClientHelloInfo) (*tls.Certificate, error) {
+			return dbdata.GetCertificateBySNI(chi.ServerName)
 		},
 		// InsecureSkipVerify: true,
 	}

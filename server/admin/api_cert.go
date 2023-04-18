@@ -46,7 +46,7 @@ func CustomCert(w http.ResponseWriter, r *http.Request) {
 		RespError(w, RespInternalErr, fmt.Sprintf("证书不合法，请重新上传:%v", err))
 		return
 	} else {
-		dbdata.TLSCert = tlscert
+		dbdata.LoadCertificate(tlscert)
 	}
 	RespSucess(w, "上传成功")
 }
