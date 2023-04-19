@@ -194,8 +194,7 @@
                 <el-form-item label="排除本地网络" prop="allow_lan">
                 <el-switch
                     v-model="ruleForm.allow_lan"
-                    active-text="开启后 用户本地所在网段将不通过anylink加密传输"
-                    inactive-text="开启后 用户本地所在网段将不通过anylink加密传输">
+                    active-text="开启后 用户本地所在网段将不通过anylink加密传输">
                 </el-switch>
                 </el-form-item>
 

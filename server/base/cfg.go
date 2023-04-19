@@ -77,6 +77,8 @@ type ServerConfig struct {
 	IptablesNat     bool `json:"iptables_nat"`
 	Compression     bool `json:"compression"`       // bool
 	NoCompressLimit int  `json:"no_compress_limit"` // int
+
+	DisplayError bool `json:"display_error"`
 }
 
 func initServerCfg() {

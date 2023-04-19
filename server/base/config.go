@@ -48,7 +48,7 @@ var configs = []config{
 	{Typ: cfgStr, Name: "default_group", Usage: "默认用户组", ValStr: "one"},
 	{Typ: cfgStr, Name: "default_domain", Usage: "要发布的默认域", ValStr: ""},
 
-	{Typ: cfgInt, Name: "ip_lease", Usage: "IP租期(秒)", ValInt: 1209600},
+	{Typ: cfgInt, Name: "ip_lease", Usage: "IP租期(秒)", ValInt: 86400},
 	{Typ: cfgInt, Name: "max_client", Usage: "最大用户连接", ValInt: 200},
 	{Typ: cfgInt, Name: "max_user_client", Usage: "最大单用户连接", ValInt: 3},
 	{Typ: cfgInt, Name: "cstp_keepalive", Usage: "keepalive时间(秒)", ValInt: 4},
@@ -56,7 +56,7 @@ var configs = []config{
 	{Typ: cfgInt, Name: "mobile_keepalive", Usage: "移动端keepalive接检测时间(秒)", ValInt: 7},
 	{Typ: cfgInt, Name: "mobile_dpd", Usage: "移动端死链接检测时间(秒)", ValInt: 15},
 	{Typ: cfgInt, Name: "mtu", Usage: "最大传输单元MTU", ValInt: 1460},
-	{Typ: cfgInt, Name: "session_timeout", Usage: "session过期时间(秒)", ValInt: 3600},
+	{Typ: cfgInt, Name: "session_timeout", Usage: "session过期时间(秒)-用于断线重连，0永不过期", ValInt: 3600},
 	// {Typ: cfgInt, Name: "auth_timeout", Usage: "auth_timeout", ValInt: 0},
 	{Typ: cfgInt, Name: "audit_interval", Usage: "审计去重间隔(秒),-1关闭", ValInt: -1},
 
@@ -64,6 +64,8 @@ var configs = []config{
 	{Typ: cfgBool, Name: "iptables_nat", Usage: "是否自动添加NAT", ValBool: true},
 	{Typ: cfgBool, Name: "compression", Usage: "启用压缩", ValBool: false},
 	{Typ: cfgInt, Name: "no_compress_limit", Usage: "低于及等于多少字节不压缩", ValInt: 256},
+
+	{Typ: cfgBool, Name: "display_error", Usage: "客户端显示详细错误信息(线上环境慎开启)", ValBool: false},
 }
 
 var envs = map[string]string{}

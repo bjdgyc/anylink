@@ -19,8 +19,8 @@ var profileHash = ""
 
 func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	// TODO 调试信息输出
-	//hd, _ := httputil.DumpRequest(r, true)
-	//base.Debug("DumpRequest: ", string(hd))
+	// hd, _ := httputil.DumpRequest(r, true)
+	// base.Debug("DumpRequest: ", string(hd))
 
 	// 判断anyconnect客户端
 	userAgent := strings.ToLower(r.UserAgent())
@@ -88,6 +88,9 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 
 		w.WriteHeader(http.StatusOK)
 		data := RequestData{Group: cr.GroupSelect, Groups: dbdata.GetGroupNamesNormal(), Error: "用户名或密码错误"}
+		if base.Cfg.DisplayError {
+			data.Error = err.Error()
+		}
 		tplRequest(tpl_request, w, data)
 		return
 	}

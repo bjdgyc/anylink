@@ -50,7 +50,7 @@ max_client = 100
 #单个用户同时在线数量
 max_user_client = 3
 #IP租期(秒)
-ip_lease = 1209600
+ip_lease = 86400
 
 #默认选择的组
 default_group = "one"
@@ -82,3 +82,8 @@ iptables_nat = true
 compression = false
 #低于及等于多少字节不压缩
 no_compress_limit = 256
+
+#客户端显示详细错误信息(线上环境慎开启)
+display_error = false
+
+

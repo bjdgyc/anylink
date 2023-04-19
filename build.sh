@@ -19,11 +19,10 @@ cd $cpath/web
 #npm install --registry=https://registry.npm.taobao.org
 #npm install
 #npm run build
-#yarn install
-#yarn run build
 
-pnpm i --registry=https://registry.npmmirror.com
-pnpm build
+yarn install --registry=https://registry.npmmirror.com
+yarn run build
+
 
 RETVAL $?
 
