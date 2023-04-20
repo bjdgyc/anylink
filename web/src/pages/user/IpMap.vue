@@ -11,12 +11,14 @@
                             @click="handleEdit('')">添加
                     </el-button>
                 </el-form-item>
+                <!--
                 <el-form-item>
                     <el-alert
                             title="直接操作数据库增删改数据后，请重启anylink服务"
                             type="warning">
                     </el-alert>
                 </el-form-item>
+                -->
             </el-form>
 
             <el-table

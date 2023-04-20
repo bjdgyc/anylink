@@ -7,7 +7,6 @@ import (
 	"strconv"
 
 	"github.com/bjdgyc/anylink/dbdata"
-	"github.com/bjdgyc/anylink/sessdata"
 )
 
 func UserIpMapList(w http.ResponseWriter, r *http.Request) {
@@ -81,7 +80,7 @@ func UserIpMapSet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sessdata.IpAllSet(v)
+	// sessdata.IpAllSet(v)
 
 	RespSucess(w, nil)
 }
@@ -109,7 +108,7 @@ func UserIpMapDel(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sessdata.IpAllDel(&data)
+	// sessdata.IpAllDel(&data)
 
 	RespSucess(w, nil)
 }
