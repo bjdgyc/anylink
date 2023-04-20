@@ -51,9 +51,16 @@ func CustomCert(w http.ResponseWriter, r *http.Request) {
 	RespSucess(w, "上传成功")
 }
 func GetCertSetting(w http.ResponseWriter, r *http.Request) {
+	sess := dbdata.GetXdb().NewSession()
+	defer sess.Close()
 	data := &dbdata.SettingLetsEncrypt{}
 	if err := dbdata.SettingGet(data); err != nil {
+		dbdata.SettingSessAdd(sess, data)
 		RespError(w, RespInternalErr, err)
+	}
+	userData := &dbdata.LegoUserData{}
+	if err := dbdata.SettingGet(userData); err != nil {
+		dbdata.SettingSessAdd(sess, userData)
 	}
 	RespSucess(w, data)
 }
