@@ -10,12 +10,12 @@ import (
 )
 
 const (
-	_Trace = iota
-	_Debug
-	_Info
-	_Warn
-	_Error
-	_Fatal
+	LogLevelTrace = iota
+	LogLevelDebug
+	LogLevelInfo
+	LogLevelWarn
+	LogLevelError
+	LogLevelFatal
 )
 
 var (
@@ -88,16 +88,20 @@ func GetBaseLog() *log.Logger {
 	return baseLog
 }
 
+func GetLogLevel() int {
+	return baseLevel
+}
+
 func logLevel2Int(l string) int {
 	levels = map[int]string{
-		_Trace: "Trace",
-		_Debug: "Debug",
-		_Info:  "Info",
-		_Warn:  "Warn",
-		_Error: "Error",
-		_Fatal: "Fatal",
+		LogLevelTrace: "Trace",
+		LogLevelDebug: "Debug",
+		LogLevelInfo:  "Info",
+		LogLevelWarn:  "Warn",
+		LogLevelError: "Error",
+		LogLevelFatal: "Fatal",
 	}
-	lvl := _Info
+	lvl := LogLevelInfo
 	for k, v := range levels {
 		if strings.EqualFold(strings.ToLower(l), strings.ToLower(v)) {
 			lvl = k
@@ -112,7 +116,7 @@ func output(l int, s ...interface{}) {
 }
 
 func Trace(v ...interface{}) {
-	l := _Trace
+	l := LogLevelTrace
 	if baseLevel > l {
 		return
 	}
@@ -120,7 +124,7 @@ func Trace(v ...interface{}) {
 }
 
 func Debug(v ...interface{}) {
-	l := _Debug
+	l := LogLevelDebug
 	if baseLevel > l {
 		return
 	}
@@ -128,7 +132,7 @@ func Debug(v ...interface{}) {
 }
 
 func Info(v ...interface{}) {
-	l := _Info
+	l := LogLevelInfo
 	if baseLevel > l {
 		return
 	}
@@ -136,7 +140,7 @@ func Info(v ...interface{}) {
 }
 
 func Warn(v ...interface{}) {
-	l := _Warn
+	l := LogLevelWarn
 	if baseLevel > l {
 		return
 	}
@@ -144,7 +148,7 @@ func Warn(v ...interface{}) {
 }
 
 func Error(v ...interface{}) {
-	l := _Error
+	l := LogLevelError
 	if baseLevel > l {
 		return
 	}
@@ -152,7 +156,7 @@ func Error(v ...interface{}) {
 }
 
 func Fatal(v ...interface{}) {
-	l := _Fatal
+	l := LogLevelFatal
 	if baseLevel > l {
 		return
 	}

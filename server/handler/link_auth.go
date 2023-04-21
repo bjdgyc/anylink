@@ -7,6 +7,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"net/http/httputil"
 	"strings"
 	"text/template"
 
@@ -19,9 +20,10 @@ var profileHash = ""
 
 func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	// TODO 调试信息输出
-	// hd, _ := httputil.DumpRequest(r, true)
-	// base.Debug("DumpRequest: ", string(hd))
-
+	if base.GetLogLevel() == base.LogLevelTrace {
+		hd, _ := httputil.DumpRequest(r, true)
+		base.Trace("LinkAuth: ", string(hd))
+	}
 	// 判断anyconnect客户端
 	userAgent := strings.ToLower(r.UserAgent())
 	xAggregateAuth := r.Header.Get("X-Aggregate-Auth")

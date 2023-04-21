@@ -33,9 +33,12 @@ import (
 	"github.com/go-acme/lego/v4/registration"
 )
 
-var nameToCertificate = make(map[string]*tls.Certificate)
-
-var tempCert *tls.Certificate
+var (
+	// nameToCertificate mutex
+	ntcMux            sync.RWMutex
+	nameToCertificate = make(map[string]*tls.Certificate)
+	tempCert          *tls.Certificate
+)
 
 func init() {
 	c, _ := selfsign.GenerateSelfSignedWithDNS("localhost")
@@ -342,6 +345,9 @@ func getTempCertificate() (*tls.Certificate, error) {
 }
 
 func GetCertificateBySNI(commonName string) (*tls.Certificate, error) {
+	ntcMux.RLock()
+	defer ntcMux.RUnlock()
+
 	// Copy from tls.Config getCertificate()
 	name := strings.ToLower(commonName)
 	if cert, ok := nameToCertificate[name]; ok {
@@ -369,6 +375,9 @@ func LoadCertificate(cert *tls.Certificate) {
 
 // Copy from tls.Config BuildNameToCertificate()
 func buildNameToCertificate(cert *tls.Certificate) {
+	ntcMux.Lock()
+	defer ntcMux.Unlock()
+
 	// TODO 设置默认证书
 	nameToCertificate["default"] = cert
 
