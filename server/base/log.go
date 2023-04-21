@@ -10,7 +10,8 @@ import (
 )
 
 const (
-	_Debug = iota
+	_Trace = iota
+	_Debug
 	_Info
 	_Warn
 	_Error
@@ -89,6 +90,7 @@ func GetBaseLog() *log.Logger {
 
 func logLevel2Int(l string) int {
 	levels = map[int]string{
+		_Trace: "Trace",
 		_Debug: "Debug",
 		_Info:  "Info",
 		_Warn:  "Warn",
@@ -107,6 +109,14 @@ func logLevel2Int(l string) int {
 func output(l int, s ...interface{}) {
 	lvl := fmt.Sprintf("[%s] ", levels[l])
 	_ = baseLog.Output(3, lvl+fmt.Sprintln(s...))
+}
+
+func Trace(v ...interface{}) {
+	l := _Trace
+	if baseLevel > l {
+		return
+	}
+	output(l, v...)
 }
 
 func Debug(v ...interface{}) {

@@ -275,8 +275,10 @@ func ParseCert() (*tls.Certificate, *time.Time, error) {
 	_, errCert := os.Stat(base.Cfg.CertFile)
 	_, errKey := os.Stat(base.Cfg.CertKey)
 	if os.IsNotExist(errCert) || os.IsNotExist(errKey) {
-		PrivateCert()
-
+		err := PrivateCert()
+		if err != nil {
+			return nil, nil, err
+		}
 	}
 	cert, err := tls.LoadX509KeyPair(base.Cfg.CertFile, base.Cfg.CertKey)
 	if err != nil || errors.Is(err, os.ErrNotExist) {
@@ -353,6 +355,11 @@ func GetCertificateBySNI(commonName string) (*tls.Certificate, error) {
 			return cert, nil
 		}
 	}
+	// 默认证书 兼容不支持 SNI 的客户端
+	if cert, ok := nameToCertificate["default"]; ok {
+		return cert, nil
+	}
+
 	return getTempCertificate()
 }
 
@@ -362,6 +369,9 @@ func LoadCertificate(cert *tls.Certificate) {
 
 // Copy from tls.Config BuildNameToCertificate()
 func buildNameToCertificate(cert *tls.Certificate) {
+	// 设置默认证书
+	nameToCertificate["default"] = cert
+
 	x509Cert, err := x509.ParseCertificate(cert.Certificate[0])
 	if err != nil {
 		return

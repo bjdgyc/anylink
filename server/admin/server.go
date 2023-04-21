@@ -100,9 +100,9 @@ func StartAdmin() {
 	for _, s := range cipherSuites {
 		selectedCipherSuites = append(selectedCipherSuites, s.ID)
 	}
+
 	if tlscert, _, err := dbdata.ParseCert(); err != nil {
-		base.Error(err)
-		return
+		base.Fatal("证书加载失败", err)
 	} else {
 		dbdata.LoadCertificate(tlscert)
 	}
