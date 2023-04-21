@@ -2,6 +2,7 @@ package dbdata
 
 import (
 	"errors"
+	"net"
 	"time"
 )
 
@@ -24,6 +25,13 @@ func SetIpMap(v *IpMap) error {
 	if len(v.IpAddr) < 4 || len(v.MacAddr) < 6 {
 		return errors.New("IP或MAC错误")
 	}
+
+	macHw, err := net.ParseMAC(v.MacAddr)
+	if err != nil {
+		return errors.New("MAC错误")
+	}
+	// 统一macAddr的格式
+	v.MacAddr = macHw.String()
 
 	v.UpdatedAt = time.Now()
 	if v.Id > 0 {

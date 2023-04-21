@@ -16,6 +16,8 @@ var (
 	// ipKeep and ipLease  ipAddr => type
 	// ipLease   = map[string]bool{}
 	ipPoolMux sync.Mutex
+	// 记录循环点
+	loopCurIp uint32
 )
 
 type ipPoolConfig struct {
@@ -36,17 +38,25 @@ func initIpPool() {
 	}
 	IpPool.Ipv4IPNet = ipNet
 	IpPool.Ipv4Mask = net.IP(ipNet.Mask)
-	IpPool.Ipv4Gateway = net.ParseIP(base.Cfg.Ipv4Gateway)
+
+	ipv4Gateway := net.ParseIP(base.Cfg.Ipv4Gateway)
+	ipStart := net.ParseIP(base.Cfg.Ipv4Start)
+	ipEnd := net.ParseIP(base.Cfg.Ipv4End)
+	if !ipNet.Contains(ipv4Gateway) || !ipNet.Contains(ipStart) || !ipNet.Contains(ipEnd) {
+		panic("ip段 设置错误")
+	}
+	// ip地址池
+	IpPool.Ipv4Gateway = ipv4Gateway
+	IpPool.IpLongMin = utils.Ip2long(ipStart)
+	IpPool.IpLongMax = utils.Ip2long(ipEnd)
+
+	loopCurIp = IpPool.IpLongMin
 
 	// 网络地址零值
 	// zero := binary.BigEndian.Uint32(ip.Mask(mask))
 	// 广播地址
 	// one, _ := ipNet.Mask.Size()
 	// max := min | uint32(math.Pow(2, float64(32-one))-1)
-
-	// ip地址池
-	IpPool.IpLongMin = utils.Ip2long(net.ParseIP(base.Cfg.Ipv4Start))
-	IpPool.IpLongMax = utils.Ip2long(net.ParseIP(base.Cfg.Ipv4End))
 
 	// 获取IpLease数据
 	// go cronIpLease()
@@ -80,6 +90,7 @@ func initIpPool() {
 
 // AcquireIp 获取动态ip
 func AcquireIp(username, macAddr string, uniqueMac bool) net.IP {
+	base.Trace("AcquireIp:", username, macAddr, uniqueMac)
 	ipPoolMux.Lock()
 	defer ipPoolMux.Unlock()
 
@@ -103,6 +114,7 @@ func AcquireIp(username, macAddr string, uniqueMac bool) net.IP {
 		}
 
 		// 存在ip记录
+		base.Trace("uniqueMac:", username, mi)
 		ipStr := mi.IpAddr
 		ip := net.ParseIP(ipStr)
 		// 跳过活跃连接
@@ -120,6 +132,8 @@ func AcquireIp(username, macAddr string, uniqueMac bool) net.IP {
 			ipActive[ipStr] = true
 			return ip
 		}
+		// 删除当前macAddr
+		mi = &dbdata.IpMap{MacAddr: macAddr}
 		_ = dbdata.Del(mi)
 
 	} else {
@@ -166,9 +180,6 @@ func AcquireIp(username, macAddr string, uniqueMac bool) net.IP {
 
 	return loopIp(username, macAddr, uniqueMac)
 }
-
-// 记录循环点
-var loopCurIp = IpPool.IpLongMin
 
 func loopIp(username, macAddr string, uniqueMac bool) net.IP {
 	var (

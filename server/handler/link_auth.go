@@ -108,7 +108,7 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	sess := sessdata.NewSession("")
 	sess.Username = cr.Auth.Username
 	sess.Group = cr.GroupSelect
-	sess.MacAddr = strings.ToLower(cr.MacAddressList.MacAddress)
+	oriMac := cr.MacAddressList.MacAddress
 	sess.UniqueIdGlobal = cr.DeviceId.UniqueIdGlobal
 	sess.UserAgent = userAgent
 	sess.DeviceType = ua.DeviceType
@@ -116,7 +116,7 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	sess.RemoteAddr = r.RemoteAddr
 	// 获取客户端mac地址
 	sess.UniqueMac = true
-	macHw, err := net.ParseMAC(sess.MacAddr)
+	macHw, err := net.ParseMAC(oriMac)
 	if err != nil {
 		var sum [16]byte
 		if sess.UniqueIdGlobal != "" {
@@ -130,6 +130,9 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 		sess.MacAddr = macHw.String()
 	}
 	sess.MacHw = macHw
+	// 统一macAddr的格式
+	sess.MacAddr = macHw.String()
+
 	other := &dbdata.SettingOther{}
 	_ = dbdata.SettingGet(other)
 	rd := RequestData{SessionId: sess.Sid, SessionToken: sess.Sid + "@" + sess.Token,
