@@ -168,7 +168,7 @@ func AcquireIp(username, macAddr string, uniqueMac bool) net.IP {
 }
 
 // 记录循环点
-var loopMin = IpPool.IpLongMin
+var loopCurIp = IpPool.IpLongMin
 
 func loopIp(username, macAddr string, uniqueMac bool) net.IP {
 	var (
@@ -176,15 +176,15 @@ func loopIp(username, macAddr string, uniqueMac bool) net.IP {
 		ip net.IP
 	)
 
-	i, ip = loopLong(loopMin, IpPool.IpLongMax, username, macAddr, uniqueMac)
+	i, ip = loopLong(loopCurIp, IpPool.IpLongMax, username, macAddr, uniqueMac)
 	if ip != nil {
-		loopMin = i + 1
+		loopCurIp = i
 		return ip
 	}
 
-	i, ip = loopLong(IpPool.IpLongMin, loopMin, username, macAddr, uniqueMac)
+	i, ip = loopLong(IpPool.IpLongMin, loopCurIp, username, macAddr, uniqueMac)
 	if ip != nil {
-		loopMin = i + 1
+		loopCurIp = i
 		return ip
 	}
 

@@ -11,5 +11,8 @@ Restart=on-failure
 RestartSec=5s
 ExecStart=/usr/local/anylink-deploy/anylink --conf=/usr/local/anylink-deploy/conf/server.toml
 
+StandardOutput=file:/usr/local/anylink-deploy/log/anylink.log
+StandardError=file:/usr/local/anylink-deploy/log/anylink.log
+
 [Install]
 WantedBy=multi-user.target
