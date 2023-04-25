@@ -199,7 +199,7 @@ func loopIp(username, macAddr string, uniqueMac bool) net.IP {
 		return ip
 	}
 
-	base.Warn("no ip available, please see ip_map table row")
+	base.Warn("no ip available, please see ip_map table row", username, macAddr)
 	return nil
 }
 

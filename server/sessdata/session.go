@@ -190,6 +190,7 @@ func (s *Session) NewConn() *ConnSession {
 
 	limit := LimitClient(username, false)
 	if !limit {
+		base.Warn("limit is full", username)
 		return nil
 	}
 	ip := AcquireIp(username, macAddr, uniqueMac)
