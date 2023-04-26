@@ -12,6 +12,9 @@ function RETVAL() {
 #当前目录
 cpath=$(pwd)
 
+ver=`cat server/base/app_ver.go | grep APP_VER | awk '{print $3}' | sed 's/"//g'`
+echo "当前版本 $ver"
+
 echo "编译前端项目"
 cd $cpath/web
 #国内可替换源加快速度
