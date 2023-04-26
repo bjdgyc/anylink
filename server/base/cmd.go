@@ -69,6 +69,11 @@ func initCmd() {
 		Run: func(cmd *cobra.Command, args []string) {
 			// fmt.Println("cmd：", cmd.Use, args)
 			runSrv = true
+
+			if rev {
+				printVersion()
+				os.Exit(0)
+			}
 		},
 	}
 
@@ -92,6 +97,7 @@ func initCmd() {
 		// viper.SetDefault(v.Name, v.Value)
 	}
 
+	rootCmd.Flags().BoolVarP(&rev, "version", "v", false, "display version info")
 	rootCmd.AddCommand(initToolCmd())
 
 	cobra.OnInitialize(func() {
@@ -127,8 +133,7 @@ func initToolCmd() *cobra.Command {
 	toolCmd.Run = func(cmd *cobra.Command, args []string) {
 		switch {
 		case rev:
-			fmt.Printf("%s v%s build on %s [%s, %s] commit_id(%s) \n",
-				APP_NAME, APP_VER, runtime.Version(), runtime.GOOS, runtime.GOARCH, CommitId)
+			printVersion()
 		case secret:
 			s, _ := utils.RandSecret(40, 60)
 			s = strings.Trim(s, "=")
@@ -144,4 +149,9 @@ func initToolCmd() *cobra.Command {
 	}
 
 	return toolCmd
+}
+
+func printVersion() {
+	fmt.Printf("%s v%s build on %s [%s, %s] commit_id(%s) \n",
+		APP_NAME, APP_VER, runtime.Version(), runtime.GOOS, runtime.GOARCH, CommitId)
 }
