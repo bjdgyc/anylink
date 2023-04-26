@@ -193,7 +193,8 @@
                 </el-form-item>
                 <el-form-item label="排除本地网络" prop="allow_lan">
                 <el-switch
-                    v-model="ruleForm.allow_lan">
+                    v-model="ruleForm.allow_lan"
+                    active-text="开启后 用户本地所在网段将不通过anylink加密传输">
                 </el-switch>
                 </el-form-item>
 
@@ -251,7 +252,7 @@
                   <el-form-item label="开启TLS" prop="auth.ldap.tls">
                     <el-switch v-model="ruleForm.auth.ldap.tls"></el-switch>                      
                   </el-form-item>
-                  <el-form-item label="管理员账号" prop="auth.ldap.bind_name" :rules="this.ruleForm.auth.type== 'ldap' ? this.rules['auth.ldap.bind_name'] : [{ required: false }]">
+                  <el-form-item label="管理员 DN" prop="auth.ldap.bind_name" :rules="this.ruleForm.auth.type== 'ldap' ? this.rules['auth.ldap.bind_name'] : [{ required: false }]">
                     <el-input v-model="ruleForm.auth.ldap.bind_name" placeholder="例如 CN=bindadmin,DC=abc,DC=COM"></el-input>
                   </el-form-item>
                   <el-form-item label="管理员密码" prop="auth.ldap.bind_pwd" :rules="this.ruleForm.auth.type== 'ldap' ? this.rules['auth.ldap.bind_pwd'] : [{ required: false }]">
@@ -259,9 +260,12 @@
                   </el-form-item>                                                
                   <el-form-item label="Base DN" prop="auth.ldap.base_dn" :rules="this.ruleForm.auth.type== 'ldap' ? this.rules['auth.ldap.base_dn'] : [{ required: false }]">
                     <el-input v-model="ruleForm.auth.ldap.base_dn" placeholder="例如 DC=abc,DC=com"></el-input>
-                  </el-form-item>  
+                  </el-form-item>
+                  <el-form-item label="用户对象类" prop="auth.ldap.object_class" :rules="this.ruleForm.auth.type== 'ldap' ? this.rules['auth.ldap.object_class'] : [{ required: false }]">
+                    <el-input v-model="ruleForm.auth.ldap.object_class" placeholder="例如 person / user / posixAccount"></el-input>
+                  </el-form-item>                  
                   <el-form-item label="用户唯一ID" prop="auth.ldap.search_attr" :rules="this.ruleForm.auth.type== 'ldap' ? this.rules['auth.ldap.search_attr'] : [{ required: false }]">
-                    <el-input v-model="ruleForm.auth.ldap.search_attr" placeholder="例如 sAMAccountName 或 uid"></el-input>
+                    <el-input v-model="ruleForm.auth.ldap.search_attr" placeholder="例如 sAMAccountName / uid / cn"></el-input>
                   </el-form-item>    
                   <el-form-item label="受限用户组" prop="auth.ldap.member_of">
                     <el-input v-model="ruleForm.auth.ldap.member_of" placeholder="选填, 只允许指定组登入, 例如 CN=HomeWork,DC=abc,DC=com"></el-input>
@@ -359,13 +363,36 @@
                 </el-form-item>
             </el-tab-pane>
             <el-form-item>
-            <el-button type="primary" @click="submitForm('ruleForm')">保存</el-button>
-            <el-button @click="closeDialog">取消</el-button>
+                <templete v-if="activeTab == 'authtype' && ruleForm.auth.type != 'local'">
+                    <el-button @click="openAuthLoginDialog()" style="margin-right:10px">测试登录</el-button>
+                </templete>
+                <el-button type="primary" @click="submitForm('ruleForm')">保存</el-button>
+                <el-button @click="closeDialog">取消</el-button>
             </el-form-item>
           </el-tabs>
         </el-form> 
     </el-dialog>
-
+    <!--测试用户登录弹出框-->
+    <el-dialog
+        :close-on-click-modal="false"
+        title="测试用户登录"
+        :visible.sync="authLoginDialog"
+        width="600px"
+        custom-class="valgin-dialog"
+        center>
+        <el-form :model="authLoginForm" :rules="authLoginRules" ref="authLoginForm" label-width="100px">
+            <el-form-item label="账号" prop="name">
+                <el-input v-model="authLoginForm.name" ref="authLoginFormName" @keydown.enter.native="testAuthLogin"></el-input>
+            </el-form-item>
+            <el-form-item label="密码" prop="pwd">
+                <el-input type="password" v-model="authLoginForm.pwd" @keydown.enter.native="testAuthLogin"></el-input>
+            </el-form-item>
+            <el-form-item>
+                <el-button type="primary" @click="testAuthLogin()" :loading="authLoginLoading">登录</el-button>
+                <el-button @click="authLoginDialog = false">取 消</el-button>
+            </el-form-item>
+        </el-form>
+    </el-dialog> 
   </div>
 </template>
 
@@ -399,6 +426,7 @@ export default {
                       addr:"", 
                       tls:false,
                       base_dn:"",
+                      object_class:"person",
                       search_attr:"sAMAccountName",
                       member_of:"",
                       bind_name:"",
@@ -415,6 +443,21 @@ export default {
         link_acl: [],
         auth : {},
       },
+      authLoginDialog : false,
+      authLoginLoading : false,
+      authLoginForm : {
+        name : "",
+        pwd : "",
+      },   
+      authLoginRules: {
+        name: [
+          {required: true, message: '请输入账号', trigger: 'blur'},
+        ],
+        pwd: [
+          {required: true, message: '请输入密码', trigger: 'blur'},
+          {min: 6, message: '长度至少 6 个字符', trigger: 'blur'}
+        ],
+      },         
       rules: {
         name: [
           {required: true, message: '请输入组名', trigger: 'blur'},
@@ -437,7 +480,7 @@ export default {
           {required: true, message: '请输入服务器地址(含端口)', trigger: 'blur'}
         ],  
         "auth.ldap.bind_name": [
-          {required: true, message: '请输入管理员账号', trigger: 'blur'}
+          {required: true, message: '请输入管理员 DN', trigger: 'blur'}
         ],
         "auth.ldap.bind_pwd": [
           {required: true, message: '请输入管理员密码', trigger: 'blur'}
@@ -445,6 +488,9 @@ export default {
         "auth.ldap.base_dn": [
           {required: true, message: '请输入Base DN值', trigger: 'blur'}
         ],
+        "auth.ldap.object_class": [
+          {required: true, message: '请输入用户对象类', trigger: 'blur'}
+        ],        
         "auth.ldap.search_attr": [
           {required: true, message: '请输入用户唯一ID', trigger: 'blur'}
         ],                                       
@@ -457,6 +503,9 @@ export default {
         this.ruleForm.auth = JSON.parse(JSON.stringify(this.defAuth));
         return ;
       }
+      if (row.auth.type == "ldap" && ! row.auth.ldap.object_class) {
+        row.auth.ldap.object_class = this.defAuth.ldap.object_class;
+      }      
       this.ruleForm.auth = Object.assign(JSON.parse(JSON.stringify(this.defAuth)), row.auth);
     },
     handleDel(row) {
@@ -549,6 +598,44 @@ export default {
         });
       });
     },
+    testAuthLogin() {
+        this.$refs["authLoginForm"].validate((valid) => {
+            if (!valid) {
+                console.log('error submit!!');
+                return false;
+            }        
+            this.authLoginLoading = true;
+            axios.post('/group/auth_login', {name:this.authLoginForm.name,
+                                            pwd:this.authLoginForm.pwd,
+                                            auth:this.ruleForm.auth}).then(resp => {
+                    const rdata = resp.data;
+                    if (rdata.code === 0) {
+                        this.$message.success("登录成功");
+                    } else {
+                        this.$message.error(rdata.msg);                
+                    }
+                    this.authLoginLoading = false;
+                    console.log(rdata);
+                }).catch(error => {
+                    this.$message.error('哦，请求出错');
+                    console.log(error);
+                    this.authLoginLoading = false;
+            });
+        });
+    },
+    openAuthLoginDialog() {
+      this.$refs["ruleForm"].validate((valid) => {
+        if (!valid) {
+          console.log('error submit!!');
+          return false;
+        }        
+        this.authLoginDialog = true;
+        // set authLoginFormName focus
+        this.$nextTick(() => {
+            this.$refs['authLoginFormName'].focus();
+        });
+      });
+    },
     resetForm(formName) {
       this.$refs[formName].resetFields();
     },
@@ -597,5 +684,21 @@ export default {
 
 .el-select {
   width: 80px;
+}
+
+::v-deep .valgin-dialog{
+    display: flex;
+    flex-direction: column;
+    margin:0 !important;
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    max-height:calc(100% - 30px);
+    max-width:calc(100% - 30px);
+}
+::v-deep  .valgin-dialog .el-dialog__body{
+    flex:1;
+    overflow: auto;
 }
 </style>

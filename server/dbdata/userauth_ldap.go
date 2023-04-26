@@ -15,13 +15,14 @@ import (
 )
 
 type AuthLdap struct {
-	Addr       string `json:"addr"`
-	Tls        bool   `json:"tls"`
-	BindName   string `json:"bind_name"`
-	BindPwd    string `json:"bind_pwd"`
-	BaseDn     string `json:"base_dn"`
-	SearchAttr string `json:"search_attr"`
-	MemberOf   string `json:"member_of"`
+	Addr        string `json:"addr"`
+	Tls         bool   `json:"tls"`
+	BindName    string `json:"bind_name"`
+	BindPwd     string `json:"bind_pwd"`
+	BaseDn      string `json:"base_dn"`
+	ObjectClass string `json:"object_class"`
+	SearchAttr  string `json:"search_attr"`
+	MemberOf    string `json:"member_of"`
 }
 
 func init() {
@@ -40,13 +41,16 @@ func (auth AuthLdap) checkData(authData map[string]interface{}) error {
 		return errors.New("LDAP的服务器地址(含端口)填写有误")
 	}
 	if auth.BindName == "" {
-		return errors.New("LDAP的管理员账号不能为空")
+		return errors.New("LDAP的管理员 DN不能为空")
 	}
 	if auth.BindPwd == "" {
 		return errors.New("LDAP的管理员密码不能为空")
 	}
 	if auth.BaseDn == "" || !ValidateDN(auth.BaseDn) {
 		return errors.New("LDAP的Base DN填写有误")
+	}
+	if auth.ObjectClass == "" {
+		return errors.New("LDAP的用户对象类填写有误")
 	}
 	if auth.SearchAttr == "" {
 		return errors.New("LDAP的用户唯一ID不能为空")
@@ -94,9 +98,12 @@ func (auth AuthLdap) checkUser(name, pwd string, g *Group) error {
 	}
 	err = l.Bind(auth.BindName, auth.BindPwd)
 	if err != nil {
-		return fmt.Errorf("%s LDAP 管理员账号或密码填写有误 %s", name, err.Error())
+		return fmt.Errorf("%s LDAP 管理员 DN或密码填写有误 %s", name, err.Error())
 	}
-	filterAttr := "(objectClass=person)"
+	if auth.ObjectClass == "" {
+		auth.ObjectClass = "person"
+	}
+	filterAttr := "(objectClass=" + auth.ObjectClass + ")"
 	filterAttr += "(" + auth.SearchAttr + "=" + name + ")"
 	if auth.MemberOf != "" {
 		filterAttr += "(memberOf:=" + auth.MemberOf + ")"

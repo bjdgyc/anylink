@@ -9,6 +9,7 @@ import (
 
 	"github.com/arl/statsviz"
 	"github.com/bjdgyc/anylink/base"
+	"github.com/bjdgyc/anylink/dbdata"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
@@ -46,6 +47,9 @@ func StartAdmin() {
 	r.HandleFunc("/set/audit/list", SetAuditList)
 	r.HandleFunc("/set/audit/export", SetAuditExport)
 	r.HandleFunc("/set/audit/act_log_list", UserActLogList)
+	r.HandleFunc("/set/other/createcert", CreatCert)
+	r.HandleFunc("/set/other/getcertset", GetCertSetting)
+	r.HandleFunc("/set/other/customcert", CustomCert)
 
 	r.HandleFunc("/user/list", UserList)
 	r.HandleFunc("/user/detail", UserDetail)
@@ -71,6 +75,7 @@ func StartAdmin() {
 	r.HandleFunc("/group/detail", GroupDetail)
 	r.HandleFunc("/group/set", GroupSet)
 	r.HandleFunc("/group/del", GroupDel)
+	r.HandleFunc("/group/auth_login", GroupAuthLogin)
 
 	r.HandleFunc("/statsinfo/list", StatsInfoList)
 
@@ -95,18 +100,28 @@ func StartAdmin() {
 	for _, s := range cipherSuites {
 		selectedCipherSuites = append(selectedCipherSuites, s.ID)
 	}
+
+	if tlscert, _, err := dbdata.ParseCert(); err != nil {
+		base.Fatal("证书加载失败", err)
+	} else {
+		dbdata.LoadCertificate(tlscert)
+	}
+
 	// 设置tls信息
 	tlsConfig := &tls.Config{
 		NextProtos:   []string{"http/1.1"},
 		MinVersion:   tls.VersionTLS12,
 		CipherSuites: selectedCipherSuites,
+		GetCertificate: func(chi *tls.ClientHelloInfo) (*tls.Certificate, error) {
+			return dbdata.GetCertificateBySNI(chi.ServerName)
+		},
 	}
 	srv := &http.Server{
 		Addr:      base.Cfg.AdminAddr,
 		Handler:   r,
 		TLSConfig: tlsConfig,
 	}
-	err := srv.ListenAndServeTLS(base.Cfg.CertFile, base.Cfg.CertKey)
+	err := srv.ListenAndServeTLS("", "")
 	if err != nil {
 		base.Fatal(err)
 	}

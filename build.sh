@@ -20,8 +20,9 @@ cd $cpath/web
 #npm install
 #npm run build
 
-yarn install
+yarn install --registry=https://registry.npmmirror.com
 yarn run build
+
 
 RETVAL $?
 

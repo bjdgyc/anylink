@@ -7,7 +7,7 @@ RUN yarn install \
     && ls /web/ui
 
 # server
-FROM golang:1.18-alpine as builder_golang
+FROM golang:1.19-alpine as builder_golang
 #TODO 本地打包时使用镜像
 ENV GOPROXY=https://goproxy.io
 ENV GOOS=linux
@@ -25,7 +25,7 @@ RUN cd /anylink/server;go mod tidy;go build -o anylink -ldflags "-X main.CommitI
 FROM alpine
 LABEL maintainer="github.com/bjdgyc"
 
-ENV IPV4_CIDR="192.168.10.0/24"
+#ENV IPV4_CIDR="192.168.10.0/24"
 
 WORKDIR /app
 COPY --from=builder_golang /anylink/server/anylink  /app/

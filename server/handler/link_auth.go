@@ -7,6 +7,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"net/http/httputil"
 	"strings"
 	"text/template"
 
@@ -19,9 +20,10 @@ var profileHash = ""
 
 func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	// TODO 调试信息输出
-	//hd, _ := httputil.DumpRequest(r, true)
-	//base.Debug("DumpRequest: ", string(hd))
-
+	if base.GetLogLevel() == base.LogLevelTrace {
+		hd, _ := httputil.DumpRequest(r, true)
+		base.Trace("LinkAuth: ", string(hd))
+	}
 	// 判断anyconnect客户端
 	userAgent := strings.ToLower(r.UserAgent())
 	xAggregateAuth := r.Header.Get("X-Aggregate-Auth")
@@ -88,6 +90,9 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 
 		w.WriteHeader(http.StatusOK)
 		data := RequestData{Group: cr.GroupSelect, Groups: dbdata.GetGroupNamesNormal(), Error: "用户名或密码错误"}
+		if base.Cfg.DisplayError {
+			data.Error = err.Error()
+		}
 		tplRequest(tpl_request, w, data)
 		return
 	}
@@ -103,7 +108,7 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	sess := sessdata.NewSession("")
 	sess.Username = cr.Auth.Username
 	sess.Group = cr.GroupSelect
-	sess.MacAddr = strings.ToLower(cr.MacAddressList.MacAddress)
+	oriMac := cr.MacAddressList.MacAddress
 	sess.UniqueIdGlobal = cr.DeviceId.UniqueIdGlobal
 	sess.UserAgent = userAgent
 	sess.DeviceType = ua.DeviceType
@@ -111,7 +116,7 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	sess.RemoteAddr = r.RemoteAddr
 	// 获取客户端mac地址
 	sess.UniqueMac = true
-	macHw, err := net.ParseMAC(sess.MacAddr)
+	macHw, err := net.ParseMAC(oriMac)
 	if err != nil {
 		var sum [16]byte
 		if sess.UniqueIdGlobal != "" {
@@ -125,6 +130,9 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 		sess.MacAddr = macHw.String()
 	}
 	sess.MacHw = macHw
+	// 统一macAddr的格式
+	sess.MacAddr = macHw.String()
+
 	other := &dbdata.SettingOther{}
 	_ = dbdata.SettingGet(other)
 	rd := RequestData{SessionId: sess.Sid, SessionToken: sess.Sid + "@" + sess.Token,

@@ -11,5 +11,12 @@ Restart=on-failure
 RestartSec=5s
 ExecStart=/usr/local/anylink-deploy/anylink --conf=/usr/local/anylink-deploy/conf/server.toml
 
+# systemd older than v236
+# ExecStart=/bin/bash -c 'exec /usr/local/anylink-deploy/anylink --conf=/usr/local/anylink-deploy/conf/server.toml >> /usr/local/anylink-deploy/log/anylink.log 2>&1'
+
+
+StandardOutput=file:/usr/local/anylink-deploy/log/anylink.log
+StandardError=file:/usr/local/anylink-deploy/log/anylink.log
+
 [Install]
 WantedBy=multi-user.target

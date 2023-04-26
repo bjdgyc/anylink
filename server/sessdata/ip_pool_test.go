@@ -6,6 +6,7 @@ import (
 	"os"
 	"path"
 	"testing"
+	"time"
 
 	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/dbdata"
@@ -18,10 +19,12 @@ func preData(tmpDir string) {
 	base.Cfg.DbType = "sqlite3"
 	base.Cfg.DbSource = tmpDb
 	base.Cfg.Ipv4CIDR = "192.168.3.0/24"
-	base.Cfg.Ipv4Start = "192.168.3.1"
-	base.Cfg.Ipv4End = "192.168.3.199"
+	base.Cfg.Ipv4Gateway = "192.168.3.1"
+	base.Cfg.Ipv4Start = "192.168.3.100"
+	base.Cfg.Ipv4End = "192.168.3.150"
 	base.Cfg.MaxClient = 100
 	base.Cfg.MaxUserClient = 3
+	base.Cfg.IpLease = 5
 
 	dbdata.Start()
 	group := dbdata.Group{
@@ -46,22 +49,34 @@ func TestIpPool(t *testing.T) {
 
 	var ip net.IP
 
-	for i := 1; i <= 100; i++ {
-		_ = AcquireIp("user", fmt.Sprintf("mac-%d", i), true)
+	for i := 100; i <= 150; i++ {
+		_ = AcquireIp(getTestUser(i), getTestMacAddr(i), true)
 	}
-	ip = AcquireIp("user", "mac-new", true)
-	assert.True(net.IPv4(192, 168, 3, 101).Equal(ip))
-	for i := 102; i <= 199; i++ {
-		ip = AcquireIp("user", fmt.Sprintf("mac-%d", i), true)
-	}
-	assert.True(net.IPv4(192, 168, 3, 199).Equal(ip))
-	ip = AcquireIp("user", "mac-nil", true)
-	assert.Nil(ip)
 
-	ReleaseIp(net.IPv4(192, 168, 3, 88), "mac-88")
-	ReleaseIp(net.IPv4(192, 168, 3, 188), "mac-188")
+	// 回收
+	ReleaseIp(net.IPv4(192, 168, 3, 140), getTestMacAddr(140))
+	time.Sleep(time.Second * 6)
+
 	// 从头循环获取可用ip
-	ip = AcquireIp("user", "mac-188", true)
-	t.Log("mac-188", ip)
-	assert.True(net.IPv4(192, 168, 3, 188).Equal(ip))
+	user_new := getTestUser(210)
+	mac_new := getTestMacAddr(210)
+	ip = AcquireIp(user_new, mac_new, true)
+	t.Log("mac_new", ip)
+	assert.NotNil(ip)
+	assert.True(net.IPv4(192, 168, 3, 140).Equal(ip))
+
+	// 回收全部
+	for i := 100; i <= 150; i++ {
+		ReleaseIp(net.IPv4(192, 168, 3, byte(i)), getTestMacAddr(i))
+	}
+}
+
+func getTestUser(i int) string {
+	return fmt.Sprintf("user-%d", i)
+}
+
+func getTestMacAddr(i int) string {
+	// 前缀mac
+	macAddr := "02:00:00:00:00"
+	return fmt.Sprintf("%s:%x", macAddr, i)
 }

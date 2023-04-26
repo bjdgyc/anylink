@@ -1,8 +1,11 @@
 package sessdata
 
 import (
+	"fmt"
 	"testing"
+	"time"
 
+	"github.com/bjdgyc/anylink/base"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -22,11 +25,15 @@ func TestConnSession(t *testing.T) {
 	preData(tmp)
 	defer cleardata(tmp)
 
+	time.Sleep(time.Second * 10)
+
 	sess := NewSession("")
+	sess.Username = "user-test"
 	sess.Group = "group1"
 	sess.MacAddr = "00:15:5d:50:14:43"
 
 	cSess := sess.NewConn()
+	base.Info("cSess", cSess)
 
 	err := cSess.RateLimit(100, true)
 	ast.Nil(err)
@@ -34,5 +41,23 @@ func TestConnSession(t *testing.T) {
 	err = cSess.RateLimit(200, false)
 	ast.Nil(err)
 	ast.Equal(cSess.BandwidthDown.Load(), uint32(200))
+
+	var (
+		cmpName string
+		ok      bool
+	)
+	base.Cfg.Compression = true
+
+	cmpName, ok = cSess.SetPickCmp("cstp", "oc-lz4,lzs")
+	fmt.Println(cmpName, ok)
+	ast.True(ok)
+	ast.Equal(cmpName, "lzs")
+	cmpName, ok = cSess.SetPickCmp("dtls", "lzs")
+	ast.True(ok)
+	ast.Equal(cmpName, "lzs")
+	cmpName, ok = cSess.SetPickCmp("dtls", "test")
+	ast.False(ok)
+	ast.Equal(cmpName, "")
+
 	cSess.Close()
 }

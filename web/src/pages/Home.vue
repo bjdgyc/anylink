@@ -230,6 +230,9 @@ export default {
                 case "mem": this.formatMem(data); break;
             }
         }).catch(error => {
+            if (error.response.status === 401) {
+               return ;
+            }            
             this.$message.error('哦，请求出错');
             console.log(error);
         });

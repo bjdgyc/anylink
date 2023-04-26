@@ -54,11 +54,13 @@ AnyLink 服务端仅在 CentOS 7、CentOS 8、Ubuntu 18.04、Ubuntu 20.04 测试
 >
 > 客户端请使用群共享文件的版本，其他版本没有测试过，不保证使用正常
 > 
+> 其他问题 [前往查看](doc/question.md)
+> 
 > 首次使用，请在浏览器访问 https://域名:443，浏览器提示安全后，在客户端输入 【域名:443】 即可
 
 ### 自行编译安装
 
-> 需要提前安装好 golang >= 1.18 和 nodejs >= 14.x 和 yarn >= v1.22.x
+> 需要提前安装好 golang >= 1.19 和 nodejs >= 14.x 和 yarn >= v1.22.x
 
 ```shell
 git clone https://github.com/bjdgyc/anylink.git

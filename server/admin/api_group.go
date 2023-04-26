@@ -118,3 +118,30 @@ func GroupDel(w http.ResponseWriter, r *http.Request) {
 	}
 	RespSucess(w, nil)
 }
+
+func GroupAuthLogin(w http.ResponseWriter, r *http.Request) {
+	type AuthLoginData struct {
+		Name string                 `json:"name"`
+		Pwd  string                 `json:"pwd"`
+		Auth map[string]interface{} `json:"auth"`
+	}
+
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		RespError(w, RespInternalErr, err)
+		return
+	}
+	defer r.Body.Close()
+	v := &AuthLoginData{}
+	err = json.Unmarshal(body, &v)
+	if err != nil {
+		RespError(w, RespInternalErr, err)
+		return
+	}
+	err = dbdata.GroupAuthLogin(v.Name, v.Pwd, v.Auth)
+	if err != nil {
+		RespError(w, RespInternalErr, err)
+		return
+	}
+	RespSucess(w, "ok")
+}

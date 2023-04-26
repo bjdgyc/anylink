@@ -30,7 +30,7 @@ type User struct {
 	Email    string `json:"email" xorm:"varchar(255)"`
 	// Password  string    `json:"password"`
 	PinCode    string     `json:"pin_code" xorm:"varchar(32)"`
-	LimitTime  *time.Time `json:"limittime,omitempty" xorm:"Datetime limittime"` //值为null时，前端不显示
+	LimitTime  *time.Time `json:"limittime,omitempty" xorm:"Datetime limittime"` // 值为null时，前端不显示
 	OtpSecret  string     `json:"otp_secret" xorm:"varchar(255)"`
 	DisableOtp bool       `json:"disable_otp" xorm:"Bool"` // 禁用otp
 	Groups     []string   `json:"groups" xorm:"Text"`
@@ -54,19 +54,6 @@ type UserActLog struct {
 	Status          uint8     `json:"status" xorm:"not null default 0 Int"`
 	Info            string    `json:"info" xorm:"varchar(255) not null default ''"` // 详情
 	CreatedAt       time.Time `json:"created_at" xorm:"DateTime created"`
-}
-
-type IpMap struct {
-	Id        int       `json:"id" xorm:"pk autoincr not null"`
-	IpAddr    string    `json:"ip_addr" xorm:"varchar(32) not null unique"`
-	MacAddr   string    `json:"mac_addr" xorm:"varchar(32) not null unique"`
-	UniqueMac bool      `json:"unique_mac" xorm:"Bool index"`
-	Username  string    `json:"username" xorm:"varchar(60)"`
-	Keep      bool      `json:"keep" xorm:"Bool"` // 保留 ip-mac 绑定
-	KeepTime  time.Time `json:"keep_time" xorm:"DateTime"`
-	Note      string    `json:"note" xorm:"varchar(255)"` // 备注
-	LastLogin time.Time `json:"last_login" xorm:"DateTime"`
-	UpdatedAt time.Time `json:"updated_at" xorm:"DateTime updated"`
 }
 
 type Setting struct {

@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"net/http/httputil"
 	"os"
 	"strings"
 	"text/template"
@@ -34,8 +35,10 @@ func HttpAddHeader(w http.ResponseWriter, key string, value string) {
 
 func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	// TODO 调试信息输出
-	//hd, _ := httputil.DumpRequest(r, true)
-	//base.Debug("DumpRequest: ", string(hd))
+	if base.GetLogLevel() == base.LogLevelTrace {
+		hd, _ := httputil.DumpRequest(r, true)
+		base.Trace("LinkTunnel: ", string(hd))
+	}
 
 	// 判断session-token的值
 	cookie, err := r.Cookie("webvpn")
@@ -88,6 +91,14 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	}
 
 	base.Debug(cSess.IpAddr, cSess.MacHw, sess.Username, mobile)
+
+	// 压缩
+	if cmpName, ok := cSess.SetPickCmp("cstp", r.Header.Get("X-Cstp-Accept-Encoding")); ok {
+		HttpSetHeader(w, "X-CSTP-Content-Encoding", cmpName)
+	}
+	if cmpName, ok := cSess.SetPickCmp("dtls", r.Header.Get("X-Dtls-Accept-Encoding")); ok {
+		HttpSetHeader(w, "X-DTLS-Content-Encoding", cmpName)
+	}
 
 	// 返回客户端数据
 	HttpSetHeader(w, "Server", fmt.Sprintf("%s %s", base.APP_NAME, base.APP_VER))

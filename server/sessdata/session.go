@@ -54,6 +54,9 @@ type ConnSession struct {
 	PayloadOutDtls      chan *Payload // Dtls的数据
 	// dSess *DtlsSession
 	dSess *atomic.Value
+	// compress
+	CstpPickCmp CmpEncoding
+	DtlsPickCmp CmpEncoding
 }
 
 type DtlsSession struct {
@@ -187,6 +190,7 @@ func (s *Session) NewConn() *ConnSession {
 
 	limit := LimitClient(username, false)
 	if !limit {
+		base.Warn("limit is full", username)
 		return nil
 	}
 	ip := AcquireIp(username, macAddr, uniqueMac)
@@ -357,6 +361,30 @@ func (cs *ConnSession) RateLimit(byt int, isUp bool) error {
 		return nil
 	}
 	return cs.Limit.Wait(byt)
+}
+
+func (cs *ConnSession) SetPickCmp(cate, encoding string) (string, bool) {
+	var cmpName string
+	if !base.Cfg.Compression {
+		return cmpName, false
+	}
+	var cmp CmpEncoding
+	switch {
+	// case strings.Contains(encoding, "oc-lz4"):
+	// 	cmpName = "oc-lz4"
+	// 	cmp = Lz4Cmp{}
+	case strings.Contains(encoding, "lzs"):
+		cmpName = "lzs"
+		cmp = LzsgoCmp{}
+	default:
+		return cmpName, false
+	}
+	if cate == "cstp" {
+		cs.CstpPickCmp = cmp
+	} else {
+		cs.DtlsPickCmp = cmp
+	}
+	return cmpName, true
 }
 
 func SToken2Sess(stoken string) *Session {
