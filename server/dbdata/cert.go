@@ -90,7 +90,7 @@ func GetDNSProvider(l *SettingLetsEncrypt) (Provider challenge.Provider, err err
 			return
 		}
 	case "txcloud":
-		if Provider, err = tencentcloud.NewDNSProviderConfig(&tencentcloud.Config{SecretID: l.DNSProvider.TXCloud.SecretID, SecretKey: l.DNSProvider.TXCloud.SecretKey, TTL: 600}); err != nil {
+		if Provider, err = tencentcloud.NewDNSProviderConfig(&tencentcloud.Config{SecretID: l.DNSProvider.TXCloud.SecretID, SecretKey: l.DNSProvider.TXCloud.SecretKey, PropagationTimeout: 60 * time.Second, PollingInterval: 10 * time.Second, TTL: 600}); err != nil {
 			return
 		}
 	case "cloudflare":
