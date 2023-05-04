@@ -318,8 +318,7 @@ export default {
           secretKey: "",
         },
         cfcloud: {
-          authEmail: "",
-          authKey: "",
+          authToken: "",
         },
       },
       customCert: { cert: "", key: "" },
@@ -399,19 +398,13 @@ export default {
         ],
         cfcloud: [
           {
-            label: "Email",
-            prop: "email",
-            component: "el-input",
-            type: "text",
-          },
-          {
-            label: "AuthKey",
-            prop: "authKey",
+            label: "AuthToken",
+            prop: "authToken",
             component: "el-input",
             type: "password",
             rules: {
               required: true,
-              message: "请输入正确的APIKey",
+              message: "请输入正确的AuthToken",
               trigger: "blur",
             },
           },

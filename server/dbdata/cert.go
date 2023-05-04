@@ -61,8 +61,8 @@ type DNSProvider struct {
 		SecretKey string `json:"secretKey"`
 	} `json:"txcloud"`
 	CfCloud struct {
-		AuthEmail string `json:"authEmail"`
-		AuthKey   string `json:"authKey"`
+		// AuthEmail string `json:"authEmail"`
+		AuthToken string `json:"authToken"`
 	} `json:"cfcloud"`
 }
 type LegoUserData struct {
@@ -93,8 +93,8 @@ func GetDNSProvider(l *SettingLetsEncrypt) (Provider challenge.Provider, err err
 		if Provider, err = tencentcloud.NewDNSProviderConfig(&tencentcloud.Config{SecretID: l.DNSProvider.TXCloud.SecretID, SecretKey: l.DNSProvider.TXCloud.SecretKey, PropagationTimeout: 60 * time.Second, PollingInterval: 10 * time.Second, TTL: 600}); err != nil {
 			return
 		}
-	case "cloudflare":
-		if Provider, err = cloudflare.NewDNSProviderConfig(&cloudflare.Config{AuthEmail: l.DNSProvider.CfCloud.AuthEmail, AuthKey: l.DNSProvider.CfCloud.AuthKey, TTL: 600}); err != nil {
+	case "cfcloud":
+		if Provider, err = cloudflare.NewDNSProviderConfig(&cloudflare.Config{AuthToken: l.DNSProvider.CfCloud.AuthToken, TTL: 600}); err != nil {
 			return
 		}
 	}
