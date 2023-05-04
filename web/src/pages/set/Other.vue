@@ -544,12 +544,20 @@ export default {
               });
             break;
           case "letsCert":
+            var loading = this.$loading({
+              lock: true,
+              text: "证书申请中...",
+              spinner: "el-icon-loading",
+              background: "rgba(0, 0, 0, 0.7)",
+            });
             axios.post("/set/other/createcert", this.letsCert).then((resp) => {
               var rdata = resp.data;
               console.log(rdata);
               if (rdata.code === 0) {
+                loading.close();
                 this.$message.success(rdata.msg);
               } else {
+                loading.close();
                 this.$message.error(rdata.msg);
               }
             });
