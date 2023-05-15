@@ -115,9 +115,8 @@ func addInitData() error {
 				SecretKey string `json:"secretKey"`
 			}{SecretID: "", SecretKey: ""},
 			CfCloud: struct {
-				AuthEmail string `json:"authEmail"`
-				AuthKey   string `json:"authKey"`
-			}{AuthEmail: "", AuthKey: ""}},
+				AuthToken string `json:"authToken"`
+			}{AuthToken: ""}},
 	}
 	err = SettingSessAdd(sess, provider)
 	if err != nil {

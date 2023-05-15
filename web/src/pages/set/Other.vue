@@ -318,8 +318,7 @@ export default {
           secretKey: "",
         },
         cfcloud: {
-          authEmail: "",
-          authKey: "",
+          authToken: "",
         },
       },
       customCert: { cert: "", key: "" },
@@ -399,19 +398,13 @@ export default {
         ],
         cfcloud: [
           {
-            label: "Email",
-            prop: "email",
-            component: "el-input",
-            type: "text",
-          },
-          {
-            label: "AuthKey",
-            prop: "authKey",
+            label: "AuthToken",
+            prop: "authToken",
             component: "el-input",
             type: "password",
             rules: {
               required: true,
-              message: "请输入正确的APIKey",
+              message: "请输入正确的AuthToken",
               trigger: "blur",
             },
           },
@@ -551,12 +544,20 @@ export default {
               });
             break;
           case "letsCert":
+            var loading = this.$loading({
+              lock: true,
+              text: "证书申请中...",
+              spinner: "el-icon-loading",
+              background: "rgba(0, 0, 0, 0.7)",
+            });
             axios.post("/set/other/createcert", this.letsCert).then((resp) => {
               var rdata = resp.data;
               console.log(rdata);
               if (rdata.code === 0) {
+                loading.close();
                 this.$message.success(rdata.msg);
               } else {
+                loading.close();
                 this.$message.error(rdata.msg);
               }
             });
