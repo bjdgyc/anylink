@@ -2,6 +2,7 @@ package dbdata
 
 import (
 	"errors"
+	"fmt"
 	"net"
 	"strings"
 	"time"
@@ -31,9 +32,14 @@ func SetPolicy(p *Policy) error {
 				continue
 			}
 
-			ipMask, _, err := parseIpNet(v.Val)
+			ipMask, ipNet, err := parseIpNet(v.Val)
 			if err != nil {
 				return errors.New("RouteInclude 错误" + err.Error())
+			}
+
+			if strings.Split(ipMask, "/")[0] != ipNet.IP.String() {
+				errMsg := fmt.Sprintf("RouteInclude 错误: 网络地址错误，建议： %s 改为 %s", v.Val, ipNet)
+				return errors.New(errMsg)
 			}
 
 			v.IpMask = ipMask
@@ -45,9 +51,14 @@ func SetPolicy(p *Policy) error {
 	routeExclude := []ValData{}
 	for _, v := range p.RouteExclude {
 		if v.Val != "" {
-			ipMask, _, err := parseIpNet(v.Val)
+			ipMask, ipNet, err := parseIpNet(v.Val)
 			if err != nil {
 				return errors.New("RouteExclude 错误" + err.Error())
+			}
+
+			if strings.Split(ipMask, "/")[0] != ipNet.IP.String() {
+				errMsg := fmt.Sprintf("RouteInclude 错误: 网络地址错误，建议： %s 改为 %s", v.Val, ipNet)
+				return errors.New(errMsg)
 			}
 			v.IpMask = ipMask
 			routeExclude = append(routeExclude, v)
