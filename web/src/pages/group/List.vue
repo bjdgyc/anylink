@@ -47,7 +47,12 @@
 
         <el-table-column
             prop="bandwidth"
-            label="带宽限制">
+            label="带宽限制"
+            width="90">
+            <template slot-scope="scope">
+                <el-row v-if="scope.row.bandwidth > 0">{{ convertBandwidth(scope.row.bandwidth, 'BYTE', 'Mbps') }} Mbps</el-row>
+                <el-row v-else>不限</el-row>
+            </template>            
         </el-table-column>
 
         <el-table-column
@@ -62,7 +67,7 @@
         <el-table-column
             prop="route_include"
             label="路由包含"
-            width="200">
+            width="180">
           <template slot-scope="scope">
             <el-row v-for="(item,inx) in scope.row.route_include.slice(0, readMinRows)" :key="inx">{{ item.val }}</el-row>
             <div v-if="scope.row.route_include.length > readMinRows">
@@ -77,7 +82,7 @@
         <el-table-column
             prop="route_exclude"
             label="路由排除"
-            width="200">
+            width="180">
           <template slot-scope="scope">
             <el-row v-for="(item,inx) in scope.row.route_exclude.slice(0, readMinRows)" :key="inx">{{ item.val }}</el-row>
             <div v-if="scope.row.route_exclude.length > readMinRows">
@@ -92,7 +97,7 @@
         <el-table-column
             prop="link_acl"
             label="LINK-ACL"
-            min-width="200">
+            min-width="180">
           <template slot-scope="scope">
             <el-row v-for="(item,inx) in scope.row.link_acl.slice(0, readMinRows)" :key="inx">
               {{ item.action }} => {{ item.val }} : {{ item.port }}
@@ -186,9 +191,9 @@
                 <el-input v-model="ruleForm.note"></el-input>
                 </el-form-item>
 
-                <el-form-item label="带宽限制" prop="bandwidth">
-                <el-input v-model.number="ruleForm.bandwidth">
-                    <template slot="append">BYTE/S</template>
+                <el-form-item label="带宽限制" prop="bandwidth_format" style="width:260px;">
+                <el-input v-model="ruleForm.bandwidth_format" oninput="value= value.match(/\d+(\.\d{0,2})?/) ? value.match(/\d+(\.\d{0,2})?/)[0] : ''">
+                    <template slot="append">Mbps</template>
                 </el-input>
                 </el-form-item>
                 <el-form-item label="排除本地网络" prop="allow_lan">
@@ -266,7 +271,7 @@
                   </el-form-item>                  
                   <el-form-item label="用户唯一ID" prop="auth.ldap.search_attr" :rules="this.ruleForm.auth.type== 'ldap' ? this.rules['auth.ldap.search_attr'] : [{ required: false }]">
                     <el-input v-model="ruleForm.auth.ldap.search_attr" placeholder="例如 sAMAccountName / uid / cn"></el-input>
-                  </el-form-item>    
+                  </el-form-item>
                   <el-form-item label="受限用户组" prop="auth.ldap.member_of">
                     <el-input v-model="ruleForm.auth.ldap.member_of" placeholder="选填, 只允许指定组登入, 例如 CN=HomeWork,DC=abc,DC=com"></el-input>
                   </el-form-item>                                                                      
@@ -435,6 +440,7 @@ export default {
       },          
       ruleForm: {
         bandwidth: 0,
+        bandwidth_format: '0',
         status: 1,
         allow_lan: true,
         client_dns: [{val: '114.114.114.114'}],
@@ -463,9 +469,9 @@ export default {
           {required: true, message: '请输入组名', trigger: 'blur'},
           {max: 30, message: '长度小于 30 个字符', trigger: 'blur'}
         ],
-        bandwidth: [
+        bandwidth_format: [
           {required: true, message: '请输入带宽限制', trigger: 'blur'},
-          {type: 'number', message: '带宽限制必须为数字值'}
+          {type: 'string', message: '带宽限制必须为数字值'}
         ],
         status: [
           {required: true}
@@ -493,7 +499,7 @@ export default {
         ],        
         "auth.ldap.search_attr": [
           {required: true, message: '请输入用户唯一ID', trigger: 'blur'}
-        ],                                       
+        ],
       },
     }
   },
@@ -536,7 +542,8 @@ export default {
           id: row.id,
         }
       }).then(resp => {
-        this.ruleForm = resp.data.data;
+        resp.data.data.bandwidth_format = this.convertBandwidth(resp.data.data.bandwidth, 'BYTE', 'Mbps').toString();
+        this.ruleForm = resp.data.data;        
         this.setAuthData(resp.data.data);
       }).catch(error => {
         this.$message.error('哦，请求出错');
@@ -582,6 +589,7 @@ export default {
           console.log('error submit!!');
           return false;
         }
+        this.ruleForm.bandwidth = this.convertBandwidth(this.ruleForm.bandwidth_format, 'Mbps', 'BYTE');
         axios.post('/group/set', this.ruleForm).then(resp => {
           const rdata = resp.data;
           if (rdata.code === 0) {
@@ -666,6 +674,18 @@ export default {
     closeDialog() {
       this.user_edit_dialog = false;
       this.activeTab = "general";
+    },
+    convertBandwidth(bandwidth, fromUnit, toUnit) {
+        const units = {
+            bps: 1,
+            Kbps: 1000,
+            Mbps: 1000000,
+            Gbps: 1000000000,
+            BYTE: 8,
+        };
+        const result = bandwidth * units[fromUnit] / units[toUnit];
+        const fixedResult = result.toFixed(2);
+        return parseFloat(fixedResult);
     }
   },
 }
