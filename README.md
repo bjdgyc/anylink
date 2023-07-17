@@ -204,6 +204,9 @@ https://cloud.tencent.com/document/product/216/62007
 # 首先关闭nat转发功能
 iptables_nat = false
 
+# master网卡需要打开混杂模式
+ip link set dev eth0 promisc on
+
 #内网主网卡名称
 ipv4_master = "eth0"
 #以下网段需要跟ipv4_master网卡设置成一样
