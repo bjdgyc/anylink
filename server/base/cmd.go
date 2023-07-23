@@ -80,7 +80,6 @@ func initCmd() {
 	linkViper.SetEnvPrefix("link")
 
 	// 基础配置
-
 	for _, v := range configs {
 		if v.Typ == cfgStr {
 			rootCmd.Flags().StringP(v.Name, v.Short, v.ValStr, v.Usage)
@@ -113,7 +112,7 @@ func initCmd() {
 		linkViper.SetConfigFile(conf)
 		err = linkViper.ReadInConfig()
 		if err != nil {
-			fmt.Println("Using config file:", err)
+			panic("config file err:" + err.Error())
 		}
 	})
 }

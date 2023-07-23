@@ -103,7 +103,7 @@ func logLevel2Int(l string) int {
 	}
 	lvl := LogLevelInfo
 	for k, v := range levels {
-		if strings.EqualFold(strings.ToLower(l), strings.ToLower(v)) {
+		if strings.ToLower(l) == strings.ToLower(v) {
 			lvl = k
 		}
 	}
