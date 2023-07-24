@@ -27,7 +27,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		pl := len(pwd)
 		if pl < 6 {
 			RespError(w, RespUserOrPassErr)
-			base.Error(adminUser, "otp错误")
+			base.Error(adminUser, "管理员otp错误")
 			return
 		}
 		// 判断otp信息
@@ -40,7 +40,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 		if !verify {
 			RespError(w, RespUserOrPassErr)
-			base.Error(adminUser, "otp错误")
+			base.Error(adminUser, "管理员otp错误")
 			return
 		}
 	}
@@ -49,6 +49,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	if !(adminUser == base.Cfg.AdminUser &&
 		utils.PasswordVerify(adminPass, base.Cfg.AdminPass)) {
 		RespError(w, RespUserOrPassErr)
+		base.Error(adminUser, "管理员用户名或密码错误")
 		return
 	}
 
