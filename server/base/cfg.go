@@ -49,6 +49,7 @@ type ServerConfig struct {
 	Issuer         string `json:"issuer"`
 	AdminUser      string `json:"admin_user"`
 	AdminPass      string `json:"admin_pass"`
+	AdminOtp       string `json:"admin_otp"`
 	JwtSecret      string `json:"jwt_secret"`
 
 	LinkMode    string `json:"link_mode"`    // tun tap macvtap ipvtap

@@ -38,6 +38,7 @@ var configs = []config{
 	{Typ: cfgStr, Name: "issuer", Usage: "系统名称", ValStr: "XX公司VPN"},
 	{Typ: cfgStr, Name: "admin_user", Usage: "管理用户名", ValStr: "admin"},
 	{Typ: cfgStr, Name: "admin_pass", Usage: "管理用户密码", ValStr: defaultPwd},
+	{Typ: cfgStr, Name: "admin_otp", Usage: "管理用户otp,生成命令 ./anylink tool -o", ValStr: ""},
 	{Typ: cfgStr, Name: "jwt_secret", Usage: "JWT密钥", ValStr: defaultJwt},
 	{Typ: cfgStr, Name: "link_mode", Usage: "虚拟网络类型[tun tap macvtap ipvtap]", ValStr: "tun"},
 	{Typ: cfgStr, Name: "ipv4_master", Usage: "ipv4主网卡名称", ValStr: "eth0"},

@@ -3,14 +3,17 @@ package base
 import (
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"reflect"
 	"runtime"
 	"strings"
 
 	"github.com/bjdgyc/anylink/pkg/utils"
+	"github.com/skip2/go-qrcode"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/xlzd/gotp"
 )
 
 var (
@@ -18,6 +21,8 @@ var (
 	CommitId string
 	// pass明文
 	passwd string
+	// 生成otp
+	otp bool
 	// 生成密钥
 	secret bool
 	// 显示版本信息
@@ -127,6 +132,7 @@ func initToolCmd() *cobra.Command {
 	toolCmd.Flags().BoolVarP(&rev, "version", "v", false, "display version info")
 	toolCmd.Flags().BoolVarP(&secret, "secret", "s", false, "generate a random jwt secret")
 	toolCmd.Flags().StringVarP(&passwd, "passwd", "p", "", "convert the password plaintext")
+	toolCmd.Flags().BoolVarP(&otp, "otp", "o", false, "generate a random otp secret")
 	toolCmd.Flags().BoolVarP(&debug, "debug", "d", false, "list the config viper.Debug() info")
 
 	toolCmd.Run = func(cmd *cobra.Command, args []string) {
@@ -137,6 +143,13 @@ func initToolCmd() *cobra.Command {
 			s, _ := utils.RandSecret(40, 60)
 			s = strings.Trim(s, "=")
 			fmt.Printf("Secret:%s\n", s)
+		case otp:
+			s := gotp.RandomSecret(32)
+			fmt.Printf("Otp:%s\n\n", s)
+			qrstr := fmt.Sprintf("otpauth://totp/%s:%s?issuer=%s&secret=%s", "anylink_admin", "admin@anylink", "anylink_admin", s)
+			qr, _ := qrcode.New(qrstr, qrcode.High)
+			ss := qr.ToSmallString(false)
+			io.WriteString(os.Stderr, ss)
 		case passwd != "":
 			pass, _ := utils.PasswordHash(passwd)
 			fmt.Printf("Passwd:%s\n", pass)

@@ -8,6 +8,7 @@ import (
 	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/pkg/utils"
 	"github.com/gorilla/mux"
+	"github.com/xlzd/gotp"
 )
 
 // Login 登陆接口
@@ -19,6 +20,30 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	_ = r.ParseForm()
 	adminUser := r.PostFormValue("admin_user")
 	adminPass := r.PostFormValue("admin_pass")
+
+	// 启用otp验证
+	if base.Cfg.AdminOtp != "" {
+		pwd := adminPass
+		pl := len(pwd)
+		if pl < 6 {
+			RespError(w, RespUserOrPassErr)
+			base.Error(adminUser, "otp错误")
+			return
+		}
+		// 判断otp信息
+		adminPass = pwd[:pl-6]
+		otp := pwd[pl-6:]
+
+		totp := gotp.NewDefaultTOTP(base.Cfg.AdminOtp)
+		unix := time.Now().Unix()
+		verify := totp.Verify(otp, int(unix))
+
+		if !verify {
+			RespError(w, RespUserOrPassErr)
+			base.Error(adminUser, "otp错误")
+			return
+		}
+	}
 
 	// 认证错误
 	if !(adminUser == base.Cfg.AdminUser &&
