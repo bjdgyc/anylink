@@ -23,6 +23,9 @@ issuer = "XX公司VPN"
 admin_user = "admin"
 #pass 123456
 admin_pass = "$2a$10$UQ7C.EoPifDeJh6d8.31TeSPQU7hM/NOM2nixmBucJpAuXDQNqNke"
+# 留空表示不开启 otp, 开启otp后密码为  pass + 6位otp
+# 生成 ./anylink tool -o
+admin_otp = ""
 jwt_secret = "abcdef.0123456789.abcdef"
 
 
