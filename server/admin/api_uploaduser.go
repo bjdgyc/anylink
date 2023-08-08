@@ -5,11 +5,11 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/dbdata"
 	"github.com/bjdgyc/anylink/pkg/utils"
 	mapset "github.com/deckarep/golang-set"
@@ -25,21 +25,27 @@ func UserUpload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer file.Close()
-	newFile, err := os.Create(base.Cfg.FilesPath + header.Filename)
+
+	// go/path-injection
+	// base.Cfg.FilesPath 可以直接对外访问，不能上传文件到此
+	fileName := path.Join(os.TempDir(), utils.RandomRunes(10))
+	newFile, err := os.Create(fileName)
 	if err != nil {
 		RespError(w, RespInternalErr, "创建文件失败:", err)
 		return
 	}
 	defer newFile.Close()
+
 	io.Copy(newFile, file)
 	if err = UploadUser(newFile.Name()); err != nil {
 		RespError(w, RespInternalErr, err)
-		os.Remove(base.Cfg.FilesPath + header.Filename)
+		os.Remove(fileName)
 		return
 	}
-	os.Remove(base.Cfg.FilesPath + header.Filename)
+	os.Remove(fileName)
 	RespSucess(w, "批量添加成功")
 }
+
 func UploadUser(file string) error {
 	f, err := excelize.OpenFile(file)
 	if err != nil {
