@@ -82,7 +82,7 @@ func authMiddleware(next http.Handler) http.Handler {
 		route := mux.CurrentRoute(r)
 		name := route.GetName()
 		// fmt.Println("bb", r.URL.Path, name)
-		if utils.InArrStr([]string{"login", "index", "static", "debug"}, name) {
+		if utils.InArrStr([]string{"login", "index", "static"}, name) {
 			// 不进行鉴权
 			next.ServeHTTP(w, r)
 			return
@@ -92,6 +92,12 @@ func authMiddleware(next http.Handler) http.Handler {
 		jwtToken := r.Header.Get("Jwt")
 		if jwtToken == "" {
 			jwtToken = r.FormValue("jwt")
+		}
+		if jwtToken == "" {
+			cc, err := r.Cookie("jwt")
+			if err == nil {
+				jwtToken = cc.Value
+			}
 		}
 		data, err := GetJwtData(jwtToken)
 		if err != nil || base.Cfg.AdminUser != fmt.Sprint(data["admin_user"]) {
