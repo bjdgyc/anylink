@@ -67,6 +67,14 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	data["admin_user"] = adminUser
 	data["expires_at"] = expiresAt
 
+	ck := &http.Cookie{
+		Name:     "jwt",
+		Value:    tokenString,
+		Path:     "/",
+		HttpOnly: true,
+	}
+	http.SetCookie(w, ck)
+
 	RespSucess(w, data)
 }
 
@@ -76,6 +84,8 @@ func authMiddleware(next http.Handler) http.Handler {
 		w.Header().Set("Access-Control-Allow-Methods", "GET,POST,OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "*")
 		if r.Method == http.MethodOptions {
+			// 正式环境不支持 OPTIONS
+			w.WriteHeader(http.StatusForbidden)
 			return
 		}
 

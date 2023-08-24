@@ -12,6 +12,7 @@ import (
 
 	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/dbdata"
+	"github.com/bjdgyc/anylink/pkg/utils"
 	"github.com/gorilla/mux"
 	"github.com/pires/go-proxyproto"
 )
@@ -86,6 +87,14 @@ func startTls() {
 
 func initRoute() http.Handler {
 	r := mux.NewRouter()
+	// 所有路由添加安全头
+	r.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			utils.SetSecureHeader(w)
+			next.ServeHTTP(w, req)
+		})
+	})
+
 	r.HandleFunc("/", LinkHome).Methods(http.MethodGet)
 	r.HandleFunc("/", LinkAuth).Methods(http.MethodPost)
 	r.HandleFunc("/CSCOSSLC/tunnel", LinkTunnel).Methods(http.MethodConnect)

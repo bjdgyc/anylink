@@ -49,7 +49,7 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// fmt.Printf("%+v \n", cr)
-	setCommonHeader(w)
+	// setCommonHeader(w)
 	if cr.Type == "logout" {
 		// 退出删除session信息
 		if cr.SessionToken != "" {
