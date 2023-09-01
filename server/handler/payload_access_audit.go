@@ -106,6 +106,7 @@ func logAudit(userName string, pl *sessdata.Payload) {
 	if !(pl.LType == sessdata.LTypeIPData && pl.PType == 0x00) {
 		return
 	}
+
 	ipProto := waterutil.IPv4Protocol(pl.Data)
 	// 访问协议
 	var accessProto uint8
@@ -121,7 +122,15 @@ func logAudit(userName string, pl *sessdata.Payload) {
 
 	ipSrc := waterutil.IPv4Source(pl.Data)
 	ipDst := waterutil.IPv4Destination(pl.Data)
-	ipPort := waterutil.IPv4DestinationPort(pl.Data)
+
+	// ipPort := waterutil.IPv4DestinationPort(pl.Data)
+	// 修复 panic: runtime error: index out of range [2] with length 2
+	ipPl := waterutil.IPv4Payload(pl.Data)
+	if len(ipPl) < 3 {
+		base.Error("ipPl len < 3", pl.Data)
+		return
+	}
+	ipPort := (uint16(ipPl[2]) << 8) | uint16(ipPl[3])
 
 	b := getByte51()
 	key := *b
