@@ -205,6 +205,7 @@ type userAccountMailData struct {
 	LinkAddr     string
 	Group        string
 	Username     string
+	Nickname     string
 	PinCode      string
 	OtpImg       string
 	OtpImgBase64 string
@@ -251,9 +252,11 @@ func userAccountMail(user *dbdata.User) error {
 	otpData, _ := userOtpQr(user.Id, true)
 
 	data := userAccountMailData{
+		Issuer:       base.Cfg.Issuer,
 		LinkAddr:     setting.LinkAddr,
 		Group:        strings.Join(user.Groups, ","),
 		Username:     user.Username,
+		Nickname:     user.Nickname,
 		PinCode:      user.PinCode,
 		OtpImg:       fmt.Sprintf("https://%s/otp_qr?id=%d&jwt=%s", setting.LinkAddr, user.Id, tokenString),
 		OtpImgBase64: "data:image/png;base64," + otpData,
