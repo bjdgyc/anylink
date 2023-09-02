@@ -31,7 +31,7 @@ func onTCP(payload []byte) (uint8, string) {
 func sniNewParser(b []byte) (uint8, string) {
 	if len(b) < 6 || b[0] != 0x16 || b[1] != 0x03 {
 		return acc_proto_tcp, ""
-	}	
+	}
 	rest := b[5:]
 	restLen := len(rest)
 	if restLen == 0 {
