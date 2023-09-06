@@ -3,6 +3,7 @@ package handler
 import (
 	"crypto/md5"
 	"encoding/binary"
+	"runtime/debug"
 	"time"
 
 	"github.com/bjdgyc/anylink/base"
@@ -101,7 +102,12 @@ func logAuditBatch() {
 
 // 解析IP包的数据
 func logAudit(userName string, pl *sessdata.Payload) {
-	defer putPayload(pl)
+	defer func() {
+		putPayload(pl)
+		if err := recover(); err != nil {
+			base.Error("logAudit is panic: ", err, "\n", string(debug.Stack()), "\n", pl.Data)
+		}
+	}()
 
 	if !(pl.LType == sessdata.LTypeIPData && pl.PType == 0x00) {
 		return
