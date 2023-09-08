@@ -125,8 +125,7 @@ func logAudit(userName string, pl *sessdata.Payload) {
 	default:
 		return
 	}
-	// ipPort := waterutil.IPv4DestinationPort(pl.Data)
-	// 修复 panic: runtime error: index out of range [2] / range [3]
+	// IP报文只包含头部信息时, 则打印LOG，并退出
 	ipPl := waterutil.IPv4Payload(pl.Data)
 	if len(ipPl) < 4 {
 		base.Error("ipPl len < 4", ipPl, pl.Data)
