@@ -103,10 +103,10 @@ func logAuditBatch() {
 // 解析IP包的数据
 func logAudit(userName string, pl *sessdata.Payload) {
 	defer func() {
-		putPayload(pl)
 		if err := recover(); err != nil {
 			base.Error("logAudit is panic: ", err, "\n", string(debug.Stack()), "\n", pl.Data)
 		}
+		putPayload(pl)
 	}()
 
 	if !(pl.LType == sessdata.LTypeIPData && pl.PType == 0x00) {
@@ -125,19 +125,15 @@ func logAudit(userName string, pl *sessdata.Payload) {
 	default:
 		return
 	}
-
-	ipSrc := waterutil.IPv4Source(pl.Data)
-	ipDst := waterutil.IPv4Destination(pl.Data)
-
-	// ipPort := waterutil.IPv4DestinationPort(pl.Data)
-	// 修复 panic: runtime error: index out of range [2] with length 2
+	// IP报文只包含头部信息时, 则打印LOG，并退出
 	ipPl := waterutil.IPv4Payload(pl.Data)
-	if len(ipPl) < 3 {
-		base.Error("ipPl len < 3", pl.Data)
+	if len(ipPl) < 4 {
+		base.Error("ipPl len < 4", ipPl, pl.Data)
 		return
 	}
 	ipPort := (uint16(ipPl[2]) << 8) | uint16(ipPl[3])
-
+	ipSrc := waterutil.IPv4Source(pl.Data)
+	ipDst := waterutil.IPv4Destination(pl.Data)
 	b := getByte51()
 	key := *b
 	copy(key[:16], ipSrc)
@@ -193,7 +189,6 @@ func logAudit(userName string, pl *sessdata.Payload) {
 		AccessProto: accessProto,
 		Info:        info,
 	}
-
 	select {
 	case logBatch.LogChan <- audit:
 	default:
