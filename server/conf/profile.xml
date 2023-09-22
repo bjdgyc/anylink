@@ -8,6 +8,7 @@
         <RestrictPreferenceCaching>false</RestrictPreferenceCaching>
         <RestrictTunnelProtocols>IPSec</RestrictTunnelProtocols>
         <BypassDownloader>true</BypassDownloader>
+        <AutoUpdate UserControllable="false">false</AutoUpdate>
         <WindowsVPNEstablishment>AllowRemoteUsers</WindowsVPNEstablishment>
         <LinuxVPNEstablishment>AllowRemoteUsers</LinuxVPNEstablishment>
         <CertEnrollmentPin>pinAllowed</CertEnrollmentPin>
@@ -21,14 +22,22 @@
         </CertificateMatch>
 
         <BackupServerList>
-            <HostAddress>localhost</HostAddress>
+            <HostAddress>localhost-bak</HostAddress>
         </BackupServerList>
     </ClientInitialization>
 
     <ServerList>
+
         <HostEntry>
             <HostName>VPN Server</HostName>
             <HostAddress>localhost</HostAddress>
         </HostEntry>
+
+        <HostEntry>
+            <HostName>VPN Server2</HostName>
+            <HostAddress>localhost2</HostAddress>
+        </HostEntry>
+
+
     </ServerList>
 </AnyConnectProfile>
