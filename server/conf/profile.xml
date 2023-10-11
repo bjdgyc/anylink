@@ -21,23 +21,19 @@
             </ExtendedKeyUsage>
         </CertificateMatch>
 
-        <BackupServerList>
-            <HostAddress>localhost-bak</HostAddress>
-        </BackupServerList>
     </ClientInitialization>
 
     <ServerList>
 
         <HostEntry>
-            <HostName>VPN Server</HostName>
+            <HostName>VPN</HostName>
             <HostAddress>localhost</HostAddress>
         </HostEntry>
 
         <HostEntry>
-            <HostName>VPN Server2</HostName>
+            <HostName>VPN2</HostName>
             <HostAddress>localhost2</HostAddress>
         </HostEntry>
-
 
     </ServerList>
 </AnyConnectProfile>
