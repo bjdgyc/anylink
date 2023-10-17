@@ -34,12 +34,12 @@ func startDtls() {
 		certificate tls.Certificate
 	)
 
-	//rsa 兼容 open connect
+	// rsa 兼容 open connect
 	if dtlsSigneType == dtlsSigneRsa {
 		priv, _ := rsa.GenerateKey(rand.Reader, 2048)
 		certificate, err = selfsign.SelfSign(priv)
 	}
-	//ecdsa
+	// ecdsa
 	if dtlsSigneType == dtlsSigneEcdsa {
 		certificate, err = selfsign.GenerateSelfSigned()
 	}
@@ -49,15 +49,14 @@ func startDtls() {
 
 	logf := logging.NewDefaultLoggerFactory()
 	logf.Writer = base.GetBaseLw()
-	//logf.DefaultLogLevel = logging.LogLevelTrace
+	// logf.DefaultLogLevel = logging.LogLevelTrace
 	logf.DefaultLogLevel = logging.LogLevelInfo
 
 	// https://github.com/pion/dtls/pull/369
 	sessStore := &sessionStore{}
 
 	config := &dtls.Config{
-		Certificates: []tls.Certificate{certificate},
-		//InsecureSkipVerify:   true,
+		Certificates:         []tls.Certificate{certificate},
 		ExtendedMasterSecret: dtls.DisableExtendedMasterSecret,
 		CipherSuites: []dtls.CipherSuiteID{
 			dtls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
@@ -132,10 +131,10 @@ func checkDtls12Ciphersuite(ciphersuite string) string {
 
 	return "ECDHE-RSA-AES256-GCM-SHA384"
 
-	//var str2ciphersuite = map[string]dtls.CipherSuiteID{
+	// var str2ciphersuite = map[string]dtls.CipherSuiteID{
 	//	"ECDHE-ECDSA-AES256-GCM-SHA384": dtls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
 	//	"ECDHE-ECDSA-AES128-GCM-SHA256": dtls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
 	//	"ECDHE-RSA-AES256-GCM-SHA384":   dtls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
 	//	"ECDHE-RSA-AES128-GCM-SHA256":   dtls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-	//}
+	// }
 }

@@ -92,9 +92,9 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 
 	base.Debug(cSess.IpAddr, cSess.MacHw, sess.Username, mobile)
 
-	//检测密码套件
+	// 检测密码套件
 	dtlsCiphersuite := checkDtls12Ciphersuite(r.Header.Get("X-Dtls12-Ciphersuite"))
-	base.Debug("dtlsCiphersuite", dtlsCiphersuite)
+	base.Trace("dtlsCiphersuite", dtlsCiphersuite)
 
 	// 压缩
 	if cmpName, ok := cSess.SetPickCmp("cstp", r.Header.Get("X-Cstp-Accept-Encoding")); ok {

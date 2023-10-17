@@ -54,7 +54,6 @@ func startTls() {
 			base.Trace("GetCertificate", chi.ServerName)
 			return dbdata.GetCertificateBySNI(chi.ServerName)
 		},
-		// InsecureSkipVerify: true,
 	}
 	srv := &http.Server{
 		Addr:         addr,
