@@ -2,6 +2,8 @@ package handler
 
 import (
 	"context"
+	"crypto/rand"
+	"crypto/rsa"
 	"crypto/tls"
 	"encoding/hex"
 	"errors"
@@ -15,31 +17,55 @@ import (
 	"github.com/pion/logging"
 )
 
+const (
+	dtlsSigneRsa   = 1
+	dtlsSigneEcdsa = 2
+)
+
+var dtlsSigneType = dtlsSigneRsa
+
 func startDtls() {
 	if !base.Cfg.ServerDTLS {
 		return
 	}
 
-	certificate, err := selfsign.GenerateSelfSigned()
+	var (
+		err         error
+		certificate tls.Certificate
+	)
+
+	//rsa 兼容 open connect
+	if dtlsSigneType == dtlsSigneRsa {
+		priv, _ := rsa.GenerateKey(rand.Reader, 2048)
+		certificate, err = selfsign.SelfSign(priv)
+	}
+	//ecdsa
+	if dtlsSigneType == dtlsSigneEcdsa {
+		certificate, err = selfsign.GenerateSelfSigned()
+	}
 	if err != nil {
 		panic(err)
 	}
+
 	logf := logging.NewDefaultLoggerFactory()
 	logf.Writer = base.GetBaseLw()
-	// logf.DefaultLogLevel = logging.LogLevelTrace
+	//logf.DefaultLogLevel = logging.LogLevelTrace
 	logf.DefaultLogLevel = logging.LogLevelInfo
 
 	// https://github.com/pion/dtls/pull/369
 	sessStore := &sessionStore{}
 
 	config := &dtls.Config{
-		Certificates:         []tls.Certificate{certificate},
-		InsecureSkipVerify:   true,
+		Certificates: []tls.Certificate{certificate},
+		//InsecureSkipVerify:   true,
 		ExtendedMasterSecret: dtls.DisableExtendedMasterSecret,
-		CipherSuites:         []dtls.CipherSuiteID{dtls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256},
-		LoggerFactory:        logf,
-		MTU:                  BufferSize,
-		SessionStore:         sessStore,
+		CipherSuites: []dtls.CipherSuiteID{
+			dtls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+			dtls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+		},
+		LoggerFactory: logf,
+		MTU:           BufferSize,
+		SessionStore:  sessStore,
 		ConnectContextMaker: func() (context.Context, func()) {
 			return context.WithTimeout(context.Background(), 5*time.Second)
 		},
@@ -97,4 +123,19 @@ func (ms *sessionStore) Get(key []byte) (dtls.Session, error) {
 
 func (ms *sessionStore) Del(key []byte) error {
 	return nil
+}
+
+func checkDtls12Ciphersuite(ciphersuite string) string {
+	if dtlsSigneType == dtlsSigneEcdsa {
+		return "ECDHE-ECDSA-AES256-GCM-SHA384"
+	}
+
+	return "ECDHE-RSA-AES256-GCM-SHA384"
+
+	//var str2ciphersuite = map[string]dtls.CipherSuiteID{
+	//	"ECDHE-ECDSA-AES256-GCM-SHA384": dtls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+	//	"ECDHE-ECDSA-AES128-GCM-SHA256": dtls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+	//	"ECDHE-RSA-AES256-GCM-SHA384":   dtls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+	//	"ECDHE-RSA-AES128-GCM-SHA256":   dtls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+	//}
 }
