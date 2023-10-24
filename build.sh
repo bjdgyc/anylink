@@ -52,6 +52,7 @@ cp -r server/conf $deploy
 
 cp -r systemd $deploy
 cp -r LICENSE $deploy
+cp -r home $deploy
 
 tar zcvf ${deploy}.tar.gz $deploy
 
