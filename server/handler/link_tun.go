@@ -75,6 +75,7 @@ func LinkTun(cSess *sessdata.ConnSession) error {
 	// log.Printf("Interface Name: %s\n", ifce.Name())
 	cSess.SetIfName(ifce.Name())
 
+	// 通过 ip link show  查看 alias 信息
 	cmdstr1 := fmt.Sprintf("ip link set dev %s up mtu %d multicast off alias %s.%s", ifce.Name(), cSess.Mtu,
 		cSess.Group.Name, cSess.Username)
 	cmdstr2 := fmt.Sprintf("ip addr add dev %s local %s peer %s/32",
