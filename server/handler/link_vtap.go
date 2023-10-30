@@ -54,7 +54,8 @@ func LinkMacvtap(cSess *sessdata.ConnSession) error {
 	cSess.SetIfName(ifName)
 
 	cmdstr1 := fmt.Sprintf("ip link add link %s name %s type macvtap mode bridge", base.Cfg.Ipv4Master, ifName)
-	cmdstr2 := fmt.Sprintf("ip link set dev %s up mtu %d address %s", ifName, cSess.Mtu, cSess.MacHw)
+	cmdstr2 := fmt.Sprintf("ip link set dev %s up mtu %d address %s alias %s.%s", ifName, cSess.Mtu, cSess.MacHw,
+		cSess.Group.Name, cSess.Username)
 	err := execCmd([]string{cmdstr1, cmdstr2})
 	if err != nil {
 		base.Error(err)

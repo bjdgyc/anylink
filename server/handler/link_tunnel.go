@@ -238,7 +238,11 @@ func SetPostAuthXml(g *dbdata.Group, w http.ResponseWriter) error {
 	if err != nil {
 		return err
 	}
-	HttpSetHeader(w, "X-CSTP-Post-Auth-XML", result.String())
+	xmlAuth := ""
+	for _, v := range strings.Split(result.String(), "\n") {
+		xmlAuth += strings.TrimSpace(v)
+	}
+	HttpSetHeader(w, "X-CSTP-Post-Auth-XML", xmlAuth)
 	return nil
 }
 
