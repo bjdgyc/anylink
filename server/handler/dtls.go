@@ -59,12 +59,15 @@ func startDtls() {
 	config := &dtls.Config{
 		Certificates:         []tls.Certificate{certificate},
 		ExtendedMasterSecret: dtls.DisableExtendedMasterSecret,
-		CipherSuites: []dtls.CipherSuiteID{
-			dtls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
-			dtls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
-			dtls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-			dtls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-		},
+		CipherSuites: func() []dtls.CipherSuiteID {
+			var cs = []dtls.CipherSuiteID{}
+			for _, v := range dtlsCipherSuites {
+				for _, vv := range v {
+					cs = append(cs, vv)
+				}
+			}
+			return cs
+		}(),
 		LoggerFactory: logf,
 		MTU:           BufferSize,
 		SessionStore:  sessStore,
@@ -128,22 +131,23 @@ func (ms *sessionStore) Del(key []byte) error {
 }
 
 // 客户端和服务端映射 X-DTLS12-CipherSuite
-var dtlsECDSA = map[string]dtls.CipherSuiteID{
-	"ECDHE-ECDSA-AES256-GCM-SHA384": dtls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
-	"ECDHE-ECDSA-AES128-GCM-SHA256": dtls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
-}
-
-var dtlsRSA = map[string]dtls.CipherSuiteID{
-	"ECDHE-RSA-AES256-GCM-SHA384": dtls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-	"ECDHE-RSA-AES128-GCM-SHA256": dtls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+var dtlsCipherSuites = map[string]map[string]dtls.CipherSuiteID{
+	"ECDSA": {
+		"ECDHE-ECDSA-AES256-GCM-SHA384": dtls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+		"ECDHE-ECDSA-AES128-GCM-SHA256": dtls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+	},
+	"RSA": {
+		"ECDHE-RSA-AES256-GCM-SHA384": dtls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+		"ECDHE-RSA-AES128-GCM-SHA256": dtls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+	},
 }
 
 func checkDtls12Ciphersuite(ciphersuite string) string {
 	csArr := strings.Split(ciphersuite, ",")
-
+	// ECDSA
 	if dtlsSigneType == dtlsSigneEcdsa {
 		for _, v := range csArr {
-			if _, ok := dtlsECDSA[v]; ok {
+			if _, ok := dtlsCipherSuites["ECDSA"][v]; ok {
 				return v
 			}
 		}
@@ -152,7 +156,7 @@ func checkDtls12Ciphersuite(ciphersuite string) string {
 	}
 
 	for _, v := range csArr {
-		if _, ok := dtlsRSA[v]; ok {
+		if _, ok := dtlsCipherSuites["RSA"][v]; ok {
 			return v
 		}
 	}
