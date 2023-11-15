@@ -18,32 +18,14 @@ import (
 	"github.com/pion/logging"
 )
 
-const (
-	dtlsSigneRsa   = 1
-	dtlsSigneEcdsa = 2
-)
-
-var dtlsSigneType = dtlsSigneRsa
-
 func startDtls() {
 	if !base.Cfg.ServerDTLS {
 		return
 	}
 
-	var (
-		err         error
-		certificate tls.Certificate
-	)
-
 	// rsa 兼容 open connect
-	if dtlsSigneType == dtlsSigneRsa {
-		priv, _ := rsa.GenerateKey(rand.Reader, 2048)
-		certificate, err = selfsign.SelfSign(priv)
-	}
-	// ecdsa
-	if dtlsSigneType == dtlsSigneEcdsa {
-		certificate, err = selfsign.GenerateSelfSigned()
-	}
+	priv, _ := rsa.GenerateKey(rand.Reader, 2048)
+	certificate, err := selfsign.SelfSign(priv)
 	if err != nil {
 		panic(err)
 	}
@@ -61,10 +43,8 @@ func startDtls() {
 		ExtendedMasterSecret: dtls.DisableExtendedMasterSecret,
 		CipherSuites: func() []dtls.CipherSuiteID {
 			var cs = []dtls.CipherSuiteID{}
-			for _, v := range dtlsCipherSuites {
-				for _, vv := range v {
-					cs = append(cs, vv)
-				}
+			for _, vv := range dtlsCipherSuites {
+				cs = append(cs, vv)
 			}
 			return cs
 		}(),
@@ -131,35 +111,21 @@ func (ms *sessionStore) Del(key []byte) error {
 }
 
 // 客户端和服务端映射 X-DTLS12-CipherSuite
-var dtlsCipherSuites = map[string]map[string]dtls.CipherSuiteID{
-	"ECDSA": {
-		"ECDHE-ECDSA-AES256-GCM-SHA384": dtls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
-		"ECDHE-ECDSA-AES128-GCM-SHA256": dtls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
-	},
-	"RSA": {
-		"ECDHE-RSA-AES256-GCM-SHA384": dtls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
-		"ECDHE-RSA-AES128-GCM-SHA256": dtls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-	},
+var dtlsCipherSuites = map[string]dtls.CipherSuiteID{
+	// "ECDHE-ECDSA-AES256-GCM-SHA384": dtls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+	// "ECDHE-ECDSA-AES128-GCM-SHA256": dtls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+	"ECDHE-RSA-AES256-GCM-SHA384": dtls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+	"ECDHE-RSA-AES128-GCM-SHA256": dtls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
 }
 
 func checkDtls12Ciphersuite(ciphersuite string) string {
-	csArr := strings.Split(ciphersuite, ",")
-	// ECDSA
-	if dtlsSigneType == dtlsSigneEcdsa {
-		for _, v := range csArr {
-			if _, ok := dtlsCipherSuites["ECDSA"][v]; ok {
-				return v
-			}
-		}
-		// 返回默认值
-		return "ECDHE-ECDSA-AES256-GCM-SHA384"
-	}
+	csArr := strings.Split(ciphersuite, ":")
 
 	for _, v := range csArr {
-		if _, ok := dtlsCipherSuites["RSA"][v]; ok {
+		if _, ok := dtlsCipherSuites[v]; ok {
 			return v
 		}
 	}
 	// 返回默认值
-	return "ECDHE-RSA-AES256-GCM-SHA384"
+	return "ECDHE-RSA-AES128-GCM-SHA256"
 }

@@ -14,6 +14,7 @@ import (
 	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/dbdata"
 	"github.com/bjdgyc/anylink/sessdata"
+	"golang.org/x/net/html"
 )
 
 var profileHash = ""
@@ -157,6 +158,7 @@ func tplRequest(typ int, w io.Writer, data RequestData) {
 	if strings.Contains(data.Banner, "\n") {
 		// 替换xml文件的换行符
 		data.Banner = strings.ReplaceAll(data.Banner, "\n", "&#x0A;")
+		data.Banner = html.EscapeString(data.Banner)
 	}
 	t, _ := template.New("auth_complete").Parse(auth_complete)
 	_ = t.Execute(w, data)
