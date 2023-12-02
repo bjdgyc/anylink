@@ -281,11 +281,15 @@
             <el-tab-pane label="路由设置" name="route">
                 <el-form-item label="包含路由" prop="route_include">
                 <el-row class="msg-info">
-                    <el-col :span="20">输入CIDR格式如: 192.168.1.0/24</el-col>
-                    <el-col :span="4">
+                    <el-col :span="18">输入CIDR格式如: 192.168.1.0/24</el-col>
+                    <el-col :span="2">
                     <el-button size="mini" type="success" icon="el-icon-plus" circle
                                 @click.prevent="addDomain(ruleForm.route_include)"></el-button>
                     </el-col>
+                    <el-col :span="4">
+                      <el-button size="mini" type="info" icon="el-icon-edit" circle
+                                @click.prevent="openIpListDialog('route_include')"></el-button>
+                    </el-col>                    
                 </el-row>
                 <el-row v-for="(item,index) in ruleForm.route_include"
                         :key="index" style="margin-bottom: 5px" :gutter="10">
@@ -304,11 +308,15 @@
 
                 <el-form-item label="排除路由" prop="route_exclude">
                 <el-row class="msg-info">
-                    <el-col :span="20">输入CIDR格式如: 192.168.2.0/24</el-col>
-                    <el-col :span="4">
+                    <el-col :span="18">输入CIDR格式如: 192.168.2.0/24</el-col>
+                    <el-col :span="2">
                     <el-button size="mini" type="success" icon="el-icon-plus" circle
                                 @click.prevent="addDomain(ruleForm.route_exclude)"></el-button>
                     </el-col>
+                    <el-col :span="4">
+                      <el-button size="mini" type="info" icon="el-icon-edit" circle
+                                @click.prevent="openIpListDialog('route_exclude')"></el-button>
+                    </el-col>                    
                 </el-row>
                 <el-row v-for="(item,index) in ruleForm.route_exclude"
                         :key="index" style="margin-bottom: 5px" :gutter="10">
@@ -365,6 +373,7 @@
                 </el-form-item>                
                 <el-form-item label="排除域名" prop="ds_exclude_domains">
                     <el-input type="textarea" :rows="5" v-model="ruleForm.ds_exclude_domains" placeholder="输入域名用,号分隔，默认匹配所有子域名, 如baidu.com,163.com"></el-input>
+                    <div class="msg-info">注意：域名拆分隧道，仅支持AnyConnect的桌面客户端，不支持移动端.</div>
                 </el-form-item>
             </el-tab-pane>
             <el-form-item>
@@ -398,6 +407,25 @@
             </el-form-item>
         </el-form>
     </el-dialog> 
+    <!--编辑模式弹窗-->
+    <el-dialog
+    :close-on-click-modal="false"
+    title="编辑模式"
+    :visible.sync="ipListDialog"
+    width="600px"
+    custom-class="valgin-dialog"
+    center>
+      <el-form ref="ipEditForm" label-width="80px">
+          <el-form-item label="路由表" prop="ip_list">
+              <el-input type="textarea" :rows="10" v-model="ipEditForm.ip_list" placeholder="输入CIDR格式和备注，以逗号分隔，如: 192.168.1.0/24,test"></el-input>
+              <div class="msg-info">AnyConnect最多支持{{ this.maxRouteRows }}条路由，当前共 {{ ipEditForm.ip_list.split("\n").length }} 条</div>
+          </el-form-item>
+          <el-form-item>
+              <el-button type="primary" @click="ipEdit()" :loading="ipEditLoading">更新</el-button>
+              <el-button @click="ipListDialog = false">取 消</el-button>
+          </el-form-item>
+      </el-form>
+    </el-dialog>
   </div>
 </template>
 
@@ -424,6 +452,7 @@ export default {
       activeTab : "general",
       readMore: {},
       readMinRows : 5,
+      maxRouteRows : 2500,
       defAuth : {
                 type:'local', 
                 radius:{addr:"", secret:""},
@@ -450,11 +479,17 @@ export default {
         auth : {},
       },
       authLoginDialog : false,
-      authLoginLoading : false,
+      ipListDialog : false,
+      authLoginLoading : false,      
       authLoginForm : {
         name : "",
         pwd : "",
-      },   
+      },
+      ipEditForm: {
+        ip_list: "",
+        type : "",
+      },
+      ipEditLoading : false,
       authLoginRules: {
         name: [
           {required: true, message: '请输入账号', trigger: 'blur'},
@@ -643,6 +678,30 @@ export default {
             this.$refs['authLoginFormName'].focus();
         });
       });
+    },
+    openIpListDialog(type) {
+      this.ipListDialog = true;
+      this.ipEditForm.type = type;
+      this.ipEditForm.ip_list = this.ruleForm[type].map(item => item.val + (item.note ? "," + item.note : "")).join("\n");      
+    },
+    ipEdit() {
+        this.ipEditLoading = true;
+        // ip_list不能超过this.maxRouteRows行
+        if (this.ipEditForm.ip_list.split("\n").length > this.maxRouteRows) {
+            this.$message.error("错误：AnyConnect最多支持" + this.maxRouteRows + "条路由.");
+            this.ipEditLoading = false;
+            return false;
+        }
+        let arr = this.ipEditForm.ip_list.split("\n").map(item => {
+            let ip = item.split(",");
+            if (ip.length > 2) {
+                ip[1] = ip.slice(1).join(",");
+            }
+            return {val: ip[0], note: ip[1] ? ip[1] : ""};
+        });
+        this.ruleForm[this.ipEditForm.type] = arr;
+        this.ipEditLoading = false;
+        this.ipListDialog = false;
     },
     resetForm(formName) {
       this.$refs[formName].resetFields();
