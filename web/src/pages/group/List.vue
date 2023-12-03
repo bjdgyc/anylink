@@ -373,7 +373,7 @@
                 </el-form-item>                
                 <el-form-item label="排除域名" prop="ds_exclude_domains">
                     <el-input type="textarea" :rows="5" v-model="ruleForm.ds_exclude_domains" placeholder="输入域名用,号分隔，默认匹配所有子域名, 如baidu.com,163.com"></el-input>
-                    <div class="msg-info">注意：域名拆分隧道，仅支持AnyConnect的桌面客户端，不支持移动端.</div>
+                    <div class="msg-info">注：域名拆分隧道，仅支持AnyConnect的桌面客户端，不支持移动端.</div>
                 </el-form-item>
             </el-tab-pane>
             <el-form-item>
@@ -412,13 +412,13 @@
     :close-on-click-modal="false"
     title="编辑模式"
     :visible.sync="ipListDialog"
-    width="600px"
+    width="650px"
     custom-class="valgin-dialog"
     center>
       <el-form ref="ipEditForm" label-width="80px">
           <el-form-item label="路由表" prop="ip_list">
-              <el-input type="textarea" :rows="10" v-model="ipEditForm.ip_list" placeholder="输入CIDR格式和备注，以逗号分隔，如: 192.168.1.0/24,test"></el-input>
-              <div class="msg-info">AnyConnect最多支持{{ this.maxRouteRows }}条路由，当前共 {{ ipEditForm.ip_list.split("\n").length }} 条</div>
+              <el-input type="textarea" :rows="10" v-model="ipEditForm.ip_list" placeholder="每行一条路由，例：192.168.1.0/24,备注 或 192.168.1.0/24"></el-input>
+              <div class="msg-info">当前共 {{ ipEditForm.ip_list.trim() === '' ? 0 : ipEditForm.ip_list.trim().split("\n").length }} 条（注：AnyConnect客户端最多支持{{ this.maxRouteRows }}条路由）</div>
           </el-form-item>
           <el-form-item>
               <el-button type="primary" @click="ipEdit()" :loading="ipEditLoading">更新</el-button>
@@ -686,22 +686,39 @@ export default {
     },
     ipEdit() {
         this.ipEditLoading = true;
-        // ip_list不能超过this.maxRouteRows行
-        if (this.ipEditForm.ip_list.split("\n").length > this.maxRouteRows) {
-            this.$message.error("错误：AnyConnect最多支持" + this.maxRouteRows + "条路由.");
+        let ipList = [];
+        if (this.ipEditForm.ip_list.trim() !== "") {
+            ipList = this.ipEditForm.ip_list.trim().split("\n");
+        }        
+        let arr = [];
+        for (let i = 0; i < ipList.length; i++) {
+          let item = ipList[i];
+          let ip = item.split(",");
+          if (ip.length > 2) {
+            ip[1] = ip.slice(1).join(",");
+          }
+          let note = ip[1] ? ip[1] : "";
+          const pushToArr = () => {
+            arr.push({val: ip[0], note: note});
+          };
+          if (this.ipEditForm.type == "route_include" && ip[0] == "all") {
+            pushToArr();
+            continue;  
+          }
+          if (!this.isValidCIDR(ip[0])) {
+            this.$message.error("错误：CIDR格式错误 " + item);
             this.ipEditLoading = false;
-            return false;
+            return;
+          }
+          pushToArr();
         }
-        let arr = this.ipEditForm.ip_list.split("\n").map(item => {
-            let ip = item.split(",");
-            if (ip.length > 2) {
-                ip[1] = ip.slice(1).join(",");
-            }
-            return {val: ip[0], note: ip[1] ? ip[1] : ""};
-        });
         this.ruleForm[this.ipEditForm.type] = arr;
         this.ipEditLoading = false;
         this.ipListDialog = false;
+    },
+    isValidCIDR(str) {
+       const cidrRegex = /^([0-9]{1,3}\.){3}[0-9]{1,3}\/([0-9]|[1-2][0-9]|3[0-2])$/;
+       return cidrRegex.test(str);
     },
     resetForm(formName) {
       this.$refs[formName].resetFields();
