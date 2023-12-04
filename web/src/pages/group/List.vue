@@ -712,10 +712,11 @@ export default {
             pushToArr();
             continue;  
           }
-          if (!this.isValidCIDR(ip[0])) {
-            this.$message.error("错误：CIDR格式错误 " + item);
-            this.ipEditLoading = false;
-            return;
+          let valid = this.isValidCIDR(ip[0]);
+          if (!valid.valid) {
+                this.$message.error("错误：CIDR格式错误，建议 " + ip[0] + " 改为 " + valid.suggestion);
+                this.ipEditLoading = false;
+                return;
           }
           pushToArr();
         }
@@ -723,9 +724,28 @@ export default {
         this.ipEditLoading = false;
         this.ipListDialog = false;
     },
-    isValidCIDR(str) {
-       const cidrRegex = /^([0-9]{1,3}\.){3}[0-9]{1,3}\/([0-9]|[1-2][0-9]|3[0-2])$/;
-       return cidrRegex.test(str);
+    isValidCIDR(input) {
+        const cidrRegex = /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)\/([12]?\d|3[0-2])$/;
+        if (!cidrRegex.test(input)) {
+            return { valid: false, suggestion: null };
+        }
+        const [ip, mask] = input.split('/');
+        const maskNum = parseInt(mask);
+        const ipParts = ip.split('.').map(part => parseInt(part));
+        const binaryIP = ipParts.map(part => part.toString(2).padStart(8, '0')).join('');
+        for (let i = maskNum; i < 32; i++) {
+            if (binaryIP[i] === '1') {
+                const binaryNetworkPart = binaryIP.substring(0, maskNum).padEnd(32, '0');
+                const networkIPParts = [];
+                for (let j = 0; j < 4; j++) {
+                    const octet = binaryNetworkPart.substring(j * 8, (j + 1) * 8);
+                    networkIPParts.push(parseInt(octet, 2));
+                }
+                const suggestedIP = networkIPParts.join('.');
+                return { valid: false, suggestion: `${suggestedIP}/${mask}` };
+            }
+        }
+        return { valid: true, suggestion: null };
     },
     resetForm(formName) {
       this.$refs[formName].resetFields();
