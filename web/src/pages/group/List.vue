@@ -346,7 +346,7 @@
                                 @click.prevent="addDomain(ruleForm.link_acl)"></el-button>
                     </el-col>
                 </el-row>  
-                              
+
                 <el-row v-for="(item,index) in ruleForm.link_acl"
                         :key="index" style="margin-bottom: 5px" :gutter="5">
                     <el-col :span="11">
@@ -697,6 +697,9 @@ export default {
         let arr = [];
         for (let i = 0; i < ipList.length; i++) {
           let item = ipList[i];
+          if (item.trim() === "") {
+            continue;
+          }
           let ip = item.split(",");
           if (ip.length > 2) {
             ip[1] = ip.slice(1).join(",");
