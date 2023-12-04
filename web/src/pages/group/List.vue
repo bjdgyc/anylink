@@ -291,19 +291,21 @@
                                 @click.prevent="openIpListDialog('route_include')"></el-button>
                     </el-col>                    
                 </el-row>
-                <el-row v-for="(item,index) in ruleForm.route_include"
-                        :key="index" style="margin-bottom: 5px" :gutter="10">
-                    <el-col :span="10">
-                    <el-input v-model="item.val"></el-input>
-                    </el-col>
-                    <el-col :span="12">
-                    <el-input v-model="item.note" placeholder="备注"></el-input>
-                    </el-col>
-                    <el-col :span="2">
-                    <el-button size="mini" type="danger" icon="el-icon-minus" circle
-                                @click.prevent="removeDomain(ruleForm.route_include,index)"></el-button>
-                    </el-col>
-                </el-row>
+                <templete v-if="activeTab == 'route'">
+                    <el-row v-for="(item,index) in ruleForm.route_include"
+                            :key="index" style="margin-bottom: 5px" :gutter="10">
+                        <el-col :span="10">
+                        <el-input v-model="item.val"></el-input>
+                        </el-col>
+                        <el-col :span="12">
+                        <el-input v-model="item.note" placeholder="备注"></el-input>
+                        </el-col>
+                        <el-col :span="2">
+                        <el-button size="mini" type="danger" icon="el-icon-minus" circle
+                                    @click.prevent="removeDomain(ruleForm.route_include,index)"></el-button>
+                        </el-col>
+                    </el-row>
+                </templete>
                 </el-form-item>
 
                 <el-form-item label="排除路由" prop="route_exclude">
@@ -318,19 +320,21 @@
                                 @click.prevent="openIpListDialog('route_exclude')"></el-button>
                     </el-col>                    
                 </el-row>
-                <el-row v-for="(item,index) in ruleForm.route_exclude"
-                        :key="index" style="margin-bottom: 5px" :gutter="10">
-                    <el-col :span="10">
-                    <el-input v-model="item.val"></el-input>
-                    </el-col>
-                    <el-col :span="12">
-                    <el-input v-model="item.note" placeholder="备注"></el-input>
-                    </el-col>
-                    <el-col :span="2">
-                    <el-button size="mini" type="danger" icon="el-icon-minus" circle
-                                @click.prevent="removeDomain(ruleForm.route_exclude,index)"></el-button>
-                    </el-col>
-                </el-row>
+                <templete v-if="activeTab == 'route'">
+                    <el-row v-for="(item,index) in ruleForm.route_exclude"
+                            :key="index" style="margin-bottom: 5px" :gutter="10">
+                        <el-col :span="10">
+                        <el-input v-model="item.val"></el-input>
+                        </el-col>
+                        <el-col :span="12">
+                        <el-input v-model="item.note" placeholder="备注"></el-input>
+                        </el-col>
+                        <el-col :span="2">
+                        <el-button size="mini" type="danger" icon="el-icon-minus" circle
+                                    @click.prevent="removeDomain(ruleForm.route_exclude,index)"></el-button>
+                        </el-col>
+                    </el-row>
+                </templete>
                 </el-form-item>
             </el-tab-pane>
             <el-tab-pane label="权限控制" name="link_acl">
@@ -341,8 +345,8 @@
                     <el-button size="mini" type="success" icon="el-icon-plus" circle
                                 @click.prevent="addDomain(ruleForm.link_acl)"></el-button>
                     </el-col>
-                </el-row>
-
+                </el-row>  
+                              
                 <el-row v-for="(item,index) in ruleForm.link_acl"
                         :key="index" style="margin-bottom: 5px" :gutter="5">
                     <el-col :span="11">
