@@ -60,10 +60,16 @@ AnyLink 服务端仅在 CentOS 7、CentOS 8、Ubuntu 18.04、Ubuntu 20.04 测试
 
 ### 自行编译安装
 
-> 需要提前安装好 golang >= 1.19 和 nodejs >= 14.x 和 yarn >= v1.22.x
+> 需要提前安装好 golang >= 1.19 和 nodejs >= 16.x 和 yarn >= v1.22.x
 
 ```shell
 git clone https://github.com/bjdgyc/anylink.git
+
+# 编译参考软件版本
+# go 1.20.12
+# node v16.20.2
+# yarn 1.22.19
+
 
 cd anylink
 sh build.sh
