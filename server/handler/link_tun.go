@@ -22,9 +22,10 @@ func checkTun() {
 	defer ifce.Close()
 
 	// 测试ip命令
-	cmdstr0 := fmt.Sprintln("modprobe -i tun")
+	base.CheckModOrLoad("tun")
+
 	cmdstr1 := fmt.Sprintf("ip link set dev %s up mtu %s multicast off", ifce.Name(), "1399")
-	err = execCmd([]string{cmdstr0, cmdstr1})
+	err = execCmd([]string{cmdstr1})
 	if err != nil {
 		base.Fatal("testTun err: ", err)
 	}
@@ -41,12 +42,8 @@ func checkTun() {
 		}
 
 		// 修复 rockyos nat 不生效
-		cmdstr0 := fmt.Sprintln("modprobe -i iptable_filter")
-		cmdstr1 := fmt.Sprintf("modprobe -i iptable_nat")
-		err = execCmd([]string{cmdstr0, cmdstr1})
-		if err != nil {
-			base.Fatal("testTun err: ", err)
-		}
+		base.CheckModOrLoad("iptable_filter")
+		base.CheckModOrLoad("iptable_nat")
 
 		natRule := []string{"-s", base.Cfg.Ipv4CIDR, "-o", base.Cfg.Ipv4Master, "-j", "MASQUERADE"}
 		forwardRule := []string{"-j", "ACCEPT"}

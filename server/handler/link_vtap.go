@@ -33,13 +33,14 @@ func checkMacvtap() {
 
 	ifName := "anylinkMacvtap"
 	// 加载 macvtap
-	cmdstr0 := fmt.Sprintln("modprobe -i macvtap")
+	base.CheckModOrLoad("macvtap")
+
 	// 开启主网卡混杂模式
 	cmdstr1 := fmt.Sprintf("ip link set dev %s promisc on", base.Cfg.Ipv4Master)
 	// 测试 macvtap 功能
 	cmdstr2 := fmt.Sprintf("ip link add link %s name %s type macvtap mode bridge", base.Cfg.Ipv4Master, ifName)
 	cmdstr3 := fmt.Sprintf("ip link del %s", ifName)
-	err := execCmd([]string{cmdstr0, cmdstr1, cmdstr2, cmdstr3})
+	err := execCmd([]string{cmdstr1, cmdstr2, cmdstr3})
 	if err != nil {
 		base.Fatal(err)
 	}
