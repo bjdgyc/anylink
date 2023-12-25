@@ -53,7 +53,7 @@ var configs = []config{
 	{Typ: cfgInt, Name: "max_client", Usage: "最大用户连接", ValInt: 200},
 	{Typ: cfgInt, Name: "max_user_client", Usage: "最大单用户连接", ValInt: 3},
 	{Typ: cfgInt, Name: "cstp_keepalive", Usage: "keepalive时间(秒)", ValInt: 4},
-	{Typ: cfgInt, Name: "cstp_dpd", Usage: "死链接检测时间(秒)", ValInt: 10},
+	{Typ: cfgInt, Name: "cstp_dpd", Usage: "死链接检测时间(秒)", ValInt: 9},
 	{Typ: cfgInt, Name: "mobile_keepalive", Usage: "移动端keepalive接检测时间(秒)", ValInt: 7},
 	{Typ: cfgInt, Name: "mobile_dpd", Usage: "移动端死链接检测时间(秒)", ValInt: 15},
 	{Typ: cfgInt, Name: "mtu", Usage: "最大传输单元MTU", ValInt: 1460},
