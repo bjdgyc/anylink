@@ -41,6 +41,6 @@ iptables_nat = true
 
 
 #客户端显示详细错误信息(线上环境慎开启)
-display_error = false
+display_error = true
 
 

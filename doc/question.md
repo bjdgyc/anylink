@@ -46,6 +46,34 @@ stream {
 }
 ```
 
+> nginx实现 共用443端口 示例
+
+```conf
+stream {
+    map $ssl_preread_server_name $name {
+        vpn.xx.com        myvpn;
+        default     defaultpage;
+    }
+    
+    # upstream pool
+    upstream myvpn {
+        server 127.0.0.1:8443;
+    }
+    upstream defaultpage {
+        server 127.0.0.1:8080;
+    }
+    
+    server {
+        listen 443 so_keepalive=on;
+        ssl_preread on;
+        #接收端也需要设置 proxy_protocol
+        #proxy_protocol on;
+        proxy_pass $name;
+    }
+}
+
+```
+
 ### 性能问题
 ```
 内网环境测试数据

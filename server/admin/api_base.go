@@ -67,6 +67,14 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	data["admin_user"] = adminUser
 	data["expires_at"] = expiresAt
 
+	ck := &http.Cookie{
+		Name:     "jwt",
+		Value:    tokenString,
+		Path:     "/",
+		HttpOnly: true,
+	}
+	http.SetCookie(w, ck)
+
 	RespSucess(w, data)
 }
 
@@ -76,13 +84,15 @@ func authMiddleware(next http.Handler) http.Handler {
 		w.Header().Set("Access-Control-Allow-Methods", "GET,POST,OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "*")
 		if r.Method == http.MethodOptions {
+			// 正式环境不支持 OPTIONS
+			w.WriteHeader(http.StatusForbidden)
 			return
 		}
 
 		route := mux.CurrentRoute(r)
 		name := route.GetName()
 		// fmt.Println("bb", r.URL.Path, name)
-		if utils.InArrStr([]string{"login", "index", "static", "debug"}, name) {
+		if utils.InArrStr([]string{"login", "index", "static"}, name) {
 			// 不进行鉴权
 			next.ServeHTTP(w, r)
 			return
@@ -92,6 +102,12 @@ func authMiddleware(next http.Handler) http.Handler {
 		jwtToken := r.Header.Get("Jwt")
 		if jwtToken == "" {
 			jwtToken = r.FormValue("jwt")
+		}
+		if jwtToken == "" {
+			cc, err := r.Cookie("jwt")
+			if err == nil {
+				jwtToken = cc.Value
+			}
 		}
 		data, err := GetJwtData(jwtToken)
 		if err != nil || base.Cfg.AdminUser != fmt.Sprint(data["admin_user"]) {

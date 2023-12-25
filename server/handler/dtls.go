@@ -2,10 +2,13 @@ package handler
 
 import (
 	"context"
+	"crypto/rand"
+	"crypto/rsa"
 	"crypto/tls"
 	"encoding/hex"
 	"errors"
 	"net"
+	"strings"
 	"time"
 
 	"github.com/bjdgyc/anylink/base"
@@ -20,10 +23,13 @@ func startDtls() {
 		return
 	}
 
-	certificate, err := selfsign.GenerateSelfSigned()
+	// rsa 兼容 open connect
+	priv, _ := rsa.GenerateKey(rand.Reader, 2048)
+	certificate, err := selfsign.SelfSign(priv)
 	if err != nil {
 		panic(err)
 	}
+
 	logf := logging.NewDefaultLoggerFactory()
 	logf.Writer = base.GetBaseLw()
 	// logf.DefaultLogLevel = logging.LogLevelTrace
@@ -34,12 +40,17 @@ func startDtls() {
 
 	config := &dtls.Config{
 		Certificates:         []tls.Certificate{certificate},
-		InsecureSkipVerify:   true,
 		ExtendedMasterSecret: dtls.DisableExtendedMasterSecret,
-		CipherSuites:         []dtls.CipherSuiteID{dtls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256},
-		LoggerFactory:        logf,
-		MTU:                  BufferSize,
-		SessionStore:         sessStore,
+		CipherSuites: func() []dtls.CipherSuiteID {
+			var cs = []dtls.CipherSuiteID{}
+			for _, vv := range dtlsCipherSuites {
+				cs = append(cs, vv)
+			}
+			return cs
+		}(),
+		LoggerFactory: logf,
+		MTU:           BufferSize,
+		SessionStore:  sessStore,
 		ConnectContextMaker: func() (context.Context, func()) {
 			return context.WithTimeout(context.Background(), 5*time.Second)
 		},
@@ -97,4 +108,24 @@ func (ms *sessionStore) Get(key []byte) (dtls.Session, error) {
 
 func (ms *sessionStore) Del(key []byte) error {
 	return nil
+}
+
+// 客户端和服务端映射 X-DTLS12-CipherSuite
+var dtlsCipherSuites = map[string]dtls.CipherSuiteID{
+	// "ECDHE-ECDSA-AES256-GCM-SHA384": dtls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+	// "ECDHE-ECDSA-AES128-GCM-SHA256": dtls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+	"ECDHE-RSA-AES256-GCM-SHA384": dtls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+	"ECDHE-RSA-AES128-GCM-SHA256": dtls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+}
+
+func checkDtls12Ciphersuite(ciphersuite string) string {
+	csArr := strings.Split(ciphersuite, ":")
+
+	for _, v := range csArr {
+		if _, ok := dtlsCipherSuites[v]; ok {
+			return v
+		}
+	}
+	// 返回默认值
+	return "ECDHE-RSA-AES128-GCM-SHA256"
 }

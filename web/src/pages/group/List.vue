@@ -281,48 +281,60 @@
             <el-tab-pane label="路由设置" name="route">
                 <el-form-item label="包含路由" prop="route_include">
                 <el-row class="msg-info">
-                    <el-col :span="20">输入CIDR格式如: 192.168.1.0/24</el-col>
-                    <el-col :span="4">
+                    <el-col :span="18">输入CIDR格式如: 192.168.1.0/24</el-col>
+                    <el-col :span="2">
                     <el-button size="mini" type="success" icon="el-icon-plus" circle
                                 @click.prevent="addDomain(ruleForm.route_include)"></el-button>
                     </el-col>
+                    <el-col :span="4">
+                      <el-button size="mini" type="info" icon="el-icon-edit" circle
+                                @click.prevent="openIpListDialog('route_include')"></el-button>
+                    </el-col>                    
                 </el-row>
-                <el-row v-for="(item,index) in ruleForm.route_include"
-                        :key="index" style="margin-bottom: 5px" :gutter="10">
-                    <el-col :span="10">
-                    <el-input v-model="item.val"></el-input>
-                    </el-col>
-                    <el-col :span="12">
-                    <el-input v-model="item.note" placeholder="备注"></el-input>
-                    </el-col>
-                    <el-col :span="2">
-                    <el-button size="mini" type="danger" icon="el-icon-minus" circle
-                                @click.prevent="removeDomain(ruleForm.route_include,index)"></el-button>
-                    </el-col>
-                </el-row>
+                <templete v-if="activeTab == 'route'">
+                    <el-row v-for="(item,index) in ruleForm.route_include"
+                            :key="index" style="margin-bottom: 5px" :gutter="10">
+                        <el-col :span="10">
+                        <el-input v-model="item.val"></el-input>
+                        </el-col>
+                        <el-col :span="12">
+                        <el-input v-model="item.note" placeholder="备注"></el-input>
+                        </el-col>
+                        <el-col :span="2">
+                        <el-button size="mini" type="danger" icon="el-icon-minus" circle
+                                    @click.prevent="removeDomain(ruleForm.route_include,index)"></el-button>
+                        </el-col>
+                    </el-row>
+                </templete>
                 </el-form-item>
 
                 <el-form-item label="排除路由" prop="route_exclude">
                 <el-row class="msg-info">
-                    <el-col :span="20">输入CIDR格式如: 192.168.2.0/24</el-col>
-                    <el-col :span="4">
+                    <el-col :span="18">输入CIDR格式如: 192.168.2.0/24</el-col>
+                    <el-col :span="2">
                     <el-button size="mini" type="success" icon="el-icon-plus" circle
                                 @click.prevent="addDomain(ruleForm.route_exclude)"></el-button>
                     </el-col>
+                    <el-col :span="4">
+                      <el-button size="mini" type="info" icon="el-icon-edit" circle
+                                @click.prevent="openIpListDialog('route_exclude')"></el-button>
+                    </el-col>                    
                 </el-row>
-                <el-row v-for="(item,index) in ruleForm.route_exclude"
-                        :key="index" style="margin-bottom: 5px" :gutter="10">
-                    <el-col :span="10">
-                    <el-input v-model="item.val"></el-input>
-                    </el-col>
-                    <el-col :span="12">
-                    <el-input v-model="item.note" placeholder="备注"></el-input>
-                    </el-col>
-                    <el-col :span="2">
-                    <el-button size="mini" type="danger" icon="el-icon-minus" circle
-                                @click.prevent="removeDomain(ruleForm.route_exclude,index)"></el-button>
-                    </el-col>
-                </el-row>
+                <templete v-if="activeTab == 'route'">
+                    <el-row v-for="(item,index) in ruleForm.route_exclude"
+                            :key="index" style="margin-bottom: 5px" :gutter="10">
+                        <el-col :span="10">
+                        <el-input v-model="item.val"></el-input>
+                        </el-col>
+                        <el-col :span="12">
+                        <el-input v-model="item.note" placeholder="备注"></el-input>
+                        </el-col>
+                        <el-col :span="2">
+                        <el-button size="mini" type="danger" icon="el-icon-minus" circle
+                                    @click.prevent="removeDomain(ruleForm.route_exclude,index)"></el-button>
+                        </el-col>
+                    </el-row>
+                </templete>
                 </el-form-item>
             </el-tab-pane>
             <el-tab-pane label="权限控制" name="link_acl">
@@ -333,7 +345,7 @@
                     <el-button size="mini" type="success" icon="el-icon-plus" circle
                                 @click.prevent="addDomain(ruleForm.link_acl)"></el-button>
                     </el-col>
-                </el-row>
+                </el-row>  
 
                 <el-row v-for="(item,index) in ruleForm.link_acl"
                         :key="index" style="margin-bottom: 5px" :gutter="5">
@@ -365,6 +377,7 @@
                 </el-form-item>                
                 <el-form-item label="排除域名" prop="ds_exclude_domains">
                     <el-input type="textarea" :rows="5" v-model="ruleForm.ds_exclude_domains" placeholder="输入域名用,号分隔，默认匹配所有子域名, 如baidu.com,163.com"></el-input>
+                    <div class="msg-info">注：域名拆分隧道，仅支持AnyConnect的桌面客户端，不支持移动端.</div>
                 </el-form-item>
             </el-tab-pane>
             <el-form-item>
@@ -398,6 +411,25 @@
             </el-form-item>
         </el-form>
     </el-dialog> 
+    <!--编辑模式弹窗-->
+    <el-dialog
+    :close-on-click-modal="false"
+    title="编辑模式"
+    :visible.sync="ipListDialog"
+    width="650px"
+    custom-class="valgin-dialog"
+    center>
+      <el-form ref="ipEditForm" label-width="80px">
+          <el-form-item label="路由表" prop="ip_list">
+              <el-input type="textarea" :rows="10" v-model="ipEditForm.ip_list" placeholder="每行一条路由，例：192.168.1.0/24,备注 或 192.168.1.0/24"></el-input>
+              <div class="msg-info">当前共 {{ ipEditForm.ip_list.trim() === '' ? 0 : ipEditForm.ip_list.trim().split("\n").length }} 条（注：AnyConnect客户端最多支持{{ this.maxRouteRows }}条路由）</div>
+          </el-form-item>
+          <el-form-item>
+              <el-button type="primary" @click="ipEdit()" :loading="ipEditLoading">更新</el-button>
+              <el-button @click="ipListDialog = false">取 消</el-button>
+          </el-form-item>
+      </el-form>
+    </el-dialog>
   </div>
 </template>
 
@@ -424,6 +456,7 @@ export default {
       activeTab : "general",
       readMore: {},
       readMinRows : 5,
+      maxRouteRows : 2500,
       defAuth : {
                 type:'local', 
                 radius:{addr:"", secret:""},
@@ -450,11 +483,17 @@ export default {
         auth : {},
       },
       authLoginDialog : false,
-      authLoginLoading : false,
+      ipListDialog : false,
+      authLoginLoading : false,      
       authLoginForm : {
         name : "",
         pwd : "",
-      },   
+      },
+      ipEditForm: {
+        ip_list: "",
+        type : "",
+      },
+      ipEditLoading : false,
       authLoginRules: {
         name: [
           {required: true, message: '请输入账号', trigger: 'blur'},
@@ -643,6 +682,70 @@ export default {
             this.$refs['authLoginFormName'].focus();
         });
       });
+    },
+    openIpListDialog(type) {
+      this.ipListDialog = true;
+      this.ipEditForm.type = type;
+      this.ipEditForm.ip_list = this.ruleForm[type].map(item => item.val + (item.note ? "," + item.note : "")).join("\n");      
+    },
+    ipEdit() {
+        this.ipEditLoading = true;
+        let ipList = [];
+        if (this.ipEditForm.ip_list.trim() !== "") {
+            ipList = this.ipEditForm.ip_list.trim().split("\n");
+        }        
+        let arr = [];
+        for (let i = 0; i < ipList.length; i++) {
+          let item = ipList[i];
+          if (item.trim() === "") {
+            continue;
+          }
+          let ip = item.split(",");
+          if (ip.length > 2) {
+            ip[1] = ip.slice(1).join(",");
+          }
+          let note = ip[1] ? ip[1] : "";
+          const pushToArr = () => {
+            arr.push({val: ip[0], note: note});
+          };
+          if (this.ipEditForm.type == "route_include" && ip[0] == "all") {
+            pushToArr();
+            continue;  
+          }
+          let valid = this.isValidCIDR(ip[0]);
+          if (!valid.valid) {
+                this.$message.error("错误：CIDR格式错误，建议 " + ip[0] + " 改为 " + valid.suggestion);
+                this.ipEditLoading = false;
+                return;
+          }
+          pushToArr();
+        }
+        this.ruleForm[this.ipEditForm.type] = arr;
+        this.ipEditLoading = false;
+        this.ipListDialog = false;
+    },
+    isValidCIDR(input) {
+        const cidrRegex = /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)\/([12]?\d|3[0-2])$/;
+        if (!cidrRegex.test(input)) {
+            return { valid: false, suggestion: null };
+        }
+        const [ip, mask] = input.split('/');
+        const maskNum = parseInt(mask);
+        const ipParts = ip.split('.').map(part => parseInt(part));
+        const binaryIP = ipParts.map(part => part.toString(2).padStart(8, '0')).join('');
+        for (let i = maskNum; i < 32; i++) {
+            if (binaryIP[i] === '1') {
+                const binaryNetworkPart = binaryIP.substring(0, maskNum).padEnd(32, '0');
+                const networkIPParts = [];
+                for (let j = 0; j < 4; j++) {
+                    const octet = binaryNetworkPart.substring(j * 8, (j + 1) * 8);
+                    networkIPParts.push(parseInt(octet, 2));
+                }
+                const suggestedIP = networkIPParts.join('.');
+                return { valid: false, suggestion: `${suggestedIP}/${mask}` };
+            }
+        }
+        return { valid: true, suggestion: null };
     },
     resetForm(formName) {
       this.$refs[formName].resetFields();

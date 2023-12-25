@@ -10,6 +10,7 @@ import (
 	"github.com/arl/statsviz"
 	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/dbdata"
+	"github.com/bjdgyc/anylink/pkg/utils"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
@@ -20,6 +21,13 @@ var UiData embed.FS
 func StartAdmin() {
 
 	r := mux.NewRouter()
+	// 所有路由添加安全头
+	r.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			utils.SetSecureHeader(w)
+			next.ServeHTTP(w, req)
+		})
+	})
 	r.Use(authMiddleware)
 	r.Use(handlers.CompressHandler)
 

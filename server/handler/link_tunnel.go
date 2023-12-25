@@ -92,6 +92,10 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 
 	base.Debug(cSess.IpAddr, cSess.MacHw, sess.Username, mobile)
 
+	// 检测密码套件
+	dtlsCiphersuite := checkDtls12Ciphersuite(r.Header.Get("X-Dtls12-Ciphersuite"))
+	base.Trace("dtlsCiphersuite", dtlsCiphersuite)
+
 	// 压缩
 	if cmpName, ok := cSess.SetPickCmp("cstp", r.Header.Get("X-Cstp-Accept-Encoding")); ok {
 		HttpSetHeader(w, "X-CSTP-Content-Encoding", cmpName)
@@ -164,7 +168,7 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	HttpSetHeader(w, "X-DTLS-Port", dtlsPort)
 	HttpSetHeader(w, "X-DTLS-DPD", fmt.Sprintf("%d", cstpDpd))
 	HttpSetHeader(w, "X-DTLS-Keepalive", fmt.Sprintf("%d", cstpKeepalive))
-	HttpSetHeader(w, "X-DTLS12-CipherSuite", "ECDHE-ECDSA-AES128-GCM-SHA256")
+	HttpSetHeader(w, "X-DTLS12-CipherSuite", dtlsCiphersuite)
 
 	HttpSetHeader(w, "X-CSTP-License", "accept")
 	HttpSetHeader(w, "X-CSTP-Routing-Filtering-Ignore", "false")
@@ -234,7 +238,11 @@ func SetPostAuthXml(g *dbdata.Group, w http.ResponseWriter) error {
 	if err != nil {
 		return err
 	}
-	HttpSetHeader(w, "X-CSTP-Post-Auth-XML", result.String())
+	xmlAuth := ""
+	for _, v := range strings.Split(result.String(), "\n") {
+		xmlAuth += strings.TrimSpace(v)
+	}
+	HttpSetHeader(w, "X-CSTP-Post-Auth-XML", xmlAuth)
 	return nil
 }
 

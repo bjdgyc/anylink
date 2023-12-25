@@ -4,6 +4,7 @@ func Start() {
 	execute()
 	initCfg()
 	initLog()
+	initMod()
 }
 
 func Test() {

@@ -248,11 +248,14 @@
           <el-form-item label="自定义首页" prop="homeindex">
             <el-input
               type="textarea"
-              :rows="5"
+              :rows="10"
               placeholder="请输入内容"
               v-model="dataOther.homeindex"
             >
             </el-input>
+            <el-tooltip content="自定义内容可以参考 home 目录下的文件" placement="top">
+              <i class="el-icon-question"></i>
+            </el-tooltip>
           </el-form-item>
 
           <el-form-item label="账户开通邮件" prop="account_mail">
