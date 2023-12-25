@@ -198,7 +198,7 @@ func (c *LeGoClient) NewClient(l *SettingLetsEncrypt) error {
 	if err != nil {
 		return err
 	}
-	if err := client.Challenge.SetDNS01Provider(Provider, dns01.AddRecursiveNameservers([]string{"114.114.114.114", "114.114.115.115"})); err != nil {
+	if err := client.Challenge.SetDNS01Provider(Provider, dns01.AddRecursiveNameservers([]string{"223.6.6.6", "223.5.5.5"})); err != nil {
 		return err
 	}
 	if legouser.Registration == nil {
