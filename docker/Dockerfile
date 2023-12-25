@@ -1,6 +1,8 @@
 #node:16-bullseye
 #golang:1.20-bullseye
 #debian:bullseye-slim
+#sed -i 's/deb.debian.org/mirrors.ustc.edu.cn/g' /etc/apt/sources.list
+
 
 # web
 FROM node:16-alpine3.18 as builder_node
