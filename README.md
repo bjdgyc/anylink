@@ -24,7 +24,8 @@ AnyLink 基于 [ietf-openconnect](https://tools.ietf.org/html/draft-mavrogiannop
 
 AnyLink 使用 TLS/DTLS 进行数据加密，因此需要 RSA 或 ECC 证书，可以通过 Let's Encrypt 和 TrustAsia 申请免费的 SSL 证书。
 
-AnyLink 服务端仅在 CentOS 7、CentOS 8、Ubuntu 18.04、Ubuntu 20.04 测试通过，如需要安装在其他系统，需要服务端支持 tun/tap 功能、ip 设置命令。
+AnyLink 服务端仅在 CentOS 7、CentOS 8、Ubuntu 18.04、Ubuntu 20.04 测试通过，如需要安装在其他系统，需要服务端支持 tun/tap
+功能、ip 设置命令。
 
 ## Screenshot
 
@@ -52,10 +53,12 @@ AnyLink 服务端仅在 CentOS 7、CentOS 8、Ubuntu 18.04、Ubuntu 20.04 测试
 >
 > 对于线上环境，必须申请安全的 https 证书，不支持私有证书连接
 >
+> 服务端安装 yum install iproute 或者 apt-get install iproute2
+>
 > 客户端请使用群共享文件的版本，其他版本没有测试过，不保证使用正常
-> 
+>
 > 其他问题 [前往查看](doc/question.md)
-> 
+>
 > 首次使用，请在浏览器访问 https://域名:443，浏览器提示安全后，在客户端输入 【域名:443】 即可
 
 ### 自行编译安装
@@ -127,7 +130,7 @@ sudo ./anylink
 > 数据库配置示例
 
 | db_type  | db_source                                              |
-| -------- | ------------------------------------------------------ |
+|----------|--------------------------------------------------------|
 | sqlite3  | ./conf/anylink.db                                      |
 | mysql    | user:password@tcp(127.0.0.1:3306)/anylink?charset=utf8 |
 | postgres | user:password@localhost/anylink?sslmode=verify-full    |
@@ -140,9 +143,11 @@ sudo ./anylink
 
 > 以下参数必须设置其中之一
 
-网络模式选择，需要配置 `link_mode` 参数，如 `link_mode="tun"`,`link_mode="macvtap"`,`link_mode="tap"(不推荐)` 等参数。 不同的参数需要对服务器做相应的设置。
+网络模式选择，需要配置 `link_mode` 参数，如 `link_mode="tun"`,`link_mode="macvtap"`,`link_mode="tap"(不推荐)` 等参数。
+不同的参数需要对服务器做相应的设置。
 
-建议优先选择 tun 模式，其次选择 macvtap 模式，因客户端传输的是 IP 层数据，无须进行数据转换。 tap 模式是在用户态做的链路层到 IP 层的数据互相转换，性能会有所下降。 如果需要在虚拟机内开启 tap
+建议优先选择 tun 模式，其次选择 macvtap 模式，因客户端传输的是 IP 层数据，无须进行数据转换。 tap 模式是在用户态做的链路层到
+IP 层的数据互相转换，性能会有所下降。 如果需要在虚拟机内开启 tap
 模式，请确认虚拟机的网卡开启混杂模式。
 
 ### tun 设置
@@ -196,7 +201,6 @@ https://cloud.tencent.com/document/product/216/62007
 
 ```
 
-
 3. 使用 AnyConnect 客户端连接即可
 
 ### macvtap 设置
@@ -221,7 +225,6 @@ ipv4_gateway = "10.1.2.1"
 ipv4_start = "10.1.2.100"
 ipv4_end = "10.1.2.200"
 ```
-
 
 ## Systemd
 
@@ -299,7 +302,6 @@ ipv4_end = "10.1.2.200"
    docker build -t anylink -f docker/Dockerfile .
    ```
 
-
 ## 常见问题
 
 请前往 [问题地址](doc/question.md) 查看具体信息
@@ -317,7 +319,6 @@ ipv4_end = "10.1.2.200"
 
 ![contact_me_qr](doc/screenshot/contact_me_qr.png)
 -->
-
 
 ## Contribution
 

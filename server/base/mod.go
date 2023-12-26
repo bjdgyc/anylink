@@ -12,19 +12,20 @@ import (
 const (
 	procModulesPath = "/proc/modules"
 	inContainerKey  = "ANYLINK_IN_CONTAINER"
+	tunPath         = "/dev/net/tun"
 )
 
 var (
-	inContainer = false
+	InContainer = false
 	modMap      = map[string]struct{}{}
 )
 
 func initMod() {
 	container := os.Getenv(inContainerKey)
 	if container == "true" {
-		inContainer = true
+		InContainer = true
 	}
-	log.Println("inContainer", inContainer)
+	log.Println("InContainer", InContainer)
 
 	file, err := os.Open(procModulesPath)
 	if err != nil {
@@ -49,8 +50,19 @@ func CheckModOrLoad(mod string) {
 		return
 	}
 
-	if inContainer {
-		err := fmt.Errorf("Linux modules %s is not loaded, please run `modprobe %s`", mod, mod)
+	if mod == "tun" || mod == "tap" {
+		_, err := os.Stat(tunPath)
+		if err == nil {
+			// 文件存在
+			return
+		}
+		panic("Linux tunFile is null " + tunPath)
+	}
+
+	if InContainer {
+		err := fmt.Errorf("Linux module %s is not loaded, please run `modprobe %s`", mod, mod)
+		// log.Println(err)
+		// return
 		panic(err)
 	}
 
