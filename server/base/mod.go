@@ -50,20 +50,25 @@ func CheckModOrLoad(mod string) {
 		return
 	}
 
+	var err error
+
 	if mod == "tun" || mod == "tap" {
-		_, err := os.Stat(tunPath)
+		_, err = os.Stat(tunPath)
 		if err == nil {
 			// 文件存在
 			return
 		}
-		panic("Linux tunFile is null " + tunPath)
+		err = fmt.Errorf("Linux tunFile is null %s", tunPath)
+		log.Println(err)
+		return
+		// panic(err)
 	}
 
 	if InContainer {
-		err := fmt.Errorf("Linux module %s is not loaded, please run `modprobe %s`", mod, mod)
-		// log.Println(err)
-		// return
-		panic(err)
+		err = fmt.Errorf("Linux module %s is not loaded, please run `modprobe %s`", mod, mod)
+		log.Println(err)
+		return
+		// panic(err)
 	}
 
 	cmdstr := fmt.Sprintln("modprobe", mod)
