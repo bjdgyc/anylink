@@ -58,14 +58,14 @@ func CheckModOrLoad(mod string) {
 			// 文件存在
 			return
 		}
-		err = fmt.Errorf("Linux tunFile is null %s", tunPath)
+		err = fmt.Errorf("[error] Linux tunFile is null %s", tunPath)
 		log.Println(err)
 		return
 		// panic(err)
 	}
 
 	if InContainer {
-		err = fmt.Errorf("Linux module %s is not loaded, please run `modprobe %s`", mod, mod)
+		err = fmt.Errorf("[error] Linux module %s is not loaded, please run `modprobe %s`", mod, mod)
 		log.Println(err)
 		return
 		// panic(err)
