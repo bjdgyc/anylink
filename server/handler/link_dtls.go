@@ -93,6 +93,8 @@ func LinkDtls(conn net.Conn, cSess *sessdata.ConnSession) {
 			if payloadIn(cSess, pl) {
 				return
 			}
+			// 只记录返回正确的数据时间
+			cSess.LastDataTime.Store(utils.NowSec())
 		}
 
 	}

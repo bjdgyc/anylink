@@ -70,6 +70,7 @@ type ServerConfig struct {
 	Mtu             int    `json:"mtu"`
 	DefaultDomain   string `json:"default_domain"`
 
+	IdleTimeout    int `json:"idle_timeout"`    // in seconds
 	SessionTimeout int `json:"session_timeout"` // in seconds
 	// AuthTimeout    int `json:"auth_timeout"`    // in seconds
 	AuditInterval int `json:"audit_interval"` // in seconds

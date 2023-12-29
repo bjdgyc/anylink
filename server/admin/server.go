@@ -25,6 +25,7 @@ func StartAdmin() {
 	r.Use(func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 			utils.SetSecureHeader(w)
+			w.Header().Set("Server", "AnyLinkAdminOpenSource")
 			next.ServeHTTP(w, req)
 		})
 	})

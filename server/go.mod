@@ -33,7 +33,7 @@ require (
 	github.com/xhit/go-simple-mail/v2 v2.10.0
 	github.com/xlzd/gotp v0.0.0-20181030022105-c8557ba2c119
 	github.com/xuri/excelize/v2 v2.6.1
-	go.uber.org/atomic v1.10.0
+	go.uber.org/atomic v1.11.0
 	golang.org/x/crypto v0.8.0
 	golang.org/x/net v0.9.0
 	golang.org/x/text v0.9.0
