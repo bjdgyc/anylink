@@ -97,8 +97,9 @@ func StartAdmin() {
 		r.HandleFunc("/debug/pprof", location("/debug/pprof/")).Name("debug")
 		r.PathPrefix("/debug/pprof/").HandlerFunc(pprof.Index).Name("debug")
 		// statsviz
-		r.Path("/debug/statsviz/ws").Name("debug").HandlerFunc(statsviz.Ws)
-		r.PathPrefix("/debug/statsviz/").Name("debug").Handler(statsviz.Index)
+		srv, _ := statsviz.NewServer() // Create server or handle error
+		r.Path("/debug/statsviz/ws").Name("debug").HandlerFunc(srv.Ws())
+		r.PathPrefix("/debug/statsviz/").Name("debug").Handler(srv.Index())
 	}
 
 	base.Info("Listen admin", base.Cfg.AdminAddr)
