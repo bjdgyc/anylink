@@ -64,6 +64,7 @@ func LinkDtls(conn net.Conn, cSess *sessdata.ConnSession) {
 		case 0x03: // DPD-REQ
 			// base.Debug("recv DPD-REQ", cSess.IpAddr)
 			pl.PType = 0x04
+			pl.Data = pl.Data[:n]
 			if payloadOutDtls(cSess, dSess, pl) {
 				return
 			}
@@ -149,7 +150,7 @@ func dtlsWrite(conn net.Conn, dSess *sessdata.DtlsSession, cSess *sessdata.ConnS
 			}
 		} else {
 			// 设置头类型
-			pl.Data = append(pl.Data[:0], pl.PType)
+			pl.Data[0] = pl.PType
 		}
 		n, err := conn.Write(pl.Data)
 		if err != nil {
