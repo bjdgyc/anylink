@@ -150,6 +150,7 @@ func dtlsWrite(conn net.Conn, dSess *sessdata.DtlsSession, cSess *sessdata.ConnS
 			}
 		} else {
 			// 设置头类型
+			// pl.Data = append(pl.Data[:0], pl.PType)
 			pl.Data[0] = pl.PType
 		}
 		n, err := conn.Write(pl.Data)

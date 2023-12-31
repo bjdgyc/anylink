@@ -75,6 +75,7 @@ func LinkCstp(conn net.Conn, bufRW *bufio.ReadWriter, cSess *sessdata.ConnSessio
 		case 0x03: // DPD-REQ
 			// base.Debug("recv DPD-REQ", cSess.IpAddr)
 			pl.PType = 0x04
+			pl.Data = pl.Data[:n]
 			if payloadOutCstp(cSess, pl) {
 				return
 			}
@@ -168,7 +169,7 @@ func cstpWrite(conn net.Conn, bufRW *bufio.ReadWriter, cSess *sessdata.ConnSessi
 				binary.BigEndian.PutUint16(pl.Data[4:6], uint16(l))
 			}
 		} else {
-			pl.Data = append(pl.Data[:0], plHeader...)
+			// pl.Data = append(pl.Data[:0], plHeader...)
 			// 设置头类型
 			pl.Data[6] = pl.PType
 		}
