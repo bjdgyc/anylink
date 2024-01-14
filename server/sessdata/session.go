@@ -49,6 +49,7 @@ type ConnSession struct {
 	BandwidthDownAll    atomic2.Uint64 // 使用下行带宽总量
 	closeOnce           sync.Once
 	CloseChan           chan struct{}
+	LastDataTime        atomic2.Time // 最后数据传输时间
 	PayloadIn           chan *Payload
 	PayloadOutCstp      chan *Payload // Cstp的数据
 	PayloadOutDtls      chan *Payload // Dtls的数据
@@ -219,6 +220,7 @@ func (s *Session) NewConn() *ConnSession {
 		PayloadOutDtls: make(chan *Payload, 64),
 		dSess:          &atomic.Value{},
 	}
+	cSess.LastDataTime.Store(time.Now())
 
 	dSess := &DtlsSession{
 		isActive: -1,

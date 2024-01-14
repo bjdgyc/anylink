@@ -22,6 +22,7 @@ const (
 	UserLogoutTimeout = 3 // 用户超时登出
 	UserLogoutAdmin   = 4 // 账号被管理员踢下线
 	UserLogoutExpire  = 5 // 账号过期被踢下线
+	UserIdleTimeout   = 6 // 用户空闲链接超时
 )
 
 type UserActLogProcess struct {
@@ -62,6 +63,7 @@ var (
 			UserLogoutTimeout: "Session过期被踢下线",
 			UserLogoutAdmin:   "账号被管理员踢下线",
 			UserLogoutExpire:  "账号过期被踢下线",
+			UserIdleTimeout:   "用户空闲链接超时",
 		},
 	}
 )

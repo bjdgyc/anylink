@@ -28,6 +28,10 @@ var (
 	logName    = "anylink.log"
 )
 
+func init() {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+}
+
 // 实现 os.Writer 接口
 type logWriter struct {
 	UseStdout bool
