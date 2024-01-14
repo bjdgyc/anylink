@@ -1,8 +1,8 @@
-name: go
+name: go-update
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 */6 * * *"
+    - cron: "0 0 * *  */7"
 jobs:
   go:
     runs-on: ubuntu-latest
@@ -31,7 +31,7 @@ jobs:
           git remote add origin "https://${{ github.actor }}:${{ secrets.GITHUBTOKEN }}@github.com/${{ github.repository }}"
           git gc --aggressive
           git add --all
-          git commit -m "update go $(date +%Y.%m.%d.%H.%M)"
+          git commit -m "update go.mod $(date +%Y.%m.%d.%H.%M)"
           git push -f -u origin main
           
     # 删除无用 workflow runs;
