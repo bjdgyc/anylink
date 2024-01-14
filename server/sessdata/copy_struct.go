@@ -8,7 +8,7 @@ import (
 // 用b的所有字段覆盖a的
 // 如果fields不为空, 表示用b的特定字段覆盖a的
 // a应该为结构体指针
-func CopyStruct(a interface{}, b interface{}, fields ...string) (err error) {
+func CopyStruct(a any, b any, fields ...string) (err error) {
 	at := reflect.TypeOf(a)
 	av := reflect.ValueOf(a)
 	bt := reflect.TypeOf(b)

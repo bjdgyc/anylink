@@ -33,7 +33,7 @@ type SettingOther struct {
 	AccountMail string `json:"account_mail"`
 }
 
-func StructName(data interface{}) string {
+func StructName(data any) string {
 	ref := reflect.ValueOf(data)
 	s := &ref
 	if s.Kind() == reflect.Ptr {
@@ -44,7 +44,7 @@ func StructName(data interface{}) string {
 	return name
 }
 
-func SettingSessAdd(sess *xorm.Session, data interface{}) error {
+func SettingSessAdd(sess *xorm.Session, data any) error {
 	name := StructName(data)
 	v, _ := json.Marshal(data)
 	s := &Setting{Name: name, Data: v}
@@ -52,7 +52,7 @@ func SettingSessAdd(sess *xorm.Session, data interface{}) error {
 	return err
 }
 
-func SettingSet(data interface{}) error {
+func SettingSet(data any) error {
 	name := StructName(data)
 	v, _ := json.Marshal(data)
 	s := &Setting{Data: v}
@@ -60,7 +60,7 @@ func SettingSet(data interface{}) error {
 	return err
 }
 
-func SettingGet(data interface{}) error {
+func SettingGet(data any) error {
 	name := StructName(data)
 	s := &Setting{Name: name}
 	err := One("name", name, s)

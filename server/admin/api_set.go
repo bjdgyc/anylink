@@ -17,7 +17,7 @@ import (
 )
 
 func SetHome(w http.ResponseWriter, r *http.Request) {
-	data := make(map[string]interface{})
+	data := make(map[string]any)
 
 	sess := sessdata.OnlineSess()
 
@@ -32,17 +32,17 @@ func SetHome(w http.ResponseWriter, r *http.Request) {
 }
 
 func SetSystem(w http.ResponseWriter, r *http.Request) {
-	data := make(map[string]interface{})
+	data := make(map[string]any)
 
 	m, _ := mem.VirtualMemory()
-	data["mem"] = map[string]interface{}{
+	data["mem"] = map[string]any{
 		"total":   utils.HumanByte(m.Total),
 		"free":    utils.HumanByte(m.Free),
 		"percent": decimal(m.UsedPercent),
 	}
 
 	d, _ := disk.Usage("/")
-	data["disk"] = map[string]interface{}{
+	data["disk"] = map[string]any{
 		"total":   utils.HumanByte(d.Total),
 		"free":    utils.HumanByte(d.Free),
 		"percent": decimal(d.UsedPercent),
@@ -56,7 +56,7 @@ func SetSystem(w http.ResponseWriter, r *http.Request) {
 	if cup == 0 {
 		cup = 1
 	}
-	data["cpu"] = map[string]interface{}{
+	data["cpu"] = map[string]any{
 		"core":      cc,
 		"modelName": ci.ModelName,
 		"ghz":       fmt.Sprintf("%.2f GHz", ci.Mhz/1000),
@@ -65,7 +65,7 @@ func SetSystem(w http.ResponseWriter, r *http.Request) {
 
 	hi, _ := host.Info()
 	l, _ := load.Avg()
-	data["sys"] = map[string]interface{}{
+	data["sys"] = map[string]any{
 		"goOs":        runtime.GOOS,
 		"goArch":      runtime.GOARCH,
 		"goVersion":   runtime.Version(),

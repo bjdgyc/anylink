@@ -203,7 +203,7 @@ func SetGroup(g *Group) error {
 		return errors.New("默认路由, 不允许设置\"包含域名\", 请重新配置")
 	}
 	// 处理登入方式的逻辑
-	defAuth := map[string]interface{}{
+	defAuth := map[string]any{
 		"type": "local",
 	}
 	if len(g.Auth) == 0 {
@@ -222,7 +222,7 @@ func SetGroup(g *Group) error {
 			return err
 		}
 		// 重置Auth， 删除多余的key
-		g.Auth = map[string]interface{}{
+		g.Auth = map[string]any{
 			"type":   authType,
 			authType: g.Auth[authType],
 		}
@@ -238,7 +238,7 @@ func SetGroup(g *Group) error {
 	return err
 }
 
-func GroupAuthLogin(name, pwd string, authData map[string]interface{}) error {
+func GroupAuthLogin(name, pwd string, authData map[string]any) error {
 	g := &Group{Auth: authData}
 	authType := g.Auth["type"].(string)
 	if _, ok := authRegistry[authType]; !ok {

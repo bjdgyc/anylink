@@ -28,7 +28,7 @@ func UserIpMapList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := map[string]interface{}{
+	data := map[string]any{
 		"count":     count,
 		"page_size": pageSize,
 		"datas":     datas,

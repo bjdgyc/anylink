@@ -43,7 +43,7 @@ func TestCheckUser(t *testing.T) {
 
 	// 添加一个radius组
 	group2 := "group2"
-	authData := map[string]interface{}{
+	authData := map[string]any{
 		"type": "radius",
 		"radius": map[string]string{
 			"addr":   "192.168.1.12:1044",
@@ -67,9 +67,9 @@ func TestCheckUser(t *testing.T) {
 	ast.Nil(err)
 	// 添加一个ldap组
 	group3 := "group3"
-	authData = map[string]interface{}{
+	authData = map[string]any{
 		"type": "ldap",
-		"ldap": map[string]interface{}{
+		"ldap": map[string]any{
 			"addr":         "192.168.8.12:389",
 			"tls":          true,
 			"bind_name":    "userfind@abc.com",

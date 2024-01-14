@@ -12,7 +12,7 @@ import (
 	// "github.com/mojocn/base64Captcha"
 )
 
-func SetJwtData(data map[string]interface{}, expiresAt int64) (string, error) {
+func SetJwtData(data map[string]any, expiresAt int64) (string, error) {
 	jwtData := jwt.MapClaims{"exp": expiresAt}
 	for k, v := range data {
 		jwtData[k] = v
@@ -24,8 +24,8 @@ func SetJwtData(data map[string]interface{}, expiresAt int64) (string, error) {
 	return tokenString, err
 }
 
-func GetJwtData(jwtToken string) (map[string]interface{}, error) {
-	token, err := jwt.Parse(jwtToken, func(token *jwt.Token) (interface{}, error) {
+func GetJwtData(jwtToken string) (map[string]any, error) {
+	token, err := jwt.Parse(jwtToken, func(token *jwt.Token) (any, error) {
 		// since we only use the one private key to sign the tokens,
 		// we also only use its public counter part to verify
 		return []byte(base.Cfg.JwtSecret), nil

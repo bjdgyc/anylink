@@ -46,7 +46,7 @@ const (
 	PB = 1024 * TB
 )
 
-func HumanByte(bf interface{}) string {
+func HumanByte(bf any) string {
 	var hb string
 	var bAll float64
 	switch bi := bf.(type) {

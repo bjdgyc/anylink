@@ -11,7 +11,7 @@ import (
 func TestJwtData(t *testing.T) {
 	assert := assert.New(t)
 	base.Cfg.JwtSecret = "dsfasfdfsadfasdfasd3sdaf"
-	data := map[string]interface{}{
+	data := map[string]any{
 		"key": "value",
 	}
 	expiresAt := time.Now().Add(time.Minute).Unix()

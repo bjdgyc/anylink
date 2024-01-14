@@ -28,7 +28,7 @@ func GroupList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := map[string]interface{}{
+	data := map[string]any{
 		"count":     count,
 		"page_size": pageSize,
 		"datas":     datas,
@@ -39,7 +39,7 @@ func GroupList(w http.ResponseWriter, r *http.Request) {
 
 func GroupNames(w http.ResponseWriter, r *http.Request) {
 	var names = dbdata.GetGroupNames()
-	data := map[string]interface{}{
+	data := map[string]any{
 		"count":     len(names),
 		"page_size": 0,
 		"datas":     names,
@@ -49,7 +49,7 @@ func GroupNames(w http.ResponseWriter, r *http.Request) {
 
 func GroupNamesIds(w http.ResponseWriter, r *http.Request) {
 	var names = dbdata.GetGroupNamesIds()
-	data := map[string]interface{}{
+	data := map[string]any{
 		"count":     len(names),
 		"page_size": 0,
 		"datas":     names,
@@ -121,9 +121,9 @@ func GroupDel(w http.ResponseWriter, r *http.Request) {
 
 func GroupAuthLogin(w http.ResponseWriter, r *http.Request) {
 	type AuthLoginData struct {
-		Name string                 `json:"name"`
-		Pwd  string                 `json:"pwd"`
-		Auth map[string]interface{} `json:"auth"`
+		Name string         `json:"name"`
+		Pwd  string         `json:"pwd"`
+		Auth map[string]any `json:"auth"`
 	}
 
 	body, err := io.ReadAll(r.Body)

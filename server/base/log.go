@@ -110,12 +110,12 @@ func logLevel2Int(l string) int {
 	return lvl
 }
 
-func output(l int, s ...interface{}) {
+func output(l int, s ...any) {
 	lvl := fmt.Sprintf("[%s] ", levels[l])
 	_ = baseLog.Output(3, lvl+fmt.Sprintln(s...))
 }
 
-func Trace(v ...interface{}) {
+func Trace(v ...any) {
 	l := LogLevelTrace
 	if baseLevel > l {
 		return
@@ -123,7 +123,7 @@ func Trace(v ...interface{}) {
 	output(l, v...)
 }
 
-func Debug(v ...interface{}) {
+func Debug(v ...any) {
 	l := LogLevelDebug
 	if baseLevel > l {
 		return
@@ -131,7 +131,7 @@ func Debug(v ...interface{}) {
 	output(l, v...)
 }
 
-func Info(v ...interface{}) {
+func Info(v ...any) {
 	l := LogLevelInfo
 	if baseLevel > l {
 		return
@@ -139,7 +139,7 @@ func Info(v ...interface{}) {
 	output(l, v...)
 }
 
-func Warn(v ...interface{}) {
+func Warn(v ...any) {
 	l := LogLevelWarn
 	if baseLevel > l {
 		return
@@ -147,7 +147,7 @@ func Warn(v ...interface{}) {
 	output(l, v...)
 }
 
-func Error(v ...interface{}) {
+func Error(v ...any) {
 	l := LogLevelError
 	if baseLevel > l {
 		return
@@ -155,7 +155,7 @@ func Error(v ...interface{}) {
 	output(l, v...)
 }
 
-func Fatal(v ...interface{}) {
+func Fatal(v ...any) {
 	l := LogLevelFatal
 	if baseLevel > l {
 		return

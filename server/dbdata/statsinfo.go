@@ -66,7 +66,7 @@ func (s *StatsInfo) ValidScope(scope string) bool {
 }
 
 // 设置实时统计数据
-func (s *StatsInfo) SetRealTime(action string, val interface{}) {
+func (s *StatsInfo) SetRealTime(action string, val any) {
 	s.mux.Lock()
 	defer s.mux.Unlock()
 
@@ -78,7 +78,7 @@ func (s *StatsInfo) SetRealTime(action string, val interface{}) {
 }
 
 // 获取实时统计数据
-func (s *StatsInfo) GetRealTime(action string) (res []interface{}) {
+func (s *StatsInfo) GetRealTime(action string) (res []any) {
 	s.mux.Lock()
 	defer s.mux.Unlock()
 
@@ -105,17 +105,17 @@ func (s *StatsInfo) SaveStatsInfo(so StatsOnline, sn StatsNetwork, sc StatsCpu, 
 }
 
 // 获取统计数据
-func (s *StatsInfo) GetData(action string, scope string) (res []interface{}, err error) {
+func (s *StatsInfo) GetData(action string, scope string) (res []any, err error) {
 	if scope == "rt" {
 		return s.GetRealTime(action), nil
 	}
-	statsMaps := make(map[string]interface{})
+	statsMaps := make(map[string]any)
 	currSec := fmt.Sprintf("%02d", time.Now().Second())
 
 	// 获取时间段数据
 	sd := s.getScopeDetail(scope)
 	timeList := s.getTimeList(sd)
-	res = make([]interface{}, len(timeList))
+	res = make([]any, len(timeList))
 
 	// 获取数据库查询条件
 	where := s.getStatsWhere(sd)

@@ -8,11 +8,11 @@ import (
 var authRegistry = make(map[string]reflect.Type)
 
 type IUserAuth interface {
-	checkData(authData map[string]interface{}) error
+	checkData(authData map[string]any) error
 	checkUser(name, pwd string, g *Group) error
 }
 
-func makeInstance(name string) interface{} {
+func makeInstance(name string) any {
 	v := reflect.New(authRegistry[name]).Elem()
 	return v.Interface()
 }

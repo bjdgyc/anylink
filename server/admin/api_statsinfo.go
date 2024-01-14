@@ -27,7 +27,7 @@ func StatsInfoList(w http.ResponseWriter, r *http.Request) {
 		RespError(w, RespInternalErr, err)
 		return
 	}
-	data := make(map[string]interface{})
+	data := make(map[string]any)
 	data["datas"] = datas
 	RespSucess(w, data)
 }

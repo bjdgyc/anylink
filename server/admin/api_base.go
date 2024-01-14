@@ -55,14 +55,14 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	// token有效期
 	expiresAt := time.Now().Unix() + 3600*3
-	jwtData := map[string]interface{}{"admin_user": adminUser}
+	jwtData := map[string]any{"admin_user": adminUser}
 	tokenString, err := SetJwtData(jwtData, expiresAt)
 	if err != nil {
 		RespError(w, 1, err)
 		return
 	}
 
-	data := make(map[string]interface{})
+	data := make(map[string]any)
 	data["token"] = tokenString
 	data["admin_user"] = adminUser
 	data["expires_at"] = expiresAt

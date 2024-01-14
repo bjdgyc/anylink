@@ -7,8 +7,8 @@ import (
 )
 
 type IMaps interface {
-	Set(key string, val interface{})
-	Get(key string) (interface{}, bool)
+	Set(key string, val any)
+	Get(key string) (any, bool)
 	Del(key string)
 }
 
@@ -17,13 +17,13 @@ type IMaps interface {
  *
  */
 type BaseMap struct {
-	m map[string]interface{}
+	m map[string]any
 }
 
-func (m *BaseMap) Set(key string, value interface{}) {
+func (m *BaseMap) Set(key string, value any) {
 	m.m[key] = value
 }
-func (m *BaseMap) Get(key string) (interface{}, bool) {
+func (m *BaseMap) Get(key string) (any, bool) {
 	v, ok := m.m[key]
 	return v, ok
 }
@@ -39,11 +39,11 @@ type ConcurrentMap struct {
 	m cmap.ConcurrentMap
 }
 
-func (m *ConcurrentMap) Set(key string, value interface{}) {
+func (m *ConcurrentMap) Set(key string, value any) {
 	m.m.Set(key, value)
 }
 
-func (m *ConcurrentMap) Get(key string) (interface{}, bool) {
+func (m *ConcurrentMap) Get(key string) (any, bool) {
 	return m.m.Get(key)
 }
 
@@ -56,17 +56,17 @@ func (m *ConcurrentMap) Del(key string) {
  *
  */
 type RWLockMap struct {
-	m    map[string]interface{}
+	m    map[string]any
 	lock sync.RWMutex
 }
 
-func (m *RWLockMap) Set(key string, value interface{}) {
+func (m *RWLockMap) Set(key string, value any) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 	m.m[key] = value
 }
 
-func (m *RWLockMap) Get(key string) (interface{}, bool) {
+func (m *RWLockMap) Get(key string) (any, bool) {
 	m.lock.RLock()
 	defer m.lock.RUnlock()
 	v, ok := m.m[key]
@@ -87,11 +87,11 @@ type SyncMap struct {
 	m sync.Map
 }
 
-func (m *SyncMap) Set(key string, val interface{}) {
+func (m *SyncMap) Set(key string, val any) {
 	m.m.Store(key, val)
 }
 
-func (m *SyncMap) Get(key string) (interface{}, bool) {
+func (m *SyncMap) Get(key string) (any, bool) {
 	return m.m.Load(key)
 }
 
@@ -104,12 +104,12 @@ func NewMap(name string, len int) IMaps {
 	case "cmap":
 		return &ConcurrentMap{m: cmap.New()}
 	case "rwmap":
-		m := make(map[string]interface{}, len)
+		m := make(map[string]any, len)
 		return &RWLockMap{m: m}
 	case "syncmap":
 		return &SyncMap{}
 	default:
-		m := make(map[string]interface{}, len)
+		m := make(map[string]any, len)
 		return &BaseMap{m: m}
 	}
 }

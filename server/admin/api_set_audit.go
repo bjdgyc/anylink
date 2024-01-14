@@ -22,7 +22,7 @@ func SetAuditList(w http.ResponseWriter, r *http.Request) {
 		RespError(w, RespInternalErr, err)
 		return
 	}
-	data := map[string]interface{}{
+	data := map[string]any{
 		"count":     count,
 		"page_size": dbdata.PageSize,
 		"datas":     datas,
@@ -66,7 +66,7 @@ func UserActLogList(w http.ResponseWriter, r *http.Request) {
 		RespError(w, RespInternalErr, err)
 		return
 	}
-	data := map[string]interface{}{
+	data := map[string]any{
 		"count":     count,
 		"page_size": dbdata.PageSize,
 		"datas":     datas,

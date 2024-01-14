@@ -11,7 +11,7 @@ import (
 	"github.com/bjdgyc/anylink/dbdata"
 )
 
-func setOtherGet(data interface{}, w http.ResponseWriter) {
+func setOtherGet(data any, w http.ResponseWriter) {
 	err := dbdata.SettingGet(data)
 	if err != nil && !dbdata.CheckErrNotFound(err) {
 		RespError(w, RespInternalErr, err)
@@ -25,7 +25,7 @@ func setOtherGet(data interface{}, w http.ResponseWriter) {
 	RespSucess(w, data)
 }
 
-func setOtherEdit(data interface{}, w http.ResponseWriter, r *http.Request) {
+func setOtherEdit(data any, w http.ResponseWriter, r *http.Request) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		RespError(w, RespInternalErr, err)

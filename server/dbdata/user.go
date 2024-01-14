@@ -134,7 +134,7 @@ func checkLocalUser(name, pwd, group string) error {
 }
 
 // 用户过期时间到达后，更新用户状态，并返回一个状态为过期的用户切片
-func CheckUserlimittime() (limitUser []interface{}) {
+func CheckUserlimittime() (limitUser []any) {
 	if _, err := xdb.Where("limittime <= ?", time.Now()).And("status = ?", 1).Update(&User{Status: 2}); err != nil {
 		return
 	}

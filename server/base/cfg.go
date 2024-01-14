@@ -149,10 +149,10 @@ func initCfg() {
 }
 
 type SCfg struct {
-	Name string      `json:"name"`
-	Env  string      `json:"env"`
-	Info string      `json:"info"`
-	Data interface{} `json:"data"`
+	Name string `json:"name"`
+	Env  string `json:"env"`
+	Info string `json:"info"`
+	Data any    `json:"data"`
 }
 
 func ServerCfg2Slice() []SCfg {

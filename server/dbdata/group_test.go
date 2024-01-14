@@ -24,7 +24,7 @@ func TestGetGroupNames(t *testing.T) {
 	err = SetGroup(&g3)
 	ast.Nil(err)
 
-	authData := map[string]interface{}{
+	authData := map[string]any{
 		"type": "radius",
 		"radius": map[string]string{
 			"addr":   "192.168.8.12:1044",
@@ -43,9 +43,9 @@ func TestGetGroupNames(t *testing.T) {
 	err = SetGroup(&g6)
 	ast.Nil(err)
 
-	authData = map[string]interface{}{
+	authData = map[string]any{
 		"type": "ldap",
-		"ldap": map[string]interface{}{
+		"ldap": map[string]any{
 			"addr":         "192.168.8.12:389",
 			"tls":          true,
 			"bind_name":    "userfind@abc.com",

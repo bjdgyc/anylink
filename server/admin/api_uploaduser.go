@@ -63,7 +63,7 @@ func UploadUser(file string) error {
 	if rows[0][0] != "id" || rows[0][1] != "username" || rows[0][2] != "nickname" || rows[0][3] != "email" || rows[0][4] != "pin_code" || rows[0][5] != "limittime" || rows[0][6] != "otp_secret" || rows[0][7] != "disable_otp" || rows[0][8] != "groups" || rows[0][9] != "status" || rows[0][10] != "send_email" {
 		return fmt.Errorf("批量添加失败，表格格式不正确")
 	}
-	var k []interface{}
+	var k []any
 	for _, v := range dbdata.GetGroupNames() {
 		k = append(k, v)
 	}

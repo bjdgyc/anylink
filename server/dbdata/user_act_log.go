@@ -101,7 +101,7 @@ func (ua *UserActLogProcess) Add(u UserActLog, userAgent string) {
 }
 
 // 转义操作类型, 方便vue显示
-func (ua *UserActLogProcess) GetStatusOpsWithTag() interface{} {
+func (ua *UserActLogProcess) GetStatusOpsWithTag() any {
 	type StatusTag struct {
 		Key   int    `json:"key"`
 		Value string `json:"value"`

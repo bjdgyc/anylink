@@ -21,7 +21,7 @@ func init() {
 	authRegistry["radius"] = reflect.TypeOf(AuthRadius{})
 }
 
-func (auth AuthRadius) checkData(authData map[string]interface{}) error {
+func (auth AuthRadius) checkData(authData map[string]any) error {
 	authType := authData["type"].(string)
 	bodyBytes, err := json.Marshal(authData[authType])
 	if err != nil {
