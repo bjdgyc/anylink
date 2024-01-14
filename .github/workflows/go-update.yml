@@ -21,6 +21,8 @@ jobs:
           gofmt -w -r 'interface{} -> any' .
           go get -u
           go mod download
+          go get -u
+          go mod download
 
       - name: Git push 
         run: |
