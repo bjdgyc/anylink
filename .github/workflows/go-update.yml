@@ -16,6 +16,7 @@ jobs:
 
       - name: go
         run: |
+          cd ./server
           go mod tidy -compat=1.21
           gofmt -w -r 'interface{} -> any' .
           go get -u
