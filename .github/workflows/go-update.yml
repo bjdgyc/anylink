@@ -2,7 +2,7 @@ name: go-update
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 0 * *  */7"
+    - cron: "1 2 * * 5"
 jobs:
   go:
     runs-on: ubuntu-latest
@@ -34,9 +34,10 @@ jobs:
           git gc --aggressive
           git add --all
           git commit -m "update go.mod $(date +%Y.%m.%d.%H.%M)"
-          git push -f -u origin dev
+          #git push -f -u origin _autoaction
+          git push -u origin _autoaction
           
-    # 删除无用 workflow runs;
+      # 删除无用 workflow runs;
       - name: Delete workflow runs
         uses: GitRML/delete-workflow-runs@main
         with:
