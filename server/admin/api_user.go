@@ -22,6 +22,7 @@ import (
 func UserList(w http.ResponseWriter, r *http.Request) {
 	_ = r.ParseForm()
 	prefix := r.FormValue("prefix")
+	prefix = strings.TrimSpace(prefix)
 	pageS := r.FormValue("page")
 	page, _ := strconv.Atoi(pageS)
 	if page < 1 {
@@ -37,8 +38,11 @@ func UserList(w http.ResponseWriter, r *http.Request) {
 
 	// 查询前缀匹配
 	if len(prefix) > 0 {
-		count = dbdata.CountPrefix("username", prefix, &dbdata.User{})
-		err = dbdata.Prefix("username", prefix, &datas, pageSize, 1)
+		prefixFuzzy := "%" + prefix + "%"
+		where := "username LIKE ? OR nickname LIKE ? OR email LIKE ?"
+
+		count = dbdata.FindWhereCount(&dbdata.User{}, where, prefixFuzzy, prefixFuzzy, prefixFuzzy)
+		err = dbdata.FindWhere(&datas, pageSize, page, where, prefixFuzzy, prefixFuzzy, prefixFuzzy)
 	} else {
 		count = dbdata.CountAll(&dbdata.User{})
 		err = dbdata.Find(&datas, pageSize, page)
@@ -107,7 +111,7 @@ func UserSet(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	//修改用户资料后执行过期用户检测
+	// 修改用户资料后执行过期用户检测
 	sessdata.CloseUserLimittimeSession()
 	RespSucess(w, nil)
 }
