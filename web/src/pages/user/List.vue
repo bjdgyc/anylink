@@ -13,23 +13,26 @@
         <el-form-item>
           <el-dropdown size="small" placement="bottom">
             <el-upload
-              class="uploaduser"
-              action="uploaduser"
-              accept=".xlsx, .xls"
-              :http-request="upLoadUser"
-              :limit="1"
-              :show-file-list="false">
-              <el-button size="small"  icon="el-icon-upload2" type="primary">批量添加</el-button>
+                class="uploaduser"
+                action="uploaduser"
+                accept=".xlsx, .xls"
+                :http-request="upLoadUser"
+                :limit="1"
+                :show-file-list="false">
+              <el-button size="small" icon="el-icon-upload2" type="primary">批量添加</el-button>
             </el-upload>
-          <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item>
-              <el-link style="font-size:12px;" type="success" href="批量添加用户模版.xlsx"><i class="el-icon-download"></i>下载模版</el-link>
-            </el-dropdown-item>
-          </el-dropdown-menu>
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item>
+                <el-link style="font-size:12px;" type="success" href="批量添加用户模版.xlsx"><i
+                    class="el-icon-download"></i>下载模版
+                </el-link>
+              </el-dropdown-item>
+            </el-dropdown-menu>
           </el-dropdown>
         </el-form-item>
-        <el-form-item label="用户名:">
-          <el-input size="small" v-model="searchData" placeholder="请输入内容" @keydown.enter.native="searchEnterFun"></el-input>
+        <el-form-item label="用户名或姓名或邮箱:">
+          <el-input size="small" v-model="searchData" placeholder="请输入内容"
+                    @keydown.enter.native="searchEnterFun"></el-input>
         </el-form-item>
 
         <el-form-item>
@@ -105,7 +108,7 @@
           <template slot-scope="scope">
             <el-tag v-if="scope.row.status === 1" type="success">可用</el-tag>
             <el-tag v-if="scope.row.status === 0" type="danger">停用</el-tag>
-            <el-tag v-if="scope.row.status === 2" >过期</el-tag>
+            <el-tag v-if="scope.row.status === 2">过期</el-tag>
           </template>
         </el-table-column>
 
@@ -202,16 +205,16 @@
 
         <el-form-item label="过期时间" prop="limittime">
           <el-date-picker
-            v-model="ruleForm.limittime"
-            type="date"
-            size="small"
-            align="center"
-            style="width:130px"
-            :picker-options="pickerOptions"
-            placeholder="选择日期">
+              v-model="ruleForm.limittime"
+              type="date"
+              size="small"
+              align="center"
+              style="width:130px"
+              :picker-options="pickerOptions"
+              placeholder="选择日期">
           </el-date-picker>
         </el-form-item>
-        
+
         <el-form-item label="禁用OTP" prop="disable_otp">
           <el-switch
               v-model="ruleForm.disable_otp">
@@ -278,7 +281,7 @@ export default {
       count: 10,
       pickerOptions: {
         disabledDate(time) {
-            return time.getTime() < Date.now();
+          return time.getTime() < Date.now();
         }
       },
       searchData: '',
@@ -324,7 +327,7 @@ export default {
       const formData = new FormData();
       formData.append("file", item.file);
       axios.post('/user/uploaduser', formData, {
-         headers: {
+        headers: {
           'Content-Type': 'multipart/form-data'
         }
       }).then(resp => {
@@ -456,15 +459,15 @@ export default {
       this.$refs[formName].resetFields();
     },
     searchEnterFun(e) {
-        var keyCode = window.event ? e.keyCode : e.which;
-        if (keyCode == 13) {
-            this.handleSearch()
-        }
-    }, 
+      var keyCode = window.event ? e.keyCode : e.which;
+      if (keyCode == 13) {
+        this.handleSearch()
+      }
+    },
     reset() {
-        this.searchData = "";
-        this.handleSearch();
-    },       
+      this.searchData = "";
+      this.handleSearch();
+    },
   },
 }
 </script>

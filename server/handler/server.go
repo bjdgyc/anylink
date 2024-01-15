@@ -56,10 +56,10 @@ func startTls() {
 		},
 	}
 	srv := &http.Server{
-		Addr:         addr,
-		Handler:      initRoute(),
-		TLSConfig:    tlsConfig,
-		ErrorLog:     base.GetBaseLog(),
+		Addr:      addr,
+		Handler:   initRoute(),
+		TLSConfig: tlsConfig,
+		// ErrorLog:     base.GetBaseLog(),
 		ReadTimeout:  60 * time.Second,
 		WriteTimeout: 60 * time.Second,
 	}

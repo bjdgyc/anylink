@@ -45,9 +45,10 @@ echo "整理部署文件"
 deploy="anylink-deploy"
 rm -rf $deploy ${deploy}.tar.gz
 mkdir $deploy
+mkdir $deploy/log
 
 cp -r server/anylink $deploy
-#cp -r server/bridge-init.sh $deploy
+cp -r server/bridge-init.sh $deploy
 cp -r server/conf $deploy
 
 cp -r systemd $deploy

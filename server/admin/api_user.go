@@ -38,11 +38,11 @@ func UserList(w http.ResponseWriter, r *http.Request) {
 
 	// 查询前缀匹配
 	if len(prefix) > 0 {
-		prefixFuzzy := "%" + prefix + "%"
+		fuzzy := "%" + prefix + "%"
 		where := "username LIKE ? OR nickname LIKE ? OR email LIKE ?"
 
-		count = dbdata.FindWhereCount(&dbdata.User{}, where, prefixFuzzy, prefixFuzzy, prefixFuzzy)
-		err = dbdata.FindWhere(&datas, pageSize, page, where, prefixFuzzy, prefixFuzzy, prefixFuzzy)
+		count = dbdata.FindWhereCount(&dbdata.User{}, where, fuzzy, fuzzy, fuzzy)
+		err = dbdata.FindWhere(&datas, pageSize, page, where, fuzzy, fuzzy, fuzzy)
 	} else {
 		count = dbdata.CountAll(&dbdata.User{})
 		err = dbdata.Find(&datas, pageSize, page)

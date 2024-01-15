@@ -186,7 +186,7 @@ func checkOtp(name, otp, secret string) bool {
 
 	totp := gotp.NewDefaultTOTP(secret)
 	unix := time.Now().Unix()
-	verify := totp.Verify(otp, int(unix))
+	verify := totp.Verify(otp, unix)
 
 	return verify
 }
