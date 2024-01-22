@@ -28,6 +28,7 @@ func main() {
 
 	base.Start()
 	handler.Start()
+
 	signalWatch()
 }
 
@@ -35,7 +36,7 @@ func signalWatch() {
 	base.Info("Server pid: ", os.Getpid())
 
 	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM, syscall.SIGALRM)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM, syscall.SIGALRM, syscall.SIGUSR2)
 	for {
 		sig := <-sigs
 		base.Info("Get signal:", sig)
