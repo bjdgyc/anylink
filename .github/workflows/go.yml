@@ -14,13 +14,13 @@ jobs:
     steps:
 
       - name: Set up Go 1.x
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v4
         with:
-          go-version: 1.18
+          go-version: 1.20
         id: go
 
       - name: Check out code into the Go module directory
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Get dependencies
         run: |
@@ -32,7 +32,7 @@ jobs:
           cd server
           mkdir ui
           touch ui/index.html
-          go build -v -o anylink -ldflags "-X main.CommitId=`git rev-parse HEAD`"
+          go build -v -o anylink -trimpath -ldflags "-X main.CommitId=`git rev-parse HEAD`"
           ./anylink tool -v
 
       - name: Test coverage
