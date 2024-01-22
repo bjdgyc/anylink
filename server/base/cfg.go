@@ -45,6 +45,7 @@ type ServerConfig struct {
 	FilesPath      string `json:"files_path"`
 	LogPath        string `json:"log_path"`
 	LogLevel       string `json:"log_level"`
+	HttpServerLog  bool   `json:"http_server_log"`
 	Pprof          bool   `json:"pprof"`
 	Issuer         string `json:"issuer"`
 	AdminUser      string `json:"admin_user"`

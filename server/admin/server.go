@@ -130,6 +130,7 @@ func StartAdmin() {
 		Addr:      base.Cfg.AdminAddr,
 		Handler:   r,
 		TLSConfig: tlsConfig,
+		ErrorLog:  base.GetServerLog(),
 	}
 	err := srv.ListenAndServeTLS("", "")
 	if err != nil {

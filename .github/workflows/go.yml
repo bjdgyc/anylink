@@ -12,16 +12,15 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v4
 
       - name: Set up Go 1.x
         uses: actions/setup-go@v4
-        id: go
         with:
           go-version: '1.20'
-          stable: true
-
-      - name: Check out code into the Go module directory
-        uses: actions/checkout@v4
+          go-version-file: 'server/go.mod'
+          cache-dependency-path: 'server/go.sum'
 
       - name: Get dependencies
         run: |
@@ -41,7 +40,7 @@ jobs:
           cd server
           go test -race -coverprofile=coverage.txt -covermode=atomic -v ./...
 
-      - name: Upload coverage to Codecov
-        run: |
-          cd server
-          bash <(curl -s https://codecov.io/bash)
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: 28d52fb0-8fc9-460f-95b9-fb84f9138e58

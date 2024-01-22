@@ -3,9 +3,10 @@
 [![Go](https://github.com/bjdgyc/anylink/workflows/Go/badge.svg?branch=main)](https://github.com/bjdgyc/anylink/actions)
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/bjdgyc/anylink)](https://pkg.go.dev/github.com/bjdgyc/anylink)
 [![Go Report Card](https://goreportcard.com/badge/github.com/bjdgyc/anylink)](https://goreportcard.com/report/github.com/bjdgyc/anylink)
-[![codecov](https://codecov.io/gh/bjdgyc/anylink/branch/master/graph/badge.svg?token=JTFLIIIBQ0)](https://codecov.io/gh/bjdgyc/anylink)
+[![codecov](https://codecov.io/gh/bjdgyc/anylink/graph/badge.svg?token=JTFLIIIBQ0)](https://codecov.io/gh/bjdgyc/anylink)
 ![GitHub release](https://img.shields.io/github/v/release/bjdgyc/anylink)
-![GitHub downloads)](https://img.shields.io/github/downloads/bjdgyc/anylink/total)
+![GitHub downloads total)](https://img.shields.io/github/downloads/bjdgyc/anylink/total)
+![GitHub Downloads (all assets, latest release)](https://img.shields.io/github/downloads/bjdgyc/anylink/latest/total)
 [![Docker pulls)](https://img.shields.io/docker/pulls/bjdgyc/anylink.svg)](https://hub.docker.com/r/bjdgyc/anylink)
 ![LICENSE](https://img.shields.io/github/license/bjdgyc/anylink)
 
@@ -60,7 +61,7 @@ AnyLink 服务端仅在 CentOS 7、CentOS 8、Ubuntu 18.04、Ubuntu 20.04 测试
 > 其他问题 [前往查看](doc/question.md)
 >
 > 默认管理后台访问地址  https://host:8800  默认账号密码 admin 123456
-> 
+>
 > 首次使用，请在浏览器访问  https://域名:443   浏览器提示安全后，在客户端输入 【域名:443】 即可
 
 ### 自行编译安装

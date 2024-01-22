@@ -34,6 +34,7 @@ var configs = []config{
 	{Typ: cfgStr, Name: "files_path", Usage: "外部下载文件路径", ValStr: "./conf/files"},
 	{Typ: cfgStr, Name: "log_path", Usage: "日志文件路径,默认标准输出", ValStr: ""},
 	{Typ: cfgStr, Name: "log_level", Usage: "日志等级 [debug info warn error]", ValStr: "debug"},
+	{Typ: cfgBool, Name: "http_server_log", Usage: "开启go标准库http.Server的日志", ValBool: false},
 	{Typ: cfgBool, Name: "pprof", Usage: "开启pprof", ValBool: false},
 	{Typ: cfgStr, Name: "issuer", Usage: "系统名称", ValStr: "XX公司VPN"},
 	{Typ: cfgStr, Name: "admin_user", Usage: "管理用户名", ValStr: "admin"},
