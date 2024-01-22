@@ -36,7 +36,7 @@ cp -rf $cpath/web/ui .
 #国内可替换源加快速度
 export GOPROXY=https://goproxy.io
 go mod tidy
-go build -v -o anylink -ldflags "-s -w -X main.CommitId=$(git rev-parse HEAD)"
+go build -v -o anylink -trimpath -ldflags "-s -w -X main.CommitId=$(git rev-parse HEAD)"
 RETVAL $?
 
 cd $cpath
