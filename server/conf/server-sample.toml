@@ -29,10 +29,11 @@ admin_otp = ""
 jwt_secret = "abcdef.0123456789.abcdef"
 
 
-#服务监听地址
+#TCP服务监听地址(任意端口)
 server_addr = ":443"
 #开启 DTLS, 默认关闭
 server_dtls = false
+#UDP监听地址(任意端口)
 server_dtls_addr = ":443"
 #后台服务监听地址
 admin_addr = ":8800"
@@ -49,7 +50,7 @@ ipv4_start = "192.168.90.100"
 ipv4_end = "192.168.90.200"
 
 #最大客户端数量
-max_client = 100
+max_client = 200
 #单个用户同时在线数量
 max_user_client = 3
 #IP租期(秒)
@@ -59,10 +60,10 @@ ip_lease = 86400
 default_group = "one"
 
 #客户端失效检测时间(秒) dpd > keepalive
-cstp_keepalive = 6
-cstp_dpd = 10
-mobile_keepalive = 15
-mobile_dpd = 20
+cstp_keepalive = 5
+cstp_dpd = 12
+mobile_keepalive = 10
+mobile_dpd = 22
 
 #设置最大传输单元
 mtu = 1460

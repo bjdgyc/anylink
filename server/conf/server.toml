@@ -23,7 +23,7 @@ admin_pass = "$2a$10$UQ7C.EoPifDeJh6d8.31TeSPQU7hM/NOM2nixmBucJpAuXDQNqNke"
 admin_otp = ""
 jwt_secret = "abcdef.0123456789.abcdef"
 
-#服务监听地址
+#TCP服务监听地址(任意端口)
 server_addr = ":443"
 #后台服务监听地址
 admin_addr = ":8800"
