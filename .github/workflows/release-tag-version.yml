@@ -1,0 +1,28 @@
+name: release-tag-version
+
+on:
+  push:
+    tags:
+      - "v0.*"
+
+jobs:
+  Build:
+    name: build-binary
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - run: git fetch --unshallow --quiet --tags --force
+
+      - uses: actions/setup-go@v4
+        with:
+          go-version: '1.20'
+          go-version-file: 'server/go.mod'
+          cache-dependency-path: 'server/go.sum'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '16'
+
+  Docker:
+    name: build-docker

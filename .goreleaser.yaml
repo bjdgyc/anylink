@@ -1,0 +1,62 @@
+#https://goreleaser.com/static/schema.json
+
+# goreleaser build --skip=validate --clean --debug
+
+version: 1
+
+dist: godist
+
+before:
+  hooks:
+  # You may remove this if you don't use go modules.
+  #- go mod tidy
+  # you may remove this if you don't need go generate
+  #- go generate ./...
+
+builds:
+  - id: "build"
+    #main: .
+    dir: ./server
+    env:
+      - CGO_ENABLED=1
+      - >-
+        {{- if eq .Os "darwin" }}
+          {{- if eq .Arch "amd64"}}CC=o64-clang{{- end }}
+          {{- if eq .Arch "arm64"}}CC=aarch64-apple-darwin20.2-clang{{- end }}
+        {{- end }}
+        {{- if eq .Os "linux" }}
+          {{- if eq .Arch "arm64" }}CC=aarch64-linux-gnu-gcc{{- end }}
+          {{- if eq .Arch "arm" }}CC=arm-linux-gnueabi-gcc{{- end }}
+        {{- end }}
+    goos:
+      - linux
+      #- darwin
+      #- windows
+    goarch:
+      - amd64
+      - arm64
+      - arm
+
+
+archives:
+  - id: "archive1"
+    format: tar.gz
+    # this name template makes the OS and Arch compatible with the results of `uname`.
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+    # use zip for windows archives
+    format_overrides:
+      - goos: windows
+        format: zip
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
