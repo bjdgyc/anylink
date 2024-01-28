@@ -23,9 +23,9 @@ cd $cpath/web
 #国内可替换源加快速度
 #npx browserslist@latest --update-db
 if [ "$github_action" == "github_action" ]; then
-  yarn install --registry=https://registry.npmmirror.com
-else
   yarn install
+else
+  yarn install --registry=https://registry.npmmirror.com
 fi
 
 yarn run build
@@ -52,10 +52,10 @@ fi
 
 #github action
 go mod tidy
-go build -o anylink_amd64 "$flags" -ldflags "$ldflags"
+go build -o anylink_amd64 $flags -ldflags "$ldflags"
 
 #arm64交叉编译
-CC=aarch64-linux-gnu-gcc CXX=aarch64-linux-gnu-g++ go build -o anylink_arm64 "$flags" -ldflags "$ldflags"
+CC=aarch64-linux-gnu-gcc CXX=aarch64-linux-gnu-g++ go build -o anylink_arm64 $flags -ldflags "$ldflags"
 
 ./anylink_amd64 -v
 ./anylink_arm64 -v
