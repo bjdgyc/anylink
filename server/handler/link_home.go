@@ -14,6 +14,8 @@ func LinkHome(w http.ResponseWriter, r *http.Request) {
 	// hu, _ := httputil.DumpRequest(r, true)
 	// fmt.Println("DumpHome: ", string(hu))
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Header().Del("X-Aggregate-Auth")
+
 	connection := strings.ToLower(r.Header.Get("Connection"))
 	userAgent := strings.ToLower(r.UserAgent())
 	if connection == "close" && (strings.Contains(userAgent, "anyconnect") || strings.Contains(userAgent, "openconnect")) {
@@ -33,6 +35,8 @@ func LinkHome(w http.ResponseWriter, r *http.Request) {
 }
 
 func LinkOtpQr(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Cross-Origin-Resource-Policy", "cross-origin")
+
 	_ = r.ParseForm()
 	idS := r.FormValue("id")
 	jwtToken := r.FormValue("jwt")

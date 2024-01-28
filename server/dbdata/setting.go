@@ -62,7 +62,7 @@ func SettingSet(data interface{}) error {
 
 func SettingGet(data interface{}) error {
 	name := StructName(data)
-	s := &Setting{Name: name}
+	s := &Setting{}
 	err := One("name", name, s)
 	if err != nil {
 		return err

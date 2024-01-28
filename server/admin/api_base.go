@@ -36,7 +36,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 		totp := gotp.NewDefaultTOTP(base.Cfg.AdminOtp)
 		unix := time.Now().Unix()
-		verify := totp.Verify(otp, int(unix))
+		verify := totp.Verify(otp, unix)
 
 		if !verify {
 			RespError(w, RespUserOrPassErr)

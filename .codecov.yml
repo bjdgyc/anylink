@@ -1,5 +1,7 @@
 ignore:
-  - "screenshot"
-  - "web"
-  - "server/conf"
-  - "server/files"
+  - "^doc"
+  - "^home"
+  - "^web"
+  - "^server/conf"
+  - "^server/files"
+

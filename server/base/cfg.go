@@ -45,6 +45,7 @@ type ServerConfig struct {
 	FilesPath      string `json:"files_path"`
 	LogPath        string `json:"log_path"`
 	LogLevel       string `json:"log_level"`
+	HttpServerLog  bool   `json:"http_server_log"`
 	Pprof          bool   `json:"pprof"`
 	Issuer         string `json:"issuer"`
 	AdminUser      string `json:"admin_user"`
@@ -70,6 +71,7 @@ type ServerConfig struct {
 	Mtu             int    `json:"mtu"`
 	DefaultDomain   string `json:"default_domain"`
 
+	IdleTimeout    int `json:"idle_timeout"`    // in seconds
 	SessionTimeout int `json:"session_timeout"` // in seconds
 	// AuthTimeout    int `json:"auth_timeout"`    // in seconds
 	AuditInterval int `json:"audit_interval"` // in seconds

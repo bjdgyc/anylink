@@ -1,7 +1,6 @@
 package base
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -17,8 +16,6 @@ import (
 )
 
 var (
-	// 提交id
-	CommitId string
 	// pass明文
 	passwd string
 	// 生成otp
@@ -58,6 +55,15 @@ func execute() {
 	for rr.Next() {
 		// fmt.Println(rr.Key(), rr.Value().Index(0))
 		envs[rr.Key().String()] = rr.Value().Index(0).String()
+	}
+
+	//移动配置解析代码
+	conf := linkViper.GetString("conf")
+	linkViper.SetConfigFile(conf)
+	err = linkViper.ReadInConfig()
+	if err != nil {
+		// 没有配置文件，直接报错
+		panic("config file err:" + err.Error())
 	}
 
 	if !runSrv {
@@ -106,19 +112,28 @@ func initCmd() {
 
 	cobra.OnInitialize(func() {
 		linkViper.AutomaticEnv()
-		conf := linkViper.GetString("conf")
 
-		_, err := os.Stat(conf)
-		if errors.Is(err, os.ErrNotExist) {
-			// 没有配置文件，不做处理
-			panic(err)
-		}
-
-		linkViper.SetConfigFile(conf)
-		err = linkViper.ReadInConfig()
-		if err != nil {
-			panic("config file err:" + err.Error())
-		}
+		//ver := linkViper.GetBool("version")
+		//if ver {
+		//	printVersion()
+		//	os.Exit(0)
+		//}
+		//
+		//return
+		//
+		//conf := linkViper.GetString("conf")
+		//_, err := os.Stat(conf)
+		//if errors.Is(err, os.ErrNotExist) {
+		//	// 没有配置文件，不做处理
+		//	panic("conf stat err:" + err.Error())
+		//}
+		//
+		//
+		//linkViper.SetConfigFile(conf)
+		//err = linkViper.ReadInConfig()
+		//if err != nil {
+		//	panic("config file err:" + err.Error())
+		//}
 	})
 }
 
@@ -164,6 +179,6 @@ func initToolCmd() *cobra.Command {
 }
 
 func printVersion() {
-	fmt.Printf("%s v%s build on %s [%s, %s] commit_id(%s) \n",
-		APP_NAME, APP_VER, runtime.Version(), runtime.GOOS, runtime.GOARCH, CommitId)
+	fmt.Printf("%s v%s build on %s [%s, %s] %s commit_id(%s)\n",
+		APP_NAME, APP_VER, runtime.Version(), runtime.GOOS, runtime.GOARCH, Date, CommitId)
 }

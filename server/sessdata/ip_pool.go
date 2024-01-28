@@ -89,10 +89,13 @@ func initIpPool() {
 // }
 
 // AcquireIp 获取动态ip
-func AcquireIp(username, macAddr string, uniqueMac bool) net.IP {
-	base.Trace("AcquireIp:", username, macAddr, uniqueMac)
+func AcquireIp(username, macAddr string, uniqueMac bool) (newIp net.IP) {
+	base.Trace("AcquireIp start:", username, macAddr, uniqueMac)
 	ipPoolMux.Lock()
-	defer ipPoolMux.Unlock()
+	defer func() {
+		ipPoolMux.Unlock()
+		base.Trace("AcquireIp end:", username, macAddr, uniqueMac, newIp)
+	}()
 
 	var (
 		err  error

@@ -25,6 +25,7 @@ func StartAdmin() {
 	r.Use(func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 			utils.SetSecureHeader(w)
+			w.Header().Set("Server", "AnyLinkAdminOpenSource")
 			next.ServeHTTP(w, req)
 		})
 	})
@@ -96,8 +97,9 @@ func StartAdmin() {
 		r.HandleFunc("/debug/pprof", location("/debug/pprof/")).Name("debug")
 		r.PathPrefix("/debug/pprof/").HandlerFunc(pprof.Index).Name("debug")
 		// statsviz
-		r.Path("/debug/statsviz/ws").Name("debug").HandlerFunc(statsviz.Ws)
-		r.PathPrefix("/debug/statsviz/").Name("debug").Handler(statsviz.Index)
+		srv, _ := statsviz.NewServer() // Create server or handle error
+		r.Path("/debug/statsviz/ws").Name("debug").HandlerFunc(srv.Ws())
+		r.PathPrefix("/debug/statsviz/").Name("debug").Handler(srv.Index())
 	}
 
 	base.Info("Listen admin", base.Cfg.AdminAddr)
@@ -128,6 +130,7 @@ func StartAdmin() {
 		Addr:      base.Cfg.AdminAddr,
 		Handler:   r,
 		TLSConfig: tlsConfig,
+		ErrorLog:  base.GetServerLog(),
 	}
 	err := srv.ListenAndServeTLS("", "")
 	if err != nil {

@@ -157,7 +157,7 @@ func tplRequest(typ int, w io.Writer, data RequestData) {
 
 	if data.Banner != "" {
 		buf := new(bytes.Buffer)
-		xml.EscapeText(buf, []byte(data.Banner))
+		_ = xml.EscapeText(buf, []byte(data.Banner))
 		data.Banner = buf.String()
 	}
 

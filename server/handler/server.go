@@ -59,9 +59,9 @@ func startTls() {
 		Addr:         addr,
 		Handler:      initRoute(),
 		TLSConfig:    tlsConfig,
-		ErrorLog:     base.GetBaseLog(),
-		ReadTimeout:  60 * time.Second,
-		WriteTimeout: 60 * time.Second,
+		ErrorLog:     base.GetServerLog(),
+		ReadTimeout:  100 * time.Second,
+		WriteTimeout: 100 * time.Second,
 	}
 
 	ln, err = net.Listen("tcp", addr)

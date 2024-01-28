@@ -20,14 +20,21 @@ import (
 var uiData embed.FS
 
 // 程序版本
-var CommitId string
+var (
+	appVer   string
+	commitId string
+	date     string
+)
 
 func main() {
-	base.CommitId = CommitId
 	admin.UiData = uiData
+	base.APP_VER = appVer
+	base.CommitId = commitId
+	base.Date = date
 
 	base.Start()
 	handler.Start()
+
 	signalWatch()
 }
 
@@ -35,7 +42,7 @@ func signalWatch() {
 	base.Info("Server pid: ", os.Getpid())
 
 	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM, syscall.SIGALRM)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM, syscall.SIGALRM, syscall.SIGUSR2)
 	for {
 		sig := <-sigs
 		base.Info("Get signal:", sig)

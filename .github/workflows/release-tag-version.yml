@@ -1,0 +1,47 @@
+name: release-tag-version
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v0.*"
+
+jobs:
+  Build:
+    name: build-binary
+    runs-on: ubuntu-latest
+    env:
+      TZ: Asia/Shanghai
+    steps:
+      - name: Hello world
+        run: |
+          uname -a
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v4
+        with:
+          go-version: '1.20'
+          cache-dependency-path: 'server/go.sum'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '16'
+          cache: 'yarn'
+          cache-dependency-path: 'web/yarn.lock'
+
+      - # https://github.com/docker/setup-qemu-action
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: build
+        run: |
+          mkdir server/ui
+          touch server/ui/index.html
+          sudo apt-get install -y -q gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+          aarch64-linux-gnu-gcc -v 
+          aarch64-linux-gnu-g++ -v
+          bash build.sh github_action
+
+#  Docker:
+#    name: build-docker

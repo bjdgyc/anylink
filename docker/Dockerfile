@@ -27,7 +27,7 @@ COPY --from=builder_node /web/ui  /anylink/ui
 #TODO 本地打包时使用镜像
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/repositories
 RUN apk add gcc musl-dev
-RUN cd /anylink;go mod tidy;go build -o anylink -ldflags "-s -w -X main.CommitId=${GitCommitId}" \
+RUN cd /anylink;go mod tidy;go build -o anylink -trimpath -ldflags "-s -w -X main.CommitId=${GitCommitId}" \
     && /anylink/anylink tool -v
 
 
@@ -47,7 +47,7 @@ COPY ./home  /app/home
 
 #TODO 本地打包时使用镜像
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/repositories
-RUN apk add --no-cache bash iptables \
+RUN apk add --no-cache bash iptables iproute2\
     && chmod +x /app/docker_entrypoint.sh \
     && ls /app
 

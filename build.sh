@@ -1,5 +1,7 @@
 #!/bin/bash
 
+github_action=$1
+
 set -x
 function RETVAL() {
   rt=$1
@@ -12,20 +14,21 @@ function RETVAL() {
 #当前目录
 cpath=$(pwd)
 
-ver=`cat server/base/app_ver.go | grep APP_VER | awk '{print $3}' | sed 's/"//g'`
+#ver=`cat server/base/app_ver.go | grep APP_VER | awk '{print $3}' | sed 's/"//g'`
+ver=$(cat version)
 echo "当前版本 $ver"
 
 echo "编译前端项目"
 cd $cpath/web
 #国内可替换源加快速度
 #npx browserslist@latest --update-db
-#npm install --registry=https://registry.npm.taobao.org
-#npm install
-#npm run build
+if [ "$github_action" == "github_action" ]; then
+  yarn install --registry=https://registry.npmmirror.com
+else
+  yarn install
+fi
 
-yarn install --registry=https://registry.npmmirror.com
 yarn run build
-
 
 RETVAL $?
 
@@ -33,11 +36,31 @@ echo "编译二进制文件"
 cd $cpath/server
 rm -rf ui
 cp -rf $cpath/web/ui .
-#国内可替换源加快速度
-export GOPROXY=https://goproxy.io
+
+flags="-v -trimpath -extldflags '-static' -tags osusergo,netgo,sqlite_omit_load_extension"
+ldflags="-s -w -X main.appVer=$ver -X main.commitId=$(git rev-parse HEAD) -X main.date=$(date --iso-8601=seconds)"
+
+if [ "$github_action" == "github_action" ]; then
+  echo "github_action"
+else
+  #国内可替换源加快速度
+  export GOPROXY=https://goproxy.io
+  go mod tidy
+  go build -o anylink "$flags" -ldflags "$ldflags"
+  exit 0
+fi
+
+#github action
 go mod tidy
-go build -v -o anylink -ldflags "-s -w -X main.CommitId=$(git rev-parse HEAD)"
-RETVAL $?
+go build -o anylink_amd64 "$flags" -ldflags "$ldflags"
+
+#arm64交叉编译
+CC=aarch64-linux-gnu-gcc CXX=aarch64-linux-gnu-g++ go build -o anylink_arm64 "$flags" -ldflags "$ldflags"
+
+./anylink_amd64 -v
+./anylink_arm64 -v
+
+exit 0
 
 cd $cpath
 
@@ -45,9 +68,10 @@ echo "整理部署文件"
 deploy="anylink-deploy"
 rm -rf $deploy ${deploy}.tar.gz
 mkdir $deploy
+mkdir $deploy/log
 
 cp -r server/anylink $deploy
-#cp -r server/bridge-init.sh $deploy
+cp -r server/bridge-init.sh $deploy
 cp -r server/conf $deploy
 
 cp -r systemd $deploy

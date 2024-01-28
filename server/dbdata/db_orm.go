@@ -75,6 +75,11 @@ func Find(data interface{}, limit, page int) error {
 	return xdb.Limit(limit, start).Find(data)
 }
 
+func FindWhereCount(data interface{}, where string, args ...interface{}) int {
+	n, _ := xdb.Where(where, args...).Count(data)
+	return int(n)
+}
+
 func FindWhere(data interface{}, limit int, page int, where string, args ...interface{}) error {
 	if limit == 0 {
 		return xdb.Where(where, args...).Find(data)

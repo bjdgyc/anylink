@@ -28,6 +28,10 @@ var (
 	logName    = "anylink.log"
 )
 
+func init() {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+}
+
 // 实现 os.Writer 接口
 type logWriter struct {
 	UseStdout bool
@@ -77,15 +81,28 @@ func initLog() {
 	baseLw.newFile()
 	baseLevel = logLevel2Int(Cfg.LogLevel)
 	baseLog = log.New(baseLw, "", log.LstdFlags|log.Lshortfile)
+
+	serverLog = log.New(&sLogWriter{}, "[http_server]", log.LstdFlags|log.Lshortfile)
 }
 
 func GetBaseLw() *logWriter {
 	return baseLw
 }
 
+var serverLog *log.Logger
+
+type sLogWriter struct{}
+
+func (w *sLogWriter) Write(p []byte) (n int, err error) {
+	if Cfg.HttpServerLog {
+		return os.Stderr.Write(p)
+	}
+	return 0, nil
+}
+
 // 获取 log.Logger
-func GetBaseLog() *log.Logger {
-	return baseLog
+func GetServerLog() *log.Logger {
+	return serverLog
 }
 
 func GetLogLevel() int {
