@@ -37,8 +37,8 @@ cd $cpath/server
 rm -rf ui
 cp -rf $cpath/web/ui .
 
-flags="-v -trimpath -extldflags '-static' -tags osusergo,netgo,sqlite_omit_load_extension"
-ldflags="-s -w -X main.appVer=$ver -X main.commitId=$(git rev-parse HEAD) -X main.date=$(date --iso-8601=seconds)"
+flags="-v -trimpath -tags osusergo,netgo,sqlite_omit_load_extension"
+ldflags="-s -w -extldflags '-static' -X main.appVer=$ver -X main.commitId=$(git rev-parse HEAD) -X main.date=$(date --iso-8601=seconds)"
 
 if [ "$github_action" == "github_action" ]; then
   echo "github_action"
