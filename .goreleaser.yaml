@@ -1,32 +1,61 @@
 #https://goreleaser.com/static/schema.json
 
+# release --skip=publish
+
 # goreleaser build --skip=validate --clean --debug
+
+# GOPROXY=https://goproxy.cn
+
+# docker run -it --rm -v $PWD:/app -v /go:/go -w /app --platform=linux/arm64
+
+# docker run -it --rm -v $PWD:/app -v /go:/go -w /app goreleaser/goreleaser-cross build --skip=validate --clean --debug
+
+# docker run -it --rm -v $PWD:/app -v /go:/go -w /app bjdgyc/dcross goreleaser build --skip=validate --clean --debug
 
 version: 1
 
-dist: godist
+dist: dist
 
 before:
   hooks:
-  # You may remove this if you don't use go modules.
-  #- go mod tidy
-  # you may remove this if you don't need go generate
-  #- go generate ./...
+    - pwd
+#    - cmd: go mod tidy
+#      dir:
+#        "{{ dir .Dist}}"
+#      output: true
+#    - cmd: go generate
+#      dir:
+#        "{{ dir .Dist}}"
+#      output: true
 
 builds:
   - id: "build"
     #main: .
     dir: ./server
+    hooks:
+      pre:
+        - cmd: go mod tidy
+          dir: ./server
+          output: true
+        - cmd: go generate
+          dir: ./server
+          output: true
+    # {{- if eq .Arch "amd64" }}CC=x86_64-linux-gnu-gcc CXX=x86_64-linux-gnu-g++{{- end }}
     env:
       - CGO_ENABLED=1
       - >-
+        {{- if eq .Os "linux" }}
+          {{- if eq .Arch "amd64" }}CC=x86_64-linux-musl-gcc{{- end }}
+        
+          {{- if eq .Arch "arm64" }}CC=aarch64-linux-gnu-gcc CXX=aarch64-linux-gnu-g++{{- end }}
+        {{- end }}
         {{- if eq .Os "darwin" }}
           {{- if eq .Arch "amd64"}}CC=o64-clang{{- end }}
-          {{- if eq .Arch "arm64"}}CC=aarch64-apple-darwin20.2-clang{{- end }}
+          {{- if eq .Arch "arm64"}}CC=oa64-clang{{- end }}
         {{- end }}
-        {{- if eq .Os "linux" }}
-          {{- if eq .Arch "arm64" }}CC=aarch64-linux-gnu-gcc{{- end }}
-          {{- if eq .Arch "arm" }}CC=arm-linux-gnueabi-gcc{{- end }}
+        {{- if eq .Os "windows" }}
+          {{- if eq .Arch "amd64"}}CC=x86_64-w64-mingw32-gcc{{- end }}
+          {{- if eq .Arch "arm64"}}CC=aarch64-linux-gnu-gcc{{- end }}
         {{- end }}
     goos:
       - linux
@@ -34,9 +63,22 @@ builds:
       #- windows
     goarch:
       - amd64
-      - arm64
-      - arm
+      #- arm64
+    # https://go.dev/wiki/MinimumRequirements
+    goamd64:
+      - v1
+    command: build
+    flags:
+      - -trimpath
+      - -tags osusergo,netgo,sqlite_omit_load_extension
+    ldflags:
+      # go tool link -help
+      # go tool compile -help
+      # -linkmode external
+      # -extld=$CC
+      # -fpic 作为动态链接库的时候 需要添加
 
+      - -s -w -extldflags '-static' -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}} -X main.builtBy=dcross
 
 archives:
   - id: "archive1"
