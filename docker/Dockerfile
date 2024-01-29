@@ -16,10 +16,10 @@ ARG buildDate="2020-1-1T11:11:11"
 
 ENV TZ=Asia/Shanghai
 
-WORKDIR /anylink
+WORKDIR /server
 COPY docker/init.sh /tmp/init.sh
-COPY server /anylink
-COPY web/ui  /anylink/ui
+COPY server/ /server/
+COPY web/ui  /server/ui
 
 RUN sh /tmp/init.sh
 
@@ -32,7 +32,7 @@ ENV TZ=Asia/Shanghai
 ENV ANYLINK_IN_CONTAINER=true
 
 WORKDIR /app
-COPY --from=builder_golang /anylink/anylink  /app/
+COPY --from=builder_golang /server/anylink  /app/
 COPY docker/docker_entrypoint.sh  /app/
 COPY ./server/bridge-init.sh /app/
 COPY ./server/conf  /app/conf

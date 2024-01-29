@@ -12,10 +12,12 @@ fi
 
 uname -a
 
-cd /anylink
+cd /server
 
 go mod tidy
 go build -o anylink -trimpath \
   -ldflags "-s -w -extldflags '-static' -X main.appVer=$appVer -X main.commitId=$commitId -X main.buildDate=$buildDate"
 
-/anylink/anylink -v
+ls -l /server/
+
+/server/anylink -v
