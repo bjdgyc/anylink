@@ -54,9 +54,8 @@ jobs:
           echo "APP_VER=$appVer" >> $GITHUB_ENV
           echo "commitId=$commitId" >> $GITHUB_ENV
           
-          mkdir server/ui
-          touch server/ui/a.txt
-          ls .
+          mkdir web/ui
+          touch web/ui/a.txt
           
           #cd server;go mod tidy
 
