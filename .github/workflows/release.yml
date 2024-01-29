@@ -29,8 +29,8 @@ jobs:
           #          cache-dependency-path: 'server/go.sum'
           #      - name: Build web
           #        working-directory: web
-          #        run: |
-          #          yarn install
+        #        run: |
+        #          yarn install
         #          yarn run build
 
       - name: Set up QEMU
@@ -62,7 +62,9 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
-          push: false
+          push: true
+          #cache-from: type=gha,mode=max
+          #cache-to: type=gha,mode=max
           context: .
           file: ./docker/Dockerfile
           #platforms: linux/amd64,linux/arm64

@@ -44,6 +44,7 @@ COPY ./home  /app/home
 #RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/repositories
 RUN apk add --no-cache bash iptables iproute2\
     && chmod +x /app/docker_entrypoint.sh \
+    && mkdir /app/log \
     && ls /app
 
 EXPOSE 443 8800
