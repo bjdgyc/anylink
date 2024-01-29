@@ -14,7 +14,8 @@ uname -a
 
 cd /server
 
-#go mod tidy
+go mod tidy
+
 
 #-extldflags '-static'
 
