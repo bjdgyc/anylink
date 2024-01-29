@@ -20,8 +20,8 @@ COPY docker/init.sh /tmp/init.sh
 COPY server/ /server/
 COPY web/ui  /server/ui
 
-RUN apk add gcc musl-dev bash
-RUN bash /tmp/init.sh
+#RUN apk add gcc musl-dev bash
+RUN sh /tmp/init.sh
 
 
 # anylink

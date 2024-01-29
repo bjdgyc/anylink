@@ -17,20 +17,22 @@ jobs:
         run: uname -a
 
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '16'
-          cache: 'yarn'
-          cache-dependency-path: 'web/yarn.lock'
-      - uses: actions/setup-go@v4
-        with:
-          go-version: '1.20'
-          cache-dependency-path: 'server/go.sum'
-      - name: Build web
-        working-directory: web
-        run: |
-          yarn install
-          yarn run build
+
+          #      - uses: actions/setup-node@v4
+          #        with:
+          #          node-version: '16'
+          #          cache: 'yarn'
+          #          cache-dependency-path: 'web/yarn.lock'
+          #      - uses: actions/setup-go@v4
+          #        with:
+          #          go-version: '1.20'
+          #          cache-dependency-path: 'server/go.sum'
+          #      - name: Build web
+          #        working-directory: web
+          #        run: |
+          #          yarn install
+          #          yarn run build
+
       - name: Set up QEMU
         # https://github.com/docker/setup-qemu-action
         uses: docker/setup-qemu-action@v3
@@ -51,6 +53,9 @@ jobs:
           commitId=`git rev-parse HEAD`
           echo "APP_VER=$appVer" >> $GITHUB_ENV
           echo "commitId=$commitId" >> $GITHUB_ENV
+          
+          mkdir server/ui
+          touch server/ui/a.txt
           
           cd server;go mod tidy
 

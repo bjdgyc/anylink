@@ -8,20 +8,23 @@ if [[ $CN == "yes" ]]; then
   export GOPROXY=https://goproxy.cn
 fi
 
-#apk add gcc musl-dev
+apk add tzdata gcc musl-dev
 
 uname -a
+env
+date
 
 cd /server
 
 go mod tidy
 
+echo "start build"
 
 #-extldflags '-static'
 
-ldflags="-s -w -X main.appVer=$appVer -X main.commitId=$commitId -X main.buildDate=$(date -Iseconds)"
+ldflags="-s -w -extldflags \"-static\" -X main.appVer=$appVer -X main.commitId=$commitId -X main.buildDate=$(date -Iseconds)"
 
-go build -v -o anylink -trimpath -ldflags "$ldflags"
+go build -o anylink -trimpath -ldflags "$ldflags"
 
 ls -l /server/
 
