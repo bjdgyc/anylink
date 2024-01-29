@@ -21,16 +21,16 @@ var uiData embed.FS
 
 // 程序版本
 var (
-	appVer   string
-	commitId string
-	date     string
+	appVer    string
+	commitId  string
+	buildDate string
 )
 
 func main() {
 	admin.UiData = uiData
 	base.APP_VER = appVer
 	base.CommitId = commitId
-	base.Date = date
+	base.BuildDate = buildDate
 
 	base.Start()
 	handler.Start()

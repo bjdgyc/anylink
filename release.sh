@@ -22,11 +22,11 @@ echo "编译前端项目"
 cd $cpath/web
 #国内可替换源加快速度
 #npx browserslist@latest --update-db
-#yarn install
-#yarn run build
-#RETVAL $?
-#rm -rf $cpath/server/ui
-#cp -rf $cpath/web/ui . $cpath/server/ui
+yarn install
+yarn run build
+RETVAL $?
+rm -rf $cpath/server/ui
+cp -rf $cpath/web/ui . $cpath/server/ui
 
 echo "编译二进制文件"
 cd $cpath/server
@@ -39,14 +39,16 @@ ldflags="-s -w -extldflags '-static' -X main.appVer=$ver -X main.commitId=$(git 
 gopath=$(go env GOPATH)
 #go mod tidy
 
+# alpine3
+apk add gcc musl-dev
+
 #使用 musl-dev 编译
 docker run -q --rm -v $PWD:/app -v $gopath:/go -w /app --platform=linux/amd64 \
   golang:1.20-alpine3.19 go build -o anylink_amd64 $flags -ldflags "$ldflags"
-#arm64交叉编译
+./anylink_amd64 -v
+#arm64编译
 docker run -q --rm -v $PWD:/app -v $gopath:/go -w /app --platform=linux/arm64 \
   golang:1.20-alpine3.19 go build -o anylink_arm64 $flags -ldflags "$ldflags"
-
-./anylink_amd64 -v
 ./anylink_arm64 -v
 
 exit 0

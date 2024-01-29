@@ -3,38 +3,32 @@
 #debian:bullseye-slim
 #sed -i 's/deb.debian.org/mirrors.ustc.edu.cn/g' /etc/apt/sources.list
 
-
-# web
-FROM node:16-alpine3.18 as builder_node
-WORKDIR /web
-COPY ./web /web
-RUN yarn install \
-    && yarn run build \
-    && ls /web/ui
-
+# 配合 github action 使用
+# 需要先编译出ui文件后 再执行docker编译
 
 # server
-FROM golang:1.20-alpine3.18 as builder_golang
-#TODO 本地打包时使用镜像
-ENV GOPROXY=https://goproxy.cn
-ENV GOOS=linux
-ARG GitCommitId="gitCommitId"
+FROM golang:1.20-alpine3.19 as builder_golang
+
+ARG CN="no"
+ARG appVer="appVer"
+ARG commitId="commitId"
+ARG buildDate="2020-1-1T11:11:11"
+
+ENV TZ=Asia/Shanghai
 
 WORKDIR /anylink
+COPY docker/init.sh /tmp/init.sh
 COPY server /anylink
-COPY --from=builder_node /web/ui  /anylink/ui
+COPY web/ui  /anylink/ui
 
-#TODO 本地打包时使用镜像
-RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/repositories
-RUN apk add gcc musl-dev
-RUN cd /anylink;go mod tidy;go build -o anylink -trimpath -ldflags "-s -w -X main.CommitId=${GitCommitId}" \
-    && /anylink/anylink tool -v
+RUN sh /tmp/init.sh
 
 
 # anylink
-FROM alpine:3.18
+FROM alpine:3.19
 LABEL maintainer="github.com/bjdgyc"
 
+ENV TZ=Asia/Shanghai
 ENV ANYLINK_IN_CONTAINER=true
 
 WORKDIR /app
@@ -42,6 +36,7 @@ COPY --from=builder_golang /anylink/anylink  /app/
 COPY docker/docker_entrypoint.sh  /app/
 COPY ./server/bridge-init.sh /app/
 COPY ./server/conf  /app/conf
+COPY ./README.md  /app/README.md
 COPY ./LICENSE  /app/LICENSE
 COPY ./home  /app/home
 

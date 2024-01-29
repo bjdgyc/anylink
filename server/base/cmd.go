@@ -57,7 +57,7 @@ func execute() {
 		envs[rr.Key().String()] = rr.Value().Index(0).String()
 	}
 
-	//移动配置解析代码
+	// 移动配置解析代码
 	conf := linkViper.GetString("conf")
 	linkViper.SetConfigFile(conf)
 	err = linkViper.ReadInConfig()
@@ -113,27 +113,27 @@ func initCmd() {
 	cobra.OnInitialize(func() {
 		linkViper.AutomaticEnv()
 
-		//ver := linkViper.GetBool("version")
-		//if ver {
+		// ver := linkViper.GetBool("version")
+		// if ver {
 		//	printVersion()
 		//	os.Exit(0)
-		//}
+		// }
 		//
-		//return
+		// return
 		//
-		//conf := linkViper.GetString("conf")
-		//_, err := os.Stat(conf)
-		//if errors.Is(err, os.ErrNotExist) {
+		// conf := linkViper.GetString("conf")
+		// _, err := os.Stat(conf)
+		// if errors.Is(err, os.ErrNotExist) {
 		//	// 没有配置文件，不做处理
 		//	panic("conf stat err:" + err.Error())
-		//}
+		// }
 		//
 		//
-		//linkViper.SetConfigFile(conf)
-		//err = linkViper.ReadInConfig()
-		//if err != nil {
+		// linkViper.SetConfigFile(conf)
+		// err = linkViper.ReadInConfig()
+		// if err != nil {
 		//	panic("config file err:" + err.Error())
-		//}
+		// }
 	})
 }
 
@@ -179,6 +179,6 @@ func initToolCmd() *cobra.Command {
 }
 
 func printVersion() {
-	fmt.Printf("%s v%s build on %s [%s, %s] %s commit_id(%s)\n",
-		APP_NAME, APP_VER, runtime.Version(), runtime.GOOS, runtime.GOARCH, Date, CommitId)
+	fmt.Printf("%s v%s build on %s [%s, %s] BuildDate:%s commit_id(%s)\n",
+		APP_NAME, APP_VER, runtime.Version(), runtime.GOOS, runtime.GOARCH, BuildDate, CommitId)
 }
