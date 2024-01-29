@@ -62,7 +62,8 @@ jobs:
           push: false
           context: .
           file: ./docker/Dockerfile
-          platforms: linux/amd64,linux/arm64
+          #platforms: linux/amd64,linux/arm64
+          platforms: linux/arm64
           build-args: appVer=$APP_VER commitId=$commitId buildDate=$buildDate
           #tags: bjdgyc/anylink:latest,bjdgyc/anylink:${{ env.APP_VER }}
           tags: bjdgyc/anylink:${{ env.APP_VER }}

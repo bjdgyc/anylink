@@ -10,6 +10,8 @@ fi
 
 #apk add gcc musl-dev
 
+uname -a
+
 cd /anylink
 
 go mod tidy
