@@ -38,10 +38,8 @@ jobs:
         run: |
           mkdir server/ui
           touch server/ui/index.html
-          sudo apt-get install -y -q gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
-          aarch64-linux-gnu-gcc -v 
-          aarch64-linux-gnu-g++ -v
-          bash build.sh github_action
+          #sudo apt-get install -y -q gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+          bash Z:\goweb\anylink\release.sh
 
 #  Docker:
 #    name: build-docker

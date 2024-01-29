@@ -6,7 +6,7 @@
 
 # GOPROXY=https://goproxy.cn
 
-# docker run -it --rm -v $PWD:/app -v /go:/go -w /app --platform=linux/arm64
+# docker run -it --rm -v $PWD:/app -v /go:/go -w /app --platform=linux/arm64 golang:alpine3.19
 
 # docker run -it --rm -v $PWD:/app -v /go:/go -w /app goreleaser/goreleaser-cross build --skip=validate --clean --debug
 
