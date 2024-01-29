@@ -56,8 +56,9 @@ jobs:
           
           mkdir server/ui
           touch server/ui/a.txt
+          ls .
           
-          cd server;go mod tidy
+          #cd server;go mod tidy
 
       - name: Build and push
         uses: docker/build-push-action@v5
