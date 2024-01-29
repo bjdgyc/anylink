@@ -40,10 +40,10 @@ gopath=$(go env GOPATH)
 go mod tidy
 
 #使用 musl-dev 编译
-docker run -it --rm -v $PWD:/app -v $gopath:/go -w /app --platform=linux/amd64 \
+docker run -q --rm -v $PWD:/app -v $gopath:/go -w /app --platform=linux/amd64 \
   golang:1.20-alpine3.19 go build -o anylink_amd64 $flags -ldflags "$ldflags"
 #arm64交叉编译
-docker run -it --rm -v $PWD:/app -v $gopath:/go -w /app --platform=linux/arm64 \
+docker run -q --rm -v $PWD:/app -v $gopath:/go -w /app --platform=linux/arm64 \
   golang:1.20-alpine3.19 go build -o anylink_amd64 $flags -ldflags "$ldflags"
 
 ./anylink_amd64 -v
