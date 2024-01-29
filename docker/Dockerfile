@@ -42,7 +42,7 @@ COPY ./LICENSE  /app/LICENSE
 COPY ./home  /app/home
 
 #TODO 本地打包时使用镜像
-RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/repositories
+#RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/repositories
 RUN apk add --no-cache bash iptables iproute2\
     && chmod +x /app/docker_entrypoint.sh \
     && ls /app
