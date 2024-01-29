@@ -15,8 +15,10 @@ uname -a
 cd /server
 
 go mod tidy
-go build -o anylink -trimpath \
-  -ldflags "-s -w -extldflags '-static' -X main.appVer=$appVer -X main.commitId=$commitId -X main.buildDate=$buildDate"
+
+go build -o anylink -trimpath
+
+#  -ldflags "-s -w -extldflags '-static' -X main.appVer=$appVer -X main.commitId=$commitId -X main.buildDate=$buildDate"
 
 ls -l /server/
 
