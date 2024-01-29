@@ -32,19 +32,19 @@ echo "编译二进制文件"
 cd $cpath/server
 
 # -tags osusergo,netgo,sqlite_omit_load_extension
-flags="-v -trimpath"
+flags="-trimpath"
 ldflags="-s -w -extldflags '-static' -X main.appVer=$ver -X main.commitId=$(git rev-parse HEAD) -X main.date=$(date --iso-8601=seconds)"
 
 #github action
 gopath=$(go env GOPATH)
-go mod tidy
+#go mod tidy
 
 #使用 musl-dev 编译
 docker run -q --rm -v $PWD:/app -v $gopath:/go -w /app --platform=linux/amd64 \
   golang:1.20-alpine3.19 go build -o anylink_amd64 $flags -ldflags "$ldflags"
 #arm64交叉编译
 docker run -q --rm -v $PWD:/app -v $gopath:/go -w /app --platform=linux/arm64 \
-  golang:1.20-alpine3.19 go build -o anylink_amd64 $flags -ldflags "$ldflags"
+  golang:1.20-alpine3.19 go build -o anylink_arm64 $flags -ldflags "$ldflags"
 
 ./anylink_amd64 -v
 ./anylink_arm64 -v

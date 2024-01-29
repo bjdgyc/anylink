@@ -15,6 +15,7 @@ jobs:
     steps:
       - name: Hello world
         run: |
+          cd server && go mod tidy
           uname -a
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v4
@@ -24,7 +25,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '16'
+          node-version: '18'
           cache: 'yarn'
           cache-dependency-path: 'web/yarn.lock'
 
@@ -34,7 +35,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: build
+      - name: Docker Build
         run: |
           mkdir server/ui
           touch server/ui/index.html
