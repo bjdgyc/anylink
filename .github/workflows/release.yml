@@ -31,7 +31,7 @@ jobs:
           #        working-directory: web
           #        run: |
           #          yarn install
-          #          yarn run build
+        #          yarn run build
 
       - name: Set up QEMU
         # https://github.com/docker/setup-qemu-action
@@ -67,7 +67,9 @@ jobs:
           file: ./docker/Dockerfile
           #platforms: linux/amd64,linux/arm64
           platforms: linux/amd64
-          build-args: appVer=${{ env.APP_VER }} commitId=${{ env.commitId }}
+          build-args: |
+            appVer=${{ env.APP_VER }}
+            commitId=${{ env.commitId }}
           #tags: bjdgyc/anylink:latest,bjdgyc/anylink:${{ env.APP_VER }}
           tags: bjdgyc/anylink:${{ env.APP_VER }}
 
