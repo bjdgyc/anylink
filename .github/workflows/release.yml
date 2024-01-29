@@ -49,10 +49,8 @@ jobs:
         run: |
           appVer=`cat version`
           commitId=`git rev-parse HEAD`
-          buildDate=`date --iso-8601=seconds`
           echo "APP_VER=$appVer" >> $GITHUB_ENV
           echo "commitId=$commitId" >> $GITHUB_ENV
-          echo "buildDate=$buildDate" >> $GITHUB_ENV
           
           cd server;go mod tidy
 
@@ -64,7 +62,7 @@ jobs:
           file: ./docker/Dockerfile
           #platforms: linux/amd64,linux/arm64
           platforms: linux/amd64
-          build-args: appVer=${{ env.APP_VER }} commitId=${{ env.commitId }} buildDate=${{ env.buildDate }}
+          build-args: appVer=${{ env.APP_VER }} commitId=${{ env.commitId }}
           #tags: bjdgyc/anylink:latest,bjdgyc/anylink:${{ env.APP_VER }}
           tags: bjdgyc/anylink:${{ env.APP_VER }}
 

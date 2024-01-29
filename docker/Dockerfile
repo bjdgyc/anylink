@@ -12,7 +12,6 @@ FROM golang:1.20-alpine3.19 as builder_golang
 ARG CN="no"
 ARG appVer="appVer"
 ARG commitId="commitId"
-ARG buildDate="2020-1-1T11:11:11"
 
 ENV TZ=Asia/Shanghai
 
