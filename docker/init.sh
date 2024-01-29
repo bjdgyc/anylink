@@ -16,9 +16,11 @@ cd /server
 
 #go mod tidy
 
-ldflags="-s -w -extldflags '-static' -X main.appVer=$appVer -X main.commitId=$commitId -X main.buildDate=$(date -Iseconds)"
+#-extldflags '-static'
 
-go build -o anylink -trimpath -ldflags "$ldflags"
+ldflags="-s -w -X main.appVer=$appVer -X main.commitId=$commitId -X main.buildDate=$(date -Iseconds)"
+
+go build -v -o anylink -trimpath -ldflags "$ldflags"
 
 ls -l /server/
 
