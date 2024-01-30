@@ -17,30 +17,32 @@ cpath=$(pwd)
 ver=$(cat version)
 echo "当前版本 $ver"
 
-mkdir archive anylink-deploy
+mkdir artifact-dist
+rm -rf artifact-dist/* app
 
 function archive() {
   os=$1
   arch=$2
-  echo "整理部署文件 $os $arch"
+  #echo "整理部署文件 $os $arch"
 
   deploy="anylink-$ver-$os-$arch"
-  docker container create --platform $os/$arch --name $deploy bjdgyc/anylink
-  rm -rf anylink-deploy/*
-  docker cp -a $deploy:/app/ ./anylink-deploy/
-  ls -lh anylink-deploy
-  tar zcf ${deploy}.tar.gz anylink-deploy
-  mv ${deploy}.tar.gz archive/
-}
+  docker container create --platform $os/$arch --name $deploy bjdgyc/anylink:$ver
+  docker cp -a $deploy:/app ./
 
+  rm -rf anylink-deploy
+  mv app anylink-deploy
+  ls -lh anylink-deploy
+
+  tar zcf ${deploy}.tar.gz anylink-deploy
+  mv ${deploy}.tar.gz artifact-dist/
+}
 
 echo "copy二进制文件"
 
 archive linux amd64
-archive linux arm64
+#archive linux arm64
 
-ls -lh archive
-
+ls -lh artifact
 
 #注意使用root权限运行
 #cd anylink-deploy

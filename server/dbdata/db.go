@@ -101,22 +101,11 @@ func addInitData() error {
 
 	// SettingDnsProvider
 	provider := &SettingLetsEncrypt{
-		Domain:   "vpn.xxx.com",
-		Legomail: "legomail",
-		Name:     "aliyun",
-		Renew:    false,
-		DNSProvider: DNSProvider{
-			AliYun: struct {
-				APIKey    string `json:"apiKey"`
-				SecretKey string `json:"secretKey"`
-			}{APIKey: "", SecretKey: ""},
-			TXCloud: struct {
-				SecretID  string `json:"secretId"`
-				SecretKey string `json:"secretKey"`
-			}{SecretID: "", SecretKey: ""},
-			CfCloud: struct {
-				AuthToken string `json:"authToken"`
-			}{AuthToken: ""}},
+		Domain:      "vpn.xxx.com",
+		Legomail:    "legomail",
+		Name:        "aliyun",
+		Renew:       false,
+		DNSProvider: DNSProvider{},
 	}
 	err = SettingSessAdd(sess, provider)
 	if err != nil {
