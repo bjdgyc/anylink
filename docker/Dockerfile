@@ -36,6 +36,7 @@ COPY --from=builder_golang /server/anylink  /app/
 COPY docker/docker_entrypoint.sh  /app/
 COPY ./server/bridge-init.sh /app/
 COPY ./server/conf  /app/conf
+COPY ./systemd /app/systemd
 COPY ./README.md  /app/README.md
 COPY ./LICENSE  /app/LICENSE
 COPY ./home  /app/home

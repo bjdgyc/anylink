@@ -1,5 +1,7 @@
 #!/bin/bash
 
+#github action release.sh
+
 set -x
 function RETVAL() {
   rt=$1
@@ -11,36 +13,29 @@ function RETVAL() {
 
 #当前目录
 cpath=$(pwd)
-#ver=`cat server/base/app_ver.go | grep APP_VER | awk '{print $3}' | sed 's/"//g'`
-ver=$(cat version)
-echo "当前版本 $ver"
 
-echo "编译前端项目"
-cd $cpath/web
-
-#国内可替换源加快速度
-#npx browserslist@latest --update-db
-yarn install --registry=https://registry.npmmirror.com
-yarn run build
-RETVAL $?
-
-echo "编译二进制文件"
+echo "copy二进制文件"
 cd $cpath/server
-rm -rf ui
-cp -rf $cpath/web/ui .
-
 # -tags osusergo,netgo,sqlite_omit_load_extension
-flags="-v -trimpath"
+flags="-trimpath"
 ldflags="-s -w -extldflags '-static' -X main.appVer=$ver -X main.commitId=$(git rev-parse HEAD) -X main.date=$(date --iso-8601=seconds)"
-
-#国内可替换源加快速度
-export GOPROXY=https://goproxy.io
+#github action
+gopath=$(go env GOPATH)
 go mod tidy
-go build -o anylink "$flags" -ldflags "$ldflags"
-
-cd $cpath
+# alpine3
+apk add gcc musl-dev
+#使用 musl-dev 编译
+docker run -q --rm -v $PWD:/app -v $gopath:/go -w /app --platform=linux/amd64 \
+  golang:1.20-alpine3.19 go build -o anylink_amd64 $flags -ldflags "$ldflags"
+./anylink_amd64 -v
+#arm64编译
+docker run -q --rm -v $PWD:/app -v $gopath:/go -w /app --platform=linux/arm64 \
+  golang:1.20-alpine3.19 go build -o anylink_arm64 $flags -ldflags "$ldflags"
+./anylink_arm64 -v
 
 exit 0
+
+cd $cpath
 
 echo "整理部署文件"
 deploy="anylink-deploy"
