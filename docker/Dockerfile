@@ -43,7 +43,7 @@ COPY ./home  /app/home
 
 #TODO 本地打包时使用镜像
 #RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/repositories
-RUN apk add --no-cache bash iptables iproute2\
+RUN apk add --no-cache bash iptables iproute2 tzdata \
     && chmod +x /app/docker_entrypoint.sh \
     && mkdir /app/log \
     && ls /app

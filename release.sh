@@ -42,7 +42,7 @@ echo "copy二进制文件"
 archive linux amd64
 #archive linux arm64
 
-ls -lh artifact
+ls -lh artifact-dist
 
 #注意使用root权限运行
 #cd anylink-deploy
