@@ -81,7 +81,7 @@ jobs:
         #if: startsWith(github.ref, 'refs/tags/')
         with:
           tag_name: v${{ env.APP_VER }}
-          files: artifact/*
+          files: artifact-dist/*
 
 #  Docker:
 #    name: build-docker
