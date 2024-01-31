@@ -50,7 +50,7 @@ func startTls() {
 		MinVersion:   tls.VersionTLS12,
 		CipherSuites: selectedCipherSuites,
 		GetCertificate: func(chi *tls.ClientHelloInfo) (*tls.Certificate, error) {
-			base.Trace("GetCertificate", chi.ServerName)
+			base.Trace("GetCertificate ServerName", chi.ServerName)
 			return dbdata.GetCertificateBySNI(chi.ServerName)
 		},
 	}

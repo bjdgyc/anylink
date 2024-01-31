@@ -39,7 +39,7 @@ COPY docker/init_release.sh /tmp/
 COPY --from=builder_golang /server/anylink  /app/
 COPY docker/docker_entrypoint.sh server/bridge-init.sh ./README.md ./LICENSE /app/
 COPY ./deploy /app/deploy
-COPY ./home  /app/home
+COPY ./index_template  /app/index_template
 COPY ./server/conf  /app/conf
 
 #TODO 本地打包时使用镜像

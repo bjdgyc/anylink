@@ -40,6 +40,7 @@ jobs:
       - name: Test coverage
         run: |
           cd server
+          go test ./...
           go test -race -coverprofile=coverage.txt -covermode=atomic -v ./...
 
       - name: Upload coverage reports to Codecov

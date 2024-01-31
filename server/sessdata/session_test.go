@@ -33,7 +33,7 @@ func TestConnSession(t *testing.T) {
 	sess.MacAddr = "00:15:5d:50:14:43"
 
 	cSess := sess.NewConn()
-	base.Info("cSess", cSess)
+	// base.Info("cSess", cSess)
 
 	err := cSess.RateLimit(100, true)
 	ast.Nil(err)
@@ -60,4 +60,7 @@ func TestConnSession(t *testing.T) {
 	ast.Equal(cmpName, "")
 
 	cSess.Close()
+
+	// 等待日志执行完成
+	time.Sleep(time.Second * 10)
 }
