@@ -54,6 +54,11 @@ jobs:
           echo "APP_VER=$appVer" >> $GITHUB_ENV
           echo "commitId=$commitId" >> $GITHUB_ENV
           
+          echo $appVer > version_info
+          echo $commitId >> version_info
+          echo $GITHUB_REF >> version_info
+          echo $GITHUB_REF_NAME >> version_info
+          
           #cd server;go mod tidy
 
       - name: Build and push
