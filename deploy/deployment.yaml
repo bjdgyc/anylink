@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: anylink
+  namespace: default
+  labels:
+    link-app: anylink
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      link-app: anylink
+  template:
+    metadata:
+      labels:
+        link-app: anylink
+    spec:
+      #hostNetwork: true
+      dnsPolicy: ClusterFirst
+      containers:
+        - name: anylink
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: spec.nodeName
+            - name: GOMAXPROCS
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.cpu
+            - name: POD_CPU_LIMIT
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.cpu
+            - name: POD_MEMORY_LIMIT
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.memory
+            - name: TZ
+              value: "Asia/Shanghai"
+          image: bjdgyc/anylink:latest
+          imagePullPolicy: Always
+          args:
+            - --conf=/app/conf/server.toml
+          ports:
+            - name: https
+              containerPort: 443
+              protocol: TCP
+            - name: https-admin
+              containerPort: 8800
+              protocol: TCP
+            - name: dtls
+              containerPort: 443
+              protocol: UDP
+          # 设置资源
+          resources:
+            limits:
+              cpu: "2"
+              memory: 4Gi
+              ephemeral-storage: "2Gi"
+          securityContext:
+            privileged: true
+      # 禁用自动注入 service 信息到环境变量
+      enableServiceLinks: false
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      nodeSelector:
+        kubernetes.io/os: linux
+      securityContext: { }
+      tolerations:
+        - operator: Exists
+      #设置优先级
+      priorityClassName: system-cluster-critical
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: anylink
+  namespace: default
+  labels:
+    link-app: anylink
+spec:
+  ports:
+    - name: https
+      port: 443
+      targetPort: 443
+      protocol: TCP
+    - name: https-admin
+      port: 8800
+      targetPort: 8800
+      protocol: TCP
+    - name: dtls
+      port: 443
+      targetPort: 443
+      protocol: UDP
+  selector:
+    link-app: anylink
+  sessionAffinity: ClientIP
+  type: ClusterIP

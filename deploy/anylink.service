@@ -17,8 +17,8 @@ ExecStart=/usr/local/anylink-deploy/anylink --conf=/usr/local/anylink-deploy/con
 # ExecStart=/bin/bash -c 'exec /usr/local/anylink-deploy/anylink --conf=/usr/local/anylink-deploy/conf/server.toml >> /usr/local/anylink-deploy/log/anylink.log 2>&1'
 
 # systemd new than v236
-# StandardOutput=file:/usr/local/anylink-deploy/log/anylink.log
-# StandardError=file:/usr/local/anylink-deploy/log/anylink.log
+# StandardOutput=file:/usr/local/anylink-deploy/log/anylink-systemd.log
+# StandardError=file:/usr/local/anylink-deploy/log/anylink-systemd.log
 
 [Install]
 WantedBy=multi-user.target

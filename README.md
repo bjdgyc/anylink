@@ -47,6 +47,8 @@ AnyLink 服务端仅在 CentOS 7、CentOS 8、Ubuntu 18.04、Ubuntu 20.04 测试
 > 没有编程基础的同学建议直接下载 release 包，从下面的地址下载 anylink-deploy.tar.gz
 >
 > https://github.com/bjdgyc/anylink/releases
+>
+> 如果不会安装，可以提供有偿远程协助服务。添加QQ联系我 68492170
 
 ### 使用问题
 
@@ -66,7 +68,7 @@ AnyLink 服务端仅在 CentOS 7、CentOS 8、Ubuntu 18.04、Ubuntu 20.04 测试
 
 ### 自行编译安装
 
-> 需要提前安装好 golang >= 1.20 和 nodejs >= 16.x 和 yarn >= v1.22.x
+> 需要提前安装好 golang >= 1.20 和 nodejs = 16.x 和 yarn >= v1.22.x
 
 ```shell
 git clone https://github.com/bjdgyc/anylink.git
@@ -123,14 +125,22 @@ sudo ./anylink
 > 示例配置文件内有详细的注释，根据注释填写配置即可。
 
 ```shell
+# 查看帮助信息
+./anylink -h
+
 # 生成后台密码
 ./anylink tool -p 123456
 
 # 生成jwt密钥
 ./anylink tool -s
+
+# 查看所有配置项
+./anylink tool -d
 ```
 
 > 数据库配置示例
+>
+> 数据库表结构自动生成，无需手动导入(请赋予 DDL 权限)
 
 | db_type  | db_source                                              |
 |----------|--------------------------------------------------------|
@@ -141,6 +151,14 @@ sudo ./anylink
 > 示例配置文件
 >
 > [conf/server-sample.toml](server/conf/server-sample.toml)
+
+## Upgrade
+
+> 升级前请备份配置文件`conf`目录 和 数据库，并停止服务
+>
+> 使用新版的 `anylink` 二进制文件替换旧版
+>
+> 重启服务后，即可完成升级
 
 ## Setting
 
@@ -214,12 +232,17 @@ https://cloud.tencent.com/document/product/216/62007
 > 以下参数可以通过执行 `ip a` 查看
 
 ```
+
+# 命令行执行 master网卡需要打开混杂模式
+ip link set dev eth0 promisc on
+
+#=====================#
+
+# 配置文件修改
 # 首先关闭nat转发功能
 iptables_nat = false
 
-# master网卡需要打开混杂模式
-ip link set dev eth0 promisc on
-
+link_mode = "macvtap"
 #内网主网卡名称
 ipv4_master = "eth0"
 #以下网段需要跟ipv4_master网卡设置成一样
@@ -229,28 +252,36 @@ ipv4_start = "10.1.2.100"
 ipv4_end = "10.1.2.200"
 ```
 
-## Systemd
+## Deploy
+
+> 部署配置文件放在 `deploy` 目录下，请根据实际情况修改配置文件
+
+### Systemd
 
 1. 添加 anylink 程序
-
-    - anylink 程序目录放入 `/usr/local/anylink-deploy`
+    - 首先把 `anylink-deploy` 文件夹放入 `/usr/local/anylink-deploy`
     - 添加执行权限 `chmod +x /usr/local/anylink-deploy/anylink`
-
-2. systemd/anylink.service 脚本放入：
-
+2. 把 `anylink.service` 脚本放入：
     - centos: `/usr/lib/systemd/system/`
     - ubuntu: `/lib/systemd/system/`
-
 3. 操作命令:
-
     - 启动: `systemctl start anylink`
     - 停止: `systemctl stop anylink`
     - 开机自启: `systemctl enable anylink`
 
+### Docker Compose
+
+1. 进入 `deploy` 目录
+2. 执行脚本 `docker-compose up`
+
+### k8s
+
+1. 进入 `deploy` 目录
+2. 执行脚本 `kubectl apply -f deployment.yaml`
+
 ## Docker
 
 1. 获取镜像
-
    ```bash
    # 具体tag可以从docker hub获取
    # https://hub.docker.com/r/bjdgyc/anylink/tags
@@ -258,50 +289,67 @@ ipv4_end = "10.1.2.200"
    ```
 
 2. 查看命令信息
-
    ```bash
    docker run -it --rm bjdgyc/anylink -h
    ```
 
 3. 生成密码
-
    ```bash
    docker run -it --rm bjdgyc/anylink tool -p 123456
    #Passwd:$2a$10$lCWTCcGmQdE/4Kb1wabbLelu4vY/cUwBwN64xIzvXcihFgRzUvH2a
    ```
 
 4. 生成 jwt secret
-
    ```bash
    docker run -it --rm bjdgyc/anylink tool -s
    #Secret:9qXoIhY01jqhWIeIluGliOS4O_rhcXGGGu422uRZ1JjZxIZmh17WwzW36woEbA
    ```
 
-5. 启动容器
-
+5. 查看所有配置项
    ```bash
+   docker run -it --rm bjdgyc/anylink tool -d
+   ```
+
+6. 启动容器
+   ```bash
+   # 默认启动
    docker run -itd --name anylink --privileged \
-       -p 443:443 -p 8800:8800 \
+       -p 443:443 -p 8800:8800 -p 443:443/udp \
        --restart=always \
        bjdgyc/anylink
+   
+   # 自定义配置目录
+   # 首次启动会自动创建配置文件
+   # 配置文件初始化完成后，容器会强制退出，请重新启动容器
+   docker run -itd --name anylink --privileged \
+       -p 443:443 -p 8800:8800 -p 443:443/udp \
+       -v /home/myconf:/app/conf \
+       --restart=always \
+       bjdgyc/anylink
+   
+   docker restart anylink
    ```
 
 6. 使用自定义参数启动容器
    ```bash
-   # 参数可以参考 -h 命令
+   # 参数可以参考 ./anylink tool -d
+   # 可以使用命令行参数 或者 环境变量 配置
    docker run -itd --name anylink --privileged \
-       -p 443:443 -p 8800:8800 \
+       -e LINK_LOG_LEVEL=info \
+       -p 443:443 -p 8800:8800 -p 443:443/udp \
+       -v /home/myconf:/app/conf \
        --restart=always \
        bjdgyc/anylink \
-       -c=/etc/server.toml --ip_lease=1209600 # IP地址租约时长
+       --ip_lease=1209600 # IP地址租约时长
    ```
 
 7. 构建镜像 (非必需)
-
    ```bash
    #获取仓库源码
    git clone https://github.com/bjdgyc/anylink.git
    # 构建镜像
+   sh build_docker.sh
+   或
    docker build -t anylink -f docker/Dockerfile .
    ```
 
@@ -328,7 +376,6 @@ ipv4_end = "10.1.2.200"
 - [AnyConnect Secure Client](https://www.cisco.com/) (可通过群文件下载: Windows/macOS/Linux/Android/iOS)
 - [OpenConnect](https://gitlab.com/openconnect/openconnect) (Windows/macOS/Linux)
 - [AnyLink Secure Client](https://github.com/tlslink/anylink-client) (Windows/macOS/Linux)
-
 
 ## Contribution
 

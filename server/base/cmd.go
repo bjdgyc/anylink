@@ -57,6 +57,21 @@ func execute() {
 		envs[rr.Key().String()] = rr.Value().Index(0).String()
 	}
 
+	if !runSrv {
+		if debug {
+			scfgData := ServerCfg2Slice()
+			fmtStr := "%-18v %-23v %-20v %v\n"
+			fmt.Printf(fmtStr, "Name", "Env", "Value", "Info")
+			for _, v := range scfgData {
+				if v.Name == "admin_pass" || v.Name == "jwt_secret" {
+					v.Val = "******"
+				}
+				fmt.Printf(fmtStr, v.Name, v.Env, v.Val, v.Info)
+			}
+		}
+		os.Exit(0)
+	}
+
 	// 移动配置解析代码
 	conf := linkViper.GetString("conf")
 	linkViper.SetConfigFile(conf)
@@ -64,10 +79,6 @@ func execute() {
 	if err != nil {
 		// 没有配置文件，直接报错
 		panic("config file err:" + err.Error())
-	}
-
-	if !runSrv {
-		os.Exit(0)
 	}
 }
 
@@ -112,28 +123,6 @@ func initCmd() {
 
 	cobra.OnInitialize(func() {
 		linkViper.AutomaticEnv()
-
-		// ver := linkViper.GetBool("version")
-		// if ver {
-		//	printVersion()
-		//	os.Exit(0)
-		// }
-		//
-		// return
-		//
-		// conf := linkViper.GetString("conf")
-		// _, err := os.Stat(conf)
-		// if errors.Is(err, os.ErrNotExist) {
-		//	// 没有配置文件，不做处理
-		//	panic("conf stat err:" + err.Error())
-		// }
-		//
-		//
-		// linkViper.SetConfigFile(conf)
-		// err = linkViper.ReadInConfig()
-		// if err != nil {
-		//	panic("config file err:" + err.Error())
-		// }
 	})
 }
 
@@ -151,6 +140,8 @@ func initToolCmd() *cobra.Command {
 	toolCmd.Flags().BoolVarP(&debug, "debug", "d", false, "list the config viper.Debug() info")
 
 	toolCmd.Run = func(cmd *cobra.Command, args []string) {
+		runSrv = false
+
 		switch {
 		case rev:
 			printVersion()
@@ -169,7 +160,7 @@ func initToolCmd() *cobra.Command {
 			pass, _ := utils.PasswordHash(passwd)
 			fmt.Printf("Passwd:%s\n", pass)
 		case debug:
-			linkViper.Debug()
+			// linkViper.Debug()
 		default:
 			fmt.Println("Using [anylink tool -h] for help")
 		}
@@ -179,6 +170,6 @@ func initToolCmd() *cobra.Command {
 }
 
 func printVersion() {
-	fmt.Printf("%s v%s build on %s [%s, %s] BuildDate:%s commit_id(%s)\n",
+	fmt.Printf("%s v%s build on %s [%s, %s] date:%s commit_id(%s)\n",
 		APP_NAME, APP_VER, runtime.Version(), runtime.GOOS, runtime.GOARCH, BuildDate, CommitId)
 }

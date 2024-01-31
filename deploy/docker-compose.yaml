@@ -1,0 +1,19 @@
+services:
+  anylink:
+    image: bjdgyc/anylink:latest
+    container_name: anylink
+    restart: always
+    privileged: true
+    #cpus: 2
+    #mem_limit: 4g
+    ports:
+      - 443:443
+      - 8800:8800
+      - 443:443/udp
+    environment:
+      LINK_LOG_LEVEL: info
+    command:
+      - --conf=/app/conf/server.toml
+    #volumes:
+    #  - /home/myconf:/app/conf
+    dns_search: .

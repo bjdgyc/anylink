@@ -23,7 +23,7 @@ var configs = []config{
 	{Typ: cfgStr, Name: "conf", Usage: "config file", ValStr: "./conf/server.toml", Short: "c"},
 	{Typ: cfgStr, Name: "profile", Usage: "profile.xml file", ValStr: "./conf/profile.xml"},
 	{Typ: cfgStr, Name: "server_addr", Usage: "TCP服务监听地址(任意端口)", ValStr: ":443"},
-	{Typ: cfgBool, Name: "server_dtls", Usage: "开启DTLS", ValBool: false},
+	{Typ: cfgBool, Name: "server_dtls", Usage: "开启DTLS", ValBool: true},
 	{Typ: cfgStr, Name: "server_dtls_addr", Usage: "DTLS监听地址(任意端口)", ValStr: ":443"},
 	{Typ: cfgStr, Name: "admin_addr", Usage: "后台服务监听地址", ValStr: ":8800"},
 	{Typ: cfgBool, Name: "proxy_protocol", Usage: "TCP代理协议", ValBool: false},

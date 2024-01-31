@@ -16,39 +16,37 @@ ARG commitId="commitId"
 ENV TZ=Asia/Shanghai
 
 WORKDIR /server
-COPY docker/init.sh /tmp/init.sh
+COPY docker/init_build.sh /tmp/
 COPY server/ /server/
 COPY web/ui  /server/ui
 
 #RUN apk add gcc musl-dev bash
-RUN sh /tmp/init.sh
+RUN sh /tmp/init_build.sh
 
 
 # anylink
 FROM alpine:3.19
 LABEL maintainer="github.com/bjdgyc"
 
+ARG CN="no"
+
 ENV TZ=Asia/Shanghai
 ENV ANYLINK_IN_CONTAINER=true
 
 WORKDIR /app
+COPY docker/init_release.sh /tmp/
+
 COPY --from=builder_golang /server/anylink  /app/
-COPY docker/docker_entrypoint.sh  /app/
-COPY ./server/bridge-init.sh /app/
-COPY ./server/conf  /app/conf
-COPY ./systemd /app/systemd
-COPY ./README.md  /app/README.md
-COPY ./LICENSE  /app/LICENSE
+COPY docker/docker_entrypoint.sh server/bridge-init.sh ./README.md ./LICENSE /app/
+COPY ./deploy /app/deploy
 COPY ./home  /app/home
+COPY ./server/conf  /app/conf
 
 #TODO 本地打包时使用镜像
-#RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/repositories
-RUN apk add --no-cache bash iptables iproute2 tzdata \
-    && chmod +x /app/docker_entrypoint.sh \
-    && mkdir /app/log \
-    && ls /app
+RUN sh /tmp/init_release.sh
 
-EXPOSE 443 8800
+
+EXPOSE 443 8800 443/udp
 
 #CMD ["/app/anylink"]
 ENTRYPOINT ["/app/docker_entrypoint.sh"]

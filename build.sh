@@ -31,7 +31,7 @@ cp -rf $cpath/web/ui .
 
 # -tags osusergo,netgo,sqlite_omit_load_extension
 flags="-v -trimpath"
-ldflags="-s -w -extldflags '-static' -X main.appVer=$ver -X main.commitId=$(git rev-parse HEAD) -X main.date=$(date --iso-8601=seconds)"
+ldflags="-s -w -extldflags '-static' -X main.appVer=$ver -X main.commitId=$(git rev-parse HEAD) -X main.date=$(date -Iseconds)"
 
 #国内可替换源加快速度
 export GOPROXY=https://goproxy.io

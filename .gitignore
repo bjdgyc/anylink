@@ -2,6 +2,8 @@
 .idea/
 anylink-deploy
 anylink-deploy.tar.gz
+anylink
+anylink.db
 
 dist
 artifact-dist

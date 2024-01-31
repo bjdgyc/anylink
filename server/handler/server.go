@@ -4,7 +4,6 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io"
-	"log"
 	"net"
 	"net/http"
 	"os"
@@ -66,7 +65,7 @@ func startTls() {
 
 	ln, err = net.Listen("tcp", addr)
 	if err != nil {
-		log.Fatal(err)
+		base.Fatal(err)
 	}
 	defer ln.Close()
 

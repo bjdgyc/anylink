@@ -17,8 +17,8 @@ cpath=$(pwd)
 ver=$(cat version)
 echo "当前版本 $ver"
 
+rm -rf artifact-dist
 mkdir artifact-dist
-rm -rf artifact-dist/* app
 
 function archive() {
   os=$1
@@ -26,11 +26,11 @@ function archive() {
   #echo "整理部署文件 $os $arch"
 
   deploy="anylink-$ver-$os-$arch"
+  docker container rm $deploy
   docker container create --platform $os/$arch --name $deploy bjdgyc/anylink:$ver
-  docker cp -a $deploy:/app ./
-
   rm -rf anylink-deploy
-  mv app anylink-deploy
+  docker cp -a $deploy:/app ./anylink-deploy
+
   ls -lh anylink-deploy
 
   tar zcf ${deploy}.tar.gz anylink-deploy

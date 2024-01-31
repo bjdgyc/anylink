@@ -47,7 +47,7 @@ builds:
         {{- if eq .Os "linux" }}
           {{- if eq .Arch "amd64" }}CC=x86_64-linux-musl-gcc{{- end }}
         
-          {{- if eq .Arch "arm64" }}CC=aarch64-linux-gnu-gcc CXX=aarch64-linux-gnu-g++{{- end }}
+          {{- if eq .Arch "arm64" }}CC=aarch64-linux-gnu-gcc{{- end }}
         {{- end }}
         {{- if eq .Os "darwin" }}
           {{- if eq .Arch "amd64"}}CC=o64-clang{{- end }}
