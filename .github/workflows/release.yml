@@ -5,6 +5,7 @@ on:
   push:
     tags:
       - "v0.*"
+      - "v1.*"
 
 jobs:
   Build:
@@ -46,7 +47,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           logout: true
 
-      - name: pre bash
+      - name: Pre bash
         shell: bash
         run: |
           appVer=`cat version`
@@ -65,8 +66,8 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           push: true
-          #cache-from: type=gha,scope=anylink
-          #cache-to: type=gha,mode=max,scope=anylink
+          cache-from: type=gha,scope=anylink
+          cache-to: type=gha,mode=max,scope=anylink
           context: .
           file: ./docker/Dockerfile
           platforms: linux/amd64,linux/arm64,linux/arm/v7

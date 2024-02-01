@@ -135,6 +135,7 @@ func logAudit(userName string, pl *sessdata.Payload) {
 	ipSrc := waterutil.IPv4Source(pl.Data)
 	ipDst := waterutil.IPv4Destination(pl.Data)
 	b := getByte51()
+	// key格式 16字节源IP地址 + 16字节目的IP地址 + 2字节目的端口 + 1字节协议类型 + 16字节域名MD5
 	key := *b
 	copy(key[:16], ipSrc)
 	copy(key[16:32], ipDst)
