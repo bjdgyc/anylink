@@ -21,13 +21,14 @@ rm -rf artifact-dist
 mkdir artifact-dist
 
 function archive() {
-  os=$1
-  arch=$2
-  #echo "整理部署文件 $os $arch"
+  arch=$1
+  #echo "整理部署文件 $arch"
+  arch_name=${arch//\//-}
+  echo $arch_name
 
-  deploy="anylink-$ver-$os-$arch"
+  deploy="anylink-$ver-$arch_name"
   docker container rm $deploy
-  docker container create --platform $os/$arch --name $deploy bjdgyc/anylink:$ver
+  docker container create --platform $arch --name $deploy bjdgyc/anylink:$ver
   rm -rf anylink-deploy
   docker cp -a $deploy:/app ./anylink-deploy
 
@@ -39,8 +40,9 @@ function archive() {
 
 echo "copy二进制文件"
 
-archive linux amd64
-#archive linux arm64
+archive "linux/amd64"
+archive "linux/arm64"
+archive "linux/arm/v7"
 
 ls -lh artifact-dist
 

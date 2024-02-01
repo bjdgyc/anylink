@@ -1,7 +1,13 @@
 #node:16-bullseye
 #golang:1.20-bullseye
 #debian:bullseye-slim
-#sed -i 's/deb.debian.org/mirrors.ustc.edu.cn/g' /etc/apt/sources.list
+#bullseye
+# sed -i 's/deb.debian.org/mirrors.ustc.edu.cn/g' /etc/apt/sources.list
+#bookworm
+# sed -i 's/deb.debian.org/mirrors.ustc.edu.cn/g' /etc/apt/sources.list.d/debian.sources
+
+# sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/repositories
+
 
 # 配合 github action 使用
 # 需要先编译出ui文件后 再执行docker编译

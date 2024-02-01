@@ -8,6 +8,9 @@ echo $ver
 # 生成时间 2024-01-30T21:41:27+08:00
 # date -Iseconds
 
+docker run -it --rm -v $PWD/web:/app -w /app node:16-alpine \
+  sh -c "yarn install --registry=https://registry.npmmirror.com && yarn run build"
+
 docker buildx build -t bjdgyc/anylink:latest --progress=plain --build-arg CN="yes" --build-arg appVer=$ver \
   --build-arg commitId=$(git rev-parse HEAD) -f docker/Dockerfile .
 

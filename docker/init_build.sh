@@ -20,7 +20,9 @@ go mod tidy
 
 echo "start build"
 
-ldflags="-s -w -extldflags '-static' -X main.appVer=$appVer -X main.commitId=$commitId -X main.buildDate=$(date -Iseconds)"
+extldflags="-static"
+ldflags="-s -w -X main.appVer=$appVer -X main.commitId=$commitId -X main.buildDate=$(date -Iseconds) \
+  -extldflags \"$extldflags\" "
 
 go build -o anylink -trimpath -ldflags "$ldflags"
 
