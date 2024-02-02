@@ -36,7 +36,7 @@ ldflags="-s -w -extldflags '-static' -X main.appVer=$ver -X main.commitId=$(git 
 #国内可替换源加快速度
 export GOPROXY=https://goproxy.io
 go mod tidy
-go build -o anylink "$flags" -ldflags "$ldflags"
+go build -o anylink $flags -ldflags "$ldflags"
 
 cd $cpath
 
