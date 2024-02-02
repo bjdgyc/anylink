@@ -20,8 +20,8 @@ cd $cpath/web
 
 #国内可替换源加快速度
 #npx browserslist@latest --update-db
-#yarn install --registry=https://registry.npmmirror.com
-#yarn run build
+yarn install --registry=https://registry.npmmirror.com
+yarn run build
 RETVAL $?
 
 echo "编译二进制文件"
