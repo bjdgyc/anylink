@@ -20,8 +20,8 @@ cd $cpath/web
 
 #国内可替换源加快速度
 #npx browserslist@latest --update-db
-yarn install --registry=https://registry.npmmirror.com
-yarn run build
+#yarn install --registry=https://registry.npmmirror.com
+#yarn run build
 RETVAL $?
 
 echo "编译二进制文件"
@@ -31,7 +31,9 @@ cp -rf $cpath/web/ui .
 
 # -tags osusergo,netgo,sqlite_omit_load_extension
 flags="-v -trimpath"
-ldflags="-s -w -extldflags '-static' -X main.appVer=$ver -X main.commitId=$(git rev-parse HEAD) -X main.date=$(date -Iseconds)"
+
+# -extldflags '-static'
+ldflags="-s -w -X main.appVer=$ver -X main.commitId=$(git rev-parse HEAD) -X main.date=$(date -Iseconds)"
 
 #国内可替换源加快速度
 export GOPROXY=https://goproxy.io
