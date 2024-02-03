@@ -42,7 +42,6 @@ echo "copy二进制文件"
 
 archive "linux/amd64"
 archive "linux/arm64"
-archive "linux/arm/v7"
 
 ls -lh artifact-dist
 
