@@ -10,9 +10,9 @@ export GOPROXY=https://goproxy.cn
 
 apk add build-base tzdata gcc musl-dev upx
 
-go build -o anylink
+#go build -o anylink
+go build -o anylink -ldflags "-s -w -extldflags '-static'"
 
-#go build -o anylink -ldflags "-extldflags '-static'"
 
 go env
 uname -a
