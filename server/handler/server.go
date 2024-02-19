@@ -6,6 +6,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"net/http/httputil"
 	"os"
 	"time"
 
@@ -116,8 +117,10 @@ func initRoute() http.Handler {
 
 func notFound(w http.ResponseWriter, r *http.Request) {
 	// fmt.Println(r.RemoteAddr)
-	// hu, _ := httputil.DumpRequest(r, true)
-	// fmt.Println("NotFound: ", string(hu))
+	if base.GetLogLevel() == base.LogLevelTrace {
+		hd, _ := httputil.DumpRequest(r, true)
+		base.Trace("NotFound: ", string(hd))
+	}
 
 	w.WriteHeader(http.StatusNotFound)
 	fmt.Fprintln(w, "404 page not found")

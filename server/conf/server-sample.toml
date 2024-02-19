@@ -69,7 +69,7 @@ mobile_dpd = 22
 #设置最大传输单元
 mtu = 1460
 
-# 要发布的默认域
+# 客户端dns的默认搜索域
 default_domain = "example.com"
 #default_domain = "example.com abc.example.com"
 

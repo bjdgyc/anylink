@@ -48,7 +48,7 @@ var configs = []config{
 	{Typ: cfgStr, Name: "ipv4_start", Usage: "IPV4开始地址", ValStr: "192.168.90.100"},
 	{Typ: cfgStr, Name: "ipv4_end", Usage: "IPV4结束", ValStr: "192.168.90.200"},
 	{Typ: cfgStr, Name: "default_group", Usage: "默认用户组", ValStr: "one"},
-	{Typ: cfgStr, Name: "default_domain", Usage: "要发布的默认域", ValStr: ""},
+	{Typ: cfgStr, Name: "default_domain", Usage: "客户端dns的默认搜索域", ValStr: ""},
 
 	{Typ: cfgInt, Name: "ip_lease", Usage: "IP租期(秒)", ValInt: 86400},
 	{Typ: cfgInt, Name: "max_client", Usage: "最大用户连接", ValInt: 200},
@@ -69,6 +69,7 @@ var configs = []config{
 	{Typ: cfgInt, Name: "no_compress_limit", Usage: "低于及等于多少字节不压缩", ValInt: 256},
 
 	{Typ: cfgBool, Name: "display_error", Usage: "客户端显示详细错误信息(线上环境慎开启)", ValBool: false},
+	{Typ: cfgBool, Name: "exclude_export_ip", Usage: "排除出口ip路由(出口ip不加密传输)", ValBool: true},
 }
 
 var envs = map[string]string{}
