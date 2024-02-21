@@ -24,7 +24,8 @@ extldflags="-static"
 ldflags="-s -w -X main.appVer=$appVer -X main.commitId=$commitId -X main.buildDate=$(date -Iseconds) \
   -extldflags \"$extldflags\" "
 
-CGO_ENABLED=1 go build -o anylink -trimpath -ldflags "$ldflags"
+export CGO_ENABLED=1
+go build -o anylink -trimpath -ldflags "$ldflags"
 
 ls -lh /server/
 

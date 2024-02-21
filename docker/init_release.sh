@@ -10,7 +10,8 @@ fi
 
 #兼容老版 iptables
 apk add --no-cache iptables iptables-legacy
-rm /sbin/iptables && ln -s /sbin/iptables-legacy /sbin/iptables
+rm /sbin/iptables
+ln -s /sbin/iptables-legacy /sbin/iptables
 
 apk add --no-cache ca-certificates bash iproute2 tzdata
 chmod +x /app/docker_entrypoint.sh

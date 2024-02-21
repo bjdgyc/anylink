@@ -16,3 +16,9 @@ docker buildx build -t bjdgyc/anylink:latest --progress=plain --build-arg CN="ye
 
 echo "docker tag latest $ver"
 docker tag bjdgyc/anylink:latest bjdgyc/anylink:$ver
+
+exit 0
+
+docker tag bjdgyc/anylink:latest registry.cn-qingdao.aliyuncs.com/bjdgyc/anylink:latest
+
+docker push registry.cn-qingdao.aliyuncs.com/bjdgyc/anylink:latest
