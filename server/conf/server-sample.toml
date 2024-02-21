@@ -15,7 +15,7 @@ profile = "./conf/profile.xml"
 #log_path = "./log"
 log_path = ""
 log_level = "debug"
-pprof = false
+pprof = true
 
 #系统名称
 issuer = "XX公司VPN"
