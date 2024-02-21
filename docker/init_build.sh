@@ -8,7 +8,7 @@ if [[ $CN == "yes" ]]; then
   export GOPROXY=https://goproxy.cn
 fi
 
-apk add build-base tzdata gcc musl-dev upx
+apk add build-base tzdata gcc g++ musl musl-dev upx
 
 uname -a
 env
@@ -20,12 +20,10 @@ go mod tidy
 
 echo "start build"
 
-extldflags="-static"
-ldflags="-s -w -X main.appVer=$appVer -X main.commitId=$commitId -X main.buildDate=$(date -Iseconds) \
-  -extldflags \"$extldflags\" "
+ldflags="-s -w -X main.appVer=$appVer -X main.commitId=$commitId -X main.buildDate=$(date -Iseconds) -extldflags '-static' "
 
 export CGO_ENABLED=1
-go build -o anylink -trimpath -ldflags "$ldflags"
+go build -v -o anylink -trimpath -ldflags "$ldflags"
 
 ls -lh /server/
 

@@ -8,7 +8,7 @@ if [[ $CN == "yes" ]]; then
   export GOPROXY=https://goproxy.cn
 fi
 
-#兼容老版 iptables
+# alpine:3.19 兼容老版 iptables
 apk add --no-cache iptables iptables-legacy
 rm /sbin/iptables
 ln -s /sbin/iptables-legacy /sbin/iptables
