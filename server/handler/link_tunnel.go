@@ -43,13 +43,13 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	// 判断session-token的值
 	cookie, err := r.Cookie("webvpn")
 	if err != nil || cookie.Value == "" {
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
 	sess := sessdata.SToken2Sess(cookie.Value)
 	if sess == nil {
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
@@ -57,7 +57,7 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	cSess := sess.NewConn()
 	if cSess == nil {
 		log.Println(err)
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
