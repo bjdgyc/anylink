@@ -7,7 +7,7 @@
 db_type = "sqlite3"
 db_source = "./conf/anylink.db"
 #证书文件 使用跟nginx一样的证书即可
-cert_file = "./conf/vpn_cert.crt"
+cert_file = "./conf/vpn_cert.pem"
 cert_key = "./conf/vpn_cert.key"
 files_path = "./conf/files"
 profile = "./conf/profile.xml"
