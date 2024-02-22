@@ -32,6 +32,11 @@ server_dtls_addr = ":443"
 #后台服务监听地址
 admin_addr = ":8800"
 
+#最大客户端数量
+max_client = 200
+#单个用户同时在线数量
+max_user_client = 3
+
 #虚拟网络类型[tun macvtap]
 link_mode = "tun"
 #客户端分配的ip地址池
