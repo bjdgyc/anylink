@@ -11,13 +11,14 @@ echo $ver
 #docker run -it --rm -v $PWD/web:/app -w /app node:16-alpine \
 #  sh -c "yarn install --registry=https://registry.npmmirror.com && yarn run build"
 
-docker buildx build -t bjdgyc/anylink:latest --progress=plain --build-arg CN="yes" --build-arg appVer=$ver \
+# docker buildx build --platform linux/amd64,linux/arm64 本地不生成镜像
+docker build -t bjdgyc/anylink:latest --progress=plain --build-arg CN="yes" --build-arg appVer=$ver \
   --build-arg commitId=$(git rev-parse HEAD) -f docker/Dockerfile .
 
 echo "docker tag latest $ver"
 docker tag bjdgyc/anylink:latest bjdgyc/anylink:$ver
 
-exit 0
+#exit 0
 
 docker tag bjdgyc/anylink:latest registry.cn-qingdao.aliyuncs.com/bjdgyc/anylink:latest
 

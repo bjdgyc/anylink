@@ -4,8 +4,8 @@ gitea.com/xorm/sqlfiddle v0.0.0-20180821085327-62ce714f951a/go.mod h1:EXuID2Zs0p
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/HdrHistogram/hdrhistogram-go v1.1.2/go.mod h1:yDgFjdqOqDEKOvasDdhWNXYg9BVp4O+o5f6V/ehm6Oo=
 github.com/ajstarks/svgo v0.0.0-20180226025133-644b8db467af/go.mod h1:K08gAheRH3/J6wwsYMMT4xOr94bZjxIelGM0+d/wbFw=
-github.com/aliyun/alibaba-cloud-sdk-go v1.62.679 h1:g+DQriWuljavMExRafWYgsslsjE5zFhL2a5ePSjrr20=
-github.com/aliyun/alibaba-cloud-sdk-go v1.62.679/go.mod h1:CJJYa1ZMxjlN/NbXEwmejEnBkhi0DV+Yb3B2lxf+74o=
+github.com/aliyun/alibaba-cloud-sdk-go v1.62.680 h1:UhaUht5x8avOCBqcnfZvc04FwGsSiXMKXXQ3NwRk85Q=
+github.com/aliyun/alibaba-cloud-sdk-go v1.62.680/go.mod h1:CJJYa1ZMxjlN/NbXEwmejEnBkhi0DV+Yb3B2lxf+74o=
 github.com/arl/statsviz v0.6.0 h1:jbW1QJkEYQkufd//4NDYRSNBpwJNrdzPahF7ZmoGdyE=
 github.com/arl/statsviz v0.6.0/go.mod h1:0toboo+YGSUXDaS4g1D5TVS4dXs7S7YYT5J/qnW2h8s=
 github.com/cenkalti/backoff/v4 v4.2.1 h1:y4OZtCnogmCPw98Zjyt5a6+QwPLGkiQsYW5oUqylYbM=
@@ -209,10 +209,10 @@ github.com/subosito/gotenv v1.6.0 h1:9NlTDc1FTs4qu0DDq7AEtTPNw6SVm7uBMsUCUjABIf8
 github.com/subosito/gotenv v1.6.0/go.mod h1:Dk4QP5c2W3ibzajGcXpNraDfq2IrhjMIvMSWPKKo0FU=
 github.com/syndtr/goleveldb v1.0.0 h1:fBdIW9lB4Iz0n9khmH8w27SJ3QEJ7+IgjPEwGSZiFdE=
 github.com/syndtr/goleveldb v1.0.0/go.mod h1:ZVVdQEZoIme9iO1Ch2Jdy24qqXrMMOU6lpPAyBWyWuQ=
-github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common v1.0.859 h1:XXpytsYJilIk/koSWmpEcDZBILNqeEUprU9L5gqbA00=
-github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common v1.0.859/go.mod h1:r5r4xbfxSaeR04b166HGsBa/R4U3SueirEUpXGuw+Q0=
-github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/dnspod v1.0.859 h1:XE2jwhF8AZqkAjZQQWvYefgfD6GeygYVR7rBZfVe7KQ=
-github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/dnspod v1.0.859/go.mod h1:4Top3Q9wd2KyFQ9TRMDexmhncwtx3wD33TzD4LgMd+s=
+github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common v1.0.860 h1:d5/YwGX6b5YgFU/0thsbs5aBp4aJJXBi7JyU1JHAaw0=
+github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common v1.0.860/go.mod h1:r5r4xbfxSaeR04b166HGsBa/R4U3SueirEUpXGuw+Q0=
+github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/dnspod v1.0.860 h1:PQ8wuVKhcjpYUW2gH3WWb92R3QF4YRWBCBZifp6SfHs=
+github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/dnspod v1.0.860/go.mod h1:7gu9rKEmx7R/D0RvuaHmMqLLGBtIR6a6de9Yd5IwDBg=
 github.com/tklauser/go-sysconf v0.3.13 h1:GBUpcahXSpR2xN01jhkNAbTLRk2Yzgggk8IM08lq3r4=
 github.com/tklauser/go-sysconf v0.3.13/go.mod h1:zwleP4Q4OehZHGn4CYZDipCgg9usW5IJePewFCGVEa0=
 github.com/tklauser/numcpus v0.7.0 h1:yjuerZP127QG9m5Zh/mSO4wqurYil27tHrqwRoRjpr4=
