@@ -28,7 +28,7 @@ gopath=/go
 dockercmd=$(
   cat <<EOF
 sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/repositories
-apk add gcc g++ musl musl-dev
+apk add gcc g++ musl musl-dev tzdata
 export GOPROXY=https://goproxy.cn
 go mod tidy
 echo "build:"
