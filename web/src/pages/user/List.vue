@@ -217,7 +217,8 @@
 
         <el-form-item label="禁用OTP" prop="disable_otp">
           <el-switch
-              v-model="ruleForm.disable_otp">
+              v-model="ruleForm.disable_otp"
+              active-text="开启OTP后，用户密码为【PIN码+OTP动态码】(中间没有+号)">
           </el-switch>
         </el-form-item>
 

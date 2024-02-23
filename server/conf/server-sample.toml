@@ -74,7 +74,7 @@ default_domain = "example.com"
 #default_domain = "example.com abc.example.com"
 
 #空闲链接超时时间(秒)-超时后断开链接，0关闭此功能
-idle_timeout = 7200
+idle_timeout = 1800
 #session过期时间，用于断线重连，0永不过期
 session_timeout = 3600
 auth_timeout = 0

@@ -179,7 +179,7 @@ const accountMail = `<p>您好:</p>
     <ul>
         <li>请使用OTP软件扫描动态码二维码</li>
         <li>然后使用anyconnect客户端进行登陆</li>
-        <li>登陆密码为 【PIN码+动态码】</li>
+        <li>登陆密码为 【PIN码+动态码】(中间没有+号)</li>
     </ul>
 </div>
 <p>

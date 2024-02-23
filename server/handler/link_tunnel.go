@@ -192,7 +192,7 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	hClone := w.Header().Clone()
 	buf := &bytes.Buffer{}
 	_ = hClone.Write(buf)
-	base.Trace("LinkTunnel Response Header:", buf.String())
+	base.Debug("LinkTunnel Response Header:", buf.String())
 
 	hj := w.(http.Hijacker)
 	conn, bufRW, err := hj.Hijack()
