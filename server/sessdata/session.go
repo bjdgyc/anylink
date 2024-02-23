@@ -464,7 +464,7 @@ func CloseSess(token string, code ...uint8) {
 		sess.CSess.Close()
 		return
 	}
-	AddUserActLogBySess(sess)
+	AddUserActLogBySess(sess, code...)
 }
 
 func CloseCSess(token string) {
@@ -501,7 +501,7 @@ func AddUserActLog(cs *ConnSession) {
 	dbdata.UserActLogIns.Add(ua, cs.UserAgent)
 }
 
-func AddUserActLogBySess(sess *Session) {
+func AddUserActLogBySess(sess *Session, code ...uint8) {
 	ua := dbdata.UserActLog{
 		Username:        sess.Username,
 		GroupName:       sess.Group,
@@ -512,5 +512,8 @@ func AddUserActLogBySess(sess *Session) {
 		Status:          dbdata.UserLogout,
 	}
 	ua.Info = dbdata.UserActLogIns.GetInfoOpsById(dbdata.UserLogoutBanner)
+	if len(code) > 0 {
+		ua.Info = dbdata.UserActLogIns.GetInfoOpsById(code[0])
+	}
 	dbdata.UserActLogIns.Add(ua, sess.UserAgent)
 }
