@@ -57,30 +57,30 @@ func LinkCstp(conn net.Conn, bufRW *bufio.ReadWriter, cSess *sessdata.ConnSessio
 		switch pl.Data[6] {
 		case 0x07: // KEEPALIVE
 			// do nothing
-			// base.Debug("recv keepalive", cSess.IpAddr)
+			base.Trace("recv LinkCstp Keepalive", cSess.Username, cSess.IpAddr, conn.RemoteAddr())
 			// 判断超时时间
 			if checkIdle {
 				lastTime = cSess.LastDataTime.Load()
 				if lastTime.Before(utils.NowSec().Add(-idle)) {
-					base.Warn("IdleTimeout", cSess.Username, cSess.IpAddr, "lastTime", lastTime)
+					base.Warn("IdleTimeout", cSess.Username, cSess.IpAddr, conn.RemoteAddr(), "lastTime", lastTime)
 					sessdata.CloseSess(cSess.Sess.Token, dbdata.UserIdleTimeout)
 					return
 				}
 			}
 		case 0x05: // DISCONNECT
 			cSess.UserLogoutCode = dbdata.UserLogoutClient
-			base.Debug("DISCONNECT", cSess.Username, cSess.IpAddr)
+			base.Debug("DISCONNECT", cSess.Username, cSess.IpAddr, conn.RemoteAddr())
 			sessdata.CloseSess(cSess.Sess.Token, dbdata.UserLogoutClient)
 			return
 		case 0x03: // DPD-REQ
-			// base.Debug("recv DPD-REQ", cSess.IpAddr)
+			base.Trace("recv LinkCstp DPD-REQ", cSess.Username, cSess.IpAddr, conn.RemoteAddr())
 			pl.PType = 0x04
 			pl.Data = pl.Data[:n]
 			if payloadOutCstp(cSess, pl) {
 				return
 			}
 		case 0x04:
-		// log.Println("recv DPD-RESP")
+			base.Trace("recv LinkCstp DPD-RESP", cSess.Username, cSess.IpAddr, conn.RemoteAddr())
 		case 0x08: // decompress
 			if cSess.CstpPickCmp == nil {
 				continue

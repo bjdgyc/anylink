@@ -7,7 +7,7 @@
 db_type = "sqlite3"
 db_source = "./conf/anylink.db"
 #证书文件
-cert_file = "./conf/vpn_cert.crt"
+cert_file = "./conf/vpn_cert.pem"
 cert_key = "./conf/vpn_cert.key"
 files_path = "./conf/files"
 log_level = "debug"
@@ -31,6 +31,11 @@ server_dtls = true
 server_dtls_addr = ":443"
 #后台服务监听地址
 admin_addr = ":8800"
+
+#最大客户端数量
+max_client = 200
+#单个用户同时在线数量
+max_user_client = 3
 
 #虚拟网络类型[tun macvtap]
 link_mode = "tun"

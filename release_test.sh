@@ -14,20 +14,36 @@ function RETVAL() {
 #当前目录
 cpath=$(pwd)
 
+ver=$(cat version)
+echo $ver
+
 echo "copy二进制文件"
 cd $cpath/server
 # -tags osusergo,netgo,sqlite_omit_load_extension
 flags="-trimpath"
-ldflags="-s -w -extldflags '-static' -X main.appVer=$ver -X main.commitId=$(git rev-parse HEAD) -X main.date=$(date --iso-8601=seconds)"
+ldflags="-s -w -extldflags '-static' -X main.appVer=$ver -X main.commitId=$(git rev-parse HEAD) -X main.buildDate=$(date --iso-8601=seconds)"
 #github action
-gopath=$(go env GOPATH)
+gopath=/go
+
+dockercmd=$(
+  cat <<EOF
+sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/repositories
+apk add gcc g++ musl musl-dev tzdata
+export GOPROXY=https://goproxy.cn
 go mod tidy
-# alpine3
-apk add gcc musl-dev
+echo "build:"
+export CGO_ENABLED=1
+go build -v -o anylink_amd64 $flags -ldflags "$ldflags"
+./anylink_amd64 -v
+EOF
+)
+
 #使用 musl-dev 编译
 docker run -q --rm -v $PWD:/app -v $gopath:/go -w /app --platform=linux/amd64 \
-  golang:1.20-alpine3.19 go build -o anylink_amd64 $flags -ldflags "$ldflags"
-./anylink_amd64 -v
+  golang:1.20-alpine3.19 sh -c "$dockercmd"
+
+exit 0
+
 #arm64编译
 docker run -q --rm -v $PWD:/app -v $gopath:/go -w /app --platform=linux/arm64 \
   golang:1.20-alpine3.19 go build -o anylink_arm64 $flags -ldflags "$ldflags"

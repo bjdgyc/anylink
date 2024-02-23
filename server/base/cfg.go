@@ -81,7 +81,8 @@ type ServerConfig struct {
 	Compression     bool `json:"compression"`       // bool
 	NoCompressLimit int  `json:"no_compress_limit"` // int
 
-	DisplayError bool `json:"display_error"`
+	DisplayError    bool `json:"display_error"`
+	ExcludeExportIp bool `json:"exclude_export_ip"`
 }
 
 func initServerCfg() {

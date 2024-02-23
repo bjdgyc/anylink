@@ -43,13 +43,13 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	// 判断session-token的值
 	cookie, err := r.Cookie("webvpn")
 	if err != nil || cookie.Value == "" {
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
 	sess := sessdata.SToken2Sess(cookie.Value)
 	if sess == nil {
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
@@ -57,7 +57,7 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	cSess := sess.NewConn()
 	if cSess == nil {
 		log.Println(err)
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
@@ -66,6 +66,8 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	cstpBaseMtu := r.Header.Get("X-CSTP-Base-MTU")
 	masterSecret := r.Header.Get("X-DTLS-Master-Secret")
 	localIp := r.Header.Get("X-Cstp-Local-Address-Ip4")
+	// 出口ip
+	exportIp4 := r.Header.Get("X-Cstp-Remote-Address-Ip4")
 	mobile := r.Header.Get("X-Cstp-License")
 
 	cSess.SetMtu(cstpMtu)
@@ -96,14 +98,6 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	dtlsCiphersuite := checkDtls12Ciphersuite(r.Header.Get("X-Dtls12-Ciphersuite"))
 	base.Trace("dtlsCiphersuite", dtlsCiphersuite)
 
-	// 压缩
-	if cmpName, ok := cSess.SetPickCmp("cstp", r.Header.Get("X-Cstp-Accept-Encoding")); ok {
-		HttpSetHeader(w, "X-CSTP-Content-Encoding", cmpName)
-	}
-	if cmpName, ok := cSess.SetPickCmp("dtls", r.Header.Get("X-Dtls-Accept-Encoding")); ok {
-		HttpSetHeader(w, "X-DTLS-Content-Encoding", cmpName)
-	}
-
 	// 返回客户端数据
 	HttpSetHeader(w, "Server", fmt.Sprintf("%s %s", base.APP_NAME, base.APP_VER))
 	HttpSetHeader(w, "X-CSTP-Version", "1")
@@ -113,9 +107,17 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	HttpSetHeader(w, "X-CSTP-Netmask", sessdata.IpPool.Ipv4Mask.String()) // 子网掩码
 	HttpSetHeader(w, "X-CSTP-Hostname", hn)                               // 机器名称
 	HttpSetHeader(w, "X-CSTP-Base-MTU", cstpBaseMtu)
-	// 要发布的默认域
+	// 客户端dns的默认搜索域
 	if base.Cfg.DefaultDomain != "" {
 		HttpSetHeader(w, "X-CSTP-Default-Domain", base.Cfg.DefaultDomain)
+	}
+
+	// 压缩
+	if cmpName, ok := cSess.SetPickCmp("cstp", r.Header.Get("X-Cstp-Accept-Encoding")); ok {
+		HttpSetHeader(w, "X-CSTP-Content-Encoding", cmpName)
+	}
+	if cmpName, ok := cSess.SetPickCmp("dtls", r.Header.Get("X-Dtls-Accept-Encoding")); ok {
+		HttpSetHeader(w, "X-DTLS-Content-Encoding", cmpName)
 	}
 
 	// 设置用户策略
@@ -136,9 +138,13 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 		}
 		HttpAddHeader(w, "X-CSTP-Split-Include", v.IpMask)
 	}
-	// 不允许的路由  X-Cstp-Remote-Address-Ip4:
+	// 不允许的路由
 	for _, v := range cSess.Group.RouteExclude {
 		HttpAddHeader(w, "X-CSTP-Split-Exclude", v.IpMask)
+	}
+	// 排除出口ip路由(出口ip不加密传输)
+	if base.Cfg.ExcludeExportIp && exportIp4 != "" {
+		HttpAddHeader(w, "X-CSTP-Split-Exclude", exportIp4+"/255.255.255.255")
 	}
 
 	HttpSetHeader(w, "X-CSTP-Lease-Duration", "1209600") // ip地址租期

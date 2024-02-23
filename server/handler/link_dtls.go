@@ -56,20 +56,20 @@ func LinkDtls(conn net.Conn, cSess *sessdata.ConnSession) {
 		switch pl.Data[0] {
 		case 0x07: // KEEPALIVE
 			// do nothing
-			// base.Debug("recv keepalive", cSess.IpAddr)
+			base.Trace("recv LinkDtls Keepalive", cSess.Username, cSess.IpAddr, conn.RemoteAddr())
 		case 0x05: // DISCONNECT
 			cSess.UserLogoutCode = dbdata.UserLogoutClient
-			base.Debug("DISCONNECT DTLS", cSess.Username, cSess.IpAddr)
+			base.Debug("DISCONNECT DTLS", cSess.Username, cSess.IpAddr, conn.RemoteAddr())
 			return
 		case 0x03: // DPD-REQ
-			// base.Debug("recv DPD-REQ", cSess.IpAddr)
+			base.Trace("recv LinkDtls DPD-REQ", cSess.Username, cSess.IpAddr, conn.RemoteAddr())
 			pl.PType = 0x04
 			pl.Data = pl.Data[:n]
 			if payloadOutDtls(cSess, dSess, pl) {
 				return
 			}
 		case 0x04:
-		// base.Debug("recv DPD-RESP", cSess.IpAddr)
+			base.Trace("recv LinkDtls DPD-RESP", cSess.Username, cSess.IpAddr, conn.RemoteAddr())
 		case 0x08: // decompress
 			if cSess.DtlsPickCmp == nil {
 				continue
