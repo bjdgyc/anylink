@@ -75,7 +75,7 @@ jobs:
           build-args: |
             appVer=${{ env.APP_VER }}
             commitId=${{ env.commitId }}
-          tags: bjdgyc/anylink:latest,bjdgyc/anylink:${{ env.APP_VER }}
+          tags: bjdgyc/anylink:${{ env.APP_VER }},bjdgyc/anylink:latest
           #tags: bjdgyc/anylink:${{ env.APP_VER }}
 
       - name: Build deploy binary

@@ -62,7 +62,7 @@ AnyLink 服务端仅在 CentOS 7、CentOS 8、Ubuntu 18.04、Ubuntu 20.04 测试
 >
 > 其他问题 [前往查看](doc/question.md)
 >
-> 默认管理后台访问地址  https://host:8800  默认账号密码 admin 123456
+> 默认管理后台访问地址  https://host:8800 或 https://域名:8800 默认账号密码 admin 123456
 >
 > 首次使用，请在浏览器访问  https://域名:443   浏览器提示安全后，在客户端输入 【域名:443】 即可
 
@@ -87,7 +87,6 @@ cd anylink-deploy
 sudo ./anylink
 
 # 默认管理后台访问地址
-# 注意该host为anylink的内网ip,不能跟客户端请求的ip一样
 # https://host:8800
 # 默认账号 密码
 # admin 123456
