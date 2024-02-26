@@ -12,17 +12,19 @@ import (
 )
 
 const (
-	UserAuthFail      = 0 // 认证失败
-	UserAuthSuccess   = 1 // 认证成功
-	UserConnected     = 2 // 连线成功
-	UserLogout        = 3 // 用户登出
-	UserLogoutLose    = 0 // 用户掉线
-	UserLogoutBanner  = 1 // 用户banner弹窗取消
-	UserLogoutClient  = 2 // 用户主动登出
-	UserLogoutTimeout = 3 // 用户超时登出
-	UserLogoutAdmin   = 4 // 账号被管理员踢下线
-	UserLogoutExpire  = 5 // 账号过期被踢下线
-	UserIdleTimeout   = 6 // 用户空闲链接超时
+	UserAuthFail       = 0 // 认证失败
+	UserAuthSuccess    = 1 // 认证成功
+	UserConnected      = 2 // 连线成功
+	UserLogout         = 3 // 用户登出
+	UserLogoutLose     = 0 // 用户掉线
+	UserLogoutBanner   = 1 // 用户banner弹窗取消
+	UserLogoutClient   = 2 // 用户主动登出
+	UserLogoutTimeout  = 3 // 用户超时登出
+	UserLogoutAdmin    = 4 // 账号被管理员踢下线
+	UserLogoutExpire   = 5 // 账号过期被踢下线
+	UserIdleTimeout    = 6 // 用户空闲链接超时
+	UserLogoutOneAdmin = 7 // 账号被管理员一键下线
+
 )
 
 type UserActLogProcess struct {
@@ -57,13 +59,14 @@ var (
 			3: "AnyLink",
 		},
 		InfoOps: []string{ // 信息
-			UserLogoutLose:    "用户掉线",
-			UserLogoutBanner:  "用户取消弹窗/客户端发起的logout",
-			UserLogoutClient:  "用户/客户端主动断开",
-			UserLogoutTimeout: "Session过期被踢下线",
-			UserLogoutAdmin:   "账号被管理员踢下线",
-			UserLogoutExpire:  "账号过期被踢下线",
-			UserIdleTimeout:   "用户空闲链接超时",
+			UserLogoutLose:     "用户掉线",
+			UserLogoutBanner:   "用户取消弹窗/客户端发起的logout",
+			UserLogoutClient:   "用户/客户端主动断开",
+			UserLogoutTimeout:  "Session过期被踢下线",
+			UserLogoutAdmin:    "账号被管理员踢下线",
+			UserLogoutExpire:   "账号过期被踢下线",
+			UserIdleTimeout:    "用户空闲链接超时",
+			UserLogoutOneAdmin: "账号被管理员一键下线",
 		},
 	}
 )
@@ -126,6 +129,9 @@ func (ua *UserActLogProcess) GetStatusOpsWithTag() interface{} {
 }
 
 func (ua *UserActLogProcess) GetInfoOpsById(id uint8) string {
+	if int(id) >= len(ua.InfoOps) {
+		return "未知的信息类型"
+	}
 	return ua.InfoOps[id]
 }
 

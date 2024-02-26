@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"net"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/bjdgyc/anylink/pkg/utils"
@@ -42,33 +43,74 @@ func (o Onlines) Swap(i, j int) {
 }
 
 func OnlineSess() []Online {
+	return GetOnlineSess("", "", false)
+}
+
+/**
+ * @Description: GetOnlineSess
+ * @param search_cate 分类：用户名、登录组、MAC地址、IP地址、远端地址
+ * @param search_text 关键字，模糊搜索
+ * @param show_sleeper 是否显示休眠用户
+ * @return []Online
+ */
+func GetOnlineSess(search_cate string, search_text string, show_sleeper bool) []Online {
 	var datas Onlines
+	if strings.TrimSpace(search_text) == "" {
+		search_cate = ""
+	}
 	sessMux.Lock()
+	defer sessMux.Unlock()
 	for _, v := range sessions {
 		v.mux.Lock()
-		if v.IsActive {
+		cSess := v.CSess
+		if cSess == nil {
+			cSess = &ConnSession{}
+		}
+		// 选择需要比较的字符串
+		var compareText string
+		switch search_cate {
+		case "username":
+			compareText = v.Username
+		case "group":
+			compareText = v.Group
+		case "mac_addr":
+			compareText = v.MacAddr
+		case "ip":
+			if cSess != nil {
+				compareText = cSess.IpAddr.String()
+			}
+		case "remote_addr":
+			if cSess != nil {
+				compareText = cSess.RemoteAddr
+			}
+		}
+		if search_cate != "" && !strings.Contains(compareText, search_text) {
+			v.mux.Unlock()
+			continue
+		}
+
+		if show_sleeper || v.IsActive {
 			val := Online{
 				Token:            v.Token,
-				Ip:               v.CSess.IpAddr,
+				Ip:               cSess.IpAddr,
 				Username:         v.Username,
 				Group:            v.Group,
 				MacAddr:          v.MacAddr,
 				UniqueMac:        v.UniqueMac,
-				RemoteAddr:       v.CSess.RemoteAddr,
-				TunName:          v.CSess.IfName,
-				Mtu:              v.CSess.Mtu,
-				Client:           v.CSess.Client,
-				BandwidthUp:      utils.HumanByte(v.CSess.BandwidthUpPeriod.Load()) + "/s",
-				BandwidthDown:    utils.HumanByte(v.CSess.BandwidthDownPeriod.Load()) + "/s",
-				BandwidthUpAll:   utils.HumanByte(v.CSess.BandwidthUpAll.Load()),
-				BandwidthDownAll: utils.HumanByte(v.CSess.BandwidthDownAll.Load()),
+				RemoteAddr:       cSess.RemoteAddr,
+				TunName:          cSess.IfName,
+				Mtu:              cSess.Mtu,
+				Client:           cSess.Client,
+				BandwidthUp:      utils.HumanByte(cSess.BandwidthUpPeriod.Load()) + "/s",
+				BandwidthDown:    utils.HumanByte(cSess.BandwidthDownPeriod.Load()) + "/s",
+				BandwidthUpAll:   utils.HumanByte(cSess.BandwidthUpAll.Load()),
+				BandwidthDownAll: utils.HumanByte(cSess.BandwidthDownAll.Load()),
 				LastLogin:        v.LastLogin,
 			}
 			datas = append(datas, val)
 		}
 		v.mux.Unlock()
 	}
-	sessMux.Unlock()
 	sort.Sort(&datas)
 	return datas
 }
