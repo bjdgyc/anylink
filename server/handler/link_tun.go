@@ -45,15 +45,21 @@ func checkTun() {
 		base.CheckModOrLoad("iptable_filter")
 		base.CheckModOrLoad("iptable_nat")
 
+		// 添加注释
 		natRule := []string{"-s", base.Cfg.Ipv4CIDR, "-o", base.Cfg.Ipv4Master, "-m", "comment",
 			"--comment", "anylink tun nat", "-j", "MASQUERADE"}
-		if natExists, _ := ipt.Exists("nat", "POSTROUTING", natRule...); !natExists {
-			ipt.Insert("nat", "POSTROUTING", 1, natRule...)
+		err = ipt.InsertUnique("nat", "POSTROUTING", 1, natRule...)
+		if err != nil {
+			base.Error(err)
 		}
+
+		// 添加注释
 		forwardRule := []string{"-m", "comment", "--comment", "anylink forward filter", "-j", "ACCEPT"}
-		if forwardExists, _ := ipt.Exists("filter", "FORWARD", forwardRule...); !forwardExists {
-			ipt.Insert("filter", "FORWARD", 1, forwardRule...)
+		err = ipt.InsertUnique("filter", "FORWARD", 1, forwardRule...)
+		if err != nil {
+			base.Error(err)
 		}
+
 		base.Info(ipt.List("nat", "POSTROUTING"))
 		base.Info(ipt.List("filter", "FORWARD"))
 	}
