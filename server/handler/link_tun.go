@@ -45,11 +45,12 @@ func checkTun() {
 		base.CheckModOrLoad("iptable_filter")
 		base.CheckModOrLoad("iptable_nat")
 
-		natRule := []string{"-s", base.Cfg.Ipv4CIDR, "-o", base.Cfg.Ipv4Master, "-j", "MASQUERADE"}
-		forwardRule := []string{"-j", "ACCEPT"}
+		natRule := []string{"-s", base.Cfg.Ipv4CIDR, "-o", base.Cfg.Ipv4Master, "-m", "comment",
+			"--comment", "anylink tun nat", "-j", "MASQUERADE"}
 		if natExists, _ := ipt.Exists("nat", "POSTROUTING", natRule...); !natExists {
 			ipt.Insert("nat", "POSTROUTING", 1, natRule...)
 		}
+		forwardRule := []string{"-m", "comment", "--comment", "anylink forward filter", "-j", "ACCEPT"}
 		if forwardExists, _ := ipt.Exists("filter", "FORWARD", forwardRule...); !forwardExists {
 			ipt.Insert("filter", "FORWARD", 1, forwardRule...)
 		}
