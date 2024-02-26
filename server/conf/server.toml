@@ -26,7 +26,7 @@ jwt_secret = "abcdef.0123456789.abcdef"
 #TCP服务监听地址(任意端口)
 server_addr = ":443"
 #开启 DTLS
-server_dtls = true
+server_dtls = false
 #UDP监听地址(任意端口)
 server_dtls_addr = ":443"
 #后台服务监听地址
