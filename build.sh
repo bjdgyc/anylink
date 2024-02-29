@@ -30,8 +30,10 @@ rm -rf ui
 cp -rf $cpath/web/ui .
 
 # -tags osusergo,netgo,sqlite_omit_load_extension
+# -tags musl
 flags="-v -trimpath"
 
+# -linkmode external
 # -extldflags '-static'
 ldflags="-s -w -X main.appVer=$ver -X main.commitId=$(git rev-parse HEAD) -X main.date=$(date -Iseconds)"
 

@@ -48,13 +48,18 @@ AnyLink 服务端仅在 CentOS 7、CentOS 8、Ubuntu 18.04、Ubuntu 20.04 测试
 >
 > https://github.com/bjdgyc/anylink/releases
 >
-> 如果不会安装，可以提供有偿远程协助服务。添加QQ联系我 68492170
+> 如果不会安装，可以提供有偿远程协助服务(200 CNY)。添加QQ联系我 68492170
+> 
+> 也可以添加QQ群 咨询群内大佬，群共享文件有相关软件下载
+> 
+> 添加QQ群①(已满): 567510628
+> 添加QQ群②: 739072205
 
 ### 使用问题
 
 > 对于测试环境，可以使用 vpn.test.vqilu.cn 绑定host进行测试
 >
-> 对于线上环境，必须申请安全的 https 证书，不支持私有证书连接
+> 对于线上环境，必须申请安全的https证书(跟nginx使用的证书类型一致)，不支持私有证书连接
 >
 > 服务端安装 yum install iproute 或者 apt-get install iproute2
 >
@@ -356,15 +361,11 @@ ipv4_end = "10.1.2.200"
 
 请前往 [问题地址](doc/question.md) 查看具体信息
 
+<!--
 ## Discussion
-
-添加QQ群(1)(已满): 567510628
-
-添加QQ群(2): 739072205
 
 群共享文件有相关软件下载
 
-<!--
 添加微信群: 群共享文件有相关软件下载
 
 ![contact_me_qr](doc/screenshot/contact_me_qr.png)
