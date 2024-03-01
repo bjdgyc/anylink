@@ -48,7 +48,7 @@ AnyLink 服务端仅在 CentOS 7、CentOS 8、Ubuntu 18.04、Ubuntu 20.04 测试
 >
 > https://github.com/bjdgyc/anylink/releases
 >
-> 如果不会安装，可以提供有偿远程协助服务(200 CNY)。添加QQ联系我 68492170
+> 如果不会安装，可以提供有偿远程协助服务(200 CNY)。添加QQ(68492170)联系我
 > 
 > 也可以添加QQ群 咨询群内大佬，群共享文件有相关软件下载
 > 
