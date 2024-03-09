@@ -145,7 +145,7 @@ func (ua *UserActLogProcess) ParseUserAgent(userAgent string) (os_idx, client_id
 	os_idx = 0
 	if strings.Contains(userAgent, "windows") {
 		os_idx = 1
-	} else if strings.Contains(userAgent, "mac os") || strings.Contains(userAgent, "darwin_i386") {
+	} else if strings.Contains(userAgent, "mac os") || strings.Contains(userAgent, "darwin_i386") || strings.Contains(userAgent, "darwin_amd64") || strings.Contains(userAgent, "darwin_arm64") {
 		os_idx = 2
 	} else if strings.Contains(userAgent, "darwin_arm") || strings.Contains(userAgent, "apple") {
 		os_idx = 5
