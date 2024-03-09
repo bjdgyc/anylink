@@ -73,7 +73,7 @@ func SendMail(subject, to, htmlBody string) error {
 	// - PLAIN (default)
 	// - LOGIN
 	// - CRAM-MD5
-	server.Authentication = mail.AuthPlain
+	server.Authentication = mail.AuthAuto
 
 	// Variable to keep alive connection
 	server.KeepAlive = false
