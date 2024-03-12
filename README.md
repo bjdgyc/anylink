@@ -58,7 +58,7 @@ AnyLink 服务端仅在 CentOS 7、CentOS 8、Ubuntu 18.04、Ubuntu 20.04 测试
 
 ### 使用问题
 
-> 对于测试环境，可以使用 vpn.test.vqilu.cn 绑定host进行测试
+> 对于测试环境，可以使用 vpn.test.vqilu.cn (已经备案) 绑定host进行测试
 >
 > 对于线上环境，必须申请安全的https证书(跟nginx使用的证书类型一致)，不支持私有证书连接
 >
