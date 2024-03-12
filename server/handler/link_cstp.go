@@ -69,13 +69,13 @@ func LinkCstp(conn net.Conn, bufRW *bufio.ReadWriter, cSess *sessdata.ConnSessio
 			}
 		case 0x05: // DISCONNECT
 			cSess.UserLogoutCode = dbdata.UserLogoutClient
-			base.Debug("DISCONNECT", cSess.Username, cSess.IpAddr, conn.RemoteAddr())
+			base.Debug("DISCONNECT", cSess.Username, cSess.IpAddr, conn.RemoteAddr(), n, string(pl.Data[9:n]))
 			sessdata.CloseSess(cSess.Sess.Token, dbdata.UserLogoutClient)
 			return
 		case 0x03: // DPD-REQ
-			base.Trace("recv LinkCstp DPD-REQ", cSess.Username, cSess.IpAddr, conn.RemoteAddr())
+			base.Trace("recv LinkCstp DPD-REQ", cSess.Username, cSess.IpAddr, conn.RemoteAddr(), n, pl.Data[:n])
 			pl.PType = 0x04
-			pl.Data = pl.Data[:n]
+			// pl.Data = pl.Data[:n]
 			if payloadOutCstp(cSess, pl) {
 				return
 			}
@@ -169,7 +169,7 @@ func cstpWrite(conn net.Conn, bufRW *bufio.ReadWriter, cSess *sessdata.ConnSessi
 				binary.BigEndian.PutUint16(pl.Data[4:6], uint16(l))
 			}
 		} else {
-			// pl.Data = append(pl.Data[:0], plHeader...)
+			pl.Data = append(pl.Data[:0], plHeader...)
 			// 设置头类型
 			pl.Data[6] = pl.PType
 		}

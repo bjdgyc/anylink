@@ -32,8 +32,10 @@ func startDtls() {
 
 	logf := logging.NewDefaultLoggerFactory()
 	logf.Writer = base.GetBaseLw()
-	// logf.DefaultLogLevel = logging.LogLevelTrace
 	logf.DefaultLogLevel = logging.LogLevelInfo
+	if base.GetLogLevel() == base.LogLevelTrace {
+		// logf.DefaultLogLevel = logging.LogLevelTrace
+	}
 
 	// https://github.com/pion/dtls/pull/369
 	sessStore := &sessionStore{}

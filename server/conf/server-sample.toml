@@ -61,10 +61,14 @@ ip_lease = 86400
 default_group = "one"
 
 #客户端失效检测时间(秒) dpd > keepalive
-cstp_keepalive = 5
-cstp_dpd = 12
-mobile_keepalive = 10
-mobile_dpd = 22
+#cstp_keepalive = 5
+#cstp_dpd = 12
+#mobile_keepalive = 10
+#mobile_dpd = 22
+cstp_keepalive = 20
+cstp_dpd = 30
+mobile_keepalive = 40
+mobile_dpd = 60
 
 #设置最大传输单元
 mtu = 1460
