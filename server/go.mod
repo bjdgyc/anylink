@@ -33,7 +33,6 @@ require (
 	github.com/xhit/go-simple-mail/v2 v2.16.0
 	github.com/xlzd/gotp v0.1.0
 	github.com/xuri/excelize/v2 v2.8.1
-	go.uber.org/atomic v1.11.0
 	golang.org/x/crypto v0.21.0
 	golang.org/x/net v0.22.0
 	golang.org/x/text v0.14.0
@@ -66,6 +65,7 @@ require (
 	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/dnspod v1.0.873 // indirect
 	github.com/toorop/go-dkim v0.0.0-20240103092955-90b7d1423f92 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
+	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/exp v0.0.0-20240222234643-814bf88cf225 // indirect
 	golang.org/x/mod v0.16.0 // indirect

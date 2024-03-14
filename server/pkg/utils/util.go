@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"math/rand"
+	"strings"
 	"sync/atomic"
 	"time"
 )
@@ -90,4 +91,12 @@ func RandomRunes(length int) string {
 	}
 
 	return string(bytes)
+}
+
+func ParseName(name string) string {
+	name = strings.ReplaceAll(name, " ", "-")
+	name = strings.ReplaceAll(name, "'", "-")
+	name = strings.ReplaceAll(name, "\"", "-")
+	name = strings.ReplaceAll(name, ";", "-")
+	return name
 }

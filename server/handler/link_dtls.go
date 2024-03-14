@@ -96,7 +96,7 @@ func LinkDtls(conn net.Conn, cSess *sessdata.ConnSession) {
 				return
 			}
 			// 只记录返回正确的数据时间
-			cSess.LastDataTime.Store(utils.NowSec())
+			cSess.LastDataTime.Store(utils.NowSec().Unix())
 		}
 
 	}

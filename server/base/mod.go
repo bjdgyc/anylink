@@ -58,10 +58,9 @@ func CheckModOrLoad(mod string) {
 			// 文件存在
 			return
 		}
-		err = fmt.Errorf("[error] Linux tunFile is null %s", tunPath)
-		log.Println(err)
-		return
-		// panic(err)
+		// err = fmt.Errorf("[error] Linux tunFile is null %s", tunPath)
+		// log.Println(err)
+		// return
 	}
 
 	if InContainer {
@@ -76,7 +75,7 @@ func CheckModOrLoad(mod string) {
 	cmd := exec.Command("sh", "-c", cmdstr)
 	b, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Println(string(b))
+		log.Println(mod, string(b))
 		panic(err)
 	}
 }

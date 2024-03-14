@@ -47,8 +47,10 @@ AnyLink 服务端仅在 CentOS 7、CentOS 8、Ubuntu 18.04、Ubuntu 20.04 测试
 > 没有编程基础的同学建议直接下载 release 包，从下面的地址下载 anylink-deploy.tar.gz
 >
 > https://github.com/bjdgyc/anylink/releases
+> 
+> https://gitee.com/bjdgyc/anylink/releases
 >
-> 如果不会安装，可以提供有偿远程协助服务(100 CNY)。添加QQ(68492170)联系我
+> 如果不会安装，可以提供有偿远程协助服务(200 CNY)。添加QQ(68492170)联系我
 > 
 > 也可以添加QQ群 咨询群内大佬，群共享文件有相关软件下载
 > 
@@ -58,11 +60,15 @@ AnyLink 服务端仅在 CentOS 7、CentOS 8、Ubuntu 18.04、Ubuntu 20.04 测试
 
 ### 使用问题
 
-> 对于测试环境，可以使用 vpn.test.vqilu.cn (已经备案) 绑定host进行测试
+> 对于测试环境，可以使用 vpn.test.vqilu.cn 绑定host进行测试
 >
 > 对于线上环境，必须申请安全的https证书(跟nginx使用的证书类型一致)，不支持私有证书连接
 >
-> 服务端安装 yum install iproute 或者 apt-get install iproute2
+> 服务端依赖安装:
+> 
+> centos: yum install iptables iproute
+> 
+> ubuntu: apt-get install iptables iproute2
 >
 > 客户端请使用群共享文件的版本，其他版本没有测试过，不保证使用正常
 >
@@ -234,6 +240,11 @@ https://cloud.tencent.com/document/product/216/62007
 1. 设置配置文件
 
 > macvtap 设置相对比较简单，只需要配置相应的参数即可。
+> 
+> 网络要求：需要网络支持 ARP 传输，可通过 ARP 宣告普通内网 IP。
+> 
+> 网络限制：云环境下不能使用，网卡mac加白环境不能使用，802.1x认证网络不能使用
+> 
 > 以下参数可以通过执行 `ip a` 查看
 
 ```
