@@ -12,6 +12,7 @@ cert_key = "./conf/vpn_cert.key"
 files_path = "./conf/files"
 profile = "./conf/profile.xml"
 #profile name(用于区分不同网站的配置)
+#客户端存放位置 C:\ProgramData\Cisco\Cisco Secure Client\VPN\Profile
 profile_name = "anylink"
 #日志目录,为空写入标准输出
 #log_path = "./log"
