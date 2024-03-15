@@ -1,5 +1,7 @@
 #!/bin/bash
 
+#github action release.sh
+
 set -x
 function RETVAL() {
   rt=$1
@@ -11,40 +13,45 @@ function RETVAL() {
 
 #当前目录
 cpath=$(pwd)
-#ver=`cat server/base/app_ver.go | grep APP_VER | awk '{print $3}' | sed 's/"//g'`
+
 ver=$(cat version)
-echo "当前版本 $ver"
+echo $ver
 
-echo "编译前端项目"
-cd $cpath/web
-
-#国内可替换源加快速度
-#npx browserslist@latest --update-db
-yarn install --registry=https://registry.npmmirror.com
-yarn run build
-RETVAL $?
-
-echo "编译二进制文件"
+echo "copy二进制文件"
 cd $cpath/server
-rm -rf ui
-cp -rf $cpath/web/ui .
-
 # -tags osusergo,netgo,sqlite_omit_load_extension
-# -tags musl
-flags="-v -trimpath"
+flags="-trimpath"
+ldflags="-s -w -extldflags '-static' -X main.appVer=$ver -X main.commitId=$(git rev-parse HEAD) -X main.buildDate=$(date --iso-8601=seconds)"
+#github action
+gopath=/go
 
-# -linkmode external
-# -extldflags '-static'
-ldflags="-s -w -X main.appVer=$ver -X main.commitId=$(git rev-parse HEAD) -X main.date=$(date -Iseconds)"
-
-#国内可替换源加快速度
-export GOPROXY=https://goproxy.io
+dockercmd=$(
+  cat <<EOF
+sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories
+apk add gcc g++ musl musl-dev tzdata
+export GOPROXY=https://goproxy.cn
 go mod tidy
-go build -o anylink $flags -ldflags "$ldflags"
+echo "build:"
+export CGO_ENABLED=1
+go build -v -o anylink_amd64 $flags -ldflags "$ldflags"
+./anylink_amd64 -v
+EOF
+)
 
-cd $cpath
+#使用 musl-dev 编译
+docker run -q --rm -v $PWD:/app -v $gopath:/go -w /app --platform=linux/amd64 \
+  golang:1.20-alpine3.19 sh -c "$dockercmd"
 
 exit 0
+
+#arm64编译
+docker run -q --rm -v $PWD:/app -v $gopath:/go -w /app --platform=linux/arm64 \
+  golang:1.20-alpine3.19 go build -o anylink_arm64 $flags -ldflags "$ldflags"
+./anylink_arm64 -v
+
+exit 0
+
+cd $cpath
 
 echo "整理部署文件"
 deploy="anylink-deploy"

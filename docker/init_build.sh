@@ -21,7 +21,7 @@ go mod tidy
 
 echo "start build"
 
-ldflags="-s -w -X main.appVer=$appVer -X main.commitId=$commitId -X main.buildDate=$(date -Iseconds) -extldflags '-static' "
+ldflags="-s -w -X main.appVer=$appVer -X main.commitId=$commitId -X main.buildDate=$(date -Iseconds) -extldflags \"-static\" "
 
 export CGO_ENABLED=1
 go build -v -o anylink -trimpath -ldflags "$ldflags"
