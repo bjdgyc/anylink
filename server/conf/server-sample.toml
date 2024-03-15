@@ -11,6 +11,8 @@ cert_file = "./conf/vpn_cert.pem"
 cert_key = "./conf/vpn_cert.key"
 files_path = "./conf/files"
 profile = "./conf/profile.xml"
+#profile name(用于区分不同网站的配置)
+profile_name = "anylink"
 #日志目录,为空写入标准输出
 #log_path = "./log"
 log_path = ""
