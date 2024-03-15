@@ -92,7 +92,7 @@ git clone https://github.com/bjdgyc/anylink.git
 
 
 cd anylink
-sh build.sh
+bash build.sh
 
 # 注意使用root权限运行
 cd anylink-deploy
@@ -187,6 +187,8 @@ IP 层的数据互相转换，性能会有所下降。 如果需要在虚拟机�
 1. 开启服务器转发
 
 ```shell
+# 新版本支持自动设置ip转发
+
 # file: /etc/sysctl.conf
 net.ipv4.ip_forward = 1
 
@@ -235,7 +237,7 @@ https://cloud.tencent.com/document/product/216/62007
 
 3. 使用 AnyConnect 客户端连接即可
 
-### macvtap 设置
+### 桥接设置
 
 1. 设置配置文件
 
@@ -246,6 +248,37 @@ https://cloud.tencent.com/document/product/216/62007
 > 网络限制：云环境下不能使用，网卡mac加白环境不能使用，802.1x认证网络不能使用
 > 
 > 以下参数可以通过执行 `ip a` 查看
+
+
+1.1 arp_proxy
+
+```
+
+# file: /etc/sysctl.conf
+net.ipv4.conf.all.proxy_arp = 1
+
+#执行如下命令
+sysctl -w net.ipv4.conf.all.proxy_arp=1
+
+
+配置文件修改:
+
+# 首先关闭nat转发功能
+iptables_nat = false
+
+
+link_mode = "tun"
+#内网主网卡名称
+ipv4_master = "eth0"
+#以下网段需要跟ipv4_master网卡设置成一样
+ipv4_cidr = "10.1.2.0/24"
+ipv4_gateway = "10.1.2.99"
+ipv4_start = "10.1.2.100"
+ipv4_end = "10.1.2.200"
+
+```
+
+1.2 macvtap
 
 ```
 
