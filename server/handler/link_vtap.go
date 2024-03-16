@@ -28,12 +28,13 @@ func (v *Vtap) Close() error {
 }
 
 func checkMacvtap() {
+	// 加载 macvtap
+	base.CheckModOrLoad("macvtap")
+
 	_setGateway()
 	_checkTapIp(base.Cfg.Ipv4Master)
 
 	ifName := "anylinkMacvtap"
-	// 加载 macvtap
-	base.CheckModOrLoad("macvtap")
 
 	// 开启主网卡混杂模式
 	cmdstr1 := fmt.Sprintf("ip link set dev %s promisc on", base.Cfg.Ipv4Master)
@@ -55,8 +56,8 @@ func LinkMacvtap(cSess *sessdata.ConnSession) error {
 	cSess.SetIfName(ifName)
 
 	cmdstr1 := fmt.Sprintf("ip link add link %s name %s type macvtap mode bridge", base.Cfg.Ipv4Master, ifName)
-	cmdstr2 := fmt.Sprintf("ip link set dev %s up mtu %d address %s alias %s.%s", ifName, cSess.Mtu,
-		cSess.MacHw, cSess.Group.Name, cSess.Username)
+	alias := utils.ParseName(cSess.Group.Name + "." + cSess.Username)
+	cmdstr2 := fmt.Sprintf("ip link set dev %s up mtu %d address %s alias %s", ifName, cSess.Mtu, cSess.MacHw, alias)
 
 	err := execCmd([]string{cmdstr1, cmdstr2})
 	if err != nil {

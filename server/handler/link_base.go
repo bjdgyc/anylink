@@ -2,8 +2,9 @@ package handler
 
 import (
 	"encoding/xml"
-	"log"
 	"os/exec"
+
+	"github.com/bjdgyc/anylink/base"
 )
 
 const BufferSize = 2048
@@ -46,7 +47,7 @@ func execCmd(cmdStrs []string) error {
 		cmd := exec.Command("sh", "-c", cmdStr)
 		b, err := cmd.CombinedOutput()
 		if err != nil {
-			log.Println(string(b))
+			base.Error(cmdStr, string(b))
 			return err
 		}
 	}

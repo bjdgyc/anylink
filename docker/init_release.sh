@@ -4,7 +4,8 @@ set -x
 
 #TODO 本地打包时使用镜像
 if [[ $CN == "yes" ]]; then
-  sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/repositories
+  #sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/repositories
+  sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories
   export GOPROXY=https://goproxy.cn
 fi
 

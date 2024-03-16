@@ -62,8 +62,9 @@ func LinkDtls(conn net.Conn, cSess *sessdata.ConnSession) {
 			base.Debug("DISCONNECT DTLS", cSess.Username, cSess.IpAddr, conn.RemoteAddr())
 			return
 		case 0x03: // DPD-REQ
-			base.Trace("recv LinkDtls DPD-REQ", cSess.Username, cSess.IpAddr, conn.RemoteAddr())
+			base.Trace("recv LinkDtls DPD-REQ", cSess.Username, cSess.IpAddr, conn.RemoteAddr(), n, pl.Data[:n])
 			pl.PType = 0x04
+			// 从零开始 可以直接赋值
 			pl.Data = pl.Data[:n]
 			if payloadOutDtls(cSess, dSess, pl) {
 				return
@@ -95,7 +96,7 @@ func LinkDtls(conn net.Conn, cSess *sessdata.ConnSession) {
 				return
 			}
 			// 只记录返回正确的数据时间
-			cSess.LastDataTime.Store(utils.NowSec())
+			cSess.LastDataTime.Store(utils.NowSec().Unix())
 		}
 
 	}

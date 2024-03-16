@@ -8,7 +8,7 @@ require (
 	github.com/go-acme/lego/v4 v4.15.0
 	github.com/go-co-op/gocron v1.37.0
 	github.com/go-ldap/ldap v3.0.3+incompatible
-	github.com/go-sql-driver/mysql v1.7.1
+	github.com/go-sql-driver/mysql v1.8.0
 	github.com/gocarina/gocsv v0.0.0-20231116093920-b87c2d0e983a
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/google/gopacket v1.1.19
@@ -32,10 +32,9 @@ require (
 	github.com/stretchr/testify v1.8.4
 	github.com/xhit/go-simple-mail/v2 v2.16.0
 	github.com/xlzd/gotp v0.1.0
-	github.com/xuri/excelize/v2 v2.8.0
-	go.uber.org/atomic v1.11.0
-	golang.org/x/crypto v0.19.0
-	golang.org/x/net v0.21.0
+	github.com/xuri/excelize/v2 v2.8.1
+	golang.org/x/crypto v0.21.0
+	golang.org/x/net v0.22.0
 	golang.org/x/text v0.14.0
 	golang.org/x/time v0.5.0
 	layeh.com/radius v0.0.0-20231213012653-1006025d24f8
@@ -43,11 +42,12 @@ require (
 )
 
 require (
-	github.com/aliyun/alibaba-cloud-sdk-go v1.62.680 // indirect
+	filippo.io/edwards25519 v1.1.0 // indirect
+	github.com/aliyun/alibaba-cloud-sdk-go v1.62.690 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
-	github.com/cloudflare/cloudflare-go v0.88.0 // indirect
+	github.com/cloudflare/cloudflare-go v0.89.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
-	github.com/go-jose/go-jose/v3 v3.0.1 // indirect
+	github.com/go-jose/go-jose/v3 v3.0.3 // indirect
 	github.com/go-test/deep v1.1.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
@@ -61,14 +61,15 @@ require (
 	github.com/sagikazarmark/locafero v0.4.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
-	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common v1.0.860 // indirect
-	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/dnspod v1.0.860 // indirect
+	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common v1.0.873 // indirect
+	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/dnspod v1.0.873 // indirect
 	github.com/toorop/go-dkim v0.0.0-20240103092955-90b7d1423f92 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
+	go.uber.org/atomic v1.11.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/exp v0.0.0-20240213143201-ec583247a57a // indirect
-	golang.org/x/mod v0.15.0 // indirect
-	golang.org/x/tools v0.18.0 // indirect
+	golang.org/x/exp v0.0.0-20240222234643-814bf88cf225 // indirect
+	golang.org/x/mod v0.16.0 // indirect
+	golang.org/x/tools v0.19.0 // indirect
 )
 
 require (
@@ -99,7 +100,7 @@ require (
 	github.com/tklauser/numcpus v0.7.0 // indirect
 	github.com/xuri/efp v0.0.0-20231025114914-d1ff6096ae53 // indirect
 	github.com/xuri/nfp v0.0.0-20230919160717-d98342af3f05 // indirect
-	golang.org/x/sys v0.17.0 // indirect
+	golang.org/x/sys v0.18.0 // indirect
 	gopkg.in/asn1-ber.v1 v1.0.0-20181015200546-f715ec2f112d // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

@@ -25,9 +25,9 @@ func LinkCstp(conn net.Conn, bufRW *bufio.ReadWriter, cSess *sessdata.ConnSessio
 		n         int
 		dataLen   uint16
 		dead      = time.Second * time.Duration(cSess.CstpDpd+5)
-		idle      = time.Second * time.Duration(base.Cfg.IdleTimeout)
+		idle      = int64(base.Cfg.IdleTimeout)
 		checkIdle = base.Cfg.IdleTimeout > 0
-		lastTime  time.Time
+		lastTime  int64
 	)
 
 	go cstpWrite(conn, bufRW, cSess)
@@ -61,7 +61,7 @@ func LinkCstp(conn net.Conn, bufRW *bufio.ReadWriter, cSess *sessdata.ConnSessio
 			// 判断超时时间
 			if checkIdle {
 				lastTime = cSess.LastDataTime.Load()
-				if lastTime.Before(utils.NowSec().Add(-idle)) {
+				if lastTime < (utils.NowSec().Unix() - idle) {
 					base.Warn("IdleTimeout", cSess.Username, cSess.IpAddr, conn.RemoteAddr(), "lastTime", lastTime)
 					sessdata.CloseSess(cSess.Sess.Token, dbdata.UserIdleTimeout)
 					return
@@ -69,13 +69,13 @@ func LinkCstp(conn net.Conn, bufRW *bufio.ReadWriter, cSess *sessdata.ConnSessio
 			}
 		case 0x05: // DISCONNECT
 			cSess.UserLogoutCode = dbdata.UserLogoutClient
-			base.Debug("DISCONNECT", cSess.Username, cSess.IpAddr, conn.RemoteAddr())
+			base.Debug("DISCONNECT", cSess.Username, cSess.IpAddr, conn.RemoteAddr(), n, string(pl.Data[9:n]))
 			sessdata.CloseSess(cSess.Sess.Token, dbdata.UserLogoutClient)
 			return
 		case 0x03: // DPD-REQ
-			base.Trace("recv LinkCstp DPD-REQ", cSess.Username, cSess.IpAddr, conn.RemoteAddr())
+			base.Trace("recv LinkCstp DPD-REQ", cSess.Username, cSess.IpAddr, conn.RemoteAddr(), n, pl.Data[:n])
 			pl.PType = 0x04
-			pl.Data = pl.Data[:n]
+			// pl.Data = pl.Data[:n]
 			if payloadOutCstp(cSess, pl) {
 				return
 			}
@@ -113,7 +113,7 @@ func LinkCstp(conn net.Conn, bufRW *bufio.ReadWriter, cSess *sessdata.ConnSessio
 				return
 			}
 			// 只记录返回正确的数据时间
-			cSess.LastDataTime.Store(utils.NowSec())
+			cSess.LastDataTime.Store(utils.NowSec().Unix())
 		}
 	}
 }
@@ -169,7 +169,7 @@ func cstpWrite(conn net.Conn, bufRW *bufio.ReadWriter, cSess *sessdata.ConnSessi
 				binary.BigEndian.PutUint16(pl.Data[4:6], uint16(l))
 			}
 		} else {
-			// pl.Data = append(pl.Data[:0], plHeader...)
+			pl.Data = append(pl.Data[:0], plHeader...)
 			// 设置头类型
 			pl.Data[6] = pl.PType
 		}

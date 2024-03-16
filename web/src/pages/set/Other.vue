@@ -88,7 +88,7 @@
                 step: '01:00',
                 end: '23:00',
               }"
-              editable="false,"
+              :editable="false"
               size="small"
               placeholder="请选择"
               style="width: 130px"

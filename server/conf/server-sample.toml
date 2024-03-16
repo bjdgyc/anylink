@@ -11,6 +11,9 @@ cert_file = "./conf/vpn_cert.pem"
 cert_key = "./conf/vpn_cert.key"
 files_path = "./conf/files"
 profile = "./conf/profile.xml"
+#profile name(用于区分不同网站的配置)
+#客户端存放位置 C:\ProgramData\Cisco\Cisco Secure Client\VPN\Profile
+profile_name = "anylink"
 #日志目录,为空写入标准输出
 #log_path = "./log"
 log_path = ""
@@ -32,7 +35,7 @@ jwt_secret = "abcdef.0123456789.abcdef"
 #TCP服务监听地址(任意端口)
 server_addr = ":443"
 #开启 DTLS
-server_dtls = true
+server_dtls = false
 #UDP监听地址(任意端口)
 server_dtls_addr = ":443"
 #后台服务监听地址
@@ -44,6 +47,7 @@ proxy_protocol = false
 link_mode = "tun"
 
 #客户端分配的ip地址池
+#docker环境一般默认 eth0，其他情况根据实际网卡信息填写
 ipv4_master = "eth0"
 ipv4_cidr = "192.168.90.0/24"
 ipv4_gateway = "192.168.90.1"
@@ -61,10 +65,14 @@ ip_lease = 86400
 default_group = "one"
 
 #客户端失效检测时间(秒) dpd > keepalive
-cstp_keepalive = 5
-cstp_dpd = 12
-mobile_keepalive = 10
-mobile_dpd = 22
+#cstp_keepalive = 5
+#cstp_dpd = 12
+#mobile_keepalive = 10
+#mobile_dpd = 22
+cstp_keepalive = 20
+cstp_dpd = 30
+mobile_keepalive = 40
+mobile_dpd = 60
 
 #设置最大传输单元
 mtu = 1460
@@ -93,4 +101,5 @@ no_compress_limit = 256
 #客户端显示详细错误信息(线上环境慎开启)
 display_error = false
 
-
+#排除出口ip路由(出口ip不加密传输)
+exclude_export_ip = true

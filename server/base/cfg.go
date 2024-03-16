@@ -33,6 +33,7 @@ type ServerConfig struct {
 	// LinkAddr      string `json:"link_addr"`
 	Conf           string `json:"conf"`
 	Profile        string `json:"profile"`
+	ProfileName    string `json:"profile_name"`
 	ServerAddr     string `json:"server_addr"`
 	ServerDTLSAddr string `json:"server_dtls_addr"`
 	ServerDTLS     bool   `json:"server_dtls"`

@@ -133,7 +133,7 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	}
 	// 允许的路由
 	for _, v := range cSess.Group.RouteInclude {
-		if v.Val == dbdata.All {
+		if strings.ToLower(v.Val) == dbdata.All {
 			continue
 		}
 		HttpAddHeader(w, "X-CSTP-Split-Include", v.IpMask)
@@ -181,7 +181,7 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	HttpSetHeader(w, "X-CSTP-Quarantine", "false")
 	HttpSetHeader(w, "X-CSTP-Disable-Always-On-VPN", "false")
 	HttpSetHeader(w, "X-CSTP-Client-Bypass-Protocol", "false")
-	HttpSetHeader(w, "X-CSTP-TCP-Keepalive", "false")
+	HttpSetHeader(w, "X-CSTP-TCP-Keepalive", "true")
 	// 设置域名拆分隧道（移动端不支持）
 	if mobile != "mobile" {
 		SetPostAuthXml(cSess.Group, w)

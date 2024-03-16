@@ -18,6 +18,14 @@
         <!--子组件上报route信息-->
         <router-view :route_path.sync="route_path" :route_name.sync="route_name"></router-view>
       </el-main>
+      <el-footer>
+        <div>
+          <el-button size="mini" @click="goUrl('https://gitee.com/bjdgyc/anylink')">
+            Powered by AnyLink
+          </el-button>
+          企业级远程办公系统 AGPL-3.0 ⓒ 2020-present
+        </div>
+      </el-footer>
     </el-container>
   </el-container>
 </template>
@@ -35,6 +43,11 @@ export default {
       route_path: '/index',
       route_name: ['首页'],
     }
+  },
+  methods: {
+    goUrl(url) {
+      window.open(url, "_blank")
+    },
   },
   watch: {
     route_path: function (val) {
@@ -58,6 +71,18 @@ export default {
 
   border-bottom: 1px solid #d8dce5;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, .12), 0 0 3px 0 rgba(0, 0, 0, .04);
+}
+
+.el-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+
+  font-size: 12px;
+  line-height: 12px;
+  margin: 0 12px;
+  color: rgb(134, 144, 156);
 }
 
 </style>

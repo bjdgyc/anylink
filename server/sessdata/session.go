@@ -13,7 +13,6 @@ import (
 	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/dbdata"
 	mapset "github.com/deckarep/golang-set"
-	atomic2 "go.uber.org/atomic"
 )
 
 var (
@@ -41,15 +40,15 @@ type ConnSession struct {
 	CstpDpd             int
 	Group               *dbdata.Group
 	Limit               *LimitRater
-	BandwidthUp         atomic2.Uint32 // 使用上行带宽 Byte
-	BandwidthDown       atomic2.Uint32 // 使用下行带宽 Byte
-	BandwidthUpPeriod   atomic2.Uint32 // 前一周期的总量
-	BandwidthDownPeriod atomic2.Uint32
-	BandwidthUpAll      atomic2.Uint64 // 使用上行带宽总量
-	BandwidthDownAll    atomic2.Uint64 // 使用下行带宽总量
+	BandwidthUp         atomic.Uint32 // 使用上行带宽 Byte
+	BandwidthDown       atomic.Uint32 // 使用下行带宽 Byte
+	BandwidthUpPeriod   atomic.Uint32 // 前一周期的总量
+	BandwidthDownPeriod atomic.Uint32
+	BandwidthUpAll      atomic.Uint64 // 使用上行带宽总量
+	BandwidthDownAll    atomic.Uint64 // 使用下行带宽总量
 	closeOnce           sync.Once
 	CloseChan           chan struct{}
-	LastDataTime        atomic2.Time // 最后数据传输时间
+	LastDataTime        atomic.Int64 // 最后数据传输时间
 	PayloadIn           chan *Payload
 	PayloadOutCstp      chan *Payload // Cstp的数据
 	PayloadOutDtls      chan *Payload // Dtls的数据
@@ -220,7 +219,7 @@ func (s *Session) NewConn() *ConnSession {
 		PayloadOutDtls: make(chan *Payload, 64),
 		dSess:          &atomic.Value{},
 	}
-	cSess.LastDataTime.Store(time.Now())
+	cSess.LastDataTime.Store(time.Now().Unix())
 
 	dSess := &DtlsSession{
 		isActive: -1,
@@ -464,7 +463,7 @@ func CloseSess(token string, code ...uint8) {
 		sess.CSess.Close()
 		return
 	}
-	AddUserActLogBySess(sess)
+	AddUserActLogBySess(sess, code...)
 }
 
 func CloseCSess(token string) {
@@ -501,7 +500,7 @@ func AddUserActLog(cs *ConnSession) {
 	dbdata.UserActLogIns.Add(ua, cs.UserAgent)
 }
 
-func AddUserActLogBySess(sess *Session) {
+func AddUserActLogBySess(sess *Session, code ...uint8) {
 	ua := dbdata.UserActLog{
 		Username:        sess.Username,
 		GroupName:       sess.Group,
@@ -512,5 +511,8 @@ func AddUserActLogBySess(sess *Session) {
 		Status:          dbdata.UserLogout,
 	}
 	ua.Info = dbdata.UserActLogIns.GetInfoOpsById(dbdata.UserLogoutBanner)
+	if len(code) > 0 {
+		ua.Info = dbdata.UserActLogIns.GetInfoOpsById(code[0])
+	}
 	dbdata.UserActLogIns.Add(ua, sess.UserAgent)
 }
