@@ -52,7 +52,7 @@ AnyLink 服务端仅在 CentOS 7、CentOS 8、Ubuntu 18.04、Ubuntu 20.04 测试
 >
 > 如果不会安装，可以提供有偿远程协助服务(200 CNY)。添加QQ(68492170)联系我
 > 
-> 也可以添加QQ群 咨询群内大佬，群共享文件有相关软件下载
+> 也可以添加QQ群 咨询群内大佬
 > 
 > 添加QQ群①(已满): 567510628
 > 
@@ -64,14 +64,8 @@ AnyLink 服务端仅在 CentOS 7、CentOS 8、Ubuntu 18.04、Ubuntu 20.04 测试
 >
 > 对于线上环境，必须申请安全的https证书(跟nginx使用的证书类型一致)，不支持私有证书连接
 >
-> 服务端依赖安装:
+> 群共享文件有相关客户端软件下载，其他版本没有测试过，不保证使用正常
 > 
-> centos: yum install iptables iproute
-> 
-> ubuntu: apt-get install iptables iproute2
->
-> 客户端请使用群共享文件的版本，其他版本没有测试过，不保证使用正常
->
 > 其他问题 [前往查看](doc/question.md)
 >
 > 默认管理后台访问地址  https://host:8800 或 https://域名:8800 默认账号密码 admin 123456
@@ -173,6 +167,17 @@ sudo ./anylink
 
 ## Setting
 
+### 依赖设置
+
+> 服务端依赖安装:
+>
+> centos: yum install iptables iproute
+>
+> ubuntu: apt-get install iptables iproute2
+
+
+### link_mode 设置
+
 > 以下参数必须设置其中之一
 
 网络模式选择，需要配置 `link_mode` 参数，如 `link_mode="tun"`,`link_mode="macvtap"`,`link_mode="tap"(不推荐)` 等参数。
@@ -182,7 +187,7 @@ sudo ./anylink
 IP 层的数据互相转换，性能会有所下降。 如果需要在虚拟机内开启 tap
 模式，请确认虚拟机的网卡开启混杂模式。
 
-### tun 设置
+#### tun 设置
 
 1. 开启服务器转发
 
@@ -237,7 +242,7 @@ https://cloud.tencent.com/document/product/216/62007
 
 3. 使用 AnyConnect 客户端连接即可
 
-### 桥接设置
+#### 桥接设置
 
 1. 设置配置文件
 
@@ -416,12 +421,19 @@ ipv4_end = "10.1.2.200"
 ![contact_me_qr](doc/screenshot/contact_me_qr.png)
 -->
 
+## Support Document
+
+- [三方文档-男孩的天职](https://note.youdao.com/s/X4AxyWfL)
+- [三方文档-issues](https://github.com/bjdgyc/anylink/issues)
+- [三方文档-思有云](https://www.ioiox.com/archives/128.html)
+
 ## Support Client
 
 - [AnyConnect Secure Client](https://www.cisco.com/) (可通过群文件下载: Windows/macOS/Linux/Android/iOS)
 - [OpenConnect](https://gitlab.com/openconnect/openconnect) (Windows/macOS/Linux)
 - [三方 AnyLink Secure Client](https://github.com/tlslink/anylink-client) (Windows/macOS/Linux)
 - [三方客户端下载地址](https://cisco.yangpin.link) (Windows/macOS/Linux/Android/iOS)
+
 
 ## Contribution
 
