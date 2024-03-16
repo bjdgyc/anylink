@@ -40,6 +40,7 @@ max_user_client = 3
 #虚拟网络类型[tun macvtap]
 link_mode = "tun"
 #客户端分配的ip地址池
+#docker环境一般默认 eth0，其他情况根据实际网卡信息填写
 ipv4_master = "eth0"
 ipv4_cidr = "192.168.90.0/24"
 ipv4_gateway = "192.168.90.1"

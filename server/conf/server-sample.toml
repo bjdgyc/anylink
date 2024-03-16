@@ -47,6 +47,7 @@ proxy_protocol = false
 link_mode = "tun"
 
 #客户端分配的ip地址池
+#docker环境一般默认 eth0，其他情况根据实际网卡信息填写
 ipv4_master = "eth0"
 ipv4_cidr = "192.168.90.0/24"
 ipv4_gateway = "192.168.90.1"
@@ -100,4 +101,5 @@ no_compress_limit = 256
 #客户端显示详细错误信息(线上环境慎开启)
 display_error = false
 
-
+#排除出口ip路由(出口ip不加密传输)
+exclude_export_ip = true
