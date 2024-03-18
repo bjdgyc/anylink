@@ -17,8 +17,11 @@ cpath=$(pwd)
 ver=$(cat version)
 echo $ver
 
+#前端编译 仅需要执行一次
+#bash ./build_web.sh
+
 echo "copy二进制文件"
-cd $cpath/server
+
 # -tags osusergo,netgo,sqlite_omit_load_extension
 flags="-trimpath"
 ldflags="-s -w -extldflags '-static' -X main.appVer=$ver -X main.commitId=$(git rev-parse HEAD) -X main.buildDate=$(date --iso-8601=seconds)"
@@ -32,42 +35,37 @@ apk add gcc g++ musl musl-dev tzdata
 export GOPROXY=https://goproxy.cn
 go mod tidy
 echo "build:"
+rm anylink
 export CGO_ENABLED=1
-go build -v -o anylink_amd64 $flags -ldflags "$ldflags"
-./anylink_amd64 -v
+go build -v -o anylink $flags -ldflags "$ldflags"
+./anylink -v
 EOF
 )
 
 #使用 musl-dev 编译
-docker run -q --rm -v $PWD:/app -v $gopath:/go -w /app --platform=linux/amd64 \
+docker run -q --rm -v $PWD/server:/app -v $gopath:/go -w /app --platform=linux/amd64 \
   golang:1.20-alpine3.19 sh -c "$dockercmd"
 
-exit 0
-
 #arm64编译
-docker run -q --rm -v $PWD:/app -v $gopath:/go -w /app --platform=linux/arm64 \
-  golang:1.20-alpine3.19 go build -o anylink_arm64 $flags -ldflags "$ldflags"
-./anylink_arm64 -v
+#docker run -q --rm -v $PWD/server:/app -v $gopath:/go -w /app --platform=linux/arm64 \
+#  golang:1.20-alpine3.19 go build -o anylink_arm64 $flags -ldflags "$ldflags"
+#exit 0
 
-exit 0
-
-cd $cpath
+#cd $cpath
 
 echo "整理部署文件"
-deploy="anylink-deploy"
-rm -rf $deploy ${deploy}.tar.gz
-mkdir $deploy
-mkdir $deploy/log
+rm -rf anylink-deploy anylink-deploy.tar.gz
+mkdir anylink-deploy
+mkdir anylink-deploy/log
 
-cp -r server/anylink $deploy
-cp -r server/bridge-init.sh $deploy
-cp -r server/conf $deploy
+cp -r server/anylink anylink-deploy
+cp -r server/conf anylink-deploy
 
-cp -r systemd $deploy
-cp -r LICENSE $deploy
-cp -r home $deploy
+cp -r index_template anylink-deploy
+cp -r deploy anylink-deploy
+cp -r LICENSE anylink-deploy
 
-tar zcvf ${deploy}.tar.gz $deploy
+tar zcvf anylink-deploy.tar.gz anylink-deploy
 
 #注意使用root权限运行
 #cd anylink-deploy
