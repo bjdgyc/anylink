@@ -62,7 +62,7 @@ func LinkDtls(conn net.Conn, cSess *sessdata.ConnSession) {
 			base.Debug("DISCONNECT DTLS", cSess.Username, cSess.IpAddr, conn.RemoteAddr())
 			return
 		case 0x03: // DPD-REQ
-			base.Trace("recv LinkDtls DPD-REQ", cSess.Username, cSess.IpAddr, conn.RemoteAddr(), n, pl.Data[:n], string(pl.Data[1:n]))
+			base.Trace("recv LinkDtls DPD-REQ", cSess.Username, cSess.IpAddr, conn.RemoteAddr(), n, pl.Data[:n])
 			pl.PType = 0x04
 			// 从零开始 可以直接赋值
 			pl.Data = pl.Data[:n]
