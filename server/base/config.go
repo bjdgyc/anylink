@@ -22,7 +22,7 @@ type config struct {
 var configs = []config{
 	{Typ: cfgStr, Name: "conf", Usage: "config file", ValStr: "./conf/server.toml", Short: "c"},
 	{Typ: cfgStr, Name: "profile", Usage: "profile.xml file", ValStr: "./conf/profile.xml"},
-	{Typ: cfgStr, Name: "profile_name", Usage: "profile name(用于区分不同网站的配置)", ValStr: "anylink"},
+	{Typ: cfgStr, Name: "profile_name", Usage: "profile name(用于区分不同服务端的配置)", ValStr: "anylink"},
 	{Typ: cfgStr, Name: "server_addr", Usage: "TCP服务监听地址(任意端口)", ValStr: ":443"},
 	{Typ: cfgBool, Name: "server_dtls", Usage: "开启DTLS", ValBool: false},
 	{Typ: cfgStr, Name: "server_dtls_addr", Usage: "DTLS监听地址(任意端口)", ValStr: ":443"},

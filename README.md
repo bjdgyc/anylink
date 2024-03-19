@@ -108,10 +108,11 @@ sudo ./anylink
 - [x] 兼容 AnyConnect
 - [x] 兼容 OpenConnect
 - [x] 基于 tun 设备的 nat 访问模式
-- [x] 基于 tap 设备的桥接访问模式
+- [x] 基于 tun 设备的桥接访问模式
 - [x] 基于 macvtap 设备的桥接访问模式
 - [x] 支持 [proxy protocol v1&v2](http://www.haproxy.org/download/2.2/doc/proxy-protocol.txt) 协议
 - [x] 用户组支持
+- [x] 用户组策略支持
 - [x] 多用户支持
 - [x] 用户策略支持
 - [x] TOTP 令牌支持
@@ -119,10 +120,15 @@ sudo ./anylink
 - [x] 流量速率限制
 - [x] 后台管理界面
 - [x] 访问权限管理
+- [x] 用户活动审计功能
 - [x] IP 访问审计功能
 - [x] 域名动态拆分隧道（域名路由功能）
 - [x] radius认证支持
 - [x] LDAP认证支持
+- [x] 空闲链接超时自动断开
+- [x] 流量压缩功能
+- [x] 出口 IP 自动放行
+- [x] 支持多服务的配置区分
 - [ ] 基于 ipvtap 设备的桥接访问模式
 
 ## Config

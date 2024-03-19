@@ -37,14 +37,14 @@ func LinkCstp(conn net.Conn, bufRW *bufio.ReadWriter, cSess *sessdata.ConnSessio
 		// 设置超时限制
 		err = conn.SetReadDeadline(utils.NowSec().Add(dead))
 		if err != nil {
-			base.Error("SetDeadline: ", cSess.Username, err)
+			base.Error("SetDeadline: ", cSess.Username, cSess.IpAddr, err)
 			return
 		}
 		// hdata := make([]byte, BufferSize)
 		pl := getPayload()
 		n, err = bufRW.Read(pl.Data)
 		if err != nil {
-			base.Error("read hdata: ", cSess.Username, err)
+			base.Warn("read hdata: ", cSess.Username, cSess.IpAddr, err)
 			return
 		}
 
@@ -69,7 +69,7 @@ func LinkCstp(conn net.Conn, bufRW *bufio.ReadWriter, cSess *sessdata.ConnSessio
 			}
 		case 0x05: // DISCONNECT
 			cSess.UserLogoutCode = dbdata.UserLogoutClient
-			base.Debug("DISCONNECT", cSess.Username, cSess.IpAddr, conn.RemoteAddr(), n, string(pl.Data[9:n]))
+			base.Info("DISCONNECT", cSess.Username, cSess.IpAddr, conn.RemoteAddr(), n, string(pl.Data[9:n]))
 			sessdata.CloseSess(cSess.Sess.Token, dbdata.UserLogoutClient)
 			return
 		case 0x03: // DPD-REQ
@@ -176,7 +176,7 @@ func cstpWrite(conn net.Conn, bufRW *bufio.ReadWriter, cSess *sessdata.ConnSessi
 
 		n, err = conn.Write(pl.Data)
 		if err != nil {
-			base.Error("write err", cSess.Username, err)
+			base.Warn("write err", cSess.Username, cSess.IpAddr, err)
 			return
 		}
 
