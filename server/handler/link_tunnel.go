@@ -92,7 +92,7 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 		dtlsPort = ss[1]
 	}
 
-	base.Debug(cSess.IpAddr, cSess.MacHw, sess.Username, mobile)
+	base.Info(sess.Username, cSess.IpAddr, cSess.MacHw, cSess.Client, mobile)
 
 	// 检测密码套件
 	dtlsCiphersuite := checkDtls12Ciphersuite(r.Header.Get("X-Dtls12-Ciphersuite"))

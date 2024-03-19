@@ -46,6 +46,7 @@ func checkTun() {
 		// 修复 rockyos nat 不生效
 		base.CheckModOrLoad("iptable_filter")
 		base.CheckModOrLoad("iptable_nat")
+		// base.CheckModOrLoad("xt_comment")
 
 		// 添加注释
 		natRule := []string{"-s", base.Cfg.Ipv4CIDR, "-o", base.Cfg.Ipv4Master, "-m", "comment",

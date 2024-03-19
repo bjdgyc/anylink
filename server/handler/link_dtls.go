@@ -36,14 +36,14 @@ func LinkDtls(conn net.Conn, cSess *sessdata.ConnSession) {
 	for {
 		err = conn.SetReadDeadline(utils.NowSec().Add(dead))
 		if err != nil {
-			base.Error("SetDeadline: ", cSess.Username, err)
+			base.Error("SetDeadline: ", cSess.Username, cSess.IpAddr, err)
 			return
 		}
 
 		pl := getPayload()
 		n, err = conn.Read(pl.Data)
 		if err != nil {
-			base.Error("read hdata: ", cSess.Username, err)
+			base.Warn("read hdata: ", cSess.Username, cSess.IpAddr, err)
 			return
 		}
 
@@ -59,10 +59,10 @@ func LinkDtls(conn net.Conn, cSess *sessdata.ConnSession) {
 			base.Trace("recv LinkDtls Keepalive", cSess.Username, cSess.IpAddr, conn.RemoteAddr())
 		case 0x05: // DISCONNECT
 			cSess.UserLogoutCode = dbdata.UserLogoutClient
-			base.Debug("DISCONNECT DTLS", cSess.Username, cSess.IpAddr, conn.RemoteAddr())
+			base.Info("DISCONNECT DTLS", cSess.Username, cSess.IpAddr, conn.RemoteAddr())
 			return
 		case 0x03: // DPD-REQ
-			base.Trace("recv LinkDtls DPD-REQ", cSess.Username, cSess.IpAddr, conn.RemoteAddr(), n, pl.Data[:n])
+			base.Trace("recv LinkDtls DPD-REQ", cSess.Username, cSess.IpAddr, conn.RemoteAddr(), n)
 			pl.PType = 0x04
 			// 从零开始 可以直接赋值
 			pl.Data = pl.Data[:n]
@@ -151,12 +151,15 @@ func dtlsWrite(conn net.Conn, dSess *sessdata.DtlsSession, cSess *sessdata.ConnS
 			}
 		} else {
 			// 设置头类型
-			// pl.Data = append(pl.Data[:0], pl.PType)
-			pl.Data[0] = pl.PType
+			if pl.PType == 0x04 {
+				pl.Data[0] = pl.PType
+			} else {
+				pl.Data = append(pl.Data[:0], pl.PType)
+			}
 		}
 		n, err := conn.Write(pl.Data)
 		if err != nil {
-			base.Error("write err", cSess.Username, err)
+			base.Warn("write err", cSess.Username, cSess.IpAddr, err)
 			return
 		}
 
