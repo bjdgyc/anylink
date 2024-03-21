@@ -51,6 +51,9 @@ func checkTun() {
 		// 添加注释
 		natRule := []string{"-s", base.Cfg.Ipv4CIDR, "-o", base.Cfg.Ipv4Master, "-m", "comment",
 			"--comment", "AnyLink", "-j", "MASQUERADE"}
+		if base.InContainer {
+			natRule = []string{"-s", base.Cfg.Ipv4CIDR, "-o", base.Cfg.Ipv4Master, "-j", "MASQUERADE"}
+		}
 		err = ipt.InsertUnique("nat", "POSTROUTING", 1, natRule...)
 		if err != nil {
 			base.Error(err)
@@ -58,6 +61,9 @@ func checkTun() {
 
 		// 添加注释
 		forwardRule := []string{"-m", "comment", "--comment", "AnyLink", "-j", "ACCEPT"}
+		if base.InContainer {
+			forwardRule = []string{"-j", "ACCEPT"}
+		}
 		err = ipt.InsertUnique("filter", "FORWARD", 1, forwardRule...)
 		if err != nil {
 			base.Error(err)

@@ -29,6 +29,7 @@ type SettingAuditLog struct {
 type SettingOther struct {
 	LinkAddr    string `json:"link_addr"`
 	Banner      string `json:"banner"`
+	Homecode    int    `json:"homecode"`
 	Homeindex   string `json:"homeindex"`
 	AccountMail string `json:"account_mail"`
 }
