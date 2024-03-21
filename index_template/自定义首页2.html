@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset=UTF-8">
+    <title id="pageTitle">客户端下载</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style type="text/css">
+        body {
+            background-color: #fff;
+            background-image: linear-gradient(0deg, transparent 24%, rgba(207, 207, 207, 0.2) 25%, rgba(207, 207, 207, 0.2) 26%, transparent 27%, transparent 74%, rgba(207, 207, 207, 0.2) 75%, rgba(207, 207, 207, 0.2) 76%, transparent 77%, transparent),
+            linear-gradient(90deg, transparent 24%, rgba(207, 207, 207, 0.2) 25%, rgba(207, 207, 207, 0.2) 26%, transparent 27%, transparent 74%, rgba(207, 207, 207, 0.2) 75%, rgba(207, 207, 207, 0.2) 76%, transparent 77%, transparent);
+            background-size: 50px 50px;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        #box {
+            background-color: #ffffff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 550px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        h2 {
+            color: #333;
+            font-weight: 600;
+            font-size: 28px;
+            margin: 0 0 20px 0;
+        }
+
+        p {
+            color: #666;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-top: 20px;
+        }
+
+        .button {
+            background-color: #ddd;
+            text-decoration: none;
+            line-height: 44px;
+            padding: 9px 42px;
+            font-weight: 500;
+            color: #fff;
+            font-size: 16px;
+            -webkit-transition: background-color 0.25s ease-out 0s;
+            -moz-transition: background-color 0.25s ease-out 0s;
+            transition: background-color 0.25s ease-out 0s;
+            -moz-border-radius: 4px;
+            -webkit-border-radius: 4px;
+            border-radius: 4px;
+        }
+
+        .button:hover {
+            background-color: #CCC;
+            color: #444;
+        }
+
+        .button:active {
+            background-color: #666;
+            color: #eee;
+        }
+
+        .blue {
+            background-color: #007BFF;
+        }
+
+        .deep-blue {
+            background-color: #0056B3;
+        }
+
+        .green {
+            background-color: #28A745;
+        }
+
+        .grey {
+            background-color: #6C757D;
+        }
+
+        .black {
+            background-color: #343A40;
+        }
+
+        .light-blue {
+            background-color: #17A2B8;
+        }
+
+        .dark-grey {
+            background-color: #495057;
+        }
+
+        @media (max-width: 768px) {
+            h2 {
+                font-size: 24px;
+            }
+
+            p {
+                font-size: 14px;
+            }
+
+            .button {
+                padding: 7px 35px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div id="app">
+    <div id="box">
+        <h2 id="title">请选择对应平台下载</h2>
+        <p id="windowsTab">Windows 系统</p>
+        <a id="linkWindowsX86_64" class="button blue" href="#">Win X86_64</a>
+        <a id="linkWindowsARM64" class="button deep-blue" href="#">Win ARM64</a>
+
+        <p id="mobileTab">移动端</p>
+        <a id="linkAndroid" class="button green" href="#">Android</a>
+        <a id="linkIphone" class="button grey" href="#" target="_blank">iPhone</a>
+
+        <p id="macOSTab">MacOS 系统</p>
+        <a id="linkMacos" class="button black" href="#">Mac Intel</a>
+        <a id="linkMacosARM64" class="button blue" href="#">Mac ARM64</a>
+
+        <p id="totpTab">TOTP 移动客户端</p>
+        <a id="linkTotpAndroid" class="button light-blue" href="#">Android</a>
+        <a id="linkTotpIphone" class="button dark-grey" href="#" target="_blank">iPhone</a>
+    </div>
+</div>
+<script>
+    const data = {
+        links: {
+            windowsX86_64: '/files/anyconnect-win-4.10.05111.msi',
+            windowsARM64: '/files/anyconnect-win-4.10.05111.msi',
+            android: '/files/CiscoSecureClientAnyConnect_v5.0.00247.apk',
+            iphone: 'https://apps.apple.com/cn/app/cisco-anyconnect/id1135064690',
+            macosIntel: '/files/anyconnect-macos-4.10.05111.dmg',
+            macosARM64: '/files/anyconnect-macos-4.10.05111.dmg',
+            totpAndroid: '/files/Authenticator_v5.10_apkpure.com.apk',
+            totpIphone: 'https://apps.apple.com/cn/app/google-authenticator/id388497605',
+        }
+    };
+
+    window.onload = function () {
+        document.getElementById('linkWindowsX86_64').href = data.links.windowsX86_64;
+        document.getElementById('linkWindowsARM64').href = data.links.windowsARM64;
+        document.getElementById('linkAndroid').href = data.links.android;
+        document.getElementById('linkIphone').href = data.links.iphone;
+        document.getElementById('linkMacos').href = data.links.macosIntel;
+        document.getElementById('linkMacosARM64').href = data.links.macosARM64;
+        document.getElementById('linkTotpAndroid').href = data.links.totpAndroid;
+        document.getElementById('linkTotpIphone').href = data.links.totpIphone;
+    };
+</script>
+</body>
+
+</html>
