@@ -183,10 +183,15 @@ const accountMail = `<p>您好:</p>
     用户PIN码: <b>{{.PinCode}}</b> <br/>
     <!-- 
     用户动态码(3天后失效):<br/>
-    <img src="{{.OtpImg}}"/>
+    <img src="{{.OtpImg}}"/><br/>
+
+    用户动态码(请妥善保存):<br/>
+    <img src="{{.OtpImgBase64}}"/><br/>
+
+    下面是兼容 gmail 的写法
     -->
     用户动态码(请妥善保存):<br/>
-    <img src="{{.OtpImgBase64}}"/>
+    <img src="cid:userOtpQr.png" alt="userOtpQr" /><br/>
 </p>
 <div>
     使用说明:

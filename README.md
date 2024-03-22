@@ -86,6 +86,7 @@ git clone https://github.com/bjdgyc/anylink.git
 
 
 cd anylink
+bash build_web.sh
 bash build.sh
 
 # 注意使用root权限运行

@@ -43,7 +43,7 @@ func GetJwtData(jwtToken string) (map[string]interface{}, error) {
 	return claims, nil
 }
 
-func SendMail(subject, to, htmlBody string) error {
+func SendMail(subject, to, htmlBody string, attach *mail.File) error {
 
 	dataSmtp := &dbdata.SettingSmtp{}
 	err := dbdata.SettingGet(dataSmtp)
@@ -101,6 +101,10 @@ func SendMail(subject, to, htmlBody string) error {
 	email.SetFrom(dataSmtp.From).
 		AddTo(to).
 		SetSubject(subject)
+
+	if attach != nil {
+		email.Attach(attach)
+	}
 
 	email.SetBody(mail.TextHTML, htmlBody)
 
