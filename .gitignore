@@ -2,6 +2,7 @@
 .idea/
 anylink-deploy
 anylink-deploy.tar.gz
+anylink-deploy-*
 anylink
 anylink.db
 
