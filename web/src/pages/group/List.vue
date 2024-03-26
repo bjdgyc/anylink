@@ -197,10 +197,14 @@
                 </el-input>
                 </el-form-item>
                 <el-form-item label="排除本地网络" prop="allow_lan">
-                <el-switch
-                    v-model="ruleForm.allow_lan"
-                    active-text="开启后 用户本地所在网段将不通过anylink加密传输">
-                </el-switch>
+                <!--  active-text="开启后 用户本地所在网段将不通过anylink加密传输" -->
+                <el-switch v-model="ruleForm.allow_lan"></el-switch>
+                <div class="msg-info">
+                 注：本地网络 指的是：
+                 运行 anyconnect 客户端的PC 所在的的网络，既本地路由网段。
+                 开启后，PC本地路由网段的数据就不会走隧道链路转发数据了。
+                 同时 anyconnect 客户端需要勾选本地网络(Local Lan)的开关，功能才能生效。
+                 </div>
                 </el-form-item>
 
                 <el-form-item label="客户端DNS" prop="client_dns">
@@ -377,7 +381,7 @@
                 </el-form-item>                
                 <el-form-item label="排除域名" prop="ds_exclude_domains">
                     <el-input type="textarea" :rows="5" v-model="ruleForm.ds_exclude_domains" placeholder="输入域名用,号分隔，默认匹配所有子域名, 如baidu.com,163.com"></el-input>
-                    <div class="msg-info">注：域名拆分隧道，仅支持AnyConnect的桌面客户端，不支持移动端.</div>
+                    <div class="msg-info">注：域名拆分隧道，仅支持AnyConnect的windows和MacOS桌面客户端，不支持移动端.</div>
                 </el-form-item>
             </el-tab-pane>
             <el-form-item>

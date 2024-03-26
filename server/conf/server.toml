@@ -10,6 +10,9 @@ db_source = "./conf/anylink.db"
 cert_file = "./conf/vpn_cert.pem"
 cert_key = "./conf/vpn_cert.key"
 files_path = "./conf/files"
+
+#日志目录,默认为空写入标准输出
+#log_path = "./log"
 log_level = "debug"
 
 #系统名称

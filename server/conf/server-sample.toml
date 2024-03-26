@@ -12,9 +12,15 @@ cert_key = "./conf/vpn_cert.key"
 files_path = "./conf/files"
 profile = "./conf/profile.xml"
 #profile name(用于区分不同服务端的配置)
-#客户端存放位置 C:\ProgramData\Cisco\Cisco Secure Client\VPN\Profile
+#客户端存放位置
+#Windows 10
+#%ProgramData%Cisco\Cisco AnyConnect Secure Mobility Client\Profile
+#Mac Os X
+#/opt/cisco/anyconnect/profile
+#Linux
+#/opt/cisco/anyconnect/profile
 profile_name = "anylink"
-#日志目录,为空写入标准输出
+#日志目录,默认为空写入标准输出
 #log_path = "./log"
 log_path = ""
 log_level = "debug"
@@ -66,9 +72,9 @@ default_group = "one"
 
 #客户端失效检测时间(秒) dpd > keepalive
 cstp_keepalive = 3
-cstp_dpd = 10
+cstp_dpd = 20
 mobile_keepalive = 4
-mobile_dpd = 15
+mobile_dpd = 60
 
 # 根据实际情况修改
 #cstp_keepalive = 20

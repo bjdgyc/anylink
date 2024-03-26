@@ -26,7 +26,7 @@ AnyLink 基于 [ietf-openconnect](https://tools.ietf.org/html/draft-mavrogiannop
 AnyLink 使用 TLS/DTLS 进行数据加密，因此需要 RSA 或 ECC 证书，可以通过 Let's Encrypt 和 TrustAsia 申请免费的 SSL 证书。
 
 AnyLink 服务端仅在 CentOS 7、CentOS 8、Ubuntu 18.04、Ubuntu 20.04 测试通过，如需要安装在其他系统，需要服务端支持 tun/tap
-功能、ip 设置命令。
+功能、ip 设置命令、iptables命令。
 
 ## Screenshot
 
@@ -74,18 +74,22 @@ AnyLink 服务端仅在 CentOS 7、CentOS 8、Ubuntu 18.04、Ubuntu 20.04 测试
 
 ### 自行编译安装
 
-> 需要提前安装好 golang >= 1.20 和 nodejs = 16.x 和 yarn >= v1.22.x
+> 需要提前安装好 docker
 
 ```shell
 git clone https://github.com/bjdgyc/anylink.git
 
-# 编译参考软件版本
+# docker编译 参考软件版本(不需要安装)
 # go 1.20.12
 # node v16.20.2
 # yarn 1.22.19
 
 
 cd anylink
+
+# 编译前端
+bash build_web.sh
+# 编译 anylink-deploy 发布文件
 bash build.sh
 
 # 注意使用root权限运行

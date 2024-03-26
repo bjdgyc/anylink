@@ -7,15 +7,22 @@ ver=$(cat version)
 echo $ver
 
 #前端编译 仅需要执行一次
-bash ./build_web.sh
+#bash ./build_web.sh
 
-cd $cpath/server
+bash build_docker.sh
 
-go build -v -o anylink
+deploy="anylink-deploy-$ver"
+docker container rm $deploy
+docker container create --name $deploy bjdgyc/anylink:$ver
+rm -rf anylink-deploy anylink-deploy.tar.gz
+docker cp -a $deploy:/app ./anylink-deploy
+tar zcf ${deploy}.tar.gz anylink-deploy
 
-./anylink -v
+
+./anylink-deploy/anylink -v
 
 
-echo "anylink 编译完成，目录: $cpath/server/anylink"
+echo "anylink 编译完成，目录: anylink-deploy"
+ls -lh anylink-deploy
 
 
