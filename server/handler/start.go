@@ -17,6 +17,12 @@ func Start() {
 	sessdata.Start()
 	cron.Start()
 
+	// 开启服务器转发
+	err := execCmd([]string{"sysctl -w net.ipv4.ip_forward=1"})
+	if err != nil {
+		base.Fatal(err)
+	}
+
 	switch base.Cfg.LinkMode {
 	case base.LinkModeTUN:
 		checkTun()
