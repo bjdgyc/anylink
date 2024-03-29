@@ -214,6 +214,7 @@ type userAccountMailData struct {
 	PinCode      string
 	OtpImg       string
 	OtpImgBase64 string
+	DisableOtp   bool
 }
 
 func userAccountMail(user *dbdata.User) error {
@@ -265,6 +266,7 @@ func userAccountMail(user *dbdata.User) error {
 		PinCode:      user.PinCode,
 		OtpImg:       fmt.Sprintf("https://%s/otp_qr?id=%d&jwt=%s", setting.LinkAddr, user.Id, tokenString),
 		OtpImgBase64: "data:image/png;base64," + otpData,
+		DisableOtp:   user.DisableOtp,
 	}
 	w := bytes.NewBufferString("")
 	t, _ := template.New("auth_complete").Parse(htmlBody)
@@ -273,12 +275,18 @@ func userAccountMail(user *dbdata.User) error {
 		return err
 	}
 	// fmt.Println(w.String())
-	imgData, _ := userOtpQr(user.Id, false)
-	attach := &mail.File{
-		MimeType: "image/png",
-		Name:     "userOtpQr.png",
-		Data:     []byte(imgData),
-		Inline:   true,
+
+	var attach *mail.File
+	if user.DisableOtp {
+		attach = nil
+	} else {
+		imgData, _ := userOtpQr(user.Id, false)
+		attach = &mail.File{
+			MimeType: "image/png",
+			Name:     "userOtpQr.png",
+			Data:     []byte(imgData),
+			Inline:   true,
+		}
 	}
 
 	return SendMail(base.Cfg.Issuer, user.Email, w.String(), attach)
