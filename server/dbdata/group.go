@@ -203,7 +203,7 @@ func SetGroup(g *Group) error {
 				v.Ports = ports
 				linkAcl = append(linkAcl, v)
 			} else {
-				return errors.New("端口: "+v.PortStr+" 格式错误,请用逗号分隔的端口列表,比如: 22,80,443")
+				return errors.New("端口: "+v.PortStr+" 格式错误,请用逗号分隔的端口,比如: 22,80,443 连续端口用-,比如:1234-5678")
 			}
 
 		}
