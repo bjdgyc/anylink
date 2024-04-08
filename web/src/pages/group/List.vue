@@ -100,12 +100,12 @@
             min-width="180">
           <template slot-scope="scope">
             <el-row v-for="(item,inx) in scope.row.link_acl.slice(0, readMinRows)" :key="inx">
-              {{ item.action }} => {{ item.val }} : {{ item.port_str }}
+              {{ item.action }} => {{ item.val }} : {{ item.port }}
             </el-row>
             <div v-if="scope.row.link_acl.length > readMinRows">
               <div v-if="readMore[`la_${ scope.row.id }`]">
                 <el-row v-for="(item,inx) in scope.row.link_acl.slice(readMinRows)" :key="inx">
-                  {{ item.action }} => {{ item.val }} : {{ item.port_str }}
+                  {{ item.action }} => {{ item.val }} : {{ item.port }}
                 </el-row>
               </div>
               <el-button size="mini" type="text" @click="toggleMore(`la_${ scope.row.id }`)">{{ readMore[`la_${ scope.row.id }`] ? "▲ 收起" : "▼ 更多" }}</el-button>
@@ -362,7 +362,7 @@
                     </el-input>
                     </el-col>
                     <el-col :span="6">
-                    <el-input type="textarea" :autosize="{ minRows: 1, maxRows: 2}" v-model="item.port_str"  placeholder="多端口,号分隔"></el-input>
+                    <el-input type="textarea" :autosize="{ minRows: 1, maxRows: 2}" v-model="item.port"  placeholder="多端口,号分隔"></el-input>
                     </el-col>
                     <el-col :span="6">
                     <el-input v-model="item.note" placeholder="备注"></el-input>

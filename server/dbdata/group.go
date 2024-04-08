@@ -8,6 +8,7 @@ import (
 	"strings"
 	"strconv"
 	"time"
+	"reflect"
 
 	"github.com/bjdgyc/anylink/base"
 	"golang.org/x/text/language"
@@ -25,12 +26,12 @@ const DsMaxLen = 20000
 
 type GroupLinkAcl struct {
 	// 自上而下匹配 默认 allow * *
-	Action 		string     `json:"action"` // allow、deny
-	Val    		string     `json:"val"`
-	PortStr    	string     `json:"port_str"`
-	Ports   	[]PortData `json:"ports"`
-	IpNet  		*net.IPNet `json:"ip_net"`
-	Note   		string     `json:"note"`
+	Action 		string     		`json:"action"` // allow、deny
+	Val    		string     		`json:"val"`
+	Port    	interface{}     `json:"port"`
+	Ports   	map[uint16]int8 `json:"ports"`
+	IpNet  		*net.IPNet 		`json:"ip_net"`
+	Note   		string     		`json:"note"`
 }
 
 type ValData struct {
@@ -170,13 +171,21 @@ func SetGroup(g *Group) error {
 				return errors.New("GroupLinkAcl 错误" + err.Error())
 			}
 			v.IpNet = ipNet
-			if regexp.MustCompile(`^\d{1,5}(-\d{1,5})?(,\d{1,5}(-\d{1,5})?)*$`).MatchString(v.PortStr) {
-				ports := []PortData{}
-				for _, p := range strings.Split(v.PortStr, ",") {
+
+			port:="";
+			//base.Debug("v.port:",v.Port,v.Ports,reflect.TypeOf(v.Port).Name())
+			switch v := v.Port.(type) {
+				case float64:
+					port = strconv.Itoa(int(v))
+				case string:
+					port = v
+			}
+			if regexp.MustCompile(`^\d{1,5}(-\d{1,5})?(,\d{1,5}(-\d{1,5})?)*$`).MatchString(port) {
+				ports := map[uint16]int8{}
+				for _, p := range strings.Split(port, ",") {
 					if p == "" {
 						continue
 					}
-					portData :=PortData{PortFrom: 0, PortTo: 0}
 					if regexp.MustCompile(`^\d{1,5}-\d{1,5}$`).MatchString(p) {
 					   rp :=	strings.Split(p, "-");
 					   portfrom, err := strconv.Atoi(rp[0])
@@ -187,23 +196,22 @@ func SetGroup(g *Group) error {
 						if err != nil {
 							return errors.New("端口:"+rp[1]+" 格式错误, " + err.Error())
 						}
-						portData.PortFrom=uint16(portfrom)
-						portData.PortTo=uint16(portto)
+						for i := portfrom; i <= portto; i++ {
+							ports[uint16(i)] = 1
+						 }
+
 					} else {
 						port, err := strconv.Atoi(p)
 						if err != nil {
 							return errors.New("端口:"+p+" 格式错误, " + err.Error())
 						}
-						portData.PortFrom=uint16(port)
-						portData.PortTo=uint16(port)
+						ports[uint16(port)] = 1
 					}
-
-					ports = append(ports, portData)
 				}
 				v.Ports = ports
 				linkAcl = append(linkAcl, v)
 			} else {
-				return errors.New("端口: "+v.PortStr+" 格式错误,请用逗号分隔的端口,比如: 22,80,443 连续端口用-,比如:1234-5678")
+				return errors.New("端口: "+port+" 格式错误,请用逗号分隔的端口,比如: 22,80,443 连续端口用-,比如:1234-5678")
 			}
 
 		}
@@ -283,13 +291,13 @@ func SetGroup(g *Group) error {
 	return err
 }
 
-func ContainsInPorts(ports []PortData, port uint16) bool {
-	for _, p := range ports {
-		if p.PortFrom<=port && p.PortTo >= port {
-			return true
-		}
+func ContainsInPorts(ports map[uint16]int8, port uint16) bool {
+	_, ok := ports[port]
+	if ok {
+		return true
+	} else {
+		return false
 	}
-	return false
 }
 
 func GroupAuthLogin(name, pwd string, authData map[string]interface{}) error {

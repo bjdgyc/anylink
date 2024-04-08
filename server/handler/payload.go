@@ -89,11 +89,21 @@ func checkLinkAcl(group *dbdata.Group, pl *sessdata.Payload) bool {
 		// 循环判断ip和端口
 		if v.IpNet.Contains(ipDst) {
 			// 放行允许ip的ping
-			if dbdata.ContainsInPorts( v.Ports , ipPort) || v.Ports[0].PortFrom == 0 || ipProto == waterutil.ICMP {
-				if v.Action == dbdata.Allow {
-					return true
-				} else {
-					return false
+			if(v.Ports==nil || len(v.Ports)==0){
+				if v.Port==ipPort || v.Port==0 || ipProto == waterutil.ICMP {
+					if v.Action == dbdata.Allow {
+						return true
+					} else {
+						return false
+					}
+				}
+			} else {
+				if dbdata.ContainsInPorts( v.Ports , ipPort) || dbdata.ContainsInPorts( v.Ports , 0) || ipProto == waterutil.ICMP {
+					if v.Action == dbdata.Allow {
+						return true
+					} else {
+						return false
+					}
 				}
 			}
 		}
