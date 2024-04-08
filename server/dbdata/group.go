@@ -28,7 +28,7 @@ type GroupLinkAcl struct {
 	Action 		string     `json:"action"` // allow、deny
 	Val    		string     `json:"val"`
 	PortStr    	string     `json:"port_str"`
-	Ports   	[]uint16   `json:"ports"`
+	Ports   	[]PortData `json:"ports"`
 	IpNet  		*net.IPNet `json:"ip_net"`
 	Note   		string     `json:"note"`
 }
@@ -43,6 +43,13 @@ type GroupNameId struct {
 	Id   int    `json:"id"`
 	Name string `json:"name"`
 }
+
+
+type PortData struct {
+	PortFrom   uint16 `json:"port_from"`
+	PortTo 	   uint16 `json:"port_to"`
+}
+
 
 // type Group struct {
 // 	Id               int                    `json:"id" xorm:"pk autoincr not null"`
@@ -163,17 +170,35 @@ func SetGroup(g *Group) error {
 				return errors.New("GroupLinkAcl 错误" + err.Error())
 			}
 			v.IpNet = ipNet
-			if regexp.MustCompile(`^\d{1,5}(,\d{1,5})*$`).MatchString(v.PortStr) {
-				ports := []uint16{}
-				for _, port := range strings.Split(v.PortStr, ",") {
-					if port == "" {
+			if regexp.MustCompile(`^\d{1,5}(-\d{1,5})?(,\d{1,5}(-\d{1,5})?)*$`).MatchString(v.PortStr) {
+				ports := []PortData{}
+				for _, p := range strings.Split(v.PortStr, ",") {
+					if p == "" {
 						continue
 					}
-					portInt, err := strconv.Atoi(port)
-					if err != nil {
-						return errors.New("端口:"+port+" 格式错误, " + err.Error())
+					portData :=PortData{PortFrom: 0, PortTo: 0}
+					if regexp.MustCompile(`^\d{1,5}-\d{1,5}$`).MatchString(p) {
+					   rp :=	strings.Split(p, "-");
+					   portfrom, err := strconv.Atoi(rp[0])
+						if err != nil {
+							return errors.New("端口:"+rp[0]+" 格式错误, " + err.Error())
+						}
+						portto, err := strconv.Atoi(rp[1])
+						if err != nil {
+							return errors.New("端口:"+rp[1]+" 格式错误, " + err.Error())
+						}
+						portData.PortFrom=uint16(portfrom)
+						portData.PortTo=uint16(portto)
+					} else {
+						port, err := strconv.Atoi(p)
+						if err != nil {
+							return errors.New("端口:"+p+" 格式错误, " + err.Error())
+						}
+						portData.PortFrom=uint16(port)
+						portData.PortTo=uint16(port)
 					}
-					ports = append(ports, uint16(portInt))
+
+					ports = append(ports, portData)
 				}
 				v.Ports = ports
 				linkAcl = append(linkAcl, v)
@@ -258,9 +283,9 @@ func SetGroup(g *Group) error {
 	return err
 }
 
-func ContainsInPorts(ports []uint16, port uint16) bool {
+func ContainsInPorts(ports []PortData, port uint16) bool {
 	for _, p := range ports {
-		if p == port {
+		if p.PortFrom<=port && p.PortTo >= port {
 			return true
 		}
 	}

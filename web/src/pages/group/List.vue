@@ -362,7 +362,7 @@
                     </el-input>
                     </el-col>
                     <el-col :span="6">
-                    <el-input v-model="item.port_str" type="textarea" :autosize="{ minRows: 1, maxRows: 2}" placeholder="多端口,号分隔"></el-input>
+                    <el-input type="textarea" :autosize="{ minRows: 1, maxRows: 2}" v-model="item.port_str"  placeholder="多端口,号分隔"></el-input>
                     </el-col>
                     <el-col :span="6">
                     <el-input v-model="item.note" placeholder="备注"></el-input>
