@@ -6,6 +6,7 @@ import (
 	"net"
 	"regexp"
 	"strings"
+	"strconv"
 	"time"
 
 	"github.com/bjdgyc/anylink/base"
@@ -24,11 +25,12 @@ const DsMaxLen = 20000
 
 type GroupLinkAcl struct {
 	// 自上而下匹配 默认 allow * *
-	Action string     `json:"action"` // allow、deny
-	Val    string     `json:"val"`
-	Port   uint16     `json:"port"`
-	IpNet  *net.IPNet `json:"ip_net"`
-	Note   string     `json:"note"`
+	Action 		string     `json:"action"` // allow、deny
+	Val    		string     `json:"val"`
+	PortStr    	string     `json:"port_str"`
+	Ports   	[]uint16   `json:"ports"`
+	IpNet  		*net.IPNet `json:"ip_net"`
+	Note   		string     `json:"note"`
 }
 
 type ValData struct {
@@ -161,9 +163,25 @@ func SetGroup(g *Group) error {
 				return errors.New("GroupLinkAcl 错误" + err.Error())
 			}
 			v.IpNet = ipNet
-			linkAcl = append(linkAcl, v)
+			if regexp.MustCompile(`^\d{1,5}(,\d{1,5})*$`).MatchString(v.PortStr) {
+				for _, port := range strings.Split(v.PortStr, ",") {
+					if port == "" {
+						continue
+					}
+					portInt, err := strconv.Atoi(port)
+					if err != nil {
+						return errors.New("端口:"+port+" 格式错误, " + err.Error())
+					}
+					v.Ports = append(v.Ports, uint16(portInt))
+				}
+				linkAcl = append(linkAcl, v)
+			} else {
+				return errors.New("端口: "+v.PortStr+" 格式错误,请用逗号分隔的端口列表,比如: 22,80,443")
+			}
+
 		}
 	}
+
 	g.LinkAcl = linkAcl
 
 	// DNS 判断
@@ -236,6 +254,15 @@ func SetGroup(g *Group) error {
 	}
 
 	return err
+}
+
+func ContainsInPorts(ports []uint16, port uint16) bool {
+	for _, p := range ports {
+		if p == port {
+			return true
+		}
+	}
+	return false
 }
 
 func GroupAuthLogin(name, pwd string, authData map[string]interface{}) error {

@@ -89,7 +89,7 @@ func checkLinkAcl(group *dbdata.Group, pl *sessdata.Payload) bool {
 		// 循环判断ip和端口
 		if v.IpNet.Contains(ipDst) {
 			// 放行允许ip的ping
-			if v.Port == ipPort || v.Port == 0 || ipProto == waterutil.ICMP {
+			if dbdata.ContainsInPorts( v.Ports , ipPort) || v.Ports[0] == 0 || ipProto == waterutil.ICMP {
 				if v.Action == dbdata.Allow {
 					return true
 				} else {
