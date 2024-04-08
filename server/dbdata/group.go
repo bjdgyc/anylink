@@ -164,6 +164,7 @@ func SetGroup(g *Group) error {
 			}
 			v.IpNet = ipNet
 			if regexp.MustCompile(`^\d{1,5}(,\d{1,5})*$`).MatchString(v.PortStr) {
+				ports := []uint16{}
 				for _, port := range strings.Split(v.PortStr, ",") {
 					if port == "" {
 						continue
@@ -172,8 +173,9 @@ func SetGroup(g *Group) error {
 					if err != nil {
 						return errors.New("端口:"+port+" 格式错误, " + err.Error())
 					}
-					v.Ports = append(v.Ports, uint16(portInt))
+					ports = append(ports, uint16(portInt))
 				}
+				v.Ports = ports
 				linkAcl = append(linkAcl, v)
 			} else {
 				return errors.New("端口: "+v.PortStr+" 格式错误,请用逗号分隔的端口列表,比如: 22,80,443")
