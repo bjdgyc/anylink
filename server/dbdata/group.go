@@ -164,17 +164,17 @@ func SetGroup(g *Group) error {
 			}
 			v.IpNet = ipNet
 
-			port := ""
+			portsStr := ""
 			switch vp := v.Port.(type) {
 				case float64:
-					port = strconv.Itoa(int(vp))
+					portsStr = strconv.Itoa(int(vp))
 				case string:
-					port = vp
+					portsStr = vp
 			}
 
-			if regexp.MustCompile(`^\d{1,5}(-\d{1,5})?(,\d{1,5}(-\d{1,5})?)*$`).MatchString(port) {
+			if regexp.MustCompile(`^\d{1,5}(-\d{1,5})?(,\d{1,5}(-\d{1,5})?)*$`).MatchString(portsStr) {
 				ports := map[uint16]int8{}
-				for _, p := range strings.Split(port, ",") {
+				for _, p := range strings.Split(portsStr, ",") {
 					if p == "" {
 						continue
 					}
@@ -203,7 +203,7 @@ func SetGroup(g *Group) error {
 				v.Ports = ports
 				linkAcl = append(linkAcl, v)
 			} else {
-				return errors.New("端口: " + port + " 格式错误,请用逗号分隔的端口,比如: 22,80,443 连续端口用-,比如:1234-5678")
+				return errors.New("端口: " + portsStr + " 格式错误,请用逗号分隔的端口,比如: 22,80,443 连续端口用-,比如:1234-5678")
 			}
 
 		}
