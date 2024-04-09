@@ -88,9 +88,12 @@ func checkLinkAcl(group *dbdata.Group, pl *sessdata.Payload) bool {
 	for _, v := range group.LinkAcl {
 		// 循环判断ip和端口
 		if v.IpNet.Contains(ipDst) {
+
 			// 放行允许ip的ping
-			if(v.Ports==nil || len(v.Ports)==0){
-				if v.Port==ipPort || v.Port==0 || ipProto == waterutil.ICMP {
+			if v.Ports == nil || len(v.Ports) == 0 {
+				//单端口历史数据兼容
+				port := uint16(v.Port.(float64))
+				if port == ipPort || port == 0 || ipProto == waterutil.ICMP {
 					if v.Action == dbdata.Allow {
 						return true
 					} else {
@@ -98,7 +101,7 @@ func checkLinkAcl(group *dbdata.Group, pl *sessdata.Payload) bool {
 					}
 				}
 			} else {
-				if dbdata.ContainsInPorts( v.Ports , ipPort) || dbdata.ContainsInPorts( v.Ports , 0) || ipProto == waterutil.ICMP {
+				if dbdata.ContainsInPorts(v.Ports, ipPort) || dbdata.ContainsInPorts(v.Ports, 0) || ipProto == waterutil.ICMP {
 					if v.Action == dbdata.Allow {
 						return true
 					} else {
