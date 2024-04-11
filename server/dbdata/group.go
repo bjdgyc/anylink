@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -24,11 +25,12 @@ const DsMaxLen = 20000
 
 type GroupLinkAcl struct {
 	// 自上而下匹配 默认 allow * *
-	Action string     `json:"action"` // allow、deny
-	Val    string     `json:"val"`
-	Port   uint16     `json:"port"`
-	IpNet  *net.IPNet `json:"ip_net"`
-	Note   string     `json:"note"`
+	Action string          `json:"action"` // allow、deny
+	Val    string          `json:"val"`
+	Port   interface{}     `json:"port"` //兼容单端口历史数据类型uint16
+	Ports  map[uint16]int8 `json:"ports"`
+	IpNet  *net.IPNet      `json:"ip_net"`
+	Note   string          `json:"note"`
 }
 
 type ValData struct {
@@ -161,9 +163,52 @@ func SetGroup(g *Group) error {
 				return errors.New("GroupLinkAcl 错误" + err.Error())
 			}
 			v.IpNet = ipNet
-			linkAcl = append(linkAcl, v)
+
+			portsStr := ""
+			switch vp := v.Port.(type) {
+				case float64:
+					portsStr = strconv.Itoa(int(vp))
+				case string:
+					portsStr = vp
+			}
+
+			if regexp.MustCompile(`^\d{1,5}(-\d{1,5})?(,\d{1,5}(-\d{1,5})?)*$`).MatchString(portsStr) {
+				ports := map[uint16]int8{}
+				for _, p := range strings.Split(portsStr, ",") {
+					if p == "" {
+						continue
+					}
+					if regexp.MustCompile(`^\d{1,5}-\d{1,5}$`).MatchString(p) {
+						rp := strings.Split(p, "-")
+						portfrom, err := strconv.Atoi(rp[0])
+						if err != nil {
+							return errors.New("端口:" + rp[0] + " 格式错误, " + err.Error())
+						}
+						portto, err := strconv.Atoi(rp[1])
+						if err != nil {
+							return errors.New("端口:" + rp[1] + " 格式错误, " + err.Error())
+						}
+						for i := portfrom; i <= portto; i++ {
+							ports[uint16(i)] = 1
+						}
+
+					} else {
+						port, err := strconv.Atoi(p)
+						if err != nil {
+							return errors.New("端口:" + p + " 格式错误, " + err.Error())
+						}
+						ports[uint16(port)] = 1
+					}
+				}
+				v.Ports = ports
+				linkAcl = append(linkAcl, v)
+			} else {
+				return errors.New("端口: " + portsStr + " 格式错误,请用逗号分隔的端口,比如: 22,80,443 连续端口用-,比如:1234-5678")
+			}
+
 		}
 	}
+
 	g.LinkAcl = linkAcl
 
 	// DNS 判断
@@ -236,6 +281,15 @@ func SetGroup(g *Group) error {
 	}
 
 	return err
+}
+
+func ContainsInPorts(ports map[uint16]int8, port uint16) bool {
+	_, ok := ports[port]
+	if ok {
+		return true
+	} else {
+		return false
+	}
 }
 
 func GroupAuthLogin(name, pwd string, authData map[string]interface{}) error {
