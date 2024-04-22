@@ -27,7 +27,7 @@ type GroupLinkAcl struct {
 	// 自上而下匹配 默认 allow * *
 	Action string          `json:"action"` // allow、deny
 	Val    string          `json:"val"`
-	Port   interface{}     `json:"port"` //兼容单端口历史数据类型uint16
+	Port   string          `json:"port"` // 兼容单端口历史数据类型uint16
 	Ports  map[uint16]int8 `json:"ports"`
 	IpNet  *net.IPNet      `json:"ip_net"`
 	Note   string          `json:"note"`
@@ -164,13 +164,14 @@ func SetGroup(g *Group) error {
 			}
 			v.IpNet = ipNet
 
-			portsStr := ""
-			switch vp := v.Port.(type) {
-				case float64:
-					portsStr = strconv.Itoa(int(vp))
-				case string:
-					portsStr = vp
-			}
+			portsStr := v.Port
+			v.Port = strings.TrimSpace(portsStr)
+			// switch vp := v.Port.(type) {
+			// case float64:
+			// 	portsStr = strconv.Itoa(int(vp))
+			// case string:
+			// 	portsStr = vp
+			// }
 
 			if regexp.MustCompile(`^\d{1,5}(-\d{1,5})?(,\d{1,5}(-\d{1,5})?)*$`).MatchString(portsStr) {
 				ports := map[uint16]int8{}

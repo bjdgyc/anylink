@@ -344,7 +344,7 @@
             <el-tab-pane label="权限控制" name="link_acl">
                 <el-form-item label="权限控制" prop="link_acl">
                 <el-row class="msg-info">
-                    <el-col :span="22">输入CIDR格式如: 192.168.3.0/24 端口0表示所有端口,多个端口用,号分隔,连续端口:1234-5678</el-col>
+                    <el-col :span="22">输入CIDR格式如: 192.168.3.0/24 端口0表示所有端口,多个端口用','号分隔,连续端口:1234-5678</el-col>
                     <el-col :span="2">
                     <el-button size="mini" type="success" icon="el-icon-plus" circle
                                 @click.prevent="addDomain(ruleForm.link_acl)"></el-button>
