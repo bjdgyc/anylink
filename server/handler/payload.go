@@ -90,23 +90,23 @@ func checkLinkAcl(group *dbdata.Group, pl *sessdata.Payload) bool {
 		if v.IpNet.Contains(ipDst) {
 
 			// 放行允许ip的ping
-			if v.Ports == nil || len(v.Ports) == 0 {
-				//单端口历史数据兼容
-				port := uint16(v.Port.(float64))
-				if port == ipPort || port == 0 || ipProto == waterutil.ICMP {
-					if v.Action == dbdata.Allow {
-						return true
-					} else {
-						return false
-					}
-				}
-			} else {
-				if dbdata.ContainsInPorts(v.Ports, ipPort) || dbdata.ContainsInPorts(v.Ports, 0) || ipProto == waterutil.ICMP {
-					if v.Action == dbdata.Allow {
-						return true
-					} else {
-						return false
-					}
+			// if v.Ports == nil || len(v.Ports) == 0 {
+			// 	//单端口历史数据兼容
+			// 	port := uint16(v.Port.(float64))
+			// 	if port == ipPort || port == 0 || ipProto == waterutil.ICMP {
+			// 		if v.Action == dbdata.Allow {
+			// 			return true
+			// 		} else {
+			// 			return false
+			// 		}
+			// 	}
+			// } else {
+
+			if dbdata.ContainsInPorts(v.Ports, ipPort) || dbdata.ContainsInPorts(v.Ports, 0) || ipProto == waterutil.ICMP {
+				if v.Action == dbdata.Allow {
+					return true
+				} else {
+					return false
 				}
 			}
 		}
