@@ -361,10 +361,11 @@
                         </el-select>
                     </el-input>
                     </el-col>
-                    <el-col :span="6">
-                    <el-input type="textarea" :autosize="{ minRows: 1, maxRows: 2}" v-model="item.port"  placeholder="多端口,号分隔"></el-input>
+                    <el-col :span="8">
+                    <!--  type="textarea" :autosize="{ minRows: 1, maxRows: 2}"  -->
+                    <el-input  v-model="item.port"  placeholder="多端口,号分隔"></el-input>
                     </el-col>
-                    <el-col :span="6">
+                    <el-col :span="4">
                     <el-input v-model="item.note" placeholder="备注"></el-input>
                     </el-col>
                     <el-col :span="2">
@@ -624,7 +625,7 @@ export default {
       // arr.pop()
     },
     addDomain(arr) {
-      arr.push({val: "", action: "allow", port: 0});
+      arr.push({val: "", action: "allow", port: "0"});
     },
     submitForm(formName) {
       this.$refs[formName].validate((valid) => {
