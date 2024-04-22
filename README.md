@@ -23,7 +23,7 @@ AnyLink 是一个企业级远程办公 sslvpn 的软件，可以支持多人同�
 AnyLink 基于 [ietf-openconnect](https://tools.ietf.org/html/draft-mavrogiannopoulos-openconnect-02)
 协议开发，并且借鉴了 [ocserv](http://ocserv.gitlab.io/www/index.html) 的开发思路，使其可以同时兼容 AnyConnect 客户端。
 
-AnyLink 使用 TLS/DTLS 进行数据加密，因此需要 RSA 或 ECC 证书，可以通过 Let's Encrypt 和 TrustAsia 申请免费的 SSL 证书。
+AnyLink 使用 TLS/DTLS 进行数据加密，因此需要 RSA 或 ECC 证书，可以使用私有自签证书，可以通过 Let's Encrypt 和 TrustAsia 申请免费的 SSL 证书。
 
 AnyLink 服务端仅在 CentOS 7、CentOS 8、Ubuntu 18.04、Ubuntu 20.04 测试通过，如需要安装在其他系统，需要服务端支持 tun/tap
 功能、ip 设置命令、iptables命令。
@@ -60,9 +60,9 @@ AnyLink 服务端仅在 CentOS 7、CentOS 8、Ubuntu 18.04、Ubuntu 20.04 测试
 
 ### 使用问题
 
-> 对于测试环境，可以使用 vpn.test.vqilu.cn 绑定host进行测试
+> 对于测试环境，可以直接进行测试，需要客户端取消勾选【阻止不受信任的服务器(Block connections to untrusted servers)】
 >
-> 对于线上环境，必须申请安全的https证书(跟nginx使用的证书类型一致)，不支持私有证书连接
+> 对于线上环境，尽量申请安全的https证书(跟nginx使用的pem证书类型一致)
 >
 > 群共享文件有相关客户端软件下载，其他版本没有测试过，不保证使用正常
 > 
@@ -133,6 +133,7 @@ sudo ./anylink
 - [x] 流量压缩功能
 - [x] 出口 IP 自动放行
 - [x] 支持多服务的配置区分
+- [x] 支持私有自签证书
 - [ ] 基于 ipvtap 设备的桥接访问模式
 
 ## Config

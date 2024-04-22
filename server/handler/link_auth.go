@@ -17,7 +17,10 @@ import (
 	"github.com/bjdgyc/anylink/sessdata"
 )
 
-var profileHash = ""
+var (
+	profileHash = ""
+	certHash    = ""
+)
 
 func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	// TODO 调试信息输出
@@ -138,7 +141,7 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	other := &dbdata.SettingOther{}
 	_ = dbdata.SettingGet(other)
 	rd := RequestData{SessionId: sess.Sid, SessionToken: sess.Sid + "@" + sess.Token,
-		Banner: other.Banner, ProfileName: base.Cfg.ProfileName, ProfileHash: profileHash}
+		Banner: other.Banner, ProfileName: base.Cfg.ProfileName, ProfileHash: profileHash, CertHash: certHash}
 	w.WriteHeader(http.StatusOK)
 	tplRequest(tpl_complete, w, rd)
 	base.Info("login", cr.Auth.Username, userAgent)
@@ -178,6 +181,7 @@ type RequestData struct {
 	Banner       string
 	ProfileName  string
 	ProfileHash  string
+	CertHash     string
 }
 
 var auth_request = `<?xml version="1.0" encoding="UTF-8"?>
@@ -223,7 +227,7 @@ var auth_complete = `<?xml version="1.0" encoding="UTF-8"?>
     </capabilities>
     <config client="vpn" type="private">
         <vpn-base-config>
-            <server-cert-hash>240B97A685B2BFA66AD699B90AAC49EA66495D69</server-cert-hash>
+            <server-cert-hash>{{.CertHash}}</server-cert-hash>
         </vpn-base-config>
         <opaque is-for="vpn-client"></opaque>
         <vpn-profile-manifest>

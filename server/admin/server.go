@@ -111,12 +111,6 @@ func StartAdmin() {
 		selectedCipherSuites = append(selectedCipherSuites, s.ID)
 	}
 
-	if tlscert, _, err := dbdata.ParseCert(); err != nil {
-		base.Fatal("证书加载失败", err)
-	} else {
-		dbdata.LoadCertificate(tlscert)
-	}
-
 	// 设置tls信息
 	tlsConfig := &tls.Config{
 		NextProtos:   []string{"http/1.1"},

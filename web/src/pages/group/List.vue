@@ -201,9 +201,9 @@
                 <el-switch v-model="ruleForm.allow_lan"></el-switch>
                 <div class="msg-info">
                  注：本地网络 指的是：
-                 运行 anyconnect 客户端的PC 所在的的网络，既本地路由网段。
+                 运行 anyconnect 客户端的PC 所在的的网络，即本地路由网段。
                  开启后，PC本地路由网段的数据就不会走隧道链路转发数据了。
-                 同时 anyconnect 客户端需要勾选本地网络(Local Lan)的开关，功能才能生效。
+                 同时 anyconnect 客户端需要勾选本地网络(Allow Local Lan)的开关，功能才能生效。
                  </div>
                 </el-form-item>
 
