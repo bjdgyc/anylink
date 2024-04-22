@@ -1,13 +1,16 @@
 package handler
 
 import (
+	"crypto/sha1"
 	"crypto/tls"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"net"
 	"net/http"
 	"net/http/httputil"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/bjdgyc/anylink/base"
@@ -35,6 +38,19 @@ func startTls() {
 	//	// 使用自定义证书
 	//	certs[0], err = tls.LoadX509KeyPair(certFile, keyFile)
 	// }
+
+	tlscert, _, err := dbdata.ParseCert()
+	if err != nil {
+		base.Fatal("证书加载失败", err)
+	}
+	dbdata.LoadCertificate(tlscert)
+
+	// 计算证书hash值
+	s1 := sha1.New()
+	s1.Write(tlscert.Certificate[0])
+	h2s := hex.EncodeToString(s1.Sum(nil))
+	certHash = strings.ToUpper(h2s)
+	base.Info("certHash", certHash)
 
 	// 修复 CVE-2016-2183
 	// https://segmentfault.com/a/1190000038486901

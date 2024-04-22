@@ -174,6 +174,9 @@ func CheckErrNotFound(err error) bool {
 	return err == ErrNotFound
 }
 
+// base64 图片
+// 用户动态码(请妥善保存):<br/>
+// <img src="{{.OtpImgBase64}}"/><br/>
 const accountMail = `<p>您好:</p>
 <p>&nbsp;&nbsp;您的{{.Issuer}}账号已经审核开通。</p>
 <p>
@@ -181,17 +184,18 @@ const accountMail = `<p>您好:</p>
     用户组: <b>{{.Group}}</b> <br/>
     用户名: <b>{{.Username}}</b> <br/>
     用户PIN码: <b>{{.PinCode}}</b> <br/>
+    {{if .DisableOtp}}
+    <!-- nothing -->
+    {{else}}
+	
     <!-- 
     用户动态码(3天后失效):<br/>
     <img src="{{.OtpImg}}"/><br/>
-
-    用户动态码(请妥善保存):<br/>
-    <img src="{{.OtpImgBase64}}"/><br/>
-
-    下面是兼容 gmail 的写法
     -->
     用户动态码(请妥善保存):<br/>
     <img src="cid:userOtpQr.png" alt="userOtpQr" /><br/>
+
+    {{end}}
 </p>
 <div>
     使用说明:
