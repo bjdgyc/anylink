@@ -180,7 +180,7 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	HttpSetHeader(w, "X-CSTP-Routing-Filtering-Ignore", "false")
 	HttpSetHeader(w, "X-CSTP-Quarantine", "false")
 	HttpSetHeader(w, "X-CSTP-Disable-Always-On-VPN", "false")
-	HttpSetHeader(w, "X-CSTP-Client-Bypass-Protocol", "false")
+	HttpSetHeader(w, "X-CSTP-Client-Bypass-Protocol", "true")
 	HttpSetHeader(w, "X-CSTP-TCP-Keepalive", "false")
 	// 设置域名拆分隧道（移动端不支持）
 	if mobile != "mobile" {
