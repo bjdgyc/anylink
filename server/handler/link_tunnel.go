@@ -86,7 +86,7 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	}
 	cSess.CstpDpd = cstpDpd
 
-	dtlsPort := "4433"
+	dtlsPort := "443"
 	if strings.Contains(base.Cfg.ServerDTLSAddr, ":") {
 		ss := strings.Split(base.Cfg.ServerDTLSAddr, ":")
 		dtlsPort = ss[1]
