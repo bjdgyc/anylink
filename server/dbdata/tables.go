@@ -11,6 +11,7 @@ type Group struct {
 	Note             string                 `json:"note" xorm:"varchar(255)"`
 	AllowLan         bool                   `json:"allow_lan" xorm:"Bool"`
 	ClientDns        []ValData              `json:"client_dns" xorm:"Text"`
+	SplitDns         []ValData              `json:"split_dns" xorm:"Text"`
 	RouteInclude     []ValData              `json:"route_include" xorm:"Text"`
 	RouteExclude     []ValData              `json:"route_exclude" xorm:"Text"`
 	DsExcludeDomains string                 `json:"ds_exclude_domains" xorm:"Text"`

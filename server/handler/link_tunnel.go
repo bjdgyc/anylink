@@ -131,6 +131,11 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 	for _, v := range cSess.Group.ClientDns {
 		HttpAddHeader(w, "X-CSTP-DNS", v.Val)
 	}
+	// 分割dns
+	for _, v := range cSess.Group.SplitDns {
+		HttpAddHeader(w, "X-CSTP-Split-DNS", v.Val)
+	}
+
 	// 允许的路由
 	for _, v := range cSess.Group.RouteInclude {
 		if strings.ToLower(v.Val) == dbdata.All {

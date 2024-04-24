@@ -215,6 +215,7 @@ func SetGroup(g *Group) error {
 	// DNS 判断
 	clientDns := []ValData{}
 	for _, v := range g.ClientDns {
+		v.Val = strings.TrimSpace(v.Val)
 		if v.Val != "" {
 			ip := net.ParseIP(v.Val)
 			if ip.String() != v.Val {
@@ -229,6 +230,20 @@ func SetGroup(g *Group) error {
 		return errors.New("默认路由，必须设置一个DNS")
 	}
 	g.ClientDns = clientDns
+
+	splitDns := []ValData{}
+	for _, v := range g.SplitDns {
+		v.Val = strings.TrimSpace(v.Val)
+		if v.Val != "" {
+			ValidateDomainName(v.Val)
+			if !ValidateDomainName(v.Val) {
+				return errors.New("域名 错误")
+			}
+			splitDns = append(splitDns, v)
+		}
+	}
+	g.SplitDns = splitDns
+
 	// 域名拆分隧道，不能同时填写
 	g.DsIncludeDomains = strings.TrimSpace(g.DsIncludeDomains)
 	g.DsExcludeDomains = strings.TrimSpace(g.DsExcludeDomains)
