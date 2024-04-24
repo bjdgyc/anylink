@@ -9,6 +9,7 @@
         <RestrictTunnelProtocols>IPSec</RestrictTunnelProtocols>
         <BypassDownloader>true</BypassDownloader>
         <AutoUpdate UserControllable="false">false</AutoUpdate>
+        <LocalLanAccess UserControllable="true">true</LocalLanAccess>
         <WindowsVPNEstablishment>AllowRemoteUsers</WindowsVPNEstablishment>
         <LinuxVPNEstablishment>AllowRemoteUsers</LinuxVPNEstablishment>
         <CertEnrollmentPin>pinAllowed</CertEnrollmentPin>
