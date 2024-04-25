@@ -250,9 +250,9 @@
               </el-row>
             </el-form-item>
 
-            <el-form-item label="分割DNS" prop="split_dns">
+            <el-form-item label="内网域名" prop="split_dns">
               <el-row class="msg-info">
-                <el-col :span="20">一般留空。如果输入域名，只有配置的域名(包含子域名)走配置的dns</el-col>
+                <el-col :span="20">(分割DNS)一般留空。如果输入域名，只有配置的域名(包含子域名)走配置的dns</el-col>
                 <el-col :span="4">
                   <el-button size="mini" type="success" icon="el-icon-plus" circle
                              @click.prevent="addDomain(ruleForm.split_dns)"></el-button>
