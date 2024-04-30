@@ -331,6 +331,7 @@ ipv4_end = "10.1.2.200"
     - centos: `/usr/lib/systemd/system/`
     - ubuntu: `/lib/systemd/system/`
 3. 操作命令:
+    - 加载配置: `systemctl daemon-reload`
     - 启动: `systemctl start anylink`
     - 停止: `systemctl stop anylink`
     - 开机自启: `systemctl enable anylink`
