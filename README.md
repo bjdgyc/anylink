@@ -365,6 +365,7 @@ ipv4_end = "10.1.2.200"
    # 具体tag可以从docker hub获取
    # https://hub.docker.com/r/bjdgyc/anylink/tags
    docker pull bjdgyc/anylink:latest
+   docker pull registry.cn-hangzhou.aliyuncs.com/bjdgyc/anylink:latest
    ```
 
 2. 查看命令信息
