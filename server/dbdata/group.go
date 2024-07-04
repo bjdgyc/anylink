@@ -181,11 +181,13 @@ func SetGroup(g *Group) error {
 					}
 					if regexp.MustCompile(`^\d{1,5}-\d{1,5}$`).MatchString(p) {
 						rp := strings.Split(p, "-")
-						portfrom, err := strconv.Atoi(rp[0])
+						// portfrom, err := strconv.Atoi(rp[0])
+						portfrom, err := strconv.ParseUint(rp[0], 10, 16)
 						if err != nil {
 							return errors.New("端口:" + rp[0] + " 格式错误, " + err.Error())
 						}
-						portto, err := strconv.Atoi(rp[1])
+						// portto, err := strconv.Atoi(rp[1])
+						portto, err := strconv.ParseUint(rp[1], 10, 16)
 						if err != nil {
 							return errors.New("端口:" + rp[1] + " 格式错误, " + err.Error())
 						}
@@ -194,7 +196,7 @@ func SetGroup(g *Group) error {
 						}
 
 					} else {
-						port, err := strconv.Atoi(p)
+						port, err := strconv.ParseUint(p, 10, 16)
 						if err != nil {
 							return errors.New("端口:" + p + " 格式错误, " + err.Error())
 						}
