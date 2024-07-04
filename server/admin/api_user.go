@@ -180,7 +180,15 @@ func userOtpQr(uid int, b64 bool) (string, error) {
 
 // 在线用户
 func UserOnline(w http.ResponseWriter, r *http.Request) {
-	datas := sessdata.OnlineSess()
+	_ = r.ParseForm()
+	search_cate := r.FormValue("search_cate")
+	search_text := r.FormValue("search_text")
+	show_sleeper := r.FormValue("show_sleeper")
+	showSleeper, _ := strconv.ParseBool(show_sleeper)
+	// one_offline := r.FormValue("one_offline")
+
+	// datas := sessdata.OnlineSess()
+	datas := sessdata.GetOnlineSess(search_cate, search_text, showSleeper)
 
 	data := map[string]interface{}{
 		"count":     len(datas),
