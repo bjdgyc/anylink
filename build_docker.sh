@@ -18,8 +18,4 @@ docker build -t bjdgyc/anylink:latest --no-cache --progress=plain \
 echo "docker tag latest $ver"
 docker tag bjdgyc/anylink:latest bjdgyc/anylink:$ver
 
-exit 0
 
-docker tag bjdgyc/anylink:latest registry.cn-qingdao.aliyuncs.com/bjdgyc/anylink:latest
-
-docker push registry.cn-qingdao.aliyuncs.com/bjdgyc/anylink:latest

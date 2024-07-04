@@ -348,6 +348,18 @@ ipv4_end = "10.1.2.200"
 
 ## Docker
 
+### anylink 镜像地址
+
+对于国内用户，为提高镜像拉取体验，可以考虑拉取存放于阿里云镜像仓库的镜像，镜像名称及标签如下表所示(
+具体版本号可以查看 `version` 文件):
+
+|    支持设备/平台    |       DockerHub       |                             阿里云镜像仓库                             |
+|:-------------:|:---------------------:|:---------------------------------------------------------------:|
+| x86_64/amd64  | bjdgyc/anylink:latest |     registry.cn-hangzhou.aliyuncs.com/bjdgyc/anylink:latest     |
+| x86_64/amd64  | bjdgyc/anylink:0.12.1 |     registry.cn-hangzhou.aliyuncs.com/bjdgyc/anylink:0.12.1     |
+| armv8/aarch64 | bjdgyc/anylink:latest | registry.cn-hangzhou.aliyuncs.com/bjdgyc/anylink:arm64v8-latest |
+| armv8/aarch64 | bjdgyc/anylink:0.12.1 | registry.cn-hangzhou.aliyuncs.com/bjdgyc/anylink:arm64v8-0.12.1 |
+
 1. 获取镜像
    ```bash
    # 具体tag可以从docker hub获取
