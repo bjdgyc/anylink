@@ -459,7 +459,7 @@ ipv4_end = "10.1.2.200"
 - [AnyConnect Secure Client](https://www.cisco.com/) (可通过群文件下载: Windows/macOS/Linux/Android/iOS)
 - [OpenConnect](https://gitlab.com/openconnect/openconnect) (Windows/macOS/Linux)
 - [三方 AnyLink Secure Client](https://github.com/tlslink/anylink-client) (Windows/macOS/Linux)
-- [三方客户端下载地址](https://cisco.yangpin.link) (Windows/macOS/Linux/Android/iOS)
+- 【推荐】三方客户端下载地址(Windows/macOS/Linux/Android/iOS) [国内地址](https://ocserv.yydy.link:2023) [国外地址](https://cisco.yydy.link/#/)
 
 ## Contribution
 
