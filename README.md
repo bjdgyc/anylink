@@ -55,9 +55,10 @@ AnyLink 服务端仅在 CentOS 7、CentOS 8、Ubuntu 18.04、Ubuntu 20.04 测试
 >
 > 也可以添加QQ群 咨询群内大佬
 >
-> 添加QQ群①(已满): 567510628
+> 添加QQ群①: 567510628
 >
-> 添加QQ群②: 739072205
+> <img src="doc/screenshot/qq2.jpg" width="400" />
+
 
 ### 使用问题
 
