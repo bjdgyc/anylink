@@ -46,7 +46,7 @@ type UserActLog struct {
 	Username        string    `json:"username" xorm:"varchar(60)"`
 	GroupName       string    `json:"group_name" xorm:"varchar(60)"`
 	IpAddr          string    `json:"ip_addr" xorm:"varchar(32)"`
-	RemoteAddr      string    `json:"remote_addr" xorm:"varchar(32)"`
+	RemoteAddr      string    `json:"remote_addr" xorm:"varchar(42)"`
 	Os              uint8     `json:"os" xorm:"not null default 0 Int"`
 	Client          uint8     `json:"client" xorm:"not null default 0 Int"`
 	Version         string    `json:"version" xorm:"varchar(15)"`
