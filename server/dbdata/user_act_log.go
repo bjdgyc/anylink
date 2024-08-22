@@ -1,12 +1,12 @@
 package dbdata
 
 import (
+	"net"
 	"net/url"
 	"regexp"
 	"strings"
 
 	"github.com/bjdgyc/anylink/base"
-	"github.com/bjdgyc/anylink/pkg/utils"
 	"github.com/ivpusic/grpool"
 	"github.com/spf13/cast"
 	"xorm.io/xorm"
@@ -80,7 +80,7 @@ func (ua *UserActLogProcess) Add(u UserActLog, userAgent string) {
 	u.Client = client_idx
 	u.Version = ver
 	// u.RemoteAddr = strings.Split(u.RemoteAddr, ":")[0]
-	u.RemoteAddr = utils.GetAddrIp(u.RemoteAddr)
+	u.RemoteAddr, _, _ = net.SplitHostPort(u.RemoteAddr)
 	// remove extra characters
 	infoSlice := strings.Split(u.Info, " ")
 	infoLen := len(infoSlice)
