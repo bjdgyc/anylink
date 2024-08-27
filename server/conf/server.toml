@@ -53,8 +53,15 @@ ipv4_end = "192.168.90.200"
 #是否自动添加nat
 iptables_nat = true
 
-
 #客户端显示详细错误信息(线上环境慎开启)
 display_error = true
 
+# ldap server
+ldap_admin_user = "anylink"
+ldap_server = "127.0.0.1:389"
+ldap_user = "cn=anylink,ou=user,dc=test,dc=com"
+ldap_pass = "12123z8qvBqrG"
+ldap_base_dn = "dc=test,dc=com"
 
+# Token verify
+otp_server = "https://otp.test.com/otp/api/v1/check/user"

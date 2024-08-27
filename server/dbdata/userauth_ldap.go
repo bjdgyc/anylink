@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/spf13/viper"
 	"net"
 	"reflect"
 	"regexp"
@@ -62,6 +63,14 @@ func (auth AuthLdap) checkData(authData map[string]interface{}) error {
 }
 
 func (auth AuthLdap) checkUser(name, pwd string, g *Group) error {
+
+	v := viper.New()
+	v.SetConfigFile("./conf/server.toml")
+	if err := v.ReadInConfig(); err != nil {
+		panic("config file err:" + err.Error())
+
+	}
+
 	pl := len(pwd)
 	if name == "" || pl < 1 {
 		return fmt.Errorf("%s %s", name, "密码错误")
@@ -130,10 +139,32 @@ func (auth AuthLdap) checkUser(name, pwd string, g *Group) error {
 		return fmt.Errorf("LDAP %s 用户 %s", name, err.Error())
 	}
 	userDN := sr.Entries[0].DN
-	err = l.Bind(userDN, pwd)
-	if err != nil {
-		return fmt.Errorf("%s LDAP 登入失败，请检查登入的账号或密码 %s", name, err.Error())
+	ldapAdminUser := v.Get("ldap_admin_user")
+	if name == ldapAdminUser {
+		pinCode := pwd
+		err = l.Bind(userDN, pinCode)
+		if err != nil {
+			return fmt.Errorf("LDAP 登入失败，请检查登入的账号 [%s] 或密码 [%v], err=[%v]", userDN, pinCode, err.Error())
+		}
+	} else {
+		pinCode := pwd[:pl-6]
+		otp := pwd[pl-6:]
+		err = l.Bind(userDN, pinCode)
+		if err != nil {
+			return fmt.Errorf("LDAP 登入失败，请检查登入的账号 [%s] 或密码 [%v], err=[%v]", userDN, pinCode, err.Error())
+		}
+		// check user otp
+		ot, err := strconv.Atoi(otp)
+		otpAuthRes, err := ValidateUserOtp(name, ot)
+		if err != nil {
+			return err
+		}
+
+		if !otpAuthRes {
+			return fmt.Errorf("LDAP 用户 [%s] 动态口令 [%d] 验证失败，请检查登入的动态口令，err=[%v]", name, ot, err.Error())
+		}
 	}
+
 	return nil
 }
 

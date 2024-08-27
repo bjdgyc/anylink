@@ -126,8 +126,8 @@ func checkSession() {
 	}()
 }
 
-// 状态为过期的用户踢下线
-func CloseUserLimittimeSession() {
+// CloseUserLimitTimeSession 状态为过期的用户踢下线
+func CloseUserLimitTimeSession() {
 	s := mapset.NewSetFromSlice(dbdata.CheckUserlimittime())
 	limitTimeToken := []string{}
 	sessMux.RLock()

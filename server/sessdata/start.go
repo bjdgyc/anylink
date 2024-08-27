@@ -4,5 +4,5 @@ func Start() {
 	initIpPool()
 	checkSession()
 	saveStatsInfo()
-	CloseUserLimittimeSession()
+	CloseUserLimitTimeSession()
 }
