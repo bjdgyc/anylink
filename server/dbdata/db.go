@@ -184,6 +184,7 @@ const accountMail = `<p>您好:</p>
     用户组: <b>{{.Group}}</b> <br/>
     用户名: <b>{{.Username}}</b> <br/>
     用户PIN码: <b>{{.PinCode}}</b> <br/>
+    用户过期时间: <b>{{.LimitTime}}</b> <br/>
     {{if .DisableOtp}}
     <!-- nothing -->
     {{else}}
