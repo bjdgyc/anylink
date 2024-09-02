@@ -220,6 +220,7 @@ type userAccountMailData struct {
 	Username     string
 	Nickname     string
 	PinCode      string
+	LimitTime    string
 	OtpImg       string
 	OtpImgBase64 string
 	DisableOtp   bool
@@ -276,6 +277,13 @@ func userAccountMail(user *dbdata.User) error {
 		OtpImgBase64: "data:image/png;base64," + otpData,
 		DisableOtp:   user.DisableOtp,
 	}
+
+	if user.LimitTime == nil {
+		data.LimitTime = "无限制"
+	} else {
+		data.LimitTime = user.LimitTime.Local().Format("2006-01-02")
+	}
+
 	w := bytes.NewBufferString("")
 	t, _ := template.New("auth_complete").Parse(htmlBody)
 	err = t.Execute(w, data)
