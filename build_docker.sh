@@ -19,3 +19,5 @@ echo "docker tag latest $ver"
 docker tag bjdgyc/anylink:latest bjdgyc/anylink:$ver
 
 
+# docker tag bjdgyc/anylink:$ver registry.cn-hangzhou.aliyuncs.com/bjdgyc/anylink:test-$ver
+# docker push registry.cn-hangzhou.aliyuncs.com/bjdgyc/anylink:test-$ver

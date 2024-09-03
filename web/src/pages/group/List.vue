@@ -401,7 +401,8 @@
             <el-form-item label="权限控制" prop="link_acl">
               <el-row class="msg-info">
                 <el-col :span="22">输入CIDR格式如: 192.168.3.0/24
-                  端口0表示所有端口,多个端口用','号分隔,连续端口:1234-5678
+                  协议支持 all,tcp,udp,icmp
+                  端口0表示所有端口,多个端口:80,443,连续端口:1234-5678
                 </el-col>
                 <el-col :span="2">
                   <el-button size="mini" type="success" icon="el-icon-plus" circle
@@ -419,13 +420,19 @@
                     </el-select>
                   </el-input>
                 </el-col>
-                <el-col :span="8">
+
+                <el-col :span="3">
+                    <el-input v-model="item.protocol" placeholder="协议类型"></el-input>
+                </el-col>
+
+                <el-col :span="6">
                   <!--  type="textarea" :autosize="{ minRows: 1, maxRows: 2}"  -->
                   <el-input v-model="item.port" placeholder="多端口,号分隔"></el-input>
                 </el-col>
-                <el-col :span="4">
+                <el-col :span="3">
                   <el-input v-model="item.note" placeholder="备注"></el-input>
                 </el-col>
+
                 <el-col :span="2">
                   <el-button size="mini" type="danger" icon="el-icon-minus" circle
                              @click.prevent="removeDomain(ruleForm.link_acl,index)"></el-button>
@@ -692,7 +699,7 @@ export default {
     },
     addDomain(arr) {
       console.log("arr", arr)
-      arr.push({val: "", action: "allow", port: "0", note: ""});
+      arr.push({protocol:"all", val: "", action: "allow", port: "0", note: ""});
     },
     submitForm(formName) {
       this.$refs[formName].validate((valid) => {

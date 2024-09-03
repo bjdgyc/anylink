@@ -147,7 +147,7 @@ func addInitData() error {
 		Name:         "all",
 		AllowLan:     true,
 		ClientDns:    []ValData{{Val: "114.114.114.114"}},
-		RouteInclude: []ValData{{Val: All}},
+		RouteInclude: []ValData{{Val: ALL}},
 		Status:       1,
 	}
 	err = SetGroup(&g1)
