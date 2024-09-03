@@ -27,7 +27,7 @@ func SetPolicy(p *Policy) error {
 	routeInclude := []ValData{}
 	for _, v := range p.RouteInclude {
 		if v.Val != "" {
-			if v.Val == All {
+			if v.Val == ALL {
 				routeInclude = append(routeInclude, v)
 				continue
 			}

@@ -138,7 +138,7 @@ func LinkTunnel(w http.ResponseWriter, r *http.Request) {
 
 	// 允许的路由
 	for _, v := range cSess.Group.RouteInclude {
-		if strings.ToLower(v.Val) == dbdata.All {
+		if strings.ToLower(v.Val) == dbdata.ALL {
 			continue
 		}
 		HttpAddHeader(w, "X-CSTP-Split-Include", v.IpMask)

@@ -102,11 +102,18 @@ func checkLinkAcl(group *dbdata.Group, pl *sessdata.Payload) bool {
 			// 	}
 			// } else {
 
-			if dbdata.ContainsInPorts(v.Ports, ipPort) || dbdata.ContainsInPorts(v.Ports, 0) || ipProto == waterutil.ICMP {
-				if v.Action == dbdata.Allow {
-					return true
-				} else {
-					return false
+			// 先判断协议
+			// 兼容旧数据 v.Protocol == ""
+			if v.Protocol == "" || v.Protocol == dbdata.ALL || v.IpProto == ipProto {
+				// 全部通过
+				if dbdata.ContainsInPorts(v.Ports, ipPort) || dbdata.ContainsInPorts(v.Ports, 0) {
+					if v.Action == dbdata.Allow {
+						// log.Println(dbdata.Allow, v.Ports)
+						return true
+					} else {
+						// log.Println(dbdata.Deny, v.Ports)
+						return false
+					}
 				}
 			}
 		}

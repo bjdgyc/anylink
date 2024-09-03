@@ -13,7 +13,8 @@
 # 需要先编译出ui文件后 再执行docker编译
 
 # server
-FROM golang:1.20-alpine3.19 as builder_golang
+# golang:1.20-alpine3.19
+FROM golang:1.22-alpine3.19 as builder_golang
 
 ARG CN="no"
 ARG appVer="appVer"
