@@ -105,7 +105,15 @@ func checkLinkAcl(group *dbdata.Group, pl *sessdata.Payload) bool {
 			// 先判断协议
 			// 兼容旧数据 v.Protocol == ""
 			if v.Protocol == "" || v.Protocol == dbdata.ALL || v.IpProto == ipProto {
-				// 全部通过
+				if ipProto == waterutil.ICMP {
+					// icmp 不判断端口
+					if v.Action == dbdata.Allow {
+						return true
+					} else {
+						return false
+					}
+				}
+
 				if dbdata.ContainsInPorts(v.Ports, ipPort) || dbdata.ContainsInPorts(v.Ports, 0) {
 					if v.Action == dbdata.Allow {
 						// log.Println(dbdata.Allow, v.Ports)
