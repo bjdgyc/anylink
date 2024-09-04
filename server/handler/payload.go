@@ -86,27 +86,26 @@ func checkLinkAcl(group *dbdata.Group, pl *sessdata.Payload) bool {
 	}
 
 	for _, v := range group.LinkAcl {
-		// 循环判断ip和端口
-		if v.IpNet.Contains(ipDst) {
+		// 放行允许ip的ping
+		// if v.Ports == nil || len(v.Ports) == 0 {
+		// 	//单端口历史数据兼容
+		// 	port := uint16(v.Port.(float64))
+		// 	if port == ipPort || port == 0 || ipProto == waterutil.ICMP {
+		// 		if v.Action == dbdata.Allow {
+		// 			return true
+		// 		} else {
+		// 			return false
+		// 		}
+		// 	}
+		// } else {
 
-			// 放行允许ip的ping
-			// if v.Ports == nil || len(v.Ports) == 0 {
-			// 	//单端口历史数据兼容
-			// 	port := uint16(v.Port.(float64))
-			// 	if port == ipPort || port == 0 || ipProto == waterutil.ICMP {
-			// 		if v.Action == dbdata.Allow {
-			// 			return true
-			// 		} else {
-			// 			return false
-			// 		}
-			// 	}
-			// } else {
-
-			// 先判断协议
-			// 兼容旧数据 v.Protocol == ""
-			if v.Protocol == "" || v.Protocol == dbdata.ALL || v.IpProto == ipProto {
+		// 先判断协议
+		// 兼容旧数据 v.Protocol == ""
+		if v.Protocol == "" || v.Protocol == dbdata.ALL || v.IpProto == ipProto {
+			// 循环判断ip和端口
+			if v.IpNet.Contains(ipDst) {
+				// icmp 不判断端口
 				if ipProto == waterutil.ICMP {
-					// icmp 不判断端口
 					if v.Action == dbdata.Allow {
 						return true
 					} else {

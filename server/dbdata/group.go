@@ -178,6 +178,9 @@ func SetGroup(g *Group) error {
 				v.IpProto = waterutil.UDP
 			case ICMP:
 				v.IpProto = waterutil.ICMP
+			default:
+				// 其他类型都是 all
+				v.Protocol = ALL
 			}
 
 			portsStr := v.Port
