@@ -422,7 +422,12 @@
                 </el-col>
 
                 <el-col :span="3">
-                    <el-input v-model="item.protocol" placeholder="协议类型"></el-input>
+                    <el-select v-model="item.protocol">
+                      <el-option value="all"></el-option>
+                      <el-option value="icmp"></el-option>
+                      <el-option value="tcp"></el-option>
+                      <el-option value="udp"></el-option>
+                    </el-select>
                 </el-col>
 
                 <el-col :span="6">
