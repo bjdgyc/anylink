@@ -191,7 +191,7 @@
         :close-on-click-modal="false"
         title="用户组"
         :visible.sync="user_edit_dialog"
-        width="750px"
+        width="850px"
         @close='closeDialog'
         center>
 
@@ -410,9 +410,17 @@
                 </el-col>
               </el-row>
 
+              <!--  添加拖拽功能  -->
+              <draggable v-model="ruleForm.link_acl" handle=".drag-handle" @end="onEnd">
+
               <el-row v-for="(item,index) in ruleForm.link_acl"
                       :key="index" style="margin-bottom: 5px" :gutter="1">
-                <el-col :span="10">
+
+                <el-col :span="1" class="drag-handle">
+                <i class="el-icon-rank"></i>
+                </el-col>
+
+                <el-col :span="9">
                   <el-input placeholder="请输入CIDR地址" v-model="item.val">
                     <el-select v-model="item.action" slot="prepend">
                       <el-option label="允许" value="allow"></el-option>
@@ -438,6 +446,8 @@
                              @click.prevent="removeDomain(ruleForm.link_acl,index)"></el-button>
                 </el-col>
               </el-row>
+              </draggable>
+
             </el-form-item>
           </el-tab-pane>
 
@@ -512,10 +522,11 @@
 
 <script>
 import axios from "axios";
+import draggable from 'vuedraggable'
 
 export default {
   name: "List",
-  components: {},
+  components: {draggable},
   mixins: [],
   created() {
     this.$emit('update:route_path', this.$route.path)
@@ -621,6 +632,9 @@ export default {
     }
   },
   methods: {
+    onEnd: function() {
+       window.console.log("onEnd", this.ruleForm.link_acl);
+    },
     setAuthData(row) {
       if (!row) {
         this.ruleForm.auth = JSON.parse(JSON.stringify(this.defAuth));
@@ -906,4 +920,9 @@ export default {
   flex: 1;
   overflow: auto;
 }
+
+.drag-handle {
+  cursor: move;
+}
+
 </style>
