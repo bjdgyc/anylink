@@ -42,9 +42,10 @@ go build -v -o anylink $flags -ldflags "$ldflags"
 EOF
 )
 
+# golang:1.20-alpine3.19
 #使用 musl-dev 编译
 docker run -q --rm -v $PWD/server:/app -v $gopath:/go -w /app --platform=linux/amd64 \
-  golang:1.20-alpine3.19 sh -c "$dockercmd"
+  golang:1.22-alpine3.19 sh -c "$dockercmd"
 
 #arm64编译
 #docker run -q --rm -v $PWD/server:/app -v $gopath:/go -w /app --platform=linux/arm64 \

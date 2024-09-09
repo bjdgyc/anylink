@@ -15,7 +15,8 @@
     "qs": "^6.11.1",
     "vue": "^2.6.11",
     "vue-count-to": "^1.0.13",
-    "vue-router": "^3.5.2"
+    "vue-router": "^3.5.2",
+    "vuedraggable": "^2.24.3"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.0",

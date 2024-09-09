@@ -191,7 +191,7 @@
         :close-on-click-modal="false"
         title="用户组"
         :visible.sync="user_edit_dialog"
-        width="750px"
+        width="850px"
         @close='closeDialog'
         center>
 
@@ -401,7 +401,8 @@
             <el-form-item label="权限控制" prop="link_acl">
               <el-row class="msg-info">
                 <el-col :span="22">输入CIDR格式如: 192.168.3.0/24
-                  端口0表示所有端口,多个端口用','号分隔,连续端口:1234-5678
+                  协议支持 all,tcp,udp,icmp
+                  端口0表示所有端口,多个端口:80,443,连续端口:1234-5678
                 </el-col>
                 <el-col :span="2">
                   <el-button size="mini" type="success" icon="el-icon-plus" circle
@@ -409,9 +410,17 @@
                 </el-col>
               </el-row>
 
+              <!--  添加拖拽功能  -->
+              <draggable v-model="ruleForm.link_acl" handle=".drag-handle" @end="onEnd">
+
               <el-row v-for="(item,index) in ruleForm.link_acl"
                       :key="index" style="margin-bottom: 5px" :gutter="1">
-                <el-col :span="10">
+
+                <el-col :span="1" class="drag-handle">
+                <i class="el-icon-rank"></i>
+                </el-col>
+
+                <el-col :span="9">
                   <el-input placeholder="请输入CIDR地址" v-model="item.val">
                     <el-select v-model="item.action" slot="prepend">
                       <el-option label="允许" value="allow"></el-option>
@@ -419,18 +428,26 @@
                     </el-select>
                   </el-input>
                 </el-col>
-                <el-col :span="8">
+
+                <el-col :span="3">
+                    <el-input placeholder="协议" v-model="item.protocol">
+                </el-col>
+
+                <el-col :span="6">
                   <!--  type="textarea" :autosize="{ minRows: 1, maxRows: 2}"  -->
                   <el-input v-model="item.port" placeholder="多端口,号分隔"></el-input>
                 </el-col>
-                <el-col :span="4">
+                <el-col :span="3">
                   <el-input v-model="item.note" placeholder="备注"></el-input>
                 </el-col>
+
                 <el-col :span="2">
                   <el-button size="mini" type="danger" icon="el-icon-minus" circle
                              @click.prevent="removeDomain(ruleForm.link_acl,index)"></el-button>
                 </el-col>
               </el-row>
+              </draggable>
+
             </el-form-item>
           </el-tab-pane>
 
@@ -505,10 +522,11 @@
 
 <script>
 import axios from "axios";
+import draggable from 'vuedraggable'
 
 export default {
   name: "List",
-  components: {},
+  components: {draggable},
   mixins: [],
   created() {
     this.$emit('update:route_path', this.$route.path)
@@ -614,6 +632,9 @@ export default {
     }
   },
   methods: {
+    onEnd: function() {
+       window.console.log("onEnd", this.ruleForm.link_acl);
+    },
     setAuthData(row) {
       if (!row) {
         this.ruleForm.auth = JSON.parse(JSON.stringify(this.defAuth));
@@ -692,7 +713,7 @@ export default {
     },
     addDomain(arr) {
       console.log("arr", arr)
-      arr.push({val: "", action: "allow", port: "0", note: ""});
+      arr.push({protocol:"all", val: "", action: "allow", port: "0", note: ""});
     },
     submitForm(formName) {
       this.$refs[formName].validate((valid) => {
@@ -899,4 +920,9 @@ export default {
   flex: 1;
   overflow: auto;
 }
+
+.drag-handle {
+  cursor: move;
+}
+
 </style>

@@ -9,12 +9,16 @@ if [[ $CN == "yes" ]]; then
   export GOPROXY=https://goproxy.cn
 fi
 
+
+# docker 启动使用 4.19 以上内核
+apk add --no-cache ca-certificates bash iproute2 tzdata iptables
+
 # alpine:3.19 兼容老版 iptables
-apk add --no-cache iptables iptables-legacy
+apk add --no-cache iptables-legacy
 rm /sbin/iptables
 ln -s /sbin/iptables-legacy /sbin/iptables
 
-apk add --no-cache ca-certificates bash iproute2 tzdata
+
 chmod +x /app/docker_entrypoint.sh
 mkdir /app/log
 

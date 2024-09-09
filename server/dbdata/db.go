@@ -147,7 +147,7 @@ func addInitData() error {
 		Name:         "all",
 		AllowLan:     true,
 		ClientDns:    []ValData{{Val: "114.114.114.114"}},
-		RouteInclude: []ValData{{Val: All}},
+		RouteInclude: []ValData{{Val: ALL}},
 		Status:       1,
 	}
 	err = SetGroup(&g1)
@@ -184,6 +184,7 @@ const accountMail = `<p>您好:</p>
     用户组: <b>{{.Group}}</b> <br/>
     用户名: <b>{{.Username}}</b> <br/>
     用户PIN码: <b>{{.PinCode}}</b> <br/>
+    用户过期时间: <b>{{.LimitTime}}</b> <br/>
     {{if .DisableOtp}}
     <!-- nothing -->
     {{else}}

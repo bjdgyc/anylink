@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/bjdgyc/anylink/base"
+	"github.com/songgao/water/waterutil"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 )
@@ -17,7 +18,10 @@ import (
 const (
 	Allow = "allow"
 	Deny  = "deny"
-	All   = "all"
+	ALL   = "all"
+	TCP   = "tcp"
+	UDP   = "udp"
+	ICMP  = "icmp"
 )
 
 // 域名分流最大字符2万
@@ -25,12 +29,14 @@ const DsMaxLen = 20000
 
 type GroupLinkAcl struct {
 	// 自上而下匹配 默认 allow * *
-	Action string          `json:"action"` // allow、deny
-	Val    string          `json:"val"`
-	Port   string          `json:"port"` // 兼容单端口历史数据类型uint16
-	Ports  map[uint16]int8 `json:"ports"`
-	IpNet  *net.IPNet      `json:"ip_net"`
-	Note   string          `json:"note"`
+	Action   string               `json:"action"`      // allow、deny
+	Protocol string               `json:"protocol"`    // 支持 ALL、TCP、UDP、ICMP 协议
+	IpProto  waterutil.IPProtocol `json:"ip_protocol"` // 判断协议使用
+	Val      string               `json:"val"`
+	Port     string               `json:"port"` // 兼容单端口历史数据类型uint16
+	Ports    map[uint16]int8      `json:"ports"`
+	IpNet    *net.IPNet           `json:"ip_net"`
+	Note     string               `json:"note"`
 }
 
 type ValData struct {
@@ -114,7 +120,7 @@ func SetGroup(g *Group) error {
 	routeInclude := []ValData{}
 	for _, v := range g.RouteInclude {
 		if v.Val != "" {
-			if v.Val == All {
+			if v.Val == ALL {
 				routeInclude = append(routeInclude, v)
 				continue
 			}
@@ -163,6 +169,19 @@ func SetGroup(g *Group) error {
 				return errors.New("GroupLinkAcl 错误" + err.Error())
 			}
 			v.IpNet = ipNet
+
+			// 设置协议数据
+			switch v.Protocol {
+			case TCP:
+				v.IpProto = waterutil.TCP
+			case UDP:
+				v.IpProto = waterutil.UDP
+			case ICMP:
+				v.IpProto = waterutil.ICMP
+			default:
+				// 其他类型都是 all
+				v.Protocol = ALL
+			}
 
 			portsStr := v.Port
 			v.Port = strings.TrimSpace(portsStr)
