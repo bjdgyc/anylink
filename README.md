@@ -59,7 +59,6 @@ AnyLink 服务端仅在 CentOS 7、CentOS 8、Ubuntu 18.04、Ubuntu 20.04 测试
 >
 > <img src="doc/screenshot/qq2.jpg" width="400" />
 
-
 ### 使用问题
 
 > 对于测试环境，可以直接进行测试，需要客户端取消勾选【阻止不受信任的服务器(Block connections to untrusted servers)】
@@ -357,9 +356,9 @@ ipv4_end = "10.1.2.200"
 |    支持设备/平台    |       DockerHub       |                             阿里云镜像仓库                             |
 |:-------------:|:---------------------:|:---------------------------------------------------------------:|
 | x86_64/amd64  | bjdgyc/anylink:latest |     registry.cn-hangzhou.aliyuncs.com/bjdgyc/anylink:latest     |
-| x86_64/amd64  | bjdgyc/anylink:0.12.1 |     registry.cn-hangzhou.aliyuncs.com/bjdgyc/anylink:0.12.1     |
+| x86_64/amd64  | bjdgyc/anylink:0.12.2 |     registry.cn-hangzhou.aliyuncs.com/bjdgyc/anylink:0.12.2     |
 | armv8/aarch64 | bjdgyc/anylink:latest | registry.cn-hangzhou.aliyuncs.com/bjdgyc/anylink:arm64v8-latest |
-| armv8/aarch64 | bjdgyc/anylink:0.12.1 | registry.cn-hangzhou.aliyuncs.com/bjdgyc/anylink:arm64v8-0.12.1 |
+| armv8/aarch64 | bjdgyc/anylink:0.12.2 | registry.cn-hangzhou.aliyuncs.com/bjdgyc/anylink:arm64v8-0.12.2 |
 
 1. 获取镜像
    ```bash
@@ -460,7 +459,8 @@ ipv4_end = "10.1.2.200"
 - [AnyConnect Secure Client](https://www.cisco.com/) (可通过群文件下载: Windows/macOS/Linux/Android/iOS)
 - [OpenConnect](https://gitlab.com/openconnect/openconnect) (Windows/macOS/Linux)
 - [三方 AnyLink Secure Client](https://github.com/tlslink/anylink-client) (Windows/macOS/Linux)
-- 【推荐】三方客户端下载地址(Windows/macOS/Linux/Android/iOS) [国内地址](https://ocserv.yydy.link:2023) [国外地址](https://cisco.yydy.link/#/)
+- 【推荐】三方客户端下载地址(
+  Windows/macOS/Linux/Android/iOS) [国内地址](https://ocserv.yydy.link:2023) [国外地址](https://cisco.yydy.link/#/)
 
 ## Contribution
 
