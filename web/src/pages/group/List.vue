@@ -298,6 +298,9 @@
                             :rules="this.ruleForm.auth.type== 'radius' ? this.rules['auth.radius.secret'] : [{ required: false }]">
                 <el-input v-model="ruleForm.auth.radius.secret" placeholder=""></el-input>
               </el-form-item>
+              <el-form-item label="Nasip" prop="auth.radius.nasip">
+                <el-input v-model="ruleForm.auth.radius.nasip" placeholder=""></el-input>
+              </el-form-item>
             </template>
 
             <template v-if="ruleForm.auth.type == 'ldap'">
@@ -547,7 +550,7 @@ export default {
       maxRouteRows: 2500,
       defAuth: {
         type: 'local',
-        radius: {addr: "", secret: ""},
+        radius: {addr: "", secret: "", nasip: ""},
         ldap: {
           addr: "",
           tls: false,

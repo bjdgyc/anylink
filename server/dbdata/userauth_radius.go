@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net"
 	"reflect"
 	"time"
 
@@ -15,6 +16,7 @@ import (
 type AuthRadius struct {
 	Addr   string `json:"addr"`
 	Secret string `json:"secret"`
+	Nasip  string `json:"nasip"`
 }
 
 func init() {
@@ -57,8 +59,22 @@ func (auth AuthRadius) checkUser(name, pwd string, g *Group) error {
 	}
 	// radius认证时，设置超时3秒
 	packet := radius.New(radius.CodeAccessRequest, []byte(auth.Secret))
-	rfc2865.UserName_SetString(packet, name)
-	rfc2865.UserPassword_SetString(packet, pwd)
+	err = rfc2865.UserName_SetString(packet, name)
+	if err != nil {
+		return fmt.Errorf("%s %s", name, "Radius set name 出现错误")
+	}
+	err = rfc2865.UserPassword_SetString(packet, pwd)
+	if err != nil {
+		return fmt.Errorf("%s %s", name, "Radius set pwd 出现错误")
+	}
+	if auth.Nasip != "" {
+		nasip := net.ParseIP(auth.Nasip)
+		err = rfc2865.NASIPAddress_Set(packet, nasip)
+		if err != nil {
+			return fmt.Errorf("%s %s", name, "Radius set nasip 出现错误")
+		}
+	}
+
 	ctx, done := context.WithTimeout(context.Background(), 3*time.Second)
 	defer done()
 	response, err := radius.Exchange(ctx, packet, auth.Addr)
