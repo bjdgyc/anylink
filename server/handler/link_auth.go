@@ -2,6 +2,7 @@ package handler
 
 import (
 	"bytes"
+	"context"
 	"crypto/md5"
 	"encoding/xml"
 	"fmt"
@@ -88,6 +89,7 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	// TODO 用户密码校验
 	err = dbdata.CheckUser(cr.Auth.Username, cr.Auth.Password, cr.GroupSelect)
 	if err != nil {
+		r = r.WithContext(context.WithValue(r.Context(), loginStatusKey, false)) // 传递登录失败状态
 		base.Warn(err, r.RemoteAddr)
 		ua.Info = err.Error()
 		ua.Status = dbdata.UserAuthFail
@@ -101,6 +103,7 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 		tplRequest(tpl_request, w, data)
 		return
 	}
+	r = r.WithContext(context.WithValue(r.Context(), loginStatusKey, true)) // 传递登录成功状态
 	dbdata.UserActLogIns.Add(ua, userAgent)
 	// if !ok {
 	//	w.WriteHeader(http.StatusOK)

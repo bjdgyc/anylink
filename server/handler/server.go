@@ -111,7 +111,7 @@ func initRoute() http.Handler {
 	})
 
 	r.HandleFunc("/", LinkHome).Methods(http.MethodGet)
-	r.HandleFunc("/", LinkAuth).Methods(http.MethodPost)
+	r.Handle("/", antiBruteForce(http.HandlerFunc(LinkAuth))).Methods(http.MethodPost)
 	r.HandleFunc("/CSCOSSLC/tunnel", LinkTunnel).Methods(http.MethodConnect)
 	r.HandleFunc("/otp_qr", LinkOtpQr).Methods(http.MethodGet)
 	r.HandleFunc(fmt.Sprintf("/profile_%s.xml", base.Cfg.ProfileName), func(w http.ResponseWriter, r *http.Request) {
