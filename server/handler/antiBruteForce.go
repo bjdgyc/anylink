@@ -54,6 +54,7 @@ func antiBruteForce(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// 如果最大验证失败次数为0，则不启用防爆破功能
 		if base.Cfg.MaxBanCount == 0 {
+			next.ServeHTTP(w, r)
 			return
 		}
 		body, err := io.ReadAll(r.Body)

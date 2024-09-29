@@ -53,7 +53,7 @@ ipv4_end = "192.168.90.200"
 #是否自动添加nat
 iptables_nat = true
 
-#单位时间内最大尝试次数
+#单位时间内最大尝试次数，0为关闭防爆功能
 max_ban_score = 5
 #设置单位时间(秒)，超过则重置计数
 ban_reset_time = 10

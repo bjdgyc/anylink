@@ -72,7 +72,7 @@ var configs = []config{
 	{Typ: cfgBool, Name: "display_error", Usage: "客户端显示详细错误信息(线上环境慎开启)", ValBool: false},
 	{Typ: cfgBool, Name: "exclude_export_ip", Usage: "排除出口ip路由(出口ip不加密传输)", ValBool: true},
 
-	{Typ: cfgInt, Name: "max_ban_score", Usage: "单位时间内最大尝试次数", ValInt: 5},
+	{Typ: cfgInt, Name: "max_ban_score", Usage: "单位时间内最大尝试次数，0为关闭防爆功能", ValInt: 5},
 	{Typ: cfgInt, Name: "ban_reset_time", Usage: "设置单位时间(秒)，超过则重置计数", ValInt: 1},
 	{Typ: cfgInt, Name: "lock_time", Usage: "超过最大尝试次数后的锁定时长(秒)", ValInt: 300},
 	{Typ: cfgInt, Name: "user_state_expiration", Usage: "用户状态的保存周期(秒),超过则清空计数", ValInt: 900},
