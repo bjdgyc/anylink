@@ -84,6 +84,11 @@ type ServerConfig struct {
 
 	DisplayError    bool `json:"display_error"`
 	ExcludeExportIp bool `json:"exclude_export_ip"`
+
+	MaxBanCount         int `json:"max_ban_score"`
+	BanResetTime        int `json:"ban_reset_time"`
+	LockTime            int `json:"lock_time"`
+	UserStateExpiration int `json:"user_state_expiration"`
 }
 
 func initServerCfg() {
