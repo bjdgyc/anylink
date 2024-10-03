@@ -85,10 +85,19 @@ type ServerConfig struct {
 	DisplayError    bool `json:"display_error"`
 	ExcludeExportIp bool `json:"exclude_export_ip"`
 
-	MaxBanCount         int `json:"max_ban_score"`
-	BanResetTime        int `json:"ban_reset_time"`
-	LockTime            int `json:"lock_time"`
-	UserStateExpiration int `json:"user_state_expiration"`
+	AntiBruteForce bool `json:"anti_brute_force"`
+
+	MaxBanCount  int `json:"max_ban_score"`
+	BanResetTime int `json:"ban_reset_time"`
+	LockTime     int `json:"lock_time"`
+
+	MaxGlobalUserBanCount  int `json:"max_global_user_ban_count"`
+	GlobalUserBanResetTime int `json:"global_user_ban_reset_time"`
+	GlobalUserLockTime     int `json:"global_user_lock_time"`
+
+	MaxGlobalIPBanCount  int `json:"max_global_ip_ban_count"`
+	GlobalIPBanResetTime int `json:"global_ip_ban_reset_time"`
+	GlobalIPLockTime     int `json:"global_ip_lock_time"`
 }
 
 func initServerCfg() {

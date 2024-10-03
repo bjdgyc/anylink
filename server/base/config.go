@@ -72,10 +72,19 @@ var configs = []config{
 	{Typ: cfgBool, Name: "display_error", Usage: "客户端显示详细错误信息(线上环境慎开启)", ValBool: false},
 	{Typ: cfgBool, Name: "exclude_export_ip", Usage: "排除出口ip路由(出口ip不加密传输)", ValBool: true},
 
+	{Typ: cfgBool, Name: "anti_brute_force", Usage: "是否开启防爆功能", ValBool: true},
+
 	{Typ: cfgInt, Name: "max_ban_score", Usage: "单位时间内最大尝试次数，0为关闭防爆功能", ValInt: 5},
-	{Typ: cfgInt, Name: "ban_reset_time", Usage: "设置单位时间(秒)，超过则重置计数", ValInt: 1},
+	{Typ: cfgInt, Name: "ban_reset_time", Usage: "设置单位时间(秒)，超过则重置计数", ValInt: 10},
 	{Typ: cfgInt, Name: "lock_time", Usage: "超过最大尝试次数后的锁定时长(秒)", ValInt: 300},
-	{Typ: cfgInt, Name: "user_state_expiration", Usage: "用户状态的保存周期(秒),超过则清空计数", ValInt: 900},
+
+	{Typ: cfgInt, Name: "max_global_user_ban_count", Usage: "全局用户单位时间内最大尝试次数", ValInt: 20},
+	{Typ: cfgInt, Name: "global_user_ban_reset_time", Usage: "全局用户设置单位时间(秒)", ValInt: 600},
+	{Typ: cfgInt, Name: "global_user_lock_time", Usage: "全局用户锁定时间(秒)", ValInt: 300},
+
+	{Typ: cfgInt, Name: "max_global_ip_ban_count", Usage: "全局IP单位时间内最大尝试次数", ValInt: 40},
+	{Typ: cfgInt, Name: "global_ip_ban_reset_time", Usage: "全局IP设置单位时间(秒)", ValInt: 1200},
+	{Typ: cfgInt, Name: "global_ip_lock_time", Usage: "全局IP锁定时间(秒)", ValInt: 300},
 }
 
 var envs = map[string]string{}
