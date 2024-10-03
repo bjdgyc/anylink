@@ -197,14 +197,11 @@ func (lm *LockManager) checkGlobalIPLock(ip string, now time.Time) bool {
 		return false
 	}
 
+	// 如果超过时间窗口，重置失败计数
+	lm.resetLockStateIfExpired(state, now, base.Cfg.GlobalIPBanResetTime)
+
 	if !state.LockTime.IsZero() && now.Before(state.LockTime) {
 		return true
-	}
-
-	// 如果超过时间窗口，重置失败计数
-	if now.Sub(state.LastAttempt) > time.Duration(base.Cfg.GlobalIPBanResetTime)*time.Second {
-		state.FailureCount = 0
-		state.LockTime = time.Time{}
 	}
 
 	return false
@@ -224,14 +221,11 @@ func (lm *LockManager) checkGlobalUserLock(username string, now time.Time) bool 
 		return false
 	}
 
+	// 如果超过时间窗口，重置失败计数
+	lm.resetLockStateIfExpired(state, now, base.Cfg.GlobalUserBanResetTime)
+
 	if !state.LockTime.IsZero() && now.Before(state.LockTime) {
 		return true
-	}
-
-	// 如果超过时间窗口，重置失败计数
-	if now.Sub(state.LastAttempt) > time.Duration(base.Cfg.GlobalUserBanResetTime)*time.Second {
-		state.FailureCount = 0
-		state.LockTime = time.Time{}
 	}
 
 	return false
@@ -256,14 +250,11 @@ func (lm *LockManager) checkUserIPLock(username, ip string, now time.Time) bool 
 		return false
 	}
 
+	// 如果超过时间窗口，重置失败计数
+	lm.resetLockStateIfExpired(state, now, base.Cfg.BanResetTime)
+
 	if !state.LockTime.IsZero() && now.Before(state.LockTime) {
 		return true
-	}
-
-	// 如果超过时间窗口，重置失败计数
-	if now.Sub(state.LastAttempt) > time.Duration(base.Cfg.BanResetTime)*time.Second {
-		state.FailureCount = 0
-		state.LockTime = time.Time{}
 	}
 
 	return false
@@ -280,16 +271,7 @@ func (lm *LockManager) updateGlobalIPLock(ip string, now time.Time, success bool
 		lm.ipLocks[ip] = state
 	}
 
-	if success {
-		state.FailureCount = 0
-		state.LockTime = time.Time{}
-	} else {
-		state.FailureCount++
-		if state.FailureCount >= base.Cfg.MaxGlobalIPBanCount {
-			state.LockTime = now.Add(time.Duration(base.Cfg.GlobalIPLockTime) * time.Second)
-		}
-	}
-	state.LastAttempt = now
+	lm.updateLockState(state, now, success, base.Cfg.MaxGlobalIPBanCount, base.Cfg.GlobalIPLockTime)
 }
 
 // 更新全局用户锁定状态
@@ -307,16 +289,7 @@ func (lm *LockManager) updateGlobalUserLock(username string, now time.Time, succ
 		lm.userLocks[username] = state
 	}
 
-	if success {
-		state.FailureCount = 0
-		state.LockTime = time.Time{}
-	} else {
-		state.FailureCount++
-		if state.FailureCount >= base.Cfg.MaxGlobalUserBanCount {
-			state.LockTime = now.Add(time.Duration(base.Cfg.GlobalUserLockTime) * time.Second)
-		}
-	}
-	state.LastAttempt = now
+	lm.updateLockState(state, now, success, base.Cfg.MaxGlobalUserBanCount, base.Cfg.GlobalUserLockTime)
 }
 
 // 更新单个用户的 IP 锁定状态
@@ -340,14 +313,31 @@ func (lm *LockManager) updateUserIPLock(username, ip string, now time.Time, succ
 		userIPMap[ip] = state
 	}
 
+	lm.updateLockState(state, now, success, base.Cfg.MaxBanCount, base.Cfg.LockTime)
+}
+
+// 更新锁定状态
+func (lm *LockManager) updateLockState(state *LockState, now time.Time, success bool, maxBanCount, lockTime int) {
 	if success {
 		state.FailureCount = 0
 		state.LockTime = time.Time{}
 	} else {
 		state.FailureCount++
-		if state.FailureCount >= base.Cfg.MaxBanCount {
-			state.LockTime = now.Add(time.Duration(base.Cfg.LockTime) * time.Second)
+		if state.FailureCount >= maxBanCount {
+			state.LockTime = now.Add(time.Duration(lockTime) * time.Second)
 		}
 	}
 	state.LastAttempt = now
+}
+
+// 超过时间窗口时重置锁定状态
+func (lm *LockManager) resetLockStateIfExpired(state *LockState, now time.Time, resetTime int) {
+	if state == nil || state.LastAttempt.IsZero() {
+		return
+	}
+
+	if now.Sub(state.LastAttempt) > time.Duration(resetTime)*time.Second {
+		state.FailureCount = 0
+		state.LockTime = time.Time{}
+	}
 }
