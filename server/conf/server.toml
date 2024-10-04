@@ -55,6 +55,7 @@ iptables_nat = true
 
 #防爆破全局开关
 anti_brute_force = true
+ip_whitelist = "192.168.90.1,172.16.0.0/24"
 
 #单位时间内最大尝试次数，0为关闭该功能
 max_ban_score = 5

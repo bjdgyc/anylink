@@ -85,7 +85,8 @@ type ServerConfig struct {
 	DisplayError    bool `json:"display_error"`
 	ExcludeExportIp bool `json:"exclude_export_ip"`
 
-	AntiBruteForce bool `json:"anti_brute_force"`
+	AntiBruteForce bool   `json:"anti_brute_force"`
+	IPWhitelist    string `json:"ip_whitelist"`
 
 	MaxBanCount  int `json:"max_ban_score"`
 	BanResetTime int `json:"ban_reset_time"`
