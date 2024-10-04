@@ -384,12 +384,20 @@ func (lm *LockManager) updateLockState(state *LockState, now time.Time, success 
 	state.LastAttempt = now
 }
 
-// 超过时间窗口时重置锁定状态
+// 超过窗口时间和锁定时间时重置锁定状态
 func (lm *LockManager) resetLockStateIfExpired(state *LockState, now time.Time, resetTime int) {
 	if state == nil || state.LastAttempt.IsZero() {
 		return
 	}
 
+	// 如果超过锁定时间，重置锁定状态
+	if !state.LockTime.IsZero() && now.After(state.LockTime) {
+		state.FailureCount = 0
+		state.LockTime = time.Time{}
+		return
+	}
+
+	// 如果超过窗口时间，重置失败计数
 	if now.Sub(state.LastAttempt) > time.Duration(resetTime)*time.Second {
 		state.FailureCount = 0
 		state.LockTime = time.Time{}

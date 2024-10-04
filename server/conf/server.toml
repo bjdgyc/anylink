@@ -55,12 +55,14 @@ iptables_nat = true
 
 #防爆破全局开关
 anti_brute_force = true
+#全局IP白名单,多个用逗号分隔，支持单IP和CIDR范围
 ip_whitelist = "192.168.90.1,172.16.0.0/24"
 
+#锁定时间最好不要超过单位时间
 #单位时间内最大尝试次数，0为关闭该功能
 max_ban_score = 5
 #设置单位时间(秒)，超过则重置计数
-ban_reset_time = 10
+ban_reset_time = 600
 #超过最大尝试次数后的锁定时长(秒)
 lock_time = 300
 
