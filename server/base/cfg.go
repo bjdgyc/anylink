@@ -98,6 +98,8 @@ type ServerConfig struct {
 	MaxGlobalIPBanCount  int `json:"max_global_ip_ban_count"`
 	GlobalIPBanResetTime int `json:"global_ip_ban_reset_time"`
 	GlobalIPLockTime     int `json:"global_ip_lock_time"`
+
+	GlobalLockStateExpirationTime int `json:"global_lock_state_expiration_time"`
 }
 
 func initServerCfg() {

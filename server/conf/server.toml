@@ -53,10 +53,10 @@ ipv4_end = "192.168.90.200"
 #是否自动添加nat
 iptables_nat = true
 
-#防爆全局开关
+#防爆破全局开关
 anti_brute_force = true
 
-#单位时间内最大尝试次数，0为全局关闭防爆功能
+#单位时间内最大尝试次数，0为关闭该功能
 max_ban_score = 5
 #设置单位时间(秒)，超过则重置计数
 ban_reset_time = 10
@@ -76,6 +76,9 @@ max_global_ip_ban_count = 40
 global_ip_ban_reset_time = 1200
 #全局IP锁定时间(秒)
 global_ip_lock_time = 300
+
+#全局锁定状态的保存生命周期(秒),超过则删除记录
+global_lock_state_expiration_time = 3600
 
 #客户端显示详细错误信息(线上环境慎开启)
 display_error = true

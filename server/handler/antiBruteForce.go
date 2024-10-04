@@ -20,7 +20,9 @@ type contextKey string
 const loginStatusKey contextKey = "login_status"
 
 func init() {
-	lockManager.startCleanupTicker()
+	if base.Cfg.AntiBruteForce {
+		lockManager.startCleanupTicker()
+	}
 }
 
 // 防爆破中间件
@@ -130,7 +132,7 @@ var lockManager = &LockManager{
 }
 
 func (lm *LockManager) startCleanupTicker() {
-	lm.cleanupTicker = time.NewTicker(1 * time.Minute)
+	lm.cleanupTicker = time.NewTicker(5 * time.Minute)
 	go func() {
 		for range lm.cleanupTicker.C {
 			lm.cleanupExpiredLocks()
@@ -140,51 +142,47 @@ func (lm *LockManager) startCleanupTicker() {
 
 // 定期清理过期的锁定
 func (lm *LockManager) cleanupExpiredLocks() {
-	go func() {
-		for range time.Tick(5 * time.Minute) {
-			now := time.Now()
+	now := time.Now()
 
-			var ipKeys, userKeys []string
-			var IPuserKeys []struct{ user, ip string }
+	var ipKeys, userKeys []string
+	var IPuserKeys []struct{ user, ip string }
 
-			lm.mu.Lock()
-			for ip, state := range lm.ipLocks {
-				if now.Sub(state.LastAttempt) > time.Duration(base.Cfg.GlobalIPBanResetTime)*time.Second {
-					ipKeys = append(ipKeys, ip)
-				}
-			}
-
-			for user, state := range lm.userLocks {
-				if now.Sub(state.LastAttempt) > time.Duration(base.Cfg.GlobalUserBanResetTime)*time.Second {
-					userKeys = append(userKeys, user)
-				}
-			}
-
-			for user, ipMap := range lm.ipUserLocks {
-				for ip, state := range ipMap {
-					if now.Sub(state.LastAttempt) > time.Duration(base.Cfg.BanResetTime)*time.Second {
-						IPuserKeys = append(IPuserKeys, struct{ user, ip string }{user, ip})
-					}
-				}
-			}
-			lm.mu.Unlock()
-
-			lm.mu.Lock()
-			for _, ip := range ipKeys {
-				delete(lm.ipLocks, ip)
-			}
-			for _, user := range userKeys {
-				delete(lm.userLocks, user)
-			}
-			for _, key := range IPuserKeys {
-				delete(lm.ipUserLocks[key.user], key.ip)
-				if len(lm.ipUserLocks[key.user]) == 0 {
-					delete(lm.ipUserLocks, key.user)
-				}
-			}
-			lm.mu.Unlock()
+	lm.mu.Lock()
+	for ip, state := range lm.ipLocks {
+		if now.Sub(state.LastAttempt) > time.Duration(base.Cfg.GlobalLockStateExpirationTime)*time.Second {
+			ipKeys = append(ipKeys, ip)
 		}
-	}()
+	}
+
+	for user, state := range lm.userLocks {
+		if now.Sub(state.LastAttempt) > time.Duration(base.Cfg.GlobalLockStateExpirationTime)*time.Second {
+			userKeys = append(userKeys, user)
+		}
+	}
+
+	for user, ipMap := range lm.ipUserLocks {
+		for ip, state := range ipMap {
+			if now.Sub(state.LastAttempt) > time.Duration(base.Cfg.GlobalLockStateExpirationTime)*time.Second {
+				IPuserKeys = append(IPuserKeys, struct{ user, ip string }{user, ip})
+			}
+		}
+	}
+	lm.mu.Unlock()
+
+	lm.mu.Lock()
+	for _, ip := range ipKeys {
+		delete(lm.ipLocks, ip)
+	}
+	for _, user := range userKeys {
+		delete(lm.userLocks, user)
+	}
+	for _, key := range IPuserKeys {
+		delete(lm.ipUserLocks[key.user], key.ip)
+		if len(lm.ipUserLocks[key.user]) == 0 {
+			delete(lm.ipUserLocks, key.user)
+		}
+	}
+	lm.mu.Unlock()
 }
 
 // 检查全局 IP 锁定
