@@ -3,7 +3,6 @@ package handler
 import (
 	"encoding/xml"
 	"io"
-	"log"
 	"net"
 	"net/http"
 	"strings"
@@ -85,21 +84,21 @@ func antiBruteForce(next http.Handler) http.Handler {
 
 		// 检查全局 IP 锁定
 		if base.Cfg.MaxGlobalIPBanCount > 0 && lockManager.checkGlobalIPLock(ip, now) {
-			log.Printf("IP %s is globally locked. Try again later.", ip)
+			base.Warn("IP", ip, "is globally locked. Try again later.")
 			http.Error(w, "Account globally locked due to too many failed attempts. Try again later.", http.StatusTooManyRequests)
 			return
 		}
 
 		// 检查全局用户锁定
 		if base.Cfg.MaxGlobalUserBanCount > 0 && lockManager.checkGlobalUserLock(username, now) {
-			log.Printf("User %s is globally locked. Try again later.", username)
+			base.Warn("User", username, "is globally locked. Try again later.")
 			http.Error(w, "Account globally locked due to too many failed attempts. Try again later.", http.StatusTooManyRequests)
 			return
 		}
 
 		// 检查单个用户的 IP 锁定
 		if base.Cfg.MaxBanCount > 0 && lockManager.checkUserIPLock(username, ip, now) {
-			log.Printf("IP %s is locked for user %s. Try again later.", ip, username)
+			base.Warn("IP", ip, "is locked for user", username, "Try again later.")
 			http.Error(w, "Account locked due to too many failed attempts. Try again later.", http.StatusTooManyRequests)
 			return
 		}
