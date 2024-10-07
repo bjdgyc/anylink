@@ -115,8 +115,8 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	v := &dbdata.User{}
 	err = dbdata.One("Username", cr.Auth.Username, v)
 	if err != nil {
-		base.Error("Failed to get TOTP secret for user:", cr.Auth.Username, err)
-		http.Error(w, "Failed to get TOTP secret", http.StatusInternalServerError)
+		base.Info("正在使用第三方认证方式登录")
+		CreateSession(w, r, sessionData)
 		return
 	}
 	// 用户otp验证
