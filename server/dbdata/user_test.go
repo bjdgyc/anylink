@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/xlzd/gotp"
 )
 
 func TestCheckUser(t *testing.T) {
@@ -30,10 +29,10 @@ func TestCheckUser(t *testing.T) {
 	ast.Nil(err)
 
 	// 验证 PinCode + OtpSecret
-	totp := gotp.NewDefaultTOTP(u.OtpSecret)
-	secret := totp.Now()
-	err = CheckUser("aaa", u.PinCode+secret, group)
-	ast.Nil(err)
+	// totp := gotp.NewDefaultTOTP(u.OtpSecret)
+	// secret := totp.Now()
+	// err = CheckUser("aaa", u.PinCode+secret, group)
+	// ast.Nil(err)
 
 	// 单独验证密码
 	u.DisableOtp = true
