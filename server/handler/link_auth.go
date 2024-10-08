@@ -3,11 +3,9 @@ package handler
 import (
 	"bytes"
 	"context"
-	"crypto/md5"
 	"encoding/xml"
 	"fmt"
 	"io"
-	"net"
 	"net/http"
 	"net/http/httputil"
 	"strings"
@@ -47,7 +45,10 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	cr := ClientRequest{}
+	cr := &ClientRequest{
+		RemoteAddr: r.RemoteAddr,
+		UserAgent:  userAgent,
+	}
 	err = xml.Unmarshal(body, &cr)
 	if err != nil {
 		base.Error(err)
@@ -78,13 +79,18 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// 用户活动日志
-	ua := dbdata.UserActLog{
+	ua := &dbdata.UserActLog{
 		Username:        cr.Auth.Username,
 		GroupName:       cr.GroupSelect,
 		RemoteAddr:      r.RemoteAddr,
 		Status:          dbdata.UserAuthSuccess,
 		DeviceType:      cr.DeviceId.DeviceType,
 		PlatformVersion: cr.DeviceId.PlatformVersion,
+	}
+
+	sessionData := &AuthSession{
+		ClientRequest: cr,
+		UserActLog:    ua,
 	}
 	// TODO 用户密码校验
 	err = dbdata.CheckUser(cr.Auth.Username, cr.Auth.Password, cr.GroupSelect)
@@ -93,7 +99,7 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 		base.Warn(err, r.RemoteAddr)
 		ua.Info = err.Error()
 		ua.Status = dbdata.UserAuthFail
-		dbdata.UserActLogIns.Add(ua, userAgent)
+		dbdata.UserActLogIns.Add(*ua, userAgent)
 
 		w.WriteHeader(http.StatusOK)
 		data := RequestData{Group: cr.GroupSelect, Groups: dbdata.GetGroupNamesNormal(), Error: "用户名或密码错误"}
@@ -104,72 +110,62 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	r = r.WithContext(context.WithValue(r.Context(), loginStatusKey, true)) // 传递登录成功状态
-	dbdata.UserActLogIns.Add(ua, userAgent)
-	// if !ok {
-	//	w.WriteHeader(http.StatusOK)
-	//	data := RequestData{Group: cr.GroupSelect, Groups: base.Cfg.UserGroups, Error: "请先激活用户"}
-	//	tplRequest(tpl_request, w, data)
-	//	return
-	// }
+	dbdata.UserActLogIns.Add(*ua, userAgent)
 
-	// 创建新的session信息
-	sess := sessdata.NewSession("")
-	sess.Username = cr.Auth.Username
-	sess.Group = cr.GroupSelect
-	oriMac := cr.MacAddressList.MacAddress
-	sess.UniqueIdGlobal = cr.DeviceId.UniqueIdGlobal
-	sess.UserAgent = userAgent
-	sess.DeviceType = ua.DeviceType
-	sess.PlatformVersion = ua.PlatformVersion
-	sess.RemoteAddr = r.RemoteAddr
-	// 获取客户端mac地址
-	sess.UniqueMac = true
-	macHw, err := net.ParseMAC(oriMac)
+	v := &dbdata.User{}
+	err = dbdata.One("Username", cr.Auth.Username, v)
 	if err != nil {
-		var sum [16]byte
-		if sess.UniqueIdGlobal != "" {
-			sum = md5.Sum([]byte(sess.UniqueIdGlobal))
-		} else {
-			sum = md5.Sum([]byte(sess.Token))
-			sess.UniqueMac = false
-		}
-		macHw = sum[0:5] // 5个byte
-		macHw = append([]byte{0x02}, macHw...)
-		sess.MacAddr = macHw.String()
+		base.Info("正在使用第三方认证方式登录")
+		CreateSession(w, r, sessionData)
+		return
 	}
-	sess.MacHw = macHw
-	// 统一macAddr的格式
-	sess.MacAddr = macHw.String()
+	// 用户otp验证
+	if !v.DisableOtp {
+		sessionID, err := GenerateSessionID()
+		if err != nil {
+			base.Error("Failed to generate session ID: ", err)
+			http.Error(w, "Failed to generate session ID", http.StatusInternalServerError)
+			return
+		}
 
-	other := &dbdata.SettingOther{}
-	_ = dbdata.SettingGet(other)
-	rd := RequestData{SessionId: sess.Sid, SessionToken: sess.Sid + "@" + sess.Token,
-		Banner: other.Banner, ProfileName: base.Cfg.ProfileName, ProfileHash: profileHash, CertHash: certHash}
-	w.WriteHeader(http.StatusOK)
-	tplRequest(tpl_complete, w, rd)
-	base.Info("login", cr.Auth.Username, userAgent)
+		sessionData.ClientRequest.Auth.OtpSecret = v.OtpSecret
+		SessStore.SaveAuthSession(sessionID, sessionData)
+
+		SetCookie(w, "auth-session-id", sessionID, 0)
+
+		data := RequestData{}
+		w.WriteHeader(http.StatusOK)
+		tplRequest(tpl_otp, w, data)
+		return
+	}
+
+	CreateSession(w, r, sessionData)
 }
 
 const (
 	tpl_request = iota
 	tpl_complete
+	tpl_otp
 )
 
 func tplRequest(typ int, w io.Writer, data RequestData) {
-	if typ == tpl_request {
+	switch typ {
+	case tpl_request:
 		t, _ := template.New("auth_request").Parse(auth_request)
 		_ = t.Execute(w, data)
-		return
-	}
+	case tpl_complete:
+		if data.Banner != "" {
+			buf := new(bytes.Buffer)
+			_ = xml.EscapeText(buf, []byte(data.Banner))
+			data.Banner = buf.String()
+		}
 
-	if data.Banner != "" {
-		buf := new(bytes.Buffer)
-		_ = xml.EscapeText(buf, []byte(data.Banner))
-		data.Banner = buf.String()
+		t, _ := template.New("auth_complete").Parse(auth_complete)
+		_ = t.Execute(w, data)
+	case tpl_otp:
+		t, _ := template.New("auth_otp").Parse(auth_otp)
+		_ = t.Execute(w, data)
 	}
-
-	t, _ := template.New("auth_complete").Parse(auth_complete)
-	_ = t.Execute(w, data)
 }
 
 // 设置输出信息
