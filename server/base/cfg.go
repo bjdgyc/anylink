@@ -2,9 +2,11 @@ package base
 
 import (
 	"fmt"
+	"github.com/bjdgyc/anylink/pkg/utils"
 	"os"
 	"path/filepath"
 	"reflect"
+	"strings"
 )
 
 const (
@@ -123,6 +125,11 @@ func initServerCfg() {
 
 	if Cfg.JwtSecret == defaultJwt {
 		fmt.Fprintln(os.Stderr, "=== 使用默认的jwt_secret有安全风险，请设置新的jwt_secret ===")
+
+		// 安全问题，自动生成新的密钥
+		jwtSecret, _ := utils.RandSecret(40, 60)
+		jwtSecret = strings.Trim(jwtSecret, "=")
+		Cfg.JwtSecret = jwtSecret
 	}
 
 	fmt.Printf("ServerCfg: %+v \n", Cfg)

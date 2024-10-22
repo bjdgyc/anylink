@@ -99,7 +99,10 @@
             prop="remote_addr"
             label="远端地址">
         </el-table-column>
-
+        <el-table-column
+            prop="transport_protocol"
+            label="传输协议">
+        </el-table-column>
         <el-table-column
             prop="tun_name"
             label="虚拟网卡">
