@@ -59,7 +59,6 @@ AnyLink 服务端仅在 CentOS 7、CentOS 8、Ubuntu 18.04、Ubuntu 20.04 测试
 >
 > <img src="doc/screenshot/qq2.jpg" width="400" />
 
-
 ### 使用问题
 
 > 对于测试环境，可以直接进行测试，需要客户端取消勾选【阻止不受信任的服务器(Block connections to untrusted servers)】
@@ -161,11 +160,11 @@ sudo ./anylink
 >
 > 数据库表结构自动生成，无需手动导入(请赋予 DDL 权限)
 
-| db_type  | db_source                                              |
-|----------|--------------------------------------------------------|
-| sqlite3  | ./conf/anylink.db                                      |
-| mysql    | user:password@tcp(127.0.0.1:3306)/anylink?charset=utf8 |
-| postgres | user:password@localhost/anylink?sslmode=verify-full    |
+| db_type  | db_source                                                      |
+|----------|----------------------------------------------------------------|
+| sqlite3  | ./conf/anylink.db                                              |
+| mysql    | user:password@tcp(127.0.0.1:3306)/anylink?charset=utf8         |
+| postgres | postgres://user:password@localhost/anylink?sslmode=verify-full |
 
 > 示例配置文件
 >
