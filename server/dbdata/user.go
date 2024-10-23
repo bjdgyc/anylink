@@ -117,13 +117,13 @@ func checkLocalUser(name, pwd, group string) error {
 	}
 	// 判断otp信息
 	pinCode := pwd
-	// if !v.DisableOtp {
-	// 	pinCode = pwd[:pl-6]
-	// 	otp := pwd[pl-6:]
-	// 	if !CheckOtp(name, otp, v.OtpSecret) {
-	// 		return fmt.Errorf("%s %s", name, "动态码错误")
-	// 	}
-	// }
+	if !v.DisableOtp {
+		pinCode = pwd[:pl-6]
+		otp := pwd[pl-6:]
+		if !CheckOtp(name, otp, v.OtpSecret) {
+			return fmt.Errorf("%s %s", name, "动态码错误")
+		}
+	}
 
 	// 判断用户密码
 	if pinCode != v.PinCode {
