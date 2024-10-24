@@ -2,26 +2,28 @@ package handler
 
 import (
 	"crypto/md5"
-	"crypto/rand"
-	"crypto/sha256"
-	"encoding/base64"
 	"encoding/xml"
 	"fmt"
 	"io"
 	"net"
 	"net/http"
 	"sync"
+	"sync/atomic"
 
 	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/dbdata"
+	"github.com/bjdgyc/anylink/pkg/utils"
 	"github.com/bjdgyc/anylink/sessdata"
 )
 
 var SessStore = NewSessionStore()
 
+const maxOtpErrCount = 3
+
 type AuthSession struct {
 	ClientRequest *ClientRequest
 	UserActLog    *dbdata.UserActLog
+	OtpErrCount   atomic.Uint32 // otp错误次数
 }
 
 // 存储临时会话信息
@@ -60,15 +62,17 @@ func (s *SessionStore) DeleteAuthSession(sessionID string) {
 	delete(s.session, sessionID)
 }
 
+func (a *AuthSession) AddOtpErrCount(i int) int {
+	newI := a.OtpErrCount.Add(uint32(i))
+	return int(newI)
+}
+
 func GenerateSessionID() (string, error) {
-	b := make([]byte, 32)
-	_, err := rand.Read(b)
-	if err != nil {
-		return "", fmt.Errorf("failed to generate session ID: %w", err)
+	sessionID := utils.RandomRunes(32)
+	if sessionID == "" {
+		return "", fmt.Errorf("failed to generate session ID")
 	}
 
-	hash := sha256.Sum256(b)
-	sessionID := base64.URLEncoding.EncodeToString(hash[:])
 	return sessionID, nil
 }
 
@@ -186,14 +190,20 @@ func LinkAuth_otp(w http.ResponseWriter, r *http.Request) {
 	otpSecret := sessionData.ClientRequest.Auth.OtpSecret
 	otp := cr.Auth.SecondaryPassword
 
+	// 动态码错误
 	if !dbdata.CheckOtp(username, otp, otpSecret) {
-		base.Warn("OTP 动态码错误", r.RemoteAddr)
+		if sessionData.AddOtpErrCount(1) > maxOtpErrCount {
+			http.Error(w, "TooManyError, please login again", http.StatusBadRequest)
+			return
+		}
+
+		base.Warn("OTP 动态码错误", username, r.RemoteAddr)
 		ua.Info = "OTP 动态码错误"
 		ua.Status = dbdata.UserAuthFail
 		dbdata.UserActLogIns.Add(*ua, sessionData.ClientRequest.UserAgent)
 
 		w.WriteHeader(http.StatusOK)
-		data := RequestData{Error: "OTP 动态码错误"}
+		data := RequestData{Error: "请求错误"}
 		if base.Cfg.DisplayError {
 			data.Error = "OTP 动态码错误"
 		}
@@ -216,7 +226,7 @@ var auth_otp = `<?xml version="1.0" encoding="UTF-8"?>
         <error id="otp-verification" param1="{{.Error}}" param2="">验证失败:  %s</error>
         {{end}}		
         <form method="post" action="/otp-verification">
-            <input type="password" name="secondary_password" label="OTP"/>
+            <input type="password" name="secondary_password" label="OTPCode:"/>
         </form>
     </auth>
 </config-auth>`

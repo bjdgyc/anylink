@@ -159,7 +159,6 @@ func tplRequest(typ int, w io.Writer, data RequestData) {
 			_ = xml.EscapeText(buf, []byte(data.Banner))
 			data.Banner = buf.String()
 		}
-
 		t, _ := template.New("auth_complete").Parse(auth_complete)
 		_ = t.Execute(w, data)
 	case tpl_otp:
