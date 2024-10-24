@@ -22,7 +22,7 @@ var (
 
 func initMod() {
 	container := os.Getenv(inContainerKey)
-	if container == "true" {
+	if container == "on" {
 		InContainer = true
 	}
 	log.Println("InContainer", InContainer)

@@ -86,6 +86,7 @@
             label="唯一MAC">
             <template slot-scope="scope">
                 <el-tag v-if="scope.row.unique_mac" type="success">是</el-tag>
+                <el-tag v-else type="info">否</el-tag>
             </template>
         </el-table-column>
 

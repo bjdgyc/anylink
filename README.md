@@ -390,7 +390,17 @@ ipv4_end = "10.1.2.200"
    docker run -it --rm bjdgyc/anylink tool -d
    ```
 
-6. 启动容器
+6. iptables兼容设置
+   ```bash
+   # 默认 iptables 使用 nf_tables 设置转发规则,如果内核低于 4.19 版本,需要特殊配置
+   docker run -itd --name anylink --privileged \
+      -e IPTABLES_LEGACY=on \
+      -p 443:443 -p 8800:8800 -p 443:443/udp \
+      --restart=always \
+      bjdgyc/anylink
+   ```
+
+7. 启动容器
    ```bash
    # 默认启动
    docker run -itd --name anylink --privileged \
@@ -410,7 +420,7 @@ ipv4_end = "10.1.2.200"
    docker restart anylink
    ```
 
-6. 使用自定义参数启动容器
+8. 使用自定义参数启动容器
    ```bash
    # 参数可以参考 ./anylink tool -d
    # 可以使用命令行参数 或者 环境变量 配置
@@ -459,7 +469,8 @@ ipv4_end = "10.1.2.200"
 - [AnyConnect Secure Client](https://www.cisco.com/) (可通过群文件下载: Windows/macOS/Linux/Android/iOS)
 - [OpenConnect](https://gitlab.com/openconnect/openconnect) (Windows/macOS/Linux)
 - [三方 AnyLink Secure Client](https://github.com/tlslink/anylink-client) (Windows/macOS/Linux)
-- 【推荐】三方客户端下载地址(Windows/macOS/Linux/Android/iOS) [国内地址](https://ocserv.yydy.link:2023) [国外地址](https://cisco.yydy.link/#/)
+- 【推荐】三方客户端下载地址(
+  Windows/macOS/Linux/Android/iOS) [国内地址](https://ocserv.yydy.link:2023) [国外地址](https://cisco.yydy.link/#/)
 
 ## Contribution
 
