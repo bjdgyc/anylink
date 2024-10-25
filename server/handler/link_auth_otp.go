@@ -172,6 +172,8 @@ func LinkAuth_otp(w http.ResponseWriter, r *http.Request) {
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
+		base.Error(err)
+		SessStore.DeleteAuthSession(sessionID)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -181,6 +183,7 @@ func LinkAuth_otp(w http.ResponseWriter, r *http.Request) {
 	err = xml.Unmarshal(body, &cr)
 	if err != nil {
 		base.Error(err)
+		SessStore.DeleteAuthSession(sessionID)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
@@ -193,6 +196,7 @@ func LinkAuth_otp(w http.ResponseWriter, r *http.Request) {
 	// 动态码错误
 	if !dbdata.CheckOtp(username, otp, otpSecret) {
 		if sessionData.AddOtpErrCount(1) > maxOtpErrCount {
+			SessStore.DeleteAuthSession(sessionID)
 			http.Error(w, "TooManyError, please login again", http.StatusBadRequest)
 			return
 		}
