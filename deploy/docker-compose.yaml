@@ -12,6 +12,7 @@ services:
       - 443:443/udp
     environment:
       LINK_LOG_LEVEL: info
+      #IPTABLES_LEGACY: "on"
     command:
       - --conf=/app/conf/server.toml
     #volumes:
