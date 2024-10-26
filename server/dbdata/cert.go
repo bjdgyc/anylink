@@ -400,12 +400,3 @@ func buildNameToCertificate(cert *tls.Certificate) {
 		nameToCertificate[san] = cert
 	}
 }
-
-// func Scrypt(passwd string) string {
-// 	salt := []byte{0xc8, 0x28, 0xf2, 0x58, 0xa7, 0x6a, 0xad, 0x7b}
-// 	hashPasswd, err := scrypt.Key([]byte(passwd), salt, 1<<15, 8, 1, 32)
-// 	if err != nil {
-// 		return err.Error()
-// 	}
-// 	return base64.StdEncoding.EncodeToString(hashPasswd)
-// }

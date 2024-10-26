@@ -1,6 +1,7 @@
 package dbdata
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"sync"
@@ -8,6 +9,7 @@ import (
 
 	"github.com/bjdgyc/anylink/pkg/utils"
 	"github.com/xlzd/gotp"
+	"golang.org/x/crypto/scrypt"
 )
 
 // type User struct {
@@ -116,7 +118,7 @@ func checkLocalUser(name, pwd, group string) error {
 		return fmt.Errorf("%s %s", name, "用户组错误")
 	}
 	// 判断otp信息
-	pinCode := pwd
+	// pinCode := pwd
 	// if !v.DisableOtp {
 	// 	pinCode = pwd[:pl-6]
 	// 	otp := pwd[pl-6:]
@@ -126,7 +128,7 @@ func checkLocalUser(name, pwd, group string) error {
 	// }
 
 	// 判断用户密码
-	if pinCode != v.PinCode {
+	if !VerifyPassword(pwd, v.PinCode) {
 		return fmt.Errorf("%s %s", name, "密码错误")
 	}
 
@@ -189,4 +191,31 @@ func CheckOtp(name, otp, secret string) bool {
 	verify := totp.Verify(otp, unix)
 
 	return verify
+}
+
+// 插入数据库前加密 Password
+func (u *User) BeforeInsert() {
+	u.PinCode = ScryptPassword(u.PinCode)
+}
+
+// 更新数据库前加密 Password
+func (u *User) BeforeUpdate() {
+	if len(u.PinCode) != 44 {
+		u.PinCode = ScryptPassword(u.PinCode)
+	}
+}
+
+// 加密
+func ScryptPassword(passwd string) string {
+	salt := []byte{0xc8, 0x28, 0xf2, 0x58, 0xa7, 0x6a, 0xad, 0x7b}
+	hashPasswd, _ := scrypt.Key([]byte(passwd), salt, 1<<16, 8, 1, 32)
+	return base64.StdEncoding.EncodeToString(hashPasswd)
+}
+
+// 验证
+func VerifyPassword(password, hashPassword string) bool {
+	if len(hashPassword) != 44 {
+		return password == hashPassword
+	}
+	return ScryptPassword(password) == hashPassword
 }
