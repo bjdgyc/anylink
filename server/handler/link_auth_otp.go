@@ -110,6 +110,8 @@ func DeleteCookie(w http.ResponseWriter, name string) {
 	http.SetCookie(w, cookie)
 }
 func CreateSession(w http.ResponseWriter, r *http.Request, authSession *AuthSession) {
+	lockManager.loginStatus.Store(loginStatusKey, true) // 更新登录成功状态
+
 	cr := authSession.ClientRequest
 	ua := authSession.UserActLog
 
@@ -200,6 +202,7 @@ func LinkAuth_otp(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "TooManyError, please login again", http.StatusBadRequest)
 			return
 		}
+		lockManager.loginStatus.Store(loginStatusKey, false) // 记录登录失败状态
 
 		base.Warn("OTP 动态码错误", username, r.RemoteAddr)
 		ua.Info = "OTP 动态码错误"

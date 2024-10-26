@@ -12,11 +12,7 @@ import (
 	"github.com/bjdgyc/anylink/base"
 )
 
-// 自定义 contextKey 类型，避免键冲突
-type contextKey string
-
-// 定义常量作为上下文的键
-const loginStatusKey contextKey = "login_status"
+const loginStatusKey = "login_status"
 const defaultGlobalLockStateExpirationTime = 3600
 
 func initAntiBruteForce() {
@@ -53,6 +49,20 @@ func antiBruteForce(next http.Handler) http.Handler {
 		}
 
 		username := cr.Auth.Username
+		if r.URL.Path == "/otp-verification" {
+			sessionID, err := GetCookie(r, "auth-session-id")
+			if err != nil {
+				http.Error(w, "Invalid session, please login again", http.StatusUnauthorized)
+				return
+			}
+
+			sessionData, err := SessStore.GetAuthSession(sessionID)
+			if err != nil {
+				http.Error(w, "Invalid session, please login again", http.StatusUnauthorized)
+				return
+			}
+			username = sessionData.ClientRequest.Auth.Username
+		}
 		ip, _, err := net.SplitHostPort(r.RemoteAddr) // 提取纯 IP 地址，去掉端口号
 		if err != nil {
 			http.Error(w, "Unable to parse IP address", http.StatusInternalServerError)
@@ -109,13 +119,17 @@ func antiBruteForce(next http.Handler) http.Handler {
 		// 调用下一个处理器
 		next.ServeHTTP(w, r)
 
-		// 从 context 中获取登录状态
-		loginStatus, _ := r.Context().Value(loginStatusKey).(bool)
+		// 检查登录状态
+		Status, _ := lockManager.loginStatus.Load(loginStatusKey)
+		loginStatus, _ := Status.(bool)
 
 		// 更新用户登录状态
 		lockManager.updateGlobalIPLock(ip, now, loginStatus)
 		lockManager.updateGlobalUserLock(username, now, loginStatus)
 		lockManager.updateUserIPLock(username, ip, now, loginStatus)
+
+		// 清除登录状态
+		lockManager.loginStatus.Delete(loginStatusKey)
 	})
 }
 
@@ -131,6 +145,7 @@ type IPWhitelists struct {
 
 type LockManager struct {
 	mu           sync.Mutex
+	loginStatus  sync.Map                         // 登录状态
 	ipLocks      map[string]*LockState            // 全局IP锁定状态
 	userLocks    map[string]*LockState            // 全局用户锁定状态
 	ipUserLocks  map[string]map[string]*LockState // 单用户IP锁定状态
@@ -140,6 +155,7 @@ type LockManager struct {
 }
 
 var lockManager = &LockManager{
+	loginStatus:  sync.Map{},
 	ipLocks:      make(map[string]*LockState),
 	userLocks:    make(map[string]*LockState),
 	ipUserLocks:  make(map[string]map[string]*LockState),
@@ -251,14 +267,7 @@ func (lm *LockManager) checkGlobalIPLock(ip string, now time.Time) bool {
 		return false
 	}
 
-	// 如果超过时间窗口，重置失败计数
-	lm.resetLockStateIfExpired(state, now, base.Cfg.GlobalIPBanResetTime)
-
-	if !state.LockTime.IsZero() && now.Before(state.LockTime) {
-		return true
-	}
-
-	return false
+	return lm.checkLockState(state, now, base.Cfg.GlobalIPBanResetTime)
 }
 
 // 检查全局用户锁定
@@ -274,14 +283,7 @@ func (lm *LockManager) checkGlobalUserLock(username string, now time.Time) bool 
 	if !exists {
 		return false
 	}
-	// 如果超过时间窗口，重置失败计数
-	lm.resetLockStateIfExpired(state, now, base.Cfg.GlobalUserBanResetTime)
-
-	if !state.LockTime.IsZero() && now.Before(state.LockTime) {
-		return true
-	}
-
-	return false
+	return lm.checkLockState(state, now, base.Cfg.GlobalUserBanResetTime)
 }
 
 // 检查单个用户的 IP 锁定
@@ -303,14 +305,7 @@ func (lm *LockManager) checkUserIPLock(username, ip string, now time.Time) bool 
 		return false
 	}
 
-	// 如果超过时间窗口，重置失败计数
-	lm.resetLockStateIfExpired(state, now, base.Cfg.BanResetTime)
-
-	if !state.LockTime.IsZero() && now.Before(state.LockTime) {
-		return true
-	}
-
-	return false
+	return lm.checkLockState(state, now, base.Cfg.BanResetTime)
 }
 
 // 更新全局 IP 锁定状态
@@ -383,22 +378,27 @@ func (lm *LockManager) updateLockState(state *LockState, now time.Time, success 
 	state.LastAttempt = now
 }
 
-// 超过窗口时间和锁定时间时重置锁定状态
-func (lm *LockManager) resetLockStateIfExpired(state *LockState, now time.Time, resetTime int) {
+// 检查锁定状态
+func (lm *LockManager) checkLockState(state *LockState, now time.Time, resetTime int) bool {
 	if state == nil || state.LastAttempt.IsZero() {
-		return
+		return false
 	}
 
 	// 如果超过锁定时间，重置锁定状态
 	if !state.LockTime.IsZero() && now.After(state.LockTime) {
 		state.FailureCount = 0
 		state.LockTime = time.Time{}
-		return
+		return false
 	}
-
 	// 如果超过窗口时间，重置失败计数
 	if now.Sub(state.LastAttempt) > time.Duration(resetTime)*time.Second {
 		state.FailureCount = 0
 		state.LockTime = time.Time{}
+		return false
 	}
+	// 如果锁定时间还在有效期内，继续锁定
+	if !state.LockTime.IsZero() && now.Before(state.LockTime) {
+		return true
+	}
+	return false
 }

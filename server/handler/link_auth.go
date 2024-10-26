@@ -2,7 +2,6 @@ package handler
 
 import (
 	"bytes"
-	"context"
 	"encoding/xml"
 	"fmt"
 	"io"
@@ -95,7 +94,7 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	// TODO 用户密码校验
 	err = dbdata.CheckUser(cr.Auth.Username, cr.Auth.Password, cr.GroupSelect)
 	if err != nil {
-		r = r.WithContext(context.WithValue(r.Context(), loginStatusKey, false)) // 传递登录失败状态
+		lockManager.loginStatus.Store(loginStatusKey, false) // 记录登录失败状态
 		base.Warn(err, r.RemoteAddr)
 		ua.Info = err.Error()
 		ua.Status = dbdata.UserAuthFail
@@ -109,7 +108,6 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 		tplRequest(tpl_request, w, data)
 		return
 	}
-	r = r.WithContext(context.WithValue(r.Context(), loginStatusKey, true)) // 传递登录成功状态
 	dbdata.UserActLogIns.Add(*ua, userAgent)
 
 	v := &dbdata.User{}
@@ -121,6 +119,7 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	}
 	// 用户otp验证
 	if !v.DisableOtp {
+		lockManager.loginStatus.Store(loginStatusKey, true) // 重置OTP验证计数
 		sessionID, err := GenerateSessionID()
 		if err != nil {
 			base.Error("Failed to generate session ID: ", err)
