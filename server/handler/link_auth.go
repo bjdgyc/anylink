@@ -94,7 +94,7 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	// TODO 用户密码校验
 	err = dbdata.CheckUser(cr.Auth.Username, cr.Auth.Password, cr.GroupSelect)
 	if err != nil {
-		lockManager.loginStatus.Store(loginStatusKey, false) // 记录登录失败状态
+		lockManager.LoginStatus.Store(loginStatusKey, false) // 记录登录失败状态
 		base.Warn(err, r.RemoteAddr)
 		ua.Info = err.Error()
 		ua.Status = dbdata.UserAuthFail
@@ -119,7 +119,7 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	}
 	// 用户otp验证
 	if !v.DisableOtp {
-		lockManager.loginStatus.Store(loginStatusKey, true) // 重置OTP验证计数
+		lockManager.LoginStatus.Store(loginStatusKey, true) // 重置OTP验证计数
 		sessionID, err := GenerateSessionID()
 		if err != nil {
 			base.Error("Failed to generate session ID: ", err)
