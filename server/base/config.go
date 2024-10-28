@@ -26,6 +26,7 @@ var configs = []config{
 	{Typ: cfgStr, Name: "server_addr", Usage: "TCP服务监听地址(任意端口)", ValStr: ":443"},
 	{Typ: cfgBool, Name: "server_dtls", Usage: "开启DTLS", ValBool: false},
 	{Typ: cfgStr, Name: "server_dtls_addr", Usage: "DTLS监听地址(任意端口)", ValStr: ":443"},
+	{Typ: cfgStr, Name: "advertise_dtls_addr", Usage: "DTLS对外映射端口(为空则与server_dtls_addr相同)", ValStr: ""},
 	{Typ: cfgStr, Name: "admin_addr", Usage: "后台服务监听地址", ValStr: ":8800"},
 	{Typ: cfgBool, Name: "proxy_protocol", Usage: "TCP代理协议", ValBool: false},
 	{Typ: cfgStr, Name: "db_type", Usage: "数据库类型 [sqlite3 mysql postgres]", ValStr: "sqlite3"},

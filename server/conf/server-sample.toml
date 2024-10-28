@@ -44,6 +44,8 @@ server_addr = ":443"
 server_dtls = false
 #UDP监听地址(任意端口)
 server_dtls_addr = ":443"
+#DTLS对外映射端口(为空则与server_dtls_addr相同)
+advertise_dtls_addr = ""
 #后台服务监听地址
 admin_addr = ":8800"
 #开启tcp proxy protocol协议
