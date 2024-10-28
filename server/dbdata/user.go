@@ -1,18 +1,14 @@
 package dbdata
 
 import (
-	"crypto/rand"
-	"encoding/base64"
 	"errors"
 	"fmt"
-	"strings"
 	"sync"
 	"time"
 
 	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/pkg/utils"
 	"github.com/xlzd/gotp"
-	"golang.org/x/crypto/scrypt"
 )
 
 // type User struct {
@@ -130,7 +126,7 @@ func checkLocalUser(name, pwd, group string) error {
 	// 	}
 	// }
 	// 判断用户密码
-	if !VerifyPassword(pwd, v.PinCode) {
+	if !utils.PasswordVerify(pwd, v.PinCode) {
 		return fmt.Errorf("%s %s", name, "密码错误")
 	}
 
@@ -196,71 +192,21 @@ func CheckOtp(name, otp, secret string) bool {
 }
 
 // 插入数据库前加密密码
-func (u *User) BeforeInsert() error {
-	hashedPassword, err := ScryptPassword(u.PinCode)
+func (u *User) BeforeInsert() {
+	hashedPassword, err := utils.PasswordHash(u.PinCode)
 	if err != nil {
 		base.Error(err)
-		return err
 	}
 	u.PinCode = hashedPassword
-	return nil
 }
 
 // 更新数据库前加密密码
-func (u *User) BeforeUpdate() error {
-	if len(u.PinCode) != 57 {
-		hashedPassword, err := ScryptPassword(u.PinCode)
+func (u *User) BeforeUpdate() {
+	if len(u.PinCode) != 60 {
+		hashedPassword, err := utils.PasswordHash(u.PinCode)
 		if err != nil {
 			base.Error(err)
-			return err
 		}
 		u.PinCode = hashedPassword
 	}
-	return nil
-}
-
-// 加密密码
-func ScryptPassword(passwd string) (string, error) {
-	salt := make([]byte, 8)
-	if _, err := rand.Read(salt); err != nil {
-		return "", err
-	}
-
-	hashPasswd, err := scrypt.Key([]byte(passwd), salt, 1<<16, 8, 1, 32)
-	if err != nil {
-		return "", err
-	}
-
-	encodedSalt := base64.StdEncoding.EncodeToString(salt)
-	encodedHash := base64.StdEncoding.EncodeToString(hashPasswd)
-
-	return encodedSalt + "&" + encodedHash, nil
-}
-
-// 验证密码
-func VerifyPassword(password, hashPassword string) bool {
-	// 老用户使用明文验证
-	if len(hashPassword) != 57 {
-		return password == hashPassword
-	}
-
-	// 分割盐值和哈希值
-	encodepwds := strings.SplitN(hashPassword, "&", 2)
-	if len(encodepwds) != 2 {
-		return false
-	}
-
-	// 解码盐值
-	salt, err := base64.StdEncoding.DecodeString(encodepwds[0])
-	if err != nil {
-		return false
-	}
-
-	// 计算新的哈希值
-	newHash, err := scrypt.Key([]byte(password), salt, 1<<16, 8, 1, 32)
-	if err != nil {
-		return false
-	}
-
-	return base64.StdEncoding.EncodeToString(newHash) == encodepwds[1]
 }

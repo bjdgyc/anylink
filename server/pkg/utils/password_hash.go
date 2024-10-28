@@ -14,6 +14,10 @@ func PasswordHash(password string) (string, error) {
 }
 
 func PasswordVerify(password, hash string) bool {
+	// 保留老用户明文验证
+	if len(hash) != 60 {
+		return password == hash
+	}
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
 }
