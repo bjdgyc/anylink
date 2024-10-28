@@ -8,7 +8,6 @@ import (
 	"net"
 	"net/http"
 	"sync"
-	"sync/atomic"
 
 	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/dbdata"
@@ -18,12 +17,12 @@ import (
 
 var SessStore = NewSessionStore()
 
-const maxOtpErrCount = 3
+// const maxOtpErrCount = 3
 
 type AuthSession struct {
 	ClientRequest *ClientRequest
 	UserActLog    *dbdata.UserActLog
-	OtpErrCount   atomic.Uint32 // otp错误次数
+	// OtpErrCount   atomic.Uint32 // otp错误次数
 }
 
 // 存储临时会话信息
@@ -62,10 +61,10 @@ func (s *SessionStore) DeleteAuthSession(sessionID string) {
 	delete(s.session, sessionID)
 }
 
-func (a *AuthSession) AddOtpErrCount(i int) int {
-	newI := a.OtpErrCount.Add(uint32(i))
-	return int(newI)
-}
+// func (a *AuthSession) AddOtpErrCount(i int) int {
+// 	newI := a.OtpErrCount.Add(uint32(i))
+// 	return int(newI)
+// }
 
 func GenerateSessionID() (string, error) {
 	sessionID := utils.RandomRunes(32)
@@ -110,6 +109,8 @@ func DeleteCookie(w http.ResponseWriter, name string) {
 	http.SetCookie(w, cookie)
 }
 func CreateSession(w http.ResponseWriter, r *http.Request, authSession *AuthSession) {
+	lockManager.LoginStatus.Store(loginStatusKey, true) // 更新登录成功状态
+
 	cr := authSession.ClientRequest
 	ua := authSession.UserActLog
 
@@ -195,11 +196,12 @@ func LinkAuth_otp(w http.ResponseWriter, r *http.Request) {
 
 	// 动态码错误
 	if !dbdata.CheckOtp(username, otp, otpSecret) {
-		if sessionData.AddOtpErrCount(1) > maxOtpErrCount {
-			SessStore.DeleteAuthSession(sessionID)
-			http.Error(w, "TooManyError, please login again", http.StatusBadRequest)
-			return
-		}
+		// if sessionData.AddOtpErrCount(1) > maxOtpErrCount {
+		// 	SessStore.DeleteAuthSession(sessionID)
+		// 	http.Error(w, "TooManyError, please login again", http.StatusBadRequest)
+		// 	return
+		// }
+		lockManager.LoginStatus.Store(loginStatusKey, false) // 记录登录失败状态
 
 		base.Warn("OTP 动态码错误", username, r.RemoteAddr)
 		ua.Info = "OTP 动态码错误"

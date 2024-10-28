@@ -17,7 +17,7 @@ func Start() {
 	sessdata.Start()
 	cron.Start()
 
-	initAntiBruteForce() //初始化防爆破定时器和IP白名单
+	admin.InitLockManager() //初始化防爆破定时器和IP白名单
 
 	// 开启服务器转发
 	err := execCmd([]string{"sysctl -w net.ipv4.ip_forward=1"})

@@ -3,22 +3,13 @@
     <el-card>
       <el-form :inline="true">
         <el-form-item>
-          <el-button
-              size="small"
-              type="primary"
-              icon="el-icon-plus"
-              @click="handleEdit('')">添加
+          <el-button size="small" type="primary" icon="el-icon-plus" @click="handleEdit('')">添加
           </el-button>
         </el-form-item>
         <el-form-item>
           <el-dropdown size="small" placement="bottom">
-            <el-upload
-                class="uploaduser"
-                action="uploaduser"
-                accept=".xlsx, .xls"
-                :http-request="upLoadUser"
-                :limit="1"
-                :show-file-list="false">
+            <el-upload class="uploaduser" action="uploaduser" accept=".xlsx, .xls" :http-request="upLoadUser" :limit="1"
+              :show-file-list="false">
               <el-button size="small" icon="el-icon-upload2" type="primary">批量添加</el-button>
             </el-upload>
             <el-dropdown-menu slot="dropdown">
@@ -32,79 +23,45 @@
         </el-form-item>
         <el-form-item label="用户名或姓名或邮箱:">
           <el-input size="small" v-model="searchData" placeholder="请输入内容"
-                    @keydown.enter.native="searchEnterFun"></el-input>
+            @keydown.enter.native="searchEnterFun"></el-input>
         </el-form-item>
 
         <el-form-item>
-          <el-button
-              size="small"
-              type="primary"
-              icon="el-icon-search"
-              @click="handleSearch()">搜索
+          <el-button size="small" type="primary" icon="el-icon-search" @click="handleSearch()">搜索
           </el-button>
-          <el-button
-              size="small"
-              icon="el-icon-refresh"
-              @click="reset">重置搜索
+          <el-button size="small" icon="el-icon-refresh" @click="reset">重置搜索
           </el-button>
         </el-form-item>
       </el-form>
 
-      <el-table
-          ref="multipleTable"
-          :data="tableData"
-          border>
+      <el-table ref="multipleTable" :data="tableData" border>
 
-        <el-table-column
-            sortable="true"
-            prop="id"
-            label="ID"
-            width="60">
+        <el-table-column sortable="true" prop="id" label="ID" width="60">
         </el-table-column>
 
-        <el-table-column
-            prop="username"
-            label="用户名"
-            width="150">
+        <el-table-column prop="username" label="用户名" width="150">
         </el-table-column>
 
-        <el-table-column
-            prop="nickname"
-            label="姓名"
-            width="100">
+        <el-table-column prop="nickname" label="姓名" width="100">
         </el-table-column>
 
-        <el-table-column
-            prop="email"
-            label="邮箱">
+        <el-table-column prop="email" label="邮箱">
         </el-table-column>
-        <el-table-column
-            prop="otp_secret"
-            label="OTP密钥"
-            width="110">
+        <el-table-column prop="otp_secret" label="OTP密钥" width="110">
           <template slot-scope="scope">
-            <el-button
-                v-if="!scope.row.disable_otp"
-                type="text"
-                icon="el-icon-view"
-                @click="getOtpImg(scope.row)">
+            <el-button v-if="!scope.row.disable_otp" type="text" icon="el-icon-view" @click="getOtpImg(scope.row)">
               {{ scope.row.otp_secret.substring(0, 6) }}
             </el-button>
           </template>
         </el-table-column>
 
-        <el-table-column
-            prop="groups"
-            label="用户组">
+        <el-table-column prop="groups" label="用户组">
           <template slot-scope="scope">
             <el-row v-for="item in scope.row.groups" :key="item">{{ item }}</el-row>
           </template>
         </el-table-column>
 
-        <el-table-column
-            prop="status"
-            label="状态"
-            width="70">
+        <el-table-column prop="status" label="状态" width="70">
           <template slot-scope="scope">
             <el-tag v-if="scope.row.status === 1" type="success">可用</el-tag>
             <el-tag v-if="scope.row.status === 0" type="danger">停用</el-tag>
@@ -112,20 +69,12 @@
           </template>
         </el-table-column>
 
-        <el-table-column
-            prop="updated_at"
-            label="更新时间"
-            :formatter="tableDateFormat">
+        <el-table-column prop="updated_at" label="更新时间" :formatter="tableDateFormat">
         </el-table-column>
 
-        <el-table-column
-            label="操作"
-            width="210">
+        <el-table-column label="操作" width="210">
           <template slot-scope="scope">
-            <el-button
-                size="mini"
-                type="primary"
-                @click="handleEdit(scope.row)">编辑
+            <el-button size="mini" type="primary" @click="handleEdit(scope.row)">编辑
             </el-button>
 
             <!--            <el-popconfirm
@@ -139,14 +88,8 @@
                           </el-button>
                         </el-popconfirm>-->
 
-            <el-popconfirm
-                class="m-left-10"
-                @confirm="handleDel(scope.row)"
-                title="确定要删除用户吗？">
-              <el-button
-                  slot="reference"
-                  size="mini"
-                  type="danger">删除
+            <el-popconfirm class="m-left-10" @confirm="handleDel(scope.row)" title="确定要删除用户吗？">
+              <el-button slot="reference" size="mini" type="danger">删除
               </el-button>
             </el-popconfirm>
 
@@ -156,34 +99,20 @@
 
       <div class="sh-20"></div>
 
-      <el-pagination
-          background
-          layout="prev, pager, next"
-          :pager-count="11"
-          @current-change="pageChange"
-          :current-page="page"
-          :total="count">
+      <el-pagination background layout="prev, pager, next" :pager-count="11" @current-change="pageChange"
+        :current-page="page" :total="count">
       </el-pagination>
 
     </el-card>
 
-    <el-dialog
-        title="OTP密钥"
-        :visible.sync="otpImgData.visible"
-        width="350px"
-        center>
+    <el-dialog title="OTP密钥" :visible.sync="otpImgData.visible" width="350px" center>
       <div style="text-align: center">{{ otpImgData.username }} : {{ otpImgData.nickname }}</div>
-      <img :src="otpImgData.base64Img" alt="otp-img"/>
+      <img :src="otpImgData.base64Img" alt="otp-img" />
     </el-dialog>
 
     <!--新增、修改弹出框-->
-    <el-dialog
-        :close-on-click-modal="false"
-        title="用户"
-        :visible="user_edit_dialog"
-        @close="disVisible"
-        width="650px"
-        center>
+    <el-dialog :close-on-click-modal="false" title="用户" :visible="user_edit_dialog" @close="disVisible" width="650px"
+      center>
 
       <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="ruleForm">
         <el-form-item label="用户ID" prop="id">
@@ -204,21 +133,13 @@
         </el-form-item>
 
         <el-form-item label="过期时间" prop="limittime">
-          <el-date-picker
-              v-model="ruleForm.limittime"
-              type="date"
-              size="small"
-              align="center"
-              style="width:130px"
-              :picker-options="pickerOptions"
-              placeholder="选择日期">
+          <el-date-picker v-model="ruleForm.limittime" type="date" size="small" align="center" style="width:130px"
+            :picker-options="pickerOptions" placeholder="选择日期">
           </el-date-picker>
         </el-form-item>
 
         <el-form-item label="禁用OTP" prop="disable_otp">
-          <el-switch
-              v-model="ruleForm.disable_otp"
-              active-text="开启OTP后，用户密码为【PIN码+OTP动态码】(中间没有+号)">
+          <el-switch v-model="ruleForm.disable_otp" active-text="开启OTP后，用户密码为PIN码,OTP密码为扫码后生成的动态码">
           </el-switch>
         </el-form-item>
 
@@ -233,8 +154,7 @@
         </el-form-item>
 
         <el-form-item label="发送邮件" prop="send_email">
-          <el-switch
-              v-model="ruleForm.send_email">
+          <el-switch v-model="ruleForm.send_email">
           </el-switch>
         </el-form-item>
 
@@ -286,7 +206,7 @@ export default {
         }
       },
       searchData: '',
-      otpImgData: {visible: false, username: '', nickname: '', base64Img: ''},
+      otpImgData: { visible: false, username: '', nickname: '', base64Img: '' },
       ruleForm: {
         send_email: true,
         status: 1,
@@ -294,30 +214,30 @@ export default {
       },
       rules: {
         username: [
-          {required: true, message: '请输入用户名', trigger: 'blur'},
-          {max: 50, message: '长度小于 50 个字符', trigger: 'blur'}
+          { required: true, message: '请输入用户名', trigger: 'blur' },
+          { max: 50, message: '长度小于 50 个字符', trigger: 'blur' }
         ],
         nickname: [
-          {required: true, message: '请输入用户姓名', trigger: 'blur'}
+          { required: true, message: '请输入用户姓名', trigger: 'blur' }
         ],
         email: [
-          {required: true, message: '请输入用户邮箱', trigger: 'blur'},
-          {type: 'email', message: '请输入正确的邮箱地址', trigger: ['blur', 'change']}
+          { required: true, message: '请输入用户邮箱', trigger: 'blur' },
+          { type: 'email', message: '请输入正确的邮箱地址', trigger: ['blur', 'change'] }
         ],
         password: [
-          {min: 6, message: '长度大于 6 个字符', trigger: 'blur'}
+          { min: 6, message: '长度大于 6 个字符', trigger: 'blur' }
         ],
         pin_code: [
-          {min: 6, message: 'PIN码大于 6 个字符', trigger: 'blur'}
+          { min: 6, message: 'PIN码大于 6 个字符', trigger: 'blur' }
         ],
         date1: [
-          {type: 'date', required: true, message: '请选择日期', trigger: 'change'}
+          { type: 'date', required: true, message: '请选择日期', trigger: 'change' }
         ],
         groups: [
-          {type: 'array', required: true, message: '请至少选择一个组', trigger: 'change'}
+          { type: 'array', required: true, message: '请至少选择一个组', trigger: 'change' }
         ],
         status: [
-          {required: true}
+          { required: true }
         ],
       },
     }
@@ -473,6 +393,4 @@ export default {
 }
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>
