@@ -160,11 +160,12 @@ sudo ./anylink
 >
 > 数据库表结构自动生成，无需手动导入(请赋予 DDL 权限)
 
-| db_type  | db_source                                                      |
-|----------|----------------------------------------------------------------|
-| sqlite3  | ./conf/anylink.db                                              |
-| mysql    | user:password@tcp(127.0.0.1:3306)/anylink?charset=utf8         |
-| postgres | postgres://user:password@localhost/anylink?sslmode=verify-full |
+| db_type  | db_source                                                                  |
+|----------|----------------------------------------------------------------------------|
+| sqlite3  | ./conf/anylink.db                                                          |
+| mysql    | user:password@tcp(127.0.0.1:3306)/anylink?charset=utf8                     |
+| postgres | postgres://user:password@localhost/anylink?sslmode=verify-full             |
+| mssql    | sqlserver://user:password@localhost?database=anylink&connection+timeout=30 |
 
 > 示例配置文件
 >

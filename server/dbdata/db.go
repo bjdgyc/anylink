@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/bjdgyc/anylink/base"
+	_ "github.com/denisenkom/go-mssqldb"
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
@@ -22,12 +23,13 @@ func GetXdb() *xorm.Engine {
 func initDb() {
 	var err error
 	xdb, err = xorm.NewEngine(base.Cfg.DbType, base.Cfg.DbSource)
-	// 初始化xorm时区
-	xdb.DatabaseTZ = time.Local
-	xdb.TZLocation = time.Local
 	if err != nil {
 		base.Fatal(err)
 	}
+
+	// 初始化xorm时区
+	xdb.DatabaseTZ = time.Local
+	xdb.TZLocation = time.Local
 
 	if base.Cfg.ShowSQL {
 		xdb.ShowSQL(true)
