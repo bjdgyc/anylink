@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/pkg/utils"
 	"github.com/xlzd/gotp"
 )
@@ -116,7 +117,7 @@ func checkLocalUser(name, pwd, group string) error {
 		return fmt.Errorf("%s %s", name, "用户组错误")
 	}
 	// 判断otp信息
-	pinCode := pwd
+	// pinCode := pwd
 	// if !v.DisableOtp {
 	// 	pinCode = pwd[:pl-6]
 	// 	otp := pwd[pl-6:]
@@ -124,9 +125,8 @@ func checkLocalUser(name, pwd, group string) error {
 	// 		return fmt.Errorf("%s %s", name, "动态码错误")
 	// 	}
 	// }
-
 	// 判断用户密码
-	if pinCode != v.PinCode {
+	if !utils.PasswordVerify(pwd, v.PinCode) {
 		return fmt.Errorf("%s %s", name, "密码错误")
 	}
 
@@ -189,4 +189,24 @@ func CheckOtp(name, otp, secret string) bool {
 	verify := totp.Verify(otp, unix)
 
 	return verify
+}
+
+// 插入数据库前加密密码
+func (u *User) BeforeInsert() {
+	hashedPassword, err := utils.PasswordHash(u.PinCode)
+	if err != nil {
+		base.Error(err)
+	}
+	u.PinCode = hashedPassword
+}
+
+// 更新数据库前加密密码
+func (u *User) BeforeUpdate() {
+	if len(u.PinCode) != 60 {
+		hashedPassword, err := utils.PasswordHash(u.PinCode)
+		if err != nil {
+			base.Error(err)
+		}
+		u.PinCode = hashedPassword
+	}
 }
