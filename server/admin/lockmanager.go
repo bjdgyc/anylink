@@ -128,7 +128,7 @@ func (lm *LockManager) GetLocksInfo() []LockInfo {
 	defer lm.mu.Unlock()
 
 	for ip, state := range lm.ipLocks {
-		if state.Locked {
+		if base.Cfg.MaxGlobalIPBanCount > 0 && state.Locked {
 			info := LockInfo{
 				Description: "全局IP锁定",
 				Username:    "",
@@ -145,7 +145,7 @@ func (lm *LockManager) GetLocksInfo() []LockInfo {
 	}
 
 	for username, state := range lm.userLocks {
-		if state.Locked {
+		if base.Cfg.MaxGlobalUserBanCount > 0 && state.Locked {
 			info := LockInfo{
 				Description: "全局用户锁定",
 				Username:    username,
@@ -163,7 +163,7 @@ func (lm *LockManager) GetLocksInfo() []LockInfo {
 
 	for username, ipStates := range lm.ipUserLocks {
 		for ip, state := range ipStates {
-			if state.Locked {
+			if base.Cfg.MaxBanCount > 0 && state.Locked {
 				info := LockInfo{
 					Description: "单用户IP锁定",
 					Username:    username,
