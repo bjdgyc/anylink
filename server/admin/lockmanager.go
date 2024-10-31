@@ -97,7 +97,25 @@ func UnlockUser(w http.ResponseWriter, r *http.Request) {
 	lm.mu.Lock()
 	defer lm.mu.Unlock()
 
-	lm.Unlock(lockinfo.State)
+	// 根据用户名和IP查找锁定状态
+	var state *LockState
+	switch {
+	case lockinfo.IP == "" && lockinfo.Username != "":
+		state = lm.userLocks[lockinfo.Username] // 全局用户锁定
+	case lockinfo.Username != "" && lockinfo.IP != "":
+		if userIPMap, exists := lm.ipUserLocks[lockinfo.Username]; exists {
+			state = userIPMap[lockinfo.IP] // 单用户 IP 锁定
+		}
+	default:
+		state = lm.ipLocks[lockinfo.IP] // 全局 IP 锁定
+	}
+
+	if state == nil || !state.Locked {
+		RespError(w, RespInternalErr, fmt.Errorf("锁定状态未找到或已解锁"))
+		return
+	}
+
+	lm.Unlock(state)
 	base.Info("解锁成功:", lockinfo.Description, lockinfo.Username, lockinfo.IP)
 
 	RespSucess(w, "解锁成功！")
@@ -112,7 +130,7 @@ func (lm *LockManager) GetLocksInfo() []LockInfo {
 	for ip, state := range lm.ipLocks {
 		if state.Locked {
 			info := LockInfo{
-				Description: "全局 IP 锁定",
+				Description: "全局IP锁定",
 				Username:    "",
 				IP:          ip,
 				State: &LockState{
@@ -147,7 +165,7 @@ func (lm *LockManager) GetLocksInfo() []LockInfo {
 		for ip, state := range ipStates {
 			if state.Locked {
 				info := LockInfo{
-					Description: "单用户 IP 锁定",
+					Description: "单用户IP锁定",
 					Username:    username,
 					IP:          ip,
 					State: &LockState{
@@ -205,7 +223,7 @@ func (lm *LockManager) IsWhitelisted(ip string) bool {
 }
 
 func (lm *LockManager) StartCleanupTicker() {
-	lm.cleanupTicker = time.NewTicker(5 * time.Minute)
+	lm.cleanupTicker = time.NewTicker(1 * time.Minute)
 	go func() {
 		for range lm.cleanupTicker.C {
 			lm.CleanupExpiredLocks()
@@ -220,20 +238,23 @@ func (lm *LockManager) CleanupExpiredLocks() {
 	defer lm.mu.Unlock()
 
 	for ip, state := range lm.ipLocks {
-		if now.Sub(state.LastAttempt) > time.Duration(base.Cfg.GlobalLockStateExpirationTime)*time.Second {
+		if !lm.CheckLockState(state, now, base.Cfg.GlobalIPLockTime) ||
+			now.Sub(state.LastAttempt) > time.Duration(base.Cfg.GlobalLockStateExpirationTime)*time.Second {
 			delete(lm.ipLocks, ip)
 		}
 	}
 
 	for user, state := range lm.userLocks {
-		if now.Sub(state.LastAttempt) > time.Duration(base.Cfg.GlobalLockStateExpirationTime)*time.Second {
+		if !lm.CheckLockState(state, now, base.Cfg.GlobalUserLockTime) ||
+			now.Sub(state.LastAttempt) > time.Duration(base.Cfg.GlobalLockStateExpirationTime)*time.Second {
 			delete(lm.userLocks, user)
 		}
 	}
 
 	for user, ipMap := range lm.ipUserLocks {
 		for ip, state := range ipMap {
-			if now.Sub(state.LastAttempt) > time.Duration(base.Cfg.GlobalLockStateExpirationTime)*time.Second {
+			if !lm.CheckLockState(state, now, base.Cfg.LockTime) ||
+				now.Sub(state.LastAttempt) > time.Duration(base.Cfg.GlobalLockStateExpirationTime)*time.Second {
 				delete(ipMap, ip)
 				if len(ipMap) == 0 {
 					delete(lm.ipUserLocks, user)

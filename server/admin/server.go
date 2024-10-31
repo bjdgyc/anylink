@@ -88,6 +88,7 @@ func StartAdmin() {
 
 	r.HandleFunc("/statsinfo/list", StatsInfoList)
 	r.HandleFunc("/locksinfo/list", GetLocksInfo)
+	r.HandleFunc("/locksinfo/unlok", UnlockUser)
 
 	// pprof
 	if base.Cfg.Pprof {
