@@ -85,6 +85,13 @@ func initIpPool() {
 // 	ipPoolMux.Unlock()
 // }
 
+func ipInPool(ip net.IP) bool {
+	if utils.Ip2long(ip) >= IpPool.IpLongMin && utils.Ip2long(ip) <= IpPool.IpLongMax {
+		return true
+	}
+	return false
+}
+
 // AcquireIp 获取动态ip
 func AcquireIp(username, macAddr string, uniqueMac bool) (newIp net.IP) {
 	base.Trace("AcquireIp start:", username, macAddr, uniqueMac)
@@ -125,8 +132,7 @@ func AcquireIp(username, macAddr string, uniqueMac bool) (newIp net.IP) {
 		// IpPool.Ipv4IPNet.Contains(ip) &&
 		// ip符合规范
 		// 检测原有ip是否在新的ip池内
-		if !ok && utils.Ip2long(ip) >= IpPool.IpLongMin &&
-			utils.Ip2long(ip) <= IpPool.IpLongMax {
+		if !ok && ipInPool(ip) {
 			mi.Username = username
 			mi.LastLogin = tNow
 			mi.UniqueMac = uniqueMac
@@ -150,7 +156,7 @@ func AcquireIp(username, macAddr string, uniqueMac bool) (newIp net.IP) {
 
 	// 没有获取到mac的情况
 	ipMaps := []dbdata.IpMap{}
-	err = dbdata.FindWhere(&ipMaps, 50, 1, "username=?", username)
+	err = dbdata.FindWhere(&ipMaps, 30, 1, "username=?", username)
 	if err != nil {
 		// 没有查询到数据
 		if dbdata.CheckErrNotFound(err) {
@@ -180,8 +186,7 @@ func AcquireIp(username, macAddr string, uniqueMac bool) (newIp net.IP) {
 
 		// 没有mac的 不需要验证租期
 		// mi.LastLogin.Before(leaseTime) &&
-		if utils.Ip2long(ip) >= IpPool.IpLongMin &&
-			utils.Ip2long(ip) <= IpPool.IpLongMax {
+		if ipInPool(ip) {
 			mi.Username = username
 			mi.LastLogin = tNow
 			mi.MacAddr = macAddr
@@ -199,8 +204,7 @@ func AcquireIp(username, macAddr string, uniqueMac bool) (newIp net.IP) {
 var (
 	// 记录循环点
 	loopCurIp uint32
-	loopFarIp = &dbdata.IpMap{LastLogin: time.Now()}
-	loopFarI  = uint32(0)
+	loopFarIp *dbdata.IpMap
 )
 
 func loopIp(username, macAddr string, uniqueMac bool) net.IP {
@@ -211,7 +215,6 @@ func loopIp(username, macAddr string, uniqueMac bool) net.IP {
 
 	// 重新赋值
 	loopFarIp = &dbdata.IpMap{LastLogin: time.Now()}
-	loopFarI = uint32(0)
 
 	i, ip = loopLong(loopCurIp, IpPool.IpLongMax, username, macAddr, uniqueMac)
 	if ip != nil {
@@ -298,7 +301,6 @@ func loopLong(start, end uint32, username, macAddr string, uniqueMac bool) (uint
 		// 其他情况判断最早登陆
 		if mi.LastLogin.Before(loopFarIp.LastLogin) {
 			loopFarIp = mi
-			loopFarI = i
 		}
 	}
 

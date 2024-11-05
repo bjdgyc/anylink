@@ -1,5 +1,7 @@
 #!/bin/bash
 
+action=$1
+
 ver=$(cat version)
 echo $ver
 
@@ -18,6 +20,8 @@ docker build -t bjdgyc/anylink:latest --no-cache --progress=plain \
 echo "docker tag latest $ver"
 docker tag bjdgyc/anylink:latest bjdgyc/anylink:$ver
 
-
-# docker tag bjdgyc/anylink:$ver registry.cn-hangzhou.aliyuncs.com/bjdgyc/anylink:test-$ver
-# docker push registry.cn-hangzhou.aliyuncs.com/bjdgyc/anylink:test-$ver
+if [[ $action == "cntest" ]]; then
+  docker tag bjdgyc/anylink:$ver registry.cn-hangzhou.aliyuncs.com/bjdgyc/anylink:test-$ver
+  docker push registry.cn-hangzhou.aliyuncs.com/bjdgyc/anylink:test-$ver
+  echo registry.cn-hangzhou.aliyuncs.com/bjdgyc/anylink:test-$ver
+fi
