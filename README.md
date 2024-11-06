@@ -12,6 +12,10 @@
 
 AnyLink 是一个企业级远程办公 sslvpn 的软件，可以支持多人同时在线使用。
 
+使用 AnyLink，你可以随时随地安全的访问你的内部网络。
+
+With AnyLink, you can securely access your internal network anytime and anywhere.
+
 ## Repo
 
 > github: https://github.com/bjdgyc/anylink
@@ -26,7 +30,7 @@ AnyLink 基于 [ietf-openconnect](https://tools.ietf.org/html/draft-mavrogiannop
 AnyLink 使用 TLS/DTLS 进行数据加密，因此需要 RSA 或 ECC 证书，可以使用私有自签证书，可以通过 Let's Encrypt 和 TrustAsia
 申请免费的 SSL 证书。
 
-AnyLink 服务端仅在 CentOS 7、CentOS 8、Ubuntu 18.04、Ubuntu 20.04 测试通过，如需要安装在其他系统，需要服务端支持 tun/tap
+AnyLink 服务端仅在 CentOS 7、CentOS 8、Ubuntu 18、Ubuntu 20、Ubuntu 20、AnolisOS 8 测试通过，如需要安装在其他系统，需要服务端支持 tun/tap
 功能、ip 设置命令、iptables命令。
 
 ## Screenshot

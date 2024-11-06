@@ -24,7 +24,8 @@ func TestCheckUser(t *testing.T) {
 	ast.Equal(g.RouteInclude[0].IpMask, "192.168.1.0/255.255.255.0")
 
 	// 添加一个用户
-	u := User{Username: "aaa", Groups: []string{group}, Status: 1}
+	pincode := "a123456"
+	u := User{Username: "aaa", PinCode: pincode, Groups: []string{group}, Status: 1}
 	err = SetUser(&u)
 	ast.Nil(err)
 
@@ -37,7 +38,7 @@ func TestCheckUser(t *testing.T) {
 	// 单独验证密码
 	u.DisableOtp = true
 	_ = SetUser(&u)
-	err = CheckUser("aaa", u.PinCode, group)
+	err = CheckUser("aaa", pincode, group)
 	ast.Nil(err)
 
 	// 添加一个radius组
@@ -62,7 +63,7 @@ func TestCheckUser(t *testing.T) {
 	p1 := Policy{Username: "aaa", Status: 1, ClientDns: dns2, RouteInclude: route2}
 	err = SetPolicy(&p1)
 	ast.Nil(err)
-	err = CheckUser("aaa", u.PinCode, group)
+	err = CheckUser("aaa", pincode, group)
 	ast.Nil(err)
 	// 添加一个ldap组
 	group3 := "group3"

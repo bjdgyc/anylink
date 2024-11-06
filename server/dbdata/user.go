@@ -126,6 +126,14 @@ func checkLocalUser(name, pwd, group string) error {
 	// 	}
 	// }
 	// 判断用户密码
+	// 兼容明文密码
+	if len(v.PinCode) != 60 {
+		if pwd != v.PinCode {
+			return fmt.Errorf("%s %s", name, "密码错误")
+		}
+		return nil
+	}
+	// 密文密码
 	if !utils.PasswordVerify(pwd, v.PinCode) {
 		return fmt.Errorf("%s %s", name, "密码错误")
 	}
