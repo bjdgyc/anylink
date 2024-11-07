@@ -113,3 +113,40 @@ display_error = false
 
 #排除出口ip路由(出口ip不加密传输)
 exclude_export_ip = true
+
+#登录单独验证OTP窗口
+auth_alone_otp = false
+
+
+#防爆破全局开关
+anti_brute_force = true
+#全局IP白名单,多个用逗号分隔，支持单IP和CIDR范围
+ip_whitelist = "192.168.90.1,172.16.0.0/24"
+
+#锁定时间最好不要超过单位时间
+#单位时间内最大尝试次数，0为关闭该功能
+max_ban_score = 5
+#设置单位时间(秒)，超过则重置计数
+ban_reset_time = 600
+#超过最大尝试次数后的锁定时长(秒)
+lock_time = 300
+
+#全局用户单位时间内最大尝试次数,0为关闭该功能
+max_global_user_ban_count = 20
+#全局用户设置单位时间(秒)
+global_user_ban_reset_time = 600
+#全局用户锁定时间(秒)
+global_user_lock_time = 300
+
+#全局IP单位时间内最大尝试次数，0为关闭该功能
+max_global_ip_ban_count = 40
+#全局IP设置单位时间(秒)
+global_ip_ban_reset_time = 1200
+#全局IP锁定时间(秒)
+global_ip_lock_time = 300
+
+#全局锁定状态的保存生命周期(秒),超过则删除记录
+global_lock_state_expiration_time = 3600
+
+
+

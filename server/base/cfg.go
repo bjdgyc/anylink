@@ -87,6 +87,7 @@ type ServerConfig struct {
 
 	DisplayError    bool `json:"display_error"`
 	ExcludeExportIp bool `json:"exclude_export_ip"`
+	AuthAloneOtp    bool `json:"auth_alone_otp"`
 
 	AntiBruteForce bool   `json:"anti_brute_force"`
 	IPWhitelist    string `json:"ip_whitelist"`

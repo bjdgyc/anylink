@@ -116,25 +116,29 @@ func checkLocalUser(name, pwd, group string) error {
 	if !utils.InArrStr(v.Groups, group) {
 		return fmt.Errorf("%s %s", name, "用户组错误")
 	}
-	// 判断otp信息
-	// pinCode := pwd
-	// if !v.DisableOtp {
-	// 	pinCode = pwd[:pl-6]
-	// 	otp := pwd[pl-6:]
-	// 	if !CheckOtp(name, otp, v.OtpSecret) {
-	// 		return fmt.Errorf("%s %s", name, "动态码错误")
-	// 	}
-	// }
+
+	pinCode := pwd
+	if base.Cfg.AuthAloneOtp == false {
+		// 判断otp信息
+		if !v.DisableOtp {
+			pinCode = pwd[:pl-6]
+			otp := pwd[pl-6:]
+			if !CheckOtp(name, otp, v.OtpSecret) {
+				return fmt.Errorf("%s %s", name, "动态码错误")
+			}
+		}
+	}
+
 	// 判断用户密码
 	// 兼容明文密码
 	if len(v.PinCode) != 60 {
-		if pwd != v.PinCode {
+		if pinCode != v.PinCode {
 			return fmt.Errorf("%s %s", name, "密码错误")
 		}
 		return nil
 	}
 	// 密文密码
-	if !utils.PasswordVerify(pwd, v.PinCode) {
+	if !utils.PasswordVerify(pinCode, v.PinCode) {
 		return fmt.Errorf("%s %s", name, "密码错误")
 	}
 

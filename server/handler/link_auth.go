@@ -118,7 +118,7 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// 用户otp验证
-	if !v.DisableOtp {
+	if base.Cfg.AuthAloneOtp && !v.DisableOtp {
 		lockManager.LoginStatus.Store(loginStatusKey, true) // 重置OTP验证计数
 		sessionID, err := GenerateSessionID()
 		if err != nil {
