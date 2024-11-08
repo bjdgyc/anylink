@@ -11,7 +11,6 @@ import (
 
 	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/dbdata"
-	"github.com/bjdgyc/anylink/pkg/utils"
 	"github.com/bjdgyc/anylink/sessdata"
 )
 
@@ -66,14 +65,14 @@ func (s *SessionStore) DeleteAuthSession(sessionID string) {
 // 	return int(newI)
 // }
 
-func GenerateSessionID() (string, error) {
-	sessionID := utils.RandomRunes(32)
-	if sessionID == "" {
-		return "", fmt.Errorf("failed to generate session ID")
-	}
+// func GenerateSessionID() (string, error) {
+// 	sessionID := utils.RandomRunes(32)
+// 	if sessionID == "" {
+// 		return "", fmt.Errorf("failed to generate session ID")
+// 	}
 
-	return sessionID, nil
-}
+// 	return sessionID, nil
+// }
 
 func SetCookie(w http.ResponseWriter, name, value string, maxAge int) {
 	cookie := &http.Cookie{
@@ -109,10 +108,11 @@ func DeleteCookie(w http.ResponseWriter, name string) {
 	http.SetCookie(w, cookie)
 }
 func CreateSession(w http.ResponseWriter, r *http.Request, authSession *AuthSession) {
-	lockManager.LoginStatus.Store(loginStatusKey, true) // 更新登录成功状态
-
 	cr := authSession.ClientRequest
 	ua := authSession.UserActLog
+
+	lockManager.LoginStatus.Store(cr.SessionId, true) // 更新登录成功状态
+	lockManager.LoginStatus.Delete(cr.SessionId)      // 清除登录状态
 
 	sess := sessdata.NewSession("")
 	sess.Username = cr.Auth.Username
@@ -201,7 +201,7 @@ func LinkAuth_otp(w http.ResponseWriter, r *http.Request) {
 		// 	http.Error(w, "TooManyError, please login again", http.StatusBadRequest)
 		// 	return
 		// }
-		lockManager.LoginStatus.Store(loginStatusKey, false) // 记录登录失败状态
+		lockManager.LoginStatus.Store(cr.SessionId, false) // 记录登录失败状态
 
 		base.Warn("OTP 动态码错误", username, r.RemoteAddr)
 		ua.Info = "OTP 动态码错误"

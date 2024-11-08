@@ -2,7 +2,6 @@ package admin
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"net"
 	"net/http"
@@ -89,7 +88,7 @@ func UnlockUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if lockinfo.State == nil {
-		RespError(w, RespInternalErr, fmt.Errorf("未找到锁定用户！"))
+		RespError(w, RespInternalErr, "未找到锁定用户！")
 		return
 	}
 	lm := GetLockManager()
@@ -111,7 +110,7 @@ func UnlockUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if state == nil || !state.Locked {
-		RespError(w, RespInternalErr, fmt.Errorf("锁定状态未找到或已解锁"))
+		RespError(w, RespInternalErr, "锁定状态未找到或已解锁")
 		return
 	}
 
@@ -238,14 +237,14 @@ func (lm *LockManager) CleanupExpiredLocks() {
 	defer lm.mu.Unlock()
 
 	for ip, state := range lm.ipLocks {
-		if !lm.CheckLockState(state, now, base.Cfg.GlobalIPLockTime) ||
+		if !lm.CheckLockState(state, now, base.Cfg.GlobalIPBanResetTime) ||
 			now.Sub(state.LastAttempt) > time.Duration(base.Cfg.GlobalLockStateExpirationTime)*time.Second {
 			delete(lm.ipLocks, ip)
 		}
 	}
 
 	for user, state := range lm.userLocks {
-		if !lm.CheckLockState(state, now, base.Cfg.GlobalUserLockTime) ||
+		if !lm.CheckLockState(state, now, base.Cfg.GlobalUserBanResetTime) ||
 			now.Sub(state.LastAttempt) > time.Duration(base.Cfg.GlobalLockStateExpirationTime)*time.Second {
 			delete(lm.userLocks, user)
 		}
@@ -253,7 +252,7 @@ func (lm *LockManager) CleanupExpiredLocks() {
 
 	for user, ipMap := range lm.ipUserLocks {
 		for ip, state := range ipMap {
-			if !lm.CheckLockState(state, now, base.Cfg.LockTime) ||
+			if !lm.CheckLockState(state, now, base.Cfg.BanResetTime) ||
 				now.Sub(state.LastAttempt) > time.Duration(base.Cfg.GlobalLockStateExpirationTime)*time.Second {
 				delete(ipMap, ip)
 				if len(ipMap) == 0 {

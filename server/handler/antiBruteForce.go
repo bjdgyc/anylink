@@ -14,8 +14,6 @@ import (
 
 var lockManager = admin.GetLockManager()
 
-const loginStatusKey = "login_status"
-
 // 防爆破中间件
 func antiBruteForce(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -96,7 +94,7 @@ func antiBruteForce(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 
 		// 检查登录状态
-		Status, _ := lockManager.LoginStatus.Load(loginStatusKey)
+		Status, _ := lockManager.LoginStatus.Load(cr.SessionId)
 		loginStatus, _ := Status.(bool)
 
 		// 更新用户登录状态
@@ -105,6 +103,6 @@ func antiBruteForce(next http.Handler) http.Handler {
 		lockManager.UpdateUserIPLock(username, ip, now, loginStatus)
 
 		// 清除登录状态
-		lockManager.LoginStatus.Delete(loginStatusKey)
+		lockManager.LoginStatus.Delete(cr.SessionId)
 	})
 }
