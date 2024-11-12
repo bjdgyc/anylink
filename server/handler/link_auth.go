@@ -77,6 +77,12 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+
+	// 锁定状态判断
+	if !lockManager.CheckLocked(cr.Auth.Username, r.RemoteAddr) {
+		http.Error(w, "Locked! Try again later.", http.StatusTooManyRequests)
+		return
+	}
 	// 用户活动日志
 	ua := &dbdata.UserActLog{
 		Username:        cr.Auth.Username,
@@ -94,7 +100,8 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	// TODO 用户密码校验
 	err = dbdata.CheckUser(cr.Auth.Username, cr.Auth.Password, cr.GroupSelect)
 	if err != nil {
-		lockManager.LoginStatus.Store(cr.SessionId, false) // 记录登录失败状态
+		// lockManager.LoginStatus.Store(loginStatusKey, false) // 记录登录失败状态
+		lockManager.UpdateLock(cr.Auth.Username, r.RemoteAddr, false) // 记录登录失败状态
 		base.Warn(err, r.RemoteAddr)
 		ua.Info = err.Error()
 		ua.Status = dbdata.UserAuthFail
@@ -119,12 +126,18 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	}
 	// 用户otp验证
 	if !v.DisableOtp {
-		lockManager.LoginStatus.Store(cr.SessionId, true) // 重置OTP验证计数
+		lockManager.UpdateLock(cr.Auth.Username, r.RemoteAddr, true) // 重置OTP验证计数
+		sessionID, err := GenerateSessionID()
+		if err != nil {
+			base.Error("Failed to generate session ID: ", err)
+			http.Error(w, "Failed to generate session ID", http.StatusInternalServerError)
+			return
+		}
 
 		sessionData.ClientRequest.Auth.OtpSecret = v.OtpSecret
-		SessStore.SaveAuthSession(cr.SessionId, sessionData)
+		SessStore.SaveAuthSession(sessionID, sessionData)
 
-		SetCookie(w, "auth-session-id", cr.SessionId, 0)
+		SetCookie(w, "auth-session-id", sessionID, 0)
 
 		data := RequestData{}
 		w.WriteHeader(http.StatusOK)

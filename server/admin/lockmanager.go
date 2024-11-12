@@ -30,8 +30,8 @@ type IPWhitelists struct {
 }
 
 type LockManager struct {
-	mu            sync.Mutex
-	LoginStatus   sync.Map                         // 登录状态
+	mu sync.Mutex
+	// LoginStatus   sync.Map                         // 登录状态
 	ipLocks       map[string]*LockState            // 全局IP锁定状态
 	userLocks     map[string]*LockState            // 全局用户锁定状态
 	ipUserLocks   map[string]map[string]*LockState // 单用户IP锁定状态
@@ -45,7 +45,7 @@ var once sync.Once
 func GetLockManager() *LockManager {
 	once.Do(func() {
 		lockmanager = &LockManager{
-			LoginStatus:  sync.Map{},
+			// LoginStatus:  sync.Map{},
 			ipLocks:      make(map[string]*LockState),
 			userLocks:    make(map[string]*LockState),
 			ipUserLocks:  make(map[string]map[string]*LockState),
@@ -408,4 +408,54 @@ func (lm *LockManager) Unlock(state *LockState) {
 	state.FailureCount = 0
 	state.LockTime = time.Time{}
 	state.Locked = false
+}
+
+// 检查锁定状态
+func (lm *LockManager) CheckLocked(username, ipaddr string) bool {
+	if !base.Cfg.AntiBruteForce {
+		return true
+	}
+
+	ip, _, err := net.SplitHostPort(ipaddr) // 提取纯 IP 地址，去掉端口号
+	if err != nil {
+		return true
+	}
+
+	now := time.Now()
+	// 检查IP是否在白名单中
+	if lm.IsWhitelisted(ip) {
+		return true
+	}
+
+	// 检查全局 IP 锁定
+	if base.Cfg.MaxGlobalIPBanCount > 0 && lm.CheckGlobalIPLock(ip, now) {
+		base.Warn("IP", ip, "is globally locked. Try again later.")
+		return false
+	}
+
+	// 检查全局用户锁定
+	if base.Cfg.MaxGlobalUserBanCount > 0 && lm.CheckGlobalUserLock(username, now) {
+		base.Warn("User", username, "is globally locked. Try again later.")
+		return false
+	}
+
+	// 检查单个用户的 IP 锁定
+	if base.Cfg.MaxBanCount > 0 && lm.CheckUserIPLock(username, ip, now) {
+		base.Warn("IP", ip, "is locked for user", username, "Try again later.")
+		return false
+	}
+
+	return true
+}
+
+func (lm *LockManager) UpdateLock(username, ipaddr string, loginStatus bool) {
+	ip, _, err := net.SplitHostPort(ipaddr) // 提取纯 IP 地址，去掉端口号
+	if err != nil {
+		return
+	}
+	now := time.Now()
+	// 更新用户登录状态
+	lm.UpdateGlobalIPLock(ip, now, loginStatus)
+	lm.UpdateGlobalUserLock(username, now, loginStatus)
+	lm.UpdateUserIPLock(username, ip, now, loginStatus)
 }

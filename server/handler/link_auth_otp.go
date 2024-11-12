@@ -9,12 +9,15 @@ import (
 	"net/http"
 	"sync"
 
+	"github.com/bjdgyc/anylink/admin"
 	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/dbdata"
+	"github.com/bjdgyc/anylink/pkg/utils"
 	"github.com/bjdgyc/anylink/sessdata"
 )
 
 var SessStore = NewSessionStore()
+var lockManager = admin.GetLockManager()
 
 // const maxOtpErrCount = 3
 
@@ -65,14 +68,13 @@ func (s *SessionStore) DeleteAuthSession(sessionID string) {
 // 	return int(newI)
 // }
 
-// func GenerateSessionID() (string, error) {
-// 	sessionID := utils.RandomRunes(32)
-// 	if sessionID == "" {
-// 		return "", fmt.Errorf("failed to generate session ID")
-// 	}
-
-// 	return sessionID, nil
-// }
+func GenerateSessionID() (string, error) {
+	sessionID := utils.RandomRunes(32)
+	if sessionID == "" {
+		return "", fmt.Errorf("failed to generate session ID")
+	}
+	return sessionID, nil
+}
 
 func SetCookie(w http.ResponseWriter, name, value string, maxAge int) {
 	cookie := &http.Cookie{
@@ -111,8 +113,7 @@ func CreateSession(w http.ResponseWriter, r *http.Request, authSession *AuthSess
 	cr := authSession.ClientRequest
 	ua := authSession.UserActLog
 
-	lockManager.LoginStatus.Store(cr.SessionId, true) // 更新登录成功状态
-	lockManager.LoginStatus.Delete(cr.SessionId)      // 清除登录状态
+	lockManager.UpdateLock(cr.Auth.Username, r.RemoteAddr, true) // 更新登录成功状态
 
 	sess := sessdata.NewSession("")
 	sess.Username = cr.Auth.Username
@@ -194,6 +195,11 @@ func LinkAuth_otp(w http.ResponseWriter, r *http.Request) {
 	otpSecret := sessionData.ClientRequest.Auth.OtpSecret
 	otp := cr.Auth.SecondaryPassword
 
+	// 锁定状态判断
+	if !lockManager.CheckLocked(username, r.RemoteAddr) {
+		http.Error(w, "Locked! Try again later.", http.StatusTooManyRequests)
+		return
+	}
 	// 动态码错误
 	if !dbdata.CheckOtp(username, otp, otpSecret) {
 		// if sessionData.AddOtpErrCount(1) > maxOtpErrCount {
@@ -201,7 +207,7 @@ func LinkAuth_otp(w http.ResponseWriter, r *http.Request) {
 		// 	http.Error(w, "TooManyError, please login again", http.StatusBadRequest)
 		// 	return
 		// }
-		lockManager.LoginStatus.Store(cr.SessionId, false) // 记录登录失败状态
+		lockManager.UpdateLock(username, r.RemoteAddr, false) // 记录登录失败状态
 
 		base.Warn("OTP 动态码错误", username, r.RemoteAddr)
 		ua.Info = "OTP 动态码错误"
