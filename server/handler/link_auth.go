@@ -94,7 +94,10 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	// TODO 用户密码校验
 	err = dbdata.CheckUser(cr.Auth.Username, cr.Auth.Password, cr.GroupSelect)
 	if err != nil {
-		lockManager.LoginStatus.Store(loginStatusKey, false) // 记录登录失败状态
+		// lockManager.LoginStatus.Store(loginStatusKey, false) // 记录登录失败状态
+		hc := r.Context().Value(loginStatusKey).(*HttpContext)
+		hc.LoginStatus = false
+
 		base.Warn(err, r.RemoteAddr)
 		ua.Info = err.Error()
 		ua.Status = dbdata.UserAuthFail
@@ -119,7 +122,10 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	}
 	// 用户otp验证
 	if base.Cfg.AuthAloneOtp && !v.DisableOtp {
-		lockManager.LoginStatus.Store(loginStatusKey, true) // 重置OTP验证计数
+		// lockManager.LoginStatus.Store(loginStatusKey, true) // 重置OTP验证计数
+		hc := r.Context().Value(loginStatusKey).(*HttpContext)
+		hc.LoginStatus = true
+
 		sessionID, err := GenerateSessionID()
 		if err != nil {
 			base.Error("Failed to generate session ID: ", err)

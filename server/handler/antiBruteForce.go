@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"encoding/xml"
 	"io"
 	"net"
@@ -16,14 +17,23 @@ var lockManager = admin.GetLockManager()
 
 const loginStatusKey = "login_status"
 
+type HttpContext struct {
+	LoginStatus bool // 登录状态
+}
+
 // 防爆破中间件
 func antiBruteForce(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	return http.HandlerFunc(func(w http.ResponseWriter, old_r *http.Request) {
 		// 防爆破功能全局开关
 		if !base.Cfg.AntiBruteForce {
-			next.ServeHTTP(w, r)
+			next.ServeHTTP(w, old_r)
 			return
 		}
+
+		// 非并发安全
+		hc := &HttpContext{}
+		ctx := context.WithValue(context.Background(), loginStatusKey, hc)
+		r := old_r.WithContext(ctx)
 
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
@@ -96,8 +106,10 @@ func antiBruteForce(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 
 		// 检查登录状态
-		Status, _ := lockManager.LoginStatus.Load(loginStatusKey)
-		loginStatus, _ := Status.(bool)
+		// Status, _ := lockManager.LoginStatus.Load(loginStatusKey)
+		// loginStatus, _ := Status.(bool)
+
+		loginStatus := hc.LoginStatus
 
 		// 更新用户登录状态
 		lockManager.UpdateGlobalIPLock(ip, now, loginStatus)
@@ -105,6 +117,6 @@ func antiBruteForce(next http.Handler) http.Handler {
 		lockManager.UpdateUserIPLock(username, ip, now, loginStatus)
 
 		// 清除登录状态
-		lockManager.LoginStatus.Delete(loginStatusKey)
+		// lockManager.LoginStatus.Delete(loginStatusKey)
 	})
 }
