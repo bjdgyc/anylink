@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"sync"
 
+	"github.com/bjdgyc/anylink/admin"
 	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/dbdata"
 	"github.com/bjdgyc/anylink/pkg/utils"
@@ -16,6 +17,7 @@ import (
 )
 
 var SessStore = NewSessionStore()
+var lockManager = admin.GetLockManager()
 
 // const maxOtpErrCount = 3
 
@@ -110,11 +112,12 @@ func DeleteCookie(w http.ResponseWriter, name string) {
 }
 func CreateSession(w http.ResponseWriter, r *http.Request, authSession *AuthSession) {
 	// lockManager.LoginStatus.Store(loginStatusKey, true) // 更新登录成功状态
-	hc := r.Context().Value(loginStatusKey).(*HttpContext)
-	hc.LoginStatus = true
-
+	// hc := r.Context().Value(loginStatusKey).(*HttpContext)
+	// hc.LoginStatus = true
 	cr := authSession.ClientRequest
 	ua := authSession.UserActLog
+
+	lockManager.UpdateLoginStatus(cr.Auth.Username, r.RemoteAddr, true) // 更新登录成功状态
 
 	sess := sessdata.NewSession("")
 	sess.Username = cr.Auth.Username
@@ -196,6 +199,13 @@ func LinkAuth_otp(w http.ResponseWriter, r *http.Request) {
 	otpSecret := sessionData.ClientRequest.Auth.OtpSecret
 	otp := cr.Auth.SecondaryPassword
 
+	// 锁定状态判断
+	if !lockManager.CheckLocked(username, r.RemoteAddr) {
+		w.WriteHeader(http.StatusTooManyRequests)
+		SessStore.DeleteAuthSession(sessionID)
+		return
+	}
+
 	// 动态码错误
 	if !dbdata.CheckOtp(username, otp, otpSecret) {
 		// if sessionData.AddOtpErrCount(1) > maxOtpErrCount {
@@ -204,8 +214,9 @@ func LinkAuth_otp(w http.ResponseWriter, r *http.Request) {
 		// 	return
 		// }
 		// lockManager.LoginStatus.Store(loginStatusKey, false) // 记录登录失败状态
-		hc := r.Context().Value(loginStatusKey).(*HttpContext)
-		hc.LoginStatus = false
+		// hc := r.Context().Value(loginStatusKey).(*HttpContext)
+		// hc.LoginStatus = false
+		lockManager.UpdateLoginStatus(username, r.RemoteAddr, false) // 记录登录失败状态
 
 		base.Warn("OTP 动态码错误", username, r.RemoteAddr)
 		ua.Info = "OTP 动态码错误"
