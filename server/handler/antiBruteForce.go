@@ -9,11 +9,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bjdgyc/anylink/admin"
 	"github.com/bjdgyc/anylink/base"
 )
 
-var lockManager = admin.GetLockManager()
+// var lockManager = admin.GetLockManager()
 
 const loginStatusKey = "login_status"
 

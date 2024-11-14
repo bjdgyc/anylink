@@ -77,6 +77,13 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+
+	// 锁定状态判断
+	if !lockManager.CheckLocked(cr.Auth.Username, r.RemoteAddr) {
+		w.WriteHeader(http.StatusTooManyRequests)
+		return
+	}
+
 	// 用户活动日志
 	ua := &dbdata.UserActLog{
 		Username:        cr.Auth.Username,
@@ -95,8 +102,9 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	err = dbdata.CheckUser(cr.Auth.Username, cr.Auth.Password, cr.GroupSelect)
 	if err != nil {
 		// lockManager.LoginStatus.Store(loginStatusKey, false) // 记录登录失败状态
-		hc := r.Context().Value(loginStatusKey).(*HttpContext)
-		hc.LoginStatus = false
+		// hc := r.Context().Value(loginStatusKey).(*HttpContext)
+		// hc.LoginStatus = false
+		lockManager.UpdateLoginStatus(cr.Auth.Username, r.RemoteAddr, false) // 记录登录失败状态
 
 		base.Warn(err, r.RemoteAddr)
 		ua.Info = err.Error()
@@ -123,8 +131,9 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	// 用户otp验证
 	if base.Cfg.AuthAloneOtp && !v.DisableOtp {
 		// lockManager.LoginStatus.Store(loginStatusKey, true) // 重置OTP验证计数
-		hc := r.Context().Value(loginStatusKey).(*HttpContext)
-		hc.LoginStatus = true
+		// hc := r.Context().Value(loginStatusKey).(*HttpContext)
+		// hc.LoginStatus = true
+		lockManager.UpdateLoginStatus(cr.Auth.Username, r.RemoteAddr, true) // 重置OTP验证计数
 
 		sessionID, err := GenerateSessionID()
 		if err != nil {
