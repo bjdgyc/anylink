@@ -99,8 +99,8 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 		UserActLog:    ua,
 	}
 	// TODO 用户密码校验
-	err = dbdata.CheckUser(cr.Auth.Username, cr.Auth.Password, cr.GroupSelect,
-		map[string]interface{}{"mac_addr": cr.MacAddressList.MacAddress})
+	ext := map[string]interface{}{"mac_addr": cr.MacAddressList.MacAddress}
+	err = dbdata.CheckUser(cr.Auth.Username, cr.Auth.Password, cr.GroupSelect, ext)
 	if err != nil {
 		// lockManager.LoginStatus.Store(loginStatusKey, false) // 记录登录失败状态
 		// hc := r.Context().Value(loginStatusKey).(*HttpContext)
