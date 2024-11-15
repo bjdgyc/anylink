@@ -68,7 +68,7 @@ func SetUser(v *User) error {
 }
 
 // 验证用户登录信息
-func CheckUser(name, pwd, group string) error {
+func CheckUser(name, pwd, group string, ext map[string]interface{}) error {
 	// 获取登入的group数据
 	groupData := &Group{}
 	err := One("Name", group, groupData)
@@ -82,7 +82,7 @@ func CheckUser(name, pwd, group string) error {
 	authType := groupData.Auth["type"].(string)
 	// 本地认证方式
 	if authType == "local" {
-		return checkLocalUser(name, pwd, group)
+		return checkLocalUser(name, pwd, group, ext)
 	}
 	// 其它认证方式, 支持自定义
 	_, ok := authRegistry[authType]
@@ -90,11 +90,11 @@ func CheckUser(name, pwd, group string) error {
 		return fmt.Errorf("%s %s", "未知的认证方式: ", authType)
 	}
 	auth := makeInstance(authType).(IUserAuth)
-	return auth.checkUser(name, pwd, groupData)
+	return auth.checkUser(name, pwd, groupData, ext)
 }
 
 // 验证本地用户登录信息
-func checkLocalUser(name, pwd, group string) error {
+func checkLocalUser(name, pwd, group string, ext map[string]interface{}) error {
 	// TODO 严重问题
 	// return nil
 

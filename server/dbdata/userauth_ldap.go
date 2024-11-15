@@ -61,7 +61,7 @@ func (auth AuthLdap) checkData(authData map[string]interface{}) error {
 	return nil
 }
 
-func (auth AuthLdap) checkUser(name, pwd string, g *Group) error {
+func (auth AuthLdap) checkUser(name, pwd string, g *Group, ext map[string]interface{}) error {
 	pl := len(pwd)
 	if name == "" || pl < 1 {
 		return fmt.Errorf("%s %s", name, "密码错误")

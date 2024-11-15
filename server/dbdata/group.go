@@ -340,7 +340,8 @@ func GroupAuthLogin(name, pwd string, authData map[string]interface{}) error {
 	if err != nil {
 		return err
 	}
-	err = auth.checkUser(name, pwd, g)
+	ext := map[string]interface{}{}
+	err = auth.checkUser(name, pwd, g, ext)
 	return err
 }
 

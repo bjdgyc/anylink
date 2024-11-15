@@ -9,7 +9,7 @@ var authRegistry = make(map[string]reflect.Type)
 
 type IUserAuth interface {
 	checkData(authData map[string]interface{}) error
-	checkUser(name, pwd string, g *Group) error
+	checkUser(name, pwd string, g *Group, ext map[string]interface{}) error
 }
 
 func makeInstance(name string) interface{} {
