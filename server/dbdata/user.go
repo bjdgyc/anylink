@@ -69,6 +69,8 @@ func SetUser(v *User) error {
 
 // 验证用户登录信息
 func CheckUser(name, pwd, group string, ext map[string]interface{}) error {
+	base.Trace("CheckUser", name, pwd, group, ext)
+
 	// 获取登入的group数据
 	groupData := &Group{}
 	err := One("Name", group, groupData)

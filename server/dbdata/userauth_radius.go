@@ -9,6 +9,7 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/bjdgyc/anylink/base"
 	"layeh.com/radius"
 	"layeh.com/radius/rfc2865"
 )
@@ -75,8 +76,9 @@ func (auth AuthRadius) checkUser(name, pwd string, g *Group, ext map[string]inte
 		}
 	}
 	macAddr := ext["mac_addr"].(string)
+	base.Trace("AuthRadius", ext, macAddr)
 	if macAddr != "" {
-		err = rfc2865.CallingStationID_SetString(packet, macAddr)
+		err = rfc2865.CallingStationID_AddString(packet, macAddr)
 		if err != nil {
 			return fmt.Errorf("%s %s", name, "Radius set CallingStationID 出现错误")
 		}
