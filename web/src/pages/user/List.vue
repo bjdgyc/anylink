@@ -39,6 +39,9 @@
         <el-table-column sortable="true" prop="id" label="ID" width="60">
         </el-table-column>
 
+        <el-table-column prop="type" label="类型" width="60">
+        </el-table-column>
+
         <el-table-column prop="username" label="用户名" width="150">
         </el-table-column>
 
@@ -118,37 +121,40 @@
         <el-form-item label="用户ID" prop="id">
           <el-input v-model="ruleForm.id" disabled></el-input>
         </el-form-item>
+        <el-form-item label="类型" prop="type">
+          <el-input v-model="ruleForm.type" disabled></el-input>
+        </el-form-item>
         <el-form-item label="用户名" prop="username">
           <el-input v-model="ruleForm.username" :disabled="ruleForm.id > 0"></el-input>
         </el-form-item>
         <el-form-item label="姓名" prop="nickname">
-          <el-input v-model="ruleForm.nickname"></el-input>
+          <el-input v-model="ruleForm.nickname" :disabled="ruleForm.type === 'ldap'"></el-input>
         </el-form-item>
         <el-form-item label="邮箱" prop="email">
-          <el-input v-model="ruleForm.email"></el-input>
+          <el-input v-model="ruleForm.email" :disabled="false"></el-input>
         </el-form-item>
 
         <el-form-item label="PIN码" prop="pin_code">
-          <el-input v-model="ruleForm.pin_code" placeholder="不填由系统自动生成"></el-input>
+          <el-input v-model="ruleForm.pin_code" :disabled="ruleForm.type === 'ldap'" placeholder="不填由系统自动生成"></el-input>
         </el-form-item>
 
         <el-form-item label="过期时间" prop="limittime">
           <el-date-picker v-model="ruleForm.limittime" type="date" size="small" align="center" style="width:130px"
-            :picker-options="pickerOptions" placeholder="选择日期">
-          </el-date-picker>
+            :picker-options="pickerOptions" placeholder="选择日期" :disabled="ruleForm.type === 'ldap'"></el-date-picker>
         </el-form-item>
 
         <el-form-item label="禁用OTP" prop="disable_otp">
-          <el-switch v-model="ruleForm.disable_otp" active-text="开启OTP后，用户密码为PIN码,OTP密码为扫码后生成的动态码">
+          <el-switch v-model="ruleForm.disable_otp" active-text="开启OTP后，用户密码为PIN码,OTP密码为扫码后生成的动态码"
+            :disabled="ruleForm.type === 'ldap'">
           </el-switch>
         </el-form-item>
 
-        <el-form-item label="OTP密钥" prop="otp_secret" v-if="!ruleForm.disable_otp">
+        <el-form-item label="OTP密钥" prop="otp_secret" v-if="!ruleForm.disable_otp && ruleForm.type === 'ldap'">
           <el-input v-model="ruleForm.otp_secret" placeholder="不填由系统自动生成"></el-input>
         </el-form-item>
 
         <el-form-item label="用户组" prop="groups">
-          <el-checkbox-group v-model="ruleForm.groups">
+          <el-checkbox-group v-model="ruleForm.groups" :disabled="ruleForm.type === 'ldap'">
             <el-checkbox v-for="(item) in grouNames" :key="item" :label="item" :name="item"></el-checkbox>
           </el-checkbox-group>
         </el-form-item>
@@ -159,7 +165,7 @@
         </el-form-item>
 
         <el-form-item label="状态" prop="status">
-          <el-radio-group v-model="ruleForm.status">
+          <el-radio-group v-model="ruleForm.status" :disabled="ruleForm.type === 'ldap'">
             <el-radio :label="1" border>启用</el-radio>
             <el-radio :label="0" border>停用</el-radio>
             <el-radio :label="2" border>过期</el-radio>
@@ -208,6 +214,7 @@ export default {
       searchData: '',
       otpImgData: { visible: false, username: '', nickname: '', base64Img: '' },
       ruleForm: {
+        type: `local`,
         send_email: true,
         status: 1,
         groups: [],

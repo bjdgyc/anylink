@@ -23,6 +23,16 @@ type AuthRadius struct {
 func init() {
 	authRegistry["radius"] = reflect.TypeOf(AuthRadius{})
 }
+func (auth AuthRadius) saveUsers(g *Group) error {
+	// To Do!!!
+	authType := g.Auth["type"].(string)
+	bodyBytes, err := json.Marshal(g.Auth[authType])
+	if err != nil {
+		return errors.New("Radius配置填写有误")
+	}
+	json.Unmarshal(bodyBytes, &auth)
+	return nil
+}
 
 func (auth AuthRadius) checkData(authData map[string]interface{}) error {
 	authType := authData["type"].(string)

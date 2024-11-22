@@ -84,7 +84,7 @@ func CheckUser(name, pwd, group string, ext map[string]interface{}) error {
 	authType := groupData.Auth["type"].(string)
 	// 本地认证方式
 	if authType == "local" {
-		return checkLocalUser(name, pwd, group, ext)
+		return checkLocalUser(name, pwd, group)
 	}
 	// 其它认证方式, 支持自定义
 	_, ok := authRegistry[authType]
@@ -96,7 +96,7 @@ func CheckUser(name, pwd, group string, ext map[string]interface{}) error {
 }
 
 // 验证本地用户登录信息
-func checkLocalUser(name, pwd, group string, ext map[string]interface{}) error {
+func checkLocalUser(name, pwd, group string) error {
 	// TODO 严重问题
 	// return nil
 
@@ -120,7 +120,7 @@ func checkLocalUser(name, pwd, group string, ext map[string]interface{}) error {
 	}
 
 	pinCode := pwd
-	if base.Cfg.AuthAloneOtp == false {
+	if !base.Cfg.AuthAloneOtp {
 		// 判断otp信息
 		if !v.DisableOtp {
 			pinCode = pwd[:pl-6]

@@ -278,6 +278,10 @@ func userAccountMail(user *dbdata.User) error {
 		DisableOtp:   user.DisableOtp,
 	}
 
+	if user.Type == "ldap" {
+		data.PinCode = "同ldap密码"
+	}
+
 	if user.LimitTime == nil {
 		data.LimitTime = "无限制"
 	} else {

@@ -11,7 +11,9 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/bjdgyc/anylink/base"
 	"github.com/go-ldap/ldap"
+	"github.com/xlzd/gotp"
 )
 
 type AuthLdap struct {
@@ -23,10 +25,113 @@ type AuthLdap struct {
 	ObjectClass string `json:"object_class"`
 	SearchAttr  string `json:"search_attr"`
 	MemberOf    string `json:"member_of"`
+	EnableOTP   bool   `json:"enable_otp"`
 }
 
 func init() {
 	authRegistry["ldap"] = reflect.TypeOf(AuthLdap{})
+}
+
+// 建立 LDAP 连接
+func (auth AuthLdap) connect() (*ldap.Conn, error) {
+	// 检测服务器和端口的可用性
+	con, err := net.DialTimeout("tcp", auth.Addr, 3*time.Second)
+	if err != nil {
+		return nil, fmt.Errorf("LDAP服务器连接异常, 请检测服务器和端口: %s", err.Error())
+	}
+	con.Close()
+
+	// 连接LDAP
+	l, err := ldap.Dial("tcp", auth.Addr)
+	if err != nil {
+		return nil, fmt.Errorf("LDAP连接失败 %s %s", auth.Addr, err.Error())
+	}
+
+	if auth.Tls {
+		err = l.StartTLS(&tls.Config{InsecureSkipVerify: true})
+		if err != nil {
+			return nil, fmt.Errorf("LDAP TLS连接失败 %s", err.Error())
+		}
+	}
+
+	err = l.Bind(auth.BindName, auth.BindPwd)
+	if err != nil {
+		return nil, fmt.Errorf("LDAP 管理员 DN或密码填写有误 %s", err.Error())
+	}
+
+	return l, nil
+}
+
+func (auth AuthLdap) saveUsers(g *Group) error {
+	authType := g.Auth["type"].(string)
+	bodyBytes, err := json.Marshal(g.Auth[authType])
+	if err != nil {
+		return errors.New("LDAP配置填写有误")
+	}
+	json.Unmarshal(bodyBytes, &auth)
+	l, err := auth.connect()
+	if err != nil {
+		return err
+	}
+	defer l.Close()
+
+	if auth.ObjectClass == "" {
+		auth.ObjectClass = "person"
+	}
+	filterAttr := "(objectClass=" + auth.ObjectClass + ")"
+	filterAttr += "(" + auth.SearchAttr + "=*)"
+	if auth.MemberOf != "" {
+		filterAttr += "(memberOf:=" + auth.MemberOf + ")"
+	}
+	searchRequest := ldap.NewSearchRequest(
+		auth.BaseDn,
+		ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
+		fmt.Sprintf("(&%s)", filterAttr),
+		[]string{},
+		nil,
+	)
+
+	sr, err := l.Search(searchRequest)
+	if err != nil {
+		return fmt.Errorf("LDAP 查询失败 %s %s %s", auth.BaseDn, filterAttr, err.Error())
+	}
+	for _, entry := range sr.Entries {
+		var groups []string
+		ldapuser := &User{
+			Type:       "ldap",
+			Username:   entry.GetAttributeValue(auth.SearchAttr),
+			Nickname:   entry.GetAttributeValue("displayName"),
+			Email:      entry.GetAttributeValue("mail"),
+			Groups:     append(groups, g.Name),
+			DisableOtp: !auth.EnableOTP,
+			OtpSecret:  gotp.RandomSecret(32),
+			SendEmail:  false,
+			Status:     1,
+		}
+		// 新增ldap用户
+		u := &User{}
+		if err := One("username", ldapuser.Username, u); err != nil {
+			if CheckErrNotFound(err) {
+				if err := Add(ldapuser); err != nil {
+					base.Error("新增ldap用户失败", ldapuser.Username, err)
+					continue
+				}
+			}
+			continue
+		}
+		if u.Type != "ldap" {
+			base.Warn("已存在本地同名用户:", ldapuser.Username)
+			continue
+		}
+		// ldap OTP全局开关
+		if u.DisableOtp != !auth.EnableOTP {
+			u.DisableOtp = !auth.EnableOTP
+			if err := Set(u); err != nil {
+				return fmt.Errorf("更新ldap用户%sOTP状态失败:%v", u.Username, err.Error())
+			}
+		}
+	}
+	return nil
 }
 
 func (auth AuthLdap) checkData(authData map[string]interface{}) error {
@@ -78,28 +183,12 @@ func (auth AuthLdap) checkUser(name, pwd string, g *Group, ext map[string]interf
 	if err != nil {
 		return fmt.Errorf("%s %s", name, "LDAP Unmarshal出现错误")
 	}
-	// 检测服务器和端口的可用性
-	con, err := net.DialTimeout("tcp", auth.Addr, 3*time.Second)
+	l, err := auth.connect()
 	if err != nil {
-		return fmt.Errorf("%s %s", name, "LDAP服务器连接异常, 请检测服务器和端口")
-	}
-	defer con.Close()
-	// 连接LDAP
-	l, err := ldap.Dial("tcp", auth.Addr)
-	if err != nil {
-		return fmt.Errorf("LDAP连接失败 %s %s", auth.Addr, err.Error())
+		return err
 	}
 	defer l.Close()
-	if auth.Tls {
-		err = l.StartTLS(&tls.Config{InsecureSkipVerify: true})
-		if err != nil {
-			return fmt.Errorf("%s LDAP TLS连接失败 %s", name, err.Error())
-		}
-	}
-	err = l.Bind(auth.BindName, auth.BindPwd)
-	if err != nil {
-		return fmt.Errorf("%s LDAP 管理员 DN或密码填写有误 %s", name, err.Error())
-	}
+
 	if auth.ObjectClass == "" {
 		auth.ObjectClass = "person"
 	}

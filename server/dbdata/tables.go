@@ -26,6 +26,7 @@ type Group struct {
 
 type User struct {
 	Id       int    `json:"id" xorm:"pk autoincr not null"`
+	Type     string `json:"type" xorm:"varchar(20) default('local')"`
 	Username string `json:"username" xorm:"varchar(60) not null unique"`
 	Nickname string `json:"nickname" xorm:"varchar(255)"`
 	Email    string `json:"email" xorm:"varchar(255)"`
