@@ -30,7 +30,8 @@ AnyLink 基于 [ietf-openconnect](https://tools.ietf.org/html/draft-mavrogiannop
 AnyLink 使用 TLS/DTLS 进行数据加密，因此需要 RSA 或 ECC 证书，可以使用私有自签证书，可以通过 Let's Encrypt 和 TrustAsia
 申请免费的 SSL 证书。
 
-AnyLink 服务端仅在 CentOS 7、CentOS 8、Ubuntu 18、Ubuntu 20、Ubuntu 20、AnolisOS 8 测试通过，如需要安装在其他系统，需要服务端支持 tun/tap
+AnyLink 服务端仅在 CentOS 7、CentOS 8、Ubuntu 18、Ubuntu 20、Ubuntu 20、AnolisOS 8 测试通过，如需要安装在其他系统，需要服务端支持
+tun/tap
 功能、ip 设置命令、iptables命令。
 
 ## Screenshot
@@ -164,12 +165,12 @@ sudo ./anylink
 >
 > 数据库表结构自动生成，无需手动导入(请赋予 DDL 权限)
 
-| db_type  | db_source                                                                  |
-|----------|----------------------------------------------------------------------------|
-| sqlite3  | ./conf/anylink.db                                                          |
-| mysql    | user:password@tcp(127.0.0.1:3306)/anylink?charset=utf8                     |
-| postgres | postgres://user:password@localhost/anylink?sslmode=verify-full             |
-| mssql    | sqlserver://user:password@localhost?database=anylink&connection+timeout=30 |
+| db_type  | db_source                                                                                                            |
+|----------|----------------------------------------------------------------------------------------------------------------------|
+| sqlite3  | ./conf/anylink.db                                                                                                    |
+| mysql    | user:password@tcp(127.0.0.1:3306)/anylink?charset=utf8<br/>user:password@tcp(127.0.0.1:3306)/anylink?charset=utf8mb4 |
+| postgres | postgres://user:password@localhost/anylink?sslmode=verify-full                                                       |
+| mssql    | sqlserver://user:password@localhost?database=anylink&connection+timeout=30                                           |
 
 > 示例配置文件
 >
