@@ -30,7 +30,7 @@ type User struct {
 	Nickname string `json:"nickname" xorm:"varchar(255)"`
 	Email    string `json:"email" xorm:"varchar(255)"`
 	// Password  string    `json:"password"`
-	PinCode    string     `json:"pin_code" xorm:"varchar(32)"`
+	PinCode    string     `json:"pin_code" xorm:"varchar(64)"`
 	LimitTime  *time.Time `json:"limittime,omitempty" xorm:"Datetime limittime"` // 值为null时，前端不显示
 	OtpSecret  string     `json:"otp_secret" xorm:"varchar(255)"`
 	DisableOtp bool       `json:"disable_otp" xorm:"Bool"` // 禁用otp
