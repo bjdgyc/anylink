@@ -304,7 +304,7 @@ func SetGroup(g *Group) error {
 			return err
 		}
 		if err := auth.saveUsers(g); err != nil {
-			return fmt.Errorf("保存ldap用户 %s 失败", err.Error())
+			return err
 		}
 		// 重置Auth， 删除多余的key
 		g.Auth = map[string]interface{}{
