@@ -1,6 +1,8 @@
 module github.com/bjdgyc/anylink
 
-go 1.22
+go 1.22.0
+
+toolchain go1.23.3
 
 require (
 	github.com/arl/statsviz v0.6.0
