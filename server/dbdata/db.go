@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/bjdgyc/anylink/base"
+	_ "github.com/denisenkom/go-mssqldb"
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
@@ -22,12 +23,13 @@ func GetXdb() *xorm.Engine {
 func initDb() {
 	var err error
 	xdb, err = xorm.NewEngine(base.Cfg.DbType, base.Cfg.DbSource)
-	// 初始化xorm时区
-	xdb.DatabaseTZ = time.Local
-	xdb.TZLocation = time.Local
 	if err != nil {
 		base.Fatal(err)
 	}
+
+	// 初始化xorm时区
+	xdb.DatabaseTZ = time.Local
+	xdb.TZLocation = time.Local
 
 	if base.Cfg.ShowSQL {
 		xdb.ShowSQL(true)
@@ -203,7 +205,8 @@ const accountMail = `<p>您好:</p>
     <ul>
         <li>请使用OTP软件扫描动态码二维码</li>
         <li>然后使用anyconnect客户端进行登陆</li>
-        <li>登陆密码为 【PIN码+动态码】(中间没有+号)</li>
+        <li>登陆密码为 PIN 码</li>
+		<li>OTP密码为扫码后生成的动态码</li>
     </ul>
 </div>
 <p>

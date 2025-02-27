@@ -11,21 +11,22 @@ import (
 )
 
 type Online struct {
-	Token            string    `json:"token"`
-	Username         string    `json:"username"`
-	Group            string    `json:"group"`
-	MacAddr          string    `json:"mac_addr"`
-	UniqueMac        bool      `json:"unique_mac"`
-	Ip               net.IP    `json:"ip"`
-	RemoteAddr       string    `json:"remote_addr"`
-	TunName          string    `json:"tun_name"`
-	Mtu              int       `json:"mtu"`
-	Client           string    `json:"client"`
-	BandwidthUp      string    `json:"bandwidth_up"`
-	BandwidthDown    string    `json:"bandwidth_down"`
-	BandwidthUpAll   string    `json:"bandwidth_up_all"`
-	BandwidthDownAll string    `json:"bandwidth_down_all"`
-	LastLogin        time.Time `json:"last_login"`
+	Token             string    `json:"token"`
+	Username          string    `json:"username"`
+	Group             string    `json:"group"`
+	MacAddr           string    `json:"mac_addr"`
+	UniqueMac         bool      `json:"unique_mac"`
+	Ip                net.IP    `json:"ip"`
+	RemoteAddr        string    `json:"remote_addr"`
+	TransportProtocol string    `json:"transport_protocol"`
+	TunName           string    `json:"tun_name"`
+	Mtu               int       `json:"mtu"`
+	Client            string    `json:"client"`
+	BandwidthUp       string    `json:"bandwidth_up"`
+	BandwidthDown     string    `json:"bandwidth_down"`
+	BandwidthUpAll    string    `json:"bandwidth_up_all"`
+	BandwidthDownAll  string    `json:"bandwidth_down_all"`
+	LastLogin         time.Time `json:"last_login"`
 }
 
 type Onlines []Online
@@ -90,22 +91,28 @@ func GetOnlineSess(search_cate string, search_text string, show_sleeper bool) []
 		}
 
 		if show_sleeper || v.IsActive {
+			transportProtocol := "TCP"
+			dSess := cSess.GetDtlsSession()
+			if dSess != nil {
+				transportProtocol = "UDP"
+			}
 			val := Online{
-				Token:            v.Token,
-				Ip:               cSess.IpAddr,
-				Username:         v.Username,
-				Group:            v.Group,
-				MacAddr:          v.MacAddr,
-				UniqueMac:        v.UniqueMac,
-				RemoteAddr:       cSess.RemoteAddr,
-				TunName:          cSess.IfName,
-				Mtu:              cSess.Mtu,
-				Client:           cSess.Client,
-				BandwidthUp:      utils.HumanByte(cSess.BandwidthUpPeriod.Load()) + "/s",
-				BandwidthDown:    utils.HumanByte(cSess.BandwidthDownPeriod.Load()) + "/s",
-				BandwidthUpAll:   utils.HumanByte(cSess.BandwidthUpAll.Load()),
-				BandwidthDownAll: utils.HumanByte(cSess.BandwidthDownAll.Load()),
-				LastLogin:        v.LastLogin,
+				Token:             v.Token,
+				Ip:                cSess.IpAddr,
+				Username:          v.Username,
+				Group:             v.Group,
+				MacAddr:           v.MacAddr,
+				UniqueMac:         v.UniqueMac,
+				RemoteAddr:        cSess.RemoteAddr,
+				TransportProtocol: transportProtocol,
+				TunName:           cSess.IfName,
+				Mtu:               cSess.Mtu,
+				Client:            cSess.Client,
+				BandwidthUp:       utils.HumanByte(cSess.BandwidthUpPeriod.Load()) + "/s",
+				BandwidthDown:     utils.HumanByte(cSess.BandwidthDownPeriod.Load()) + "/s",
+				BandwidthUpAll:    utils.HumanByte(cSess.BandwidthUpAll.Load()),
+				BandwidthDownAll:  utils.HumanByte(cSess.BandwidthDownAll.Load()),
+				LastLogin:         v.LastLogin,
 			}
 			datas = append(datas, val)
 		}

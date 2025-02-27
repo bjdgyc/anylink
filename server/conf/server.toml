@@ -53,8 +53,5 @@ ipv4_end = "192.168.90.200"
 #是否自动添加nat
 iptables_nat = true
 
-
 #客户端显示详细错误信息(线上环境慎开启)
 display_error = true
-
-

@@ -106,6 +106,9 @@ func logAudit(userName string, pl *sessdata.Payload) {
 		if err := recover(); err != nil {
 			base.Error("logAudit is panic: ", err, "\n", string(debug.Stack()), "\n", pl.Data)
 		}
+	}()
+
+	defer func() {
 		putPayload(pl)
 	}()
 

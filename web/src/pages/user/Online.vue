@@ -86,6 +86,7 @@
             label="唯一MAC">
             <template slot-scope="scope">
                 <el-tag v-if="scope.row.unique_mac" type="success">是</el-tag>
+                <el-tag v-else type="info">否</el-tag>
             </template>
         </el-table-column>
 
@@ -99,7 +100,10 @@
             prop="remote_addr"
             label="远端地址">
         </el-table-column>
-
+        <el-table-column
+            prop="transport_protocol"
+            label="传输协议">
+        </el-table-column>
         <el-table-column
             prop="tun_name"
             label="虚拟网卡">

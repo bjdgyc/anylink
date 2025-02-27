@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/pkg/utils"
 	"github.com/xlzd/gotp"
 )
@@ -67,7 +68,9 @@ func SetUser(v *User) error {
 }
 
 // 验证用户登录信息
-func CheckUser(name, pwd, group string) error {
+func CheckUser(name, pwd, group string, ext map[string]interface{}) error {
+	base.Trace("CheckUser", name, pwd, group, ext)
+
 	// 获取登入的group数据
 	groupData := &Group{}
 	err := One("Name", group, groupData)
@@ -81,7 +84,7 @@ func CheckUser(name, pwd, group string) error {
 	authType := groupData.Auth["type"].(string)
 	// 本地认证方式
 	if authType == "local" {
-		return checkLocalUser(name, pwd, group)
+		return checkLocalUser(name, pwd, group, ext)
 	}
 	// 其它认证方式, 支持自定义
 	_, ok := authRegistry[authType]
@@ -89,11 +92,11 @@ func CheckUser(name, pwd, group string) error {
 		return fmt.Errorf("%s %s", "未知的认证方式: ", authType)
 	}
 	auth := makeInstance(authType).(IUserAuth)
-	return auth.checkUser(name, pwd, groupData)
+	return auth.checkUser(name, pwd, groupData, ext)
 }
 
 // 验证本地用户登录信息
-func checkLocalUser(name, pwd, group string) error {
+func checkLocalUser(name, pwd, group string, ext map[string]interface{}) error {
 	// TODO 严重问题
 	// return nil
 
@@ -115,18 +118,29 @@ func checkLocalUser(name, pwd, group string) error {
 	if !utils.InArrStr(v.Groups, group) {
 		return fmt.Errorf("%s %s", name, "用户组错误")
 	}
-	// 判断otp信息
+
 	pinCode := pwd
-	if !v.DisableOtp {
-		pinCode = pwd[:pl-6]
-		otp := pwd[pl-6:]
-		if !checkOtp(name, otp, v.OtpSecret) {
-			return fmt.Errorf("%s %s", name, "动态码错误")
+	if base.Cfg.AuthAloneOtp == false {
+		// 判断otp信息
+		if !v.DisableOtp {
+			pinCode = pwd[:pl-6]
+			otp := pwd[pl-6:]
+			if !CheckOtp(name, otp, v.OtpSecret) {
+				return fmt.Errorf("%s %s", name, "动态码错误")
+			}
 		}
 	}
 
 	// 判断用户密码
-	if pinCode != v.PinCode {
+	// 兼容明文密码
+	if len(v.PinCode) != 60 {
+		if pinCode != v.PinCode {
+			return fmt.Errorf("%s %s", name, "密码错误")
+		}
+		return nil
+	}
+	// 密文密码
+	if !utils.PasswordVerify(pinCode, v.PinCode) {
 		return fmt.Errorf("%s %s", name, "密码错误")
 	}
 
@@ -171,7 +185,7 @@ func init() {
 }
 
 // 判断令牌信息
-func checkOtp(name, otp, secret string) bool {
+func CheckOtp(name, otp, secret string) bool {
 	key := fmt.Sprintf("%s:%s", name, otp)
 
 	userOtpMux.Lock()
@@ -189,4 +203,24 @@ func checkOtp(name, otp, secret string) bool {
 	verify := totp.Verify(otp, unix)
 
 	return verify
+}
+
+// 插入数据库前加密密码
+func (u *User) BeforeInsert() {
+	hashedPassword, err := utils.PasswordHash(u.PinCode)
+	if err != nil {
+		base.Error(err)
+	}
+	u.PinCode = hashedPassword
+}
+
+// 更新数据库前加密密码
+func (u *User) BeforeUpdate() {
+	if len(u.PinCode) != 60 {
+		hashedPassword, err := utils.PasswordHash(u.PinCode)
+		if err != nil {
+			base.Error(err)
+		}
+		u.PinCode = hashedPassword
+	}
 }

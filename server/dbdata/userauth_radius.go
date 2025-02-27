@@ -9,6 +9,7 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/bjdgyc/anylink/base"
 	"layeh.com/radius"
 	"layeh.com/radius/rfc2865"
 )
@@ -40,7 +41,7 @@ func (auth AuthRadius) checkData(authData map[string]interface{}) error {
 	return nil
 }
 
-func (auth AuthRadius) checkUser(name, pwd string, g *Group) error {
+func (auth AuthRadius) checkUser(name, pwd string, g *Group, ext map[string]interface{}) error {
 	pl := len(pwd)
 	if name == "" || pl < 1 {
 		return fmt.Errorf("%s %s", name, "密码错误")
@@ -74,15 +75,24 @@ func (auth AuthRadius) checkUser(name, pwd string, g *Group) error {
 			return fmt.Errorf("%s %s", name, "Radius set nasip 出现错误")
 		}
 	}
+	macAddr := ext["mac_addr"].(string)
+	base.Trace("AuthRadius", ext, macAddr)
+	if macAddr != "" {
+		err = rfc2865.CallingStationID_AddString(packet, macAddr)
+		if err != nil {
+			return fmt.Errorf("%s %s", name, "Radius set CallingStationID 出现错误")
+		}
+	}
 
 	ctx, done := context.WithTimeout(context.Background(), 3*time.Second)
 	defer done()
 	response, err := radius.Exchange(ctx, packet, auth.Addr)
 	if err != nil {
-		return fmt.Errorf("%s %s", name, "Radius服务器连接异常, 请检测服务器和端口")
+		return fmt.Errorf("%s %s %s", name, "Radius服务器连接异常, 请检测服务器和端口", err)
 	}
 	if response.Code != radius.CodeAccessAccept {
 		return fmt.Errorf("%s %s", name, "Radius：用户名或密码错误")
 	}
 	return nil
+
 }

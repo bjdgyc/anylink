@@ -2,7 +2,6 @@ package sessdata
 
 import (
 	"fmt"
-	"math/rand"
 	"net"
 	"strconv"
 	"strings"
@@ -12,6 +11,7 @@ import (
 
 	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/dbdata"
+	"github.com/bjdgyc/anylink/pkg/utils"
 	mapset "github.com/deckarep/golang-set"
 )
 
@@ -91,10 +91,6 @@ type Session struct {
 	CSess *ConnSession
 }
 
-func init() {
-	rand.Seed(time.Now().UnixNano())
-}
-
 func checkSession() {
 	// 检测过期的session
 	go func() {
@@ -144,28 +140,16 @@ func CloseUserLimittimeSession() {
 	}
 }
 
-func GenToken() string {
-	// 生成32位的 token
-	bToken := make([]byte, 32)
-	rand.Read(bToken)
-	return fmt.Sprintf("%x", bToken)
-}
-
 func NewSession(token string) *Session {
 	if token == "" {
-		btoken := make([]byte, 32)
-		rand.Read(btoken)
-		token = fmt.Sprintf("%x", btoken)
+		token = utils.RandomHex(32)
 	}
 
 	// 生成 dtlsn session_id
-	dtlsid := make([]byte, 32)
-	rand.Read(dtlsid)
-
 	sess := &Session{
 		Sid:       fmt.Sprintf("%d", time.Now().Unix()),
 		Token:     token,
-		DtlsSid:   fmt.Sprintf("%x", dtlsid),
+		DtlsSid:   utils.RandomHex(32),
 		LastLogin: time.Now(),
 	}
 

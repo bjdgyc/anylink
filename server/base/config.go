@@ -26,6 +26,7 @@ var configs = []config{
 	{Typ: cfgStr, Name: "server_addr", Usage: "TCP服务监听地址(任意端口)", ValStr: ":443"},
 	{Typ: cfgBool, Name: "server_dtls", Usage: "开启DTLS", ValBool: false},
 	{Typ: cfgStr, Name: "server_dtls_addr", Usage: "DTLS监听地址(任意端口)", ValStr: ":443"},
+	{Typ: cfgStr, Name: "advertise_dtls_addr", Usage: "DTLS对外映射端口(为空则与server_dtls_addr相同)", ValStr: ""},
 	{Typ: cfgStr, Name: "admin_addr", Usage: "后台服务监听地址", ValStr: ":8800"},
 	{Typ: cfgBool, Name: "proxy_protocol", Usage: "TCP代理协议", ValBool: false},
 	{Typ: cfgStr, Name: "db_type", Usage: "数据库类型 [sqlite3 mysql postgres]", ValStr: "sqlite3"},
@@ -71,6 +72,24 @@ var configs = []config{
 
 	{Typ: cfgBool, Name: "display_error", Usage: "客户端显示详细错误信息(线上环境慎开启)", ValBool: false},
 	{Typ: cfgBool, Name: "exclude_export_ip", Usage: "排除出口ip路由(出口ip不加密传输)", ValBool: true},
+	{Typ: cfgBool, Name: "auth_alone_otp", Usage: "登录单独验证OTP窗口", ValBool: false},
+
+	{Typ: cfgBool, Name: "anti_brute_force", Usage: "是否开启防爆功能", ValBool: true},
+	{Typ: cfgStr, Name: "ip_whitelist", Usage: "全局IP白名单,多个用逗号分隔，支持单IP和CIDR范围", ValStr: "192.168.90.1,172.16.0.0/24"},
+
+	{Typ: cfgInt, Name: "max_ban_score", Usage: "单位时间内最大尝试次数，0为关闭该功能", ValInt: 5},
+	{Typ: cfgInt, Name: "ban_reset_time", Usage: "设置单位时间(秒)，超过则重置计数", ValInt: 10},
+	{Typ: cfgInt, Name: "lock_time", Usage: "超过最大尝试次数后的锁定时长(秒)", ValInt: 300},
+
+	{Typ: cfgInt, Name: "max_global_user_ban_count", Usage: "全局用户单位时间内最大尝试次数，0为关闭该功能", ValInt: 20},
+	{Typ: cfgInt, Name: "global_user_ban_reset_time", Usage: "全局用户设置单位时间(秒)", ValInt: 600},
+	{Typ: cfgInt, Name: "global_user_lock_time", Usage: "全局用户锁定时间(秒)", ValInt: 300},
+
+	{Typ: cfgInt, Name: "max_global_ip_ban_count", Usage: "全局IP单位时间内最大尝试次数，0为关闭该功能", ValInt: 40},
+	{Typ: cfgInt, Name: "global_ip_ban_reset_time", Usage: "全局IP设置单位时间(秒)", ValInt: 1200},
+	{Typ: cfgInt, Name: "global_ip_lock_time", Usage: "全局IP锁定时间(秒)", ValInt: 300},
+
+	{Typ: cfgInt, Name: "global_lock_state_expiration_time", Usage: "全局锁定状态的保存生命周期(秒),超过则删除记录", ValInt: 3600},
 }
 
 var envs = map[string]string{}

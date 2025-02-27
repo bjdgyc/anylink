@@ -7,17 +7,9 @@
 
   <!--<div class="layout-aside" :style="aside_style">-->
 
-  <el-menu :collapse="!is_active"
-           :default-active="route_path"
-           :style="is_active?'width:200px':''"
-           router
-           class="layout-menu"
-           :collapse-transition="false"
-
-           background-color="#545c64"
-           text-color="#fff"
-           active-text-color="#ffd04b"
-  >
+  <el-menu :collapse="!is_active" :default-active="route_path" :style="is_active ? 'width:200px' : ''" router
+    class="layout-menu" :collapse-transition="false" background-color="#545c64" text-color="#fff"
+    active-text-color="#ffd04b">
     <el-menu-item index="/admin/home">
       <i class="el-icon-s-home"></i>
       <span slot="title">首页</span>
@@ -44,6 +36,7 @@
       <el-menu-item index="/admin/user/list">用户列表</el-menu-item>
       <el-menu-item index="/admin/user/policy">用户策略</el-menu-item>
       <el-menu-item index="/admin/user/online">在线用户</el-menu-item>
+      <el-menu-item index="/admin/user/lockmanager">锁定管理</el-menu-item>
       <el-menu-item index="/admin/user/ip_map">IP映射</el-menu-item>
     </el-submenu>
 

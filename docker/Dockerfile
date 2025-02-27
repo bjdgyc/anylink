@@ -38,7 +38,9 @@ LABEL maintainer="github.com/bjdgyc"
 ARG CN="no"
 
 ENV TZ=Asia/Shanghai
-ENV ANYLINK_IN_CONTAINER=true
+#开关变量  on  off
+ENV ANYLINK_IN_CONTAINER="on"
+ENV IPTABLES_LEGACY="off"
 
 WORKDIR /app
 COPY docker/init_release.sh /tmp/

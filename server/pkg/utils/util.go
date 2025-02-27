@@ -1,7 +1,10 @@
 package utils
 
 import (
+	crand "crypto/rand"
+	"encoding/hex"
 	"fmt"
+	"log"
 	"math/rand"
 	"strings"
 	"sync/atomic"
@@ -83,14 +86,23 @@ func HumanByte(bf interface{}) string {
 
 func RandomRunes(length int) string {
 	letterRunes := []rune("abcdefghijklmnpqrstuvwxy1234567890")
-
 	bytes := make([]rune, length)
-
 	for i := range bytes {
 		bytes[i] = letterRunes[rand.Intn(len(letterRunes))]
 	}
 
 	return string(bytes)
+}
+
+func RandomHex(length int) string {
+	b := make([]byte, length)
+	_, err := crand.Read(b)
+	if err != nil {
+		log.Println(err)
+		return ""
+	}
+
+	return hex.EncodeToString(b)
 }
 
 func ParseName(name string) string {
