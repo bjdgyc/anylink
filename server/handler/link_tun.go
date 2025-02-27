@@ -31,10 +31,10 @@ func checkTun() {
 		base.Fatal("testTun err: ", err)
 	}
 	// 开启服务器转发
-	err = execCmd([]string{"sysctl -w net.ipv4.ip_forward=1"})
-	if err != nil {
-		base.Fatal(err)
-	}
+	// err = execCmd([]string{"sysctl -w net.ipv4.ip_forward=1"})
+	// if err != nil {
+	// 	base.Fatal(err)
+	// }
 	if base.Cfg.IptablesNat {
 		// 添加NAT转发规则
 		ipt, err := iptables.New()

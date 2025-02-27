@@ -20,10 +20,7 @@ func Start() {
 	admin.InitLockManager() //初始化防爆破定时器和IP白名单
 
 	// 开启服务器转发
-	err := execCmd([]string{"sysctl -w net.ipv4.ip_forward=1"})
-	if err != nil {
-		base.Fatal(err)
-	}
+	execCmd([]string{"sysctl -w net.ipv4.ip_forward=1"})
 
 	switch base.Cfg.LinkMode {
 	case base.LinkModeTUN:

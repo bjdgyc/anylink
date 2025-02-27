@@ -439,7 +439,18 @@ ipv4_end = "10.1.2.200"
        --ip_lease=1209600 # IP地址租约时长
    ```
 
-7. 构建镜像 (非必需)
+9. 使用非特权模式启动容器
+   ```bash
+   # 参数可以参考 ./anylink tool -d
+   # 可以使用命令行参数 或者 环境变量 配置
+   docker run -itd --name anylink \
+       -p 443:443 -p 8800:8800 -p 443:443/udp \
+       -v /dev/net/tun:/dev/net/tun --cap-add=NET_ADMIN \
+       --restart=always \
+       bjdgyc/anylink
+   ```
+
+10. 构建镜像 (非必需)
    ```bash
    #获取仓库源码
    git clone https://github.com/bjdgyc/anylink.git
