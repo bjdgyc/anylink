@@ -142,6 +142,7 @@ sudo ./anylink
 - [x] 支持私有自签证书
 - [x] 支持内网域名解析(指定的域名走内网dns)
 - [x] 增加用户验证防爆功能(IP BAN)
+- [x] 支持 docker 非特权模式
 - [ ] 基于 ipvtap 设备的桥接访问模式
 
 ## Config
@@ -363,9 +364,9 @@ ipv4_end = "10.1.2.200"
 |    支持设备/平台    |       DockerHub       |                             阿里云镜像仓库                             |
 |:-------------:|:---------------------:|:---------------------------------------------------------------:|
 | x86_64/amd64  | bjdgyc/anylink:latest |     registry.cn-hangzhou.aliyuncs.com/bjdgyc/anylink:latest     |
-| x86_64/amd64  | bjdgyc/anylink:0.12.1 |     registry.cn-hangzhou.aliyuncs.com/bjdgyc/anylink:0.12.1     |
+| x86_64/amd64  | bjdgyc/anylink:0.13.1 |     registry.cn-hangzhou.aliyuncs.com/bjdgyc/anylink:0.13.1     |
 | armv8/aarch64 | bjdgyc/anylink:latest | registry.cn-hangzhou.aliyuncs.com/bjdgyc/anylink:arm64v8-latest |
-| armv8/aarch64 | bjdgyc/anylink:0.12.1 | registry.cn-hangzhou.aliyuncs.com/bjdgyc/anylink:arm64v8-0.12.1 |
+| armv8/aarch64 | bjdgyc/anylink:0.13.1 | registry.cn-hangzhou.aliyuncs.com/bjdgyc/anylink:arm64v8-0.13.1 |
 
 1. 获取镜像
    ```bash
