@@ -141,6 +141,8 @@ sudo ./anylink
 - [x] 支持多服务的配置区分
 - [x] 支持私有自签证书
 - [x] 支持内网域名解析(指定的域名走内网dns)
+- [x] 增加用户验证防爆功能(IP BAN)
+- [x] 支持 docker 非特权模式
 - [ ] 基于 ipvtap 设备的桥接访问模式
 
 ## Config
@@ -362,9 +364,9 @@ ipv4_end = "10.1.2.200"
 |    支持设备/平台    |       DockerHub       |                             阿里云镜像仓库                             |
 |:-------------:|:---------------------:|:---------------------------------------------------------------:|
 | x86_64/amd64  | bjdgyc/anylink:latest |     registry.cn-hangzhou.aliyuncs.com/bjdgyc/anylink:latest     |
-| x86_64/amd64  | bjdgyc/anylink:0.12.2 |     registry.cn-hangzhou.aliyuncs.com/bjdgyc/anylink:0.12.2     |
+| x86_64/amd64  | bjdgyc/anylink:0.13.1 |     registry.cn-hangzhou.aliyuncs.com/bjdgyc/anylink:0.13.1     |
 | armv8/aarch64 | bjdgyc/anylink:latest | registry.cn-hangzhou.aliyuncs.com/bjdgyc/anylink:arm64v8-latest |
-| armv8/aarch64 | bjdgyc/anylink:0.12.2 | registry.cn-hangzhou.aliyuncs.com/bjdgyc/anylink:arm64v8-0.12.2 |
+| armv8/aarch64 | bjdgyc/anylink:0.13.1 | registry.cn-hangzhou.aliyuncs.com/bjdgyc/anylink:arm64v8-0.13.1 |
 
 1. 获取镜像
    ```bash
@@ -439,7 +441,18 @@ ipv4_end = "10.1.2.200"
        --ip_lease=1209600 # IP地址租约时长
    ```
 
-7. 构建镜像 (非必需)
+9. 使用非特权模式启动容器
+   ```bash
+   # 参数可以参考 ./anylink tool -d
+   # 可以使用命令行参数 或者 环境变量 配置
+   docker run -itd --name anylink \
+       -p 443:443 -p 8800:8800 -p 443:443/udp \
+       -v /dev/net/tun:/dev/net/tun --cap-add=NET_ADMIN \
+       --restart=always \
+       bjdgyc/anylink
+   ```
+
+10. 构建镜像 (非必需)
    ```bash
    #获取仓库源码
    git clone https://github.com/bjdgyc/anylink.git
