@@ -7,6 +7,7 @@ import (
 	"github.com/bjdgyc/anylink/pkg/utils"
 	"github.com/bjdgyc/anylink/sessdata"
 	"github.com/coreos/go-iptables/iptables"
+	gosysctl "github.com/lorenzosaino/go-sysctl"
 	"github.com/songgao/water"
 )
 
@@ -100,8 +101,12 @@ func LinkTun(cSess *sessdata.ConnSession) error {
 		return err
 	}
 
-	cmdstr3 := fmt.Sprintf("sysctl -w net.ipv6.conf.%s.disable_ipv6=1", ifce.Name())
-	execCmd([]string{cmdstr3})
+	// cmdstr3 := fmt.Sprintf("sysctl -w net.ipv6.conf.%s.disable_ipv6=1", ifce.Name())
+	// execCmd([]string{cmdstr3})
+	err = gosysctl.Set(fmt.Sprintf("net.ipv6.conf.%s.disable_ipv6", ifce.Name()), "1")
+	if err != nil {
+		base.Warn(err)
+	}
 
 	go tunRead(ifce, cSess)
 	go tunWrite(ifce, cSess)
