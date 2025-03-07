@@ -2,11 +2,12 @@ package base
 
 import (
 	"fmt"
-	"github.com/bjdgyc/anylink/pkg/utils"
 	"os"
 	"path/filepath"
 	"reflect"
 	"strings"
+
+	"github.com/bjdgyc/anylink/pkg/utils"
 )
 
 const (
@@ -85,9 +86,10 @@ type ServerConfig struct {
 	Compression     bool `json:"compression"`       // bool
 	NoCompressLimit int  `json:"no_compress_limit"` // int
 
-	DisplayError    bool `json:"display_error"`
-	ExcludeExportIp bool `json:"exclude_export_ip"`
-	AuthAloneOtp    bool `json:"auth_alone_otp"`
+	DisplayError       bool `json:"display_error"`
+	ExcludeExportIp    bool `json:"exclude_export_ip"`
+	AuthAloneOtp       bool `json:"auth_alone_otp"`
+	EncryptionPassword bool `json:"encryption_password"`
 
 	AntiBruteForce bool   `json:"anti_brute_force"`
 	IPWhitelist    string `json:"ip_whitelist"`
