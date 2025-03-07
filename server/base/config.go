@@ -73,6 +73,7 @@ var configs = []config{
 	{Typ: cfgBool, Name: "display_error", Usage: "客户端显示详细错误信息(线上环境慎开启)", ValBool: false},
 	{Typ: cfgBool, Name: "exclude_export_ip", Usage: "排除出口ip路由(出口ip不加密传输)", ValBool: true},
 	{Typ: cfgBool, Name: "auth_alone_otp", Usage: "登录单独验证OTP窗口", ValBool: false},
+	{Typ: cfgBool, Name: "encryption_password", Usage: "用户密码是否加密保存", ValBool: false},
 
 	{Typ: cfgBool, Name: "anti_brute_force", Usage: "是否开启防爆功能", ValBool: true},
 	{Typ: cfgStr, Name: "ip_whitelist", Usage: "全局IP白名单,多个用逗号分隔，支持单IP和CIDR范围", ValStr: "192.168.90.1,172.16.0.0/24"},

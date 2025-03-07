@@ -15,6 +15,7 @@ import (
 
 	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/dbdata"
+	"github.com/bjdgyc/anylink/pkg/utils"
 	"github.com/bjdgyc/anylink/sessdata"
 	"github.com/skip2/go-qrcode"
 	mail "github.com/xhit/go-simple-mail/v2"
@@ -98,11 +99,17 @@ func UserSet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if len(data.PinCode) < 6 {
+		data.PinCode = utils.RandomRunes(8)
+		base.Info("用户", data.Username, "随机密码为:", data.PinCode)
+	}
+	plainpwd := data.PinCode
 	err = dbdata.SetUser(data)
 	if err != nil {
 		RespError(w, RespInternalErr, err)
 		return
 	}
+	data.PinCode = plainpwd
 
 	// 发送邮件
 	if data.SendEmail {

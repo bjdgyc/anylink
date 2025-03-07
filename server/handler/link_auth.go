@@ -102,9 +102,6 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	ext := map[string]interface{}{"mac_addr": cr.MacAddressList.MacAddress}
 	err = dbdata.CheckUser(cr.Auth.Username, cr.Auth.Password, cr.GroupSelect, ext)
 	if err != nil {
-		// lockManager.LoginStatus.Store(loginStatusKey, false) // 记录登录失败状态
-		// hc := r.Context().Value(loginStatusKey).(*HttpContext)
-		// hc.LoginStatus = false
 		lockManager.UpdateLoginStatus(cr.Auth.Username, r.RemoteAddr, false) // 记录登录失败状态
 
 		base.Warn(err, r.RemoteAddr)
@@ -131,9 +128,6 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	}
 	// 用户otp验证
 	if base.Cfg.AuthAloneOtp && !v.DisableOtp {
-		// lockManager.LoginStatus.Store(loginStatusKey, true) // 重置OTP验证计数
-		// hc := r.Context().Value(loginStatusKey).(*HttpContext)
-		// hc.LoginStatus = true
 		lockManager.UpdateLoginStatus(cr.Auth.Username, r.RemoteAddr, true) // 重置OTP验证计数
 
 		sessionID, err := GenerateSessionID()
