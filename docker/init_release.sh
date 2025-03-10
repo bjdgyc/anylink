@@ -11,7 +11,7 @@ fi
 
 
 # docker 启动使用 4.19 以上内核
-apk add --no-cache ca-certificates bash iproute2 tzdata iptables
+apk add --no-cache ca-certificates bash iproute2 tzdata iptables inetutils-telnet
 
 # alpine:3.19 兼容老版本 iptables
 apk add --no-cache iptables-legacy
