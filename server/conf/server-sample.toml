@@ -117,6 +117,8 @@ exclude_export_ip = true
 #登录单独验证OTP窗口
 auth_alone_otp = false
 
+#加密保存用户密码
+encryption_password = false
 
 #防爆破全局开关
 anti_brute_force = true
@@ -147,6 +149,3 @@ global_ip_lock_time = 300
 
 #全局锁定状态的保存生命周期(秒),超过则删除记录
 global_lock_state_expiration_time = 3600
-
-
-

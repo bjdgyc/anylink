@@ -111,9 +111,6 @@ func DeleteCookie(w http.ResponseWriter, name string) {
 	http.SetCookie(w, cookie)
 }
 func CreateSession(w http.ResponseWriter, r *http.Request, authSession *AuthSession) {
-	// lockManager.LoginStatus.Store(loginStatusKey, true) // 更新登录成功状态
-	// hc := r.Context().Value(loginStatusKey).(*HttpContext)
-	// hc.LoginStatus = true
 	cr := authSession.ClientRequest
 	ua := authSession.UserActLog
 
@@ -208,14 +205,6 @@ func LinkAuth_otp(w http.ResponseWriter, r *http.Request) {
 
 	// 动态码错误
 	if !dbdata.CheckOtp(username, otp, otpSecret) {
-		// if sessionData.AddOtpErrCount(1) > maxOtpErrCount {
-		// 	SessStore.DeleteAuthSession(sessionID)
-		// 	http.Error(w, "TooManyError, please login again", http.StatusBadRequest)
-		// 	return
-		// }
-		// lockManager.LoginStatus.Store(loginStatusKey, false) // 记录登录失败状态
-		// hc := r.Context().Value(loginStatusKey).(*HttpContext)
-		// hc.LoginStatus = false
 		lockManager.UpdateLoginStatus(username, r.RemoteAddr, false) // 记录登录失败状态
 
 		base.Warn("OTP 动态码错误", username, r.RemoteAddr)

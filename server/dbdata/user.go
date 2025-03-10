@@ -120,7 +120,7 @@ func checkLocalUser(name, pwd, group string, ext map[string]interface{}) error {
 	}
 
 	pinCode := pwd
-	if base.Cfg.AuthAloneOtp == false {
+	if !base.Cfg.AuthAloneOtp {
 		// 判断otp信息
 		if !v.DisableOtp {
 			pinCode = pwd[:pl-6]
@@ -207,16 +207,18 @@ func CheckOtp(name, otp, secret string) bool {
 
 // 插入数据库前加密密码
 func (u *User) BeforeInsert() {
-	hashedPassword, err := utils.PasswordHash(u.PinCode)
-	if err != nil {
-		base.Error(err)
+	if base.Cfg.EncryptionPassword {
+		hashedPassword, err := utils.PasswordHash(u.PinCode)
+		if err != nil {
+			base.Error(err)
+		}
+		u.PinCode = hashedPassword
 	}
-	u.PinCode = hashedPassword
 }
 
 // 更新数据库前加密密码
 func (u *User) BeforeUpdate() {
-	if len(u.PinCode) != 60 {
+	if len(u.PinCode) != 60 && base.Cfg.EncryptionPassword {
 		hashedPassword, err := utils.PasswordHash(u.PinCode)
 		if err != nil {
 			base.Error(err)
