@@ -77,6 +77,8 @@ func StartAdmin() {
 	r.HandleFunc("/user/policy/detail", PolicyDetail)
 	r.HandleFunc("/user/policy/set", PolicySet)
 	r.HandleFunc("/user/policy/del", PolicyDel)
+	r.HandleFunc("/user/reset/forgotPassword", ForgotPassword).Name("forgot_password")
+	r.HandleFunc("/user/reset/resetPassword", ResetPassword).Name("reset_password")
 
 	r.HandleFunc("/group/list", GroupList)
 	r.HandleFunc("/group/names", GroupNames)
