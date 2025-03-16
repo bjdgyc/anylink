@@ -16,11 +16,14 @@ import (
 	"time"
 )
 
+var forgot_interval_time = 1 * 60 // 1分钟的间隔时间（单位：秒）
+var reset_interval_time = 30      // 密码重置有效期(单位: 分钟)
+
 func GenerateResetToken(userID int) (string, error) {
 	fmt.Println(base.Cfg.JwtSecret)
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user_id": userID,
-		"exp":     time.Now().Add(1 * time.Hour).Unix(),
+		"exp":     time.Now().Add(time.Duration(reset_interval_time) * time.Minute).Unix(),
 	})
 	return token.SignedString([]byte(base.Cfg.JwtSecret))
 }
@@ -52,22 +55,20 @@ func ResetPassword(w http.ResponseWriter, r *http.Request) {
 		Password string `json:"password" binding:"required"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		fmt.Println("json 解析失败", err)
 		RespError(w, RespInternalErr, "json 解析失败")
 		return
 	} else {
 		// 验证token,并获取UserID
 		claims, valid_err := ValidateResetToken(req.Token)
 		if valid_err != nil {
-			fmt.Println("Token 链接无效或已过期", err)
-			RespError(w, RespInternalErr, "Token 链接无效或已过期")
+			msg := fmt.Sprintf("验证失败, 重置链接已过期, 请重新申请。错误信息: %v", valid_err)
+			RespError(w, RespInternalErr, msg)
 			return
 		}
 		// 根据验证后的UserId 来更新用户表的密码
 		s := &dbdata.User{PinCode: req.Password}
 		update_err := dbdata.Update("Id", claims.UserID, s)
 		if update_err != nil {
-			fmt.Println("更新密码失败", update_err)
 			RespError(w, RespInternalErr, "更新密码失败")
 			return
 		}
@@ -75,7 +76,6 @@ func ResetPassword(w http.ResponseWriter, r *http.Request) {
 		// 删除重置记录表的数据
 		reset := dbdata.PasswordReset{UserId: claims.UserID}
 		del_err := dbdata.Del(&reset)
-
 		if del_err != nil {
 			fmt.Println("删除记录失败", del_err)
 		} else {
@@ -85,7 +85,6 @@ func ResetPassword(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// 发送重置密码请求
 func ForgotPassword(w http.ResponseWriter, r *http.Request) {
 	// 校验 Content-Type
 	if r.Header.Get("Content-Type") != "application/json" {
@@ -98,32 +97,57 @@ func ForgotPassword(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		RespError(w, RespInternalErr, "Json 解析失败")
+		return
 	}
-	// 获取用户xorm 数据
+	// 获取用户数据
 	user := &dbdata.User{}
 	err := dbdata.One("Email", req.Email, user)
-
-	fmt.Println("获取到的用户ID,", user.Id)
-	if user.Id == 0 {
+	if err != nil {
 		RespError(w, RespInternalErr, "用户不存在 输入的地址:"+req.Email)
 		return
 	}
-	// 根据用户ID 获取token 数据
+	// 检查上一次请求的时间
+	reset := &dbdata.PasswordReset{}
+	err = dbdata.One("user_id", user.Id, reset)
+	if err != nil {
+		if err == dbdata.ErrNotFound {
+			base.Info("此账号没有重置记录")
+		} else {
+			RespError(w, RespInternalErr, "查询重置记录失败", err.Error())
+			return
+		}
+	} else {
+		// 检查时间间隔是否足够
+		currentTime := int(time.Now().Unix())
+		lastRequestTime := reset.LastRequestTime
+		if currentTime-lastRequestTime < forgot_interval_time {
+			msg := fmt.Sprintf("重复的重置操作,请等待%d秒后进行重置申请", forgot_interval_time)
+			RespError(w, RespInternalErr, msg)
+			return
+		}
+	}
+	// 生成新的重置令牌
 	token, err := GenerateResetToken(user.Id)
 	if err != nil {
 		RespError(w, RespInternalErr, "生成token失败")
 		return
 	}
-	// 插入token 数据到passwordReset 表中
-	reset := &dbdata.PasswordReset{}
+	// 开始更新或插入重置记录
+	reset.ExpiresAt = int(time.Now().Add(time.Duration(reset_interval_time) * time.Minute).Unix())
+	reset.LastRequestTime = int(time.Now().Unix())
 	reset.UserId = user.Id
-	reset.Token = token
-	reset.ExpiresAt = int(time.Now().Unix())
 
-	insert_err := dbdata.Add(reset)
-	if insert_err != nil {
-		fmt.Println("插入token表失败", insert_err)
-		RespError(w, RespInternalErr, "插入token表失败")
+	if reset.Token == "" {
+		// 如果 Token 为空，说明是第一次请求，插入新记录
+		reset.Token = token
+		err = dbdata.Add(reset)
+	} else {
+		// 如果 Token 不为空，说明记录已存在，更新记录
+		reset.Token = token
+		err = dbdata.Update("user_id", reset.UserId, reset)
+	}
+	if err != nil {
+		RespError(w, RespInternalErr, "更新重置记录失败")
 		return
 	}
 
@@ -134,46 +158,39 @@ func ForgotPassword(w http.ResponseWriter, r *http.Request) {
 	mail_err := dbdata.SettingGet(dataSmtp)
 	server_err := dbdata.SettingGet(serverConf)
 	if server_err != nil {
-		fmt.Println("获取服务器配置失败", err)
 		RespError(w, RespInternalErr, "获取服务器配置失败,请检查后台对外地址的配置")
 		return
 	}
 	if mail_err != nil {
-		fmt.Println("获取邮箱配置失败", err)
 		RespError(w, RespInternalErr, "获取邮箱配置失败,请检查邮箱配置")
 		return
 	}
-	// 根据后台配置的对外地址进行解析
+
+	// 构建重置链接
 	parsedURL, err := url.Parse(serverConf.LinkAddr)
 	if err != nil {
-		fmt.Println("解析 URL 失败:", err)
-		RespError(w, RespInternalErr, "解析URL失败,可能是后台配置的对外地址不符合要求,应该按照https://xxx.test.com or https://xxx.test.com:10443")
+		RespError(w, RespInternalErr, "解析URL失败,可能是后台配置的对外地址不符合要求")
 		return
 	}
-	// 提取协议（http 或 https）
+
 	scheme := parsedURL.Scheme
-	// 提取主机名（域名）
 	hosts := parsedURL.Hostname()
-	// 拼接协议和域名,加上后台的地址 就是发送重置链接的地址
 	fullURL := fmt.Sprintf("%s://%s%s", scheme, hosts, base.Cfg.AdminAddr)
-	// 输出结果
 	resetLink := fmt.Sprintf("%s/ui/#resetPassword?token=%s", fullURL, reset.Token)
+
+	// 发送邮件
 	mail_user := dataSmtp.Username
 	password := dataSmtp.Password
 	host := dataSmtp.Host
 	port := strconv.Itoa(dataSmtp.Port)
 	toUser := req.Email
 
-	message := fmt.Sprintf("这个是vpn账号的重置链接:%s \n密码有效期1小时,超时请重新提交", resetLink)
+	message := fmt.Sprintf("这个是vpn账号的重置链接:%s \n密码有效期%d分钟,超时请重新提交", resetLink, reset_interval_time)
 	if err := SendResetMail(mail_user, password, toUser, "vpn密码重置", message, host, port, false); err != nil {
-		fmt.Println("发送失败")
 		RespError(w, RespInternalErr, "邮箱发送失败")
 		return
-	} else {
-		fmt.Println("send mail success")
-		RespSucess(w, "邮箱发送成功")
-		return
 	}
+	RespSucess(w, "邮箱发送成功")
 }
 
 func SendResetMail(email, password, toEmail, subject, body, host, port string, isHtml bool) (err error) {
@@ -275,3 +292,4 @@ func sendMailUsingTLS(addr string, auth smtp.Auth, from string,
 
 	return c.Quit()
 }
+
