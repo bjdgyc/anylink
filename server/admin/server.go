@@ -21,6 +21,7 @@ var UiData embed.FS
 func StartAdmin() {
 
 	r := mux.NewRouter()
+	r.Use(recoverHttp, authMiddleware, handlers.CompressHandler)
 	// 所有路由添加安全头
 	r.Use(func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
@@ -29,8 +30,6 @@ func StartAdmin() {
 			next.ServeHTTP(w, req)
 		})
 	})
-	r.Use(authMiddleware)
-	r.Use(handlers.CompressHandler)
 
 	// 监控检测
 	r.HandleFunc("/status.html", func(w http.ResponseWriter, r *http.Request) {
