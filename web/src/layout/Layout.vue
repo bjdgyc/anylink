@@ -23,7 +23,7 @@
           <el-button size="mini" @click="goUrl('https://gitee.com/bjdgyc/anylink')">
             Powered by AnyLink
           </el-button>
-          企业级远程办公系统 AGPL-3.0 ⓒ 2020-present
+          企业级远程办公系统 AGPL-3.0 ⓒ 2025-present
         </div>
       </el-footer>
     </el-container>
