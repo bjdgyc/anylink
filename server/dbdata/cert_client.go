@@ -21,9 +21,9 @@ import (
 
 // 客户端证书数据结构
 type ClientCertData struct {
-	Id       int    `json:"id" xorm:"pk autoincr not null"`
-	Username string `json:"username" xorm:"varchar(60) not null"`
-	// GroupName    string    `json:"group_name" xorm:"varchar(60)"`
+	Id           int       `json:"id" xorm:"pk autoincr not null"`
+	Username     string    `json:"username" xorm:"varchar(60) not null"`
+	GroupName    string    `json:"groupname" xorm:"varchar(60)"`
 	Certificate  string    `json:"certificate" xorm:"text not null"`
 	PrivateKey   string    `json:"private_key" xorm:"text not null"`
 	SerialNumber string    `json:"serial_number" xorm:"varchar(100) not null"`
@@ -177,7 +177,7 @@ func GenerateClientCA() error {
 }
 
 // 生成客户端证书并保存到数据库
-func GenerateClientCert(username string) (*ClientCertData, error) {
+func GenerateClientCert(username, groupname string) (*ClientCertData, error) {
 	// 检查是否已存在证书记录
 	_, err := GetClientCert(username)
 	if err != nil {
@@ -204,11 +204,12 @@ func GenerateClientCert(username string) (*ClientCertData, error) {
 	template := x509.Certificate{
 		SerialNumber: big.NewInt(time.Now().UnixNano()),
 		Subject: pkix.Name{
-			CommonName:   username,
-			Organization: []string{"AnyLink VPN"},
-			Country:      []string{"CN"},
-			Province:     []string{"Beijing"},
-			Locality:     []string{"Beijing"},
+			CommonName:         username,
+			OrganizationalUnit: []string{groupname},
+			Organization:       []string{"AnyLink VPN"},
+			Country:            []string{"CN"},
+			Province:           []string{"Beijing"},
+			Locality:           []string{"Beijing"},
 		},
 		NotBefore:             time.Now(),
 		NotAfter:              time.Now().Add(time.Hour * 24 * 365), // 1年有效期
@@ -232,6 +233,7 @@ func GenerateClientCert(username string) (*ClientCertData, error) {
 	// 保存到数据库
 	clientCertData := &ClientCertData{
 		Username:     username,
+		GroupName:    groupname,
 		Certificate:  string(certPEM),
 		PrivateKey:   string(keyPEM),
 		SerialNumber: template.SerialNumber.String(),
@@ -316,6 +318,11 @@ func ValidateClientCert(cert *x509.Certificate, userAgent string) bool {
 	clientCertData, err := GetClientCert(user.Username)
 	if err != nil {
 		base.Error("证书验证失败：获取客户端证书失败:", err)
+		return false
+	}
+
+	if clientCertData.GroupName != cert.Subject.OrganizationalUnit[0] {
+		base.Error("证书验证失败：证书组名与用户组名不匹配")
 		return false
 	}
 

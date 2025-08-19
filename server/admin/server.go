@@ -67,6 +67,7 @@ func StartAdmin() {
 	// r.HandleFunc("/set/client_cert/enable", EnableClientCert)
 	// r.HandleFunc("/set/client_cert/disable", DisableClientCert)
 	r.HandleFunc("/set/client_cert/delete", DeleteClientCert)
+	r.HandleFunc("/set/client_cert/user_cert_info", UserCertInfo)
 
 	r.HandleFunc("/user/list", UserList)
 	r.HandleFunc("/user/detail", UserDetail)

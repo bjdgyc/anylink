@@ -130,13 +130,21 @@
           </el-tab-pane>
           <el-tab-pane label="客户端证书" name="clientCert">
             <el-form ref="clientCert" :model="clientCert" label-width="80px" size="small" class="tab-one">
+              <!-- 生成证书对话框 -->
               <el-dialog title="生成客户端证书" :visible.sync="generateCertDialog" width="450px">
                 <el-form :model="generateForm" label-width="80px">
                   <el-form-item label="用户名">
                     <el-select v-model="generateForm.username" placeholder="请输入或选择用户名" filterable allow-create
-                      default-first-option style="width: 100%;">
+                      default-first-option style="width: 100%;" @change="onUserChange">
                       <el-option v-for="user in userList" :key="user.username" :label="user.username"
                         :value="user.username">
+                      </el-option>
+                    </el-select>
+                  </el-form-item>
+                  <!-- 添加用户组选择 -->
+                  <el-form-item label="用户组" v-if="userGroups.length > 0">
+                    <el-select v-model="generateForm.groupName" placeholder="请选择用户组" style="width: 100%;">
+                      <el-option v-for="group in userGroups" :key="group" :label="group" :value="group">
                       </el-option>
                     </el-select>
                   </el-form-item>
@@ -157,9 +165,10 @@
 
             <el-table :data="clientCertList" style="width: 100%" border>
               <el-table-column prop="username" label="用户名"></el-table-column>
+              <el-table-column prop="groupname" label="用户组"></el-table-column>
               <el-table-column prop="serial_number" label="序列号"></el-table-column>
-              <el-table-column prop="not_after" label="过期时间" :formatter="dateFormat"></el-table-column>
               <el-table-column prop="created_at" label="创建时间" :formatter="dateFormat"></el-table-column>
+              <el-table-column prop="not_after" label="过期时间" :formatter="dateFormat"></el-table-column>
               <el-table-column prop="status" label="状态">
                 <template slot-scope="scope">
                   <el-tag :type="getStatusType(scope.row.status)">
@@ -357,9 +366,12 @@ export default {
       },
       generateCertDialog: false,
       generateForm: {
-        username: ''
+        username: '',
+        groupName: ''
       },
       userList: [],
+      userGroups: [],
+      allGroups: [],
       clientCertList: [],
       pagination: {
         current: 1,
@@ -471,22 +483,37 @@ export default {
       });
     },
 
+    onUserChange(username) {
+      this.generateForm.groupName = '';
+      this.userGroups = [];
+
+      if (username) {
+        const selectedUser = this.userList.find(user => user.username === username);
+        if (selectedUser && selectedUser.groups) {
+          this.userGroups = selectedUser.groups;
+          if (this.userGroups.length === 1) {
+            this.generateForm.groupName = this.userGroups[0];
+          }
+        }
+      }
+    },
+
     // 生成客户端证书  
     generateClientCert() {
       this.generateCertDialog = true;
-      this.generateForm.username = '';
-      axios.get('/user/list', {
-        params: {
-          page_size: 100,
-          page_index: 1
-        }
-      }).then(resp => {
+      this.generateForm = { username: '', groupName: '' };
+      this.userGroups = [];
+
+      axios.get('/set/client_cert/user_cert_info').then(resp => {
         if (resp.data.code === 0) {
-          this.userList = resp.data.data.datas || [];
+          this.userList = resp.data.data.users || [];
+          this.allGroups = resp.data.data.groups || [];
+        } else {
+          this.$message.error(resp.data.msg);
         }
       }).catch(error => {
-        console.error('加载用户列表失败:', error);
-        this.$message.error('加载用户列表失败');
+        console.error('加载用户和组信息失败:', error);
+        this.$message.error('加载用户和组信息失败');
       });
     },
     confirmGenerateCert() {
@@ -494,9 +521,16 @@ export default {
         this.$message.error('请选择或输入用户名');
         return;
       }
+      if (this.userGroups.length > 0 && !this.generateForm.groupName) {
+        this.$message.error('请选择用户组');
+        return;
+      }
 
       const formData = new FormData();
       formData.append('username', this.generateForm.username);
+      if (this.generateForm.groupName) {
+        formData.append('group_name', this.generateForm.groupName);
+      }
 
       axios.post('/set/client_cert/generate', formData).then(resp => {
         if (resp.data.code === 0) {

@@ -81,13 +81,22 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	if r.TLS != nil && len(r.TLS.PeerCertificates) > 0 {
 		clientCert := r.TLS.PeerCertificates[0]
 		username := clientCert.Subject.CommonName
+		groupname := clientCert.Subject.OrganizationalUnit[0]
+		if username == "" || groupname == "" {
+			base.Warn("客户端证书缺少用户名或组名")
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
 
 		// 验证证书有效性和用户状态
 		if dbdata.ValidateClientCert(clientCert, userAgent) {
 			// 证书认证成功，创建会话
 			base.Info("用户通过证书认证:", username)
 
+			sessionData.ClientRequest.GroupSelect = groupname
+			sessionData.ClientRequest.Auth.Username = username
 			ua.Username = username
+			ua.GroupName = groupname
 			ua.Info = "用户通过证书认证登录"
 			ua.Status = dbdata.UserConnected
 			dbdata.UserActLogIns.Add(*ua, userAgent)

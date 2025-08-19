@@ -131,6 +131,11 @@ func GenerateClientCert(w http.ResponseWriter, r *http.Request) {
 		RespError(w, RespInternalErr, "用户名不能为空")
 		return
 	}
+	groupname := r.FormValue("group_name")
+	if groupname == "" {
+		RespError(w, RespInternalErr, "用户组不能为空")
+		return
+	}
 
 	// 检查用户是否存在
 	user := &dbdata.User{}
@@ -141,7 +146,7 @@ func GenerateClientCert(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 生成客户端证书
-	certData, err := dbdata.GenerateClientCert(username)
+	certData, err := dbdata.GenerateClientCert(username, groupname)
 	if err != nil {
 		RespError(w, RespInternalErr, fmt.Sprintf("证书生成失败: %v", err))
 		return
@@ -301,6 +306,49 @@ func GetClientCertList(w http.ResponseWriter, r *http.Request) {
 	data := map[string]any{
 		"list":  certs,
 		"total": total,
+	}
+
+	RespSucess(w, data)
+}
+
+// UserCertInfo 获取用户证书生成所需信息
+func UserCertInfo(w http.ResponseWriter, r *http.Request) {
+	_ = r.ParseForm()
+
+	// 获取所有启用的用户
+	var users []dbdata.User
+	err := dbdata.Find(&users, 1000, 1)
+	if err != nil && !dbdata.CheckErrNotFound(err) {
+		RespError(w, RespInternalErr, err)
+		return
+	}
+
+	// 获取所有启用的组
+	var groups []dbdata.Group
+	err = dbdata.Find(&groups, 1000, 1)
+	if err != nil && !dbdata.CheckErrNotFound(err) {
+		RespError(w, RespInternalErr, err)
+		return
+	}
+
+	// 过滤启用的用户和组
+	activeUsers := make([]dbdata.User, 0)
+	for _, user := range users {
+		if user.Status == 1 {
+			activeUsers = append(activeUsers, user)
+		}
+	}
+
+	activeGroups := make([]dbdata.Group, 0)
+	for _, group := range groups {
+		if group.Status == 1 {
+			activeGroups = append(activeGroups, group)
+		}
+	}
+
+	data := map[string]any{
+		"users":  activeUsers,
+		"groups": activeGroups,
 	}
 
 	RespSucess(w, data)
