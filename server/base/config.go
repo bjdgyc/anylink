@@ -33,6 +33,8 @@ var configs = []config{
 	{Typ: cfgStr, Name: "db_source", Usage: "数据库source", ValStr: "./conf/anylink.db"},
 	{Typ: cfgStr, Name: "cert_file", Usage: "证书文件", ValStr: "./conf/vpn_cert.pem"},
 	{Typ: cfgStr, Name: "cert_key", Usage: "证书密钥", ValStr: "./conf/vpn_cert.key"},
+	{Typ: cfgStr, Name: "client_ca_file", Usage: "客户端证书CA证书", ValStr: "./conf/client_ca.pem"},
+	{Typ: cfgStr, Name: "client_ca_key_file", Usage: "客户端证书CA密钥", ValStr: "./conf/client_ca.key"},
 	{Typ: cfgStr, Name: "files_path", Usage: "外部下载文件路径", ValStr: "./conf/files"},
 	{Typ: cfgStr, Name: "log_path", Usage: "日志文件路径,默认标准输出", ValStr: ""},
 	{Typ: cfgStr, Name: "log_level", Usage: "日志等级 [debug info warn error]", ValStr: "debug"},

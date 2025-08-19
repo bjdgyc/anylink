@@ -66,6 +66,8 @@ func startTls() {
 		NextProtos:   []string{"http/1.1"},
 		MinVersion:   tls.VersionTLS12,
 		CipherSuites: selectedCipherSuites,
+		ClientAuth:   tls.VerifyClientCertIfGiven, // 验证客户端证书
+		ClientCAs:    dbdata.LoadClientCAPool(),   // 加载客户端CA证书
 		GetCertificate: func(chi *tls.ClientHelloInfo) (*tls.Certificate, error) {
 			base.Trace("GetCertificate ServerName", chi.ServerName)
 			return dbdata.GetCertificateBySNI(chi.ServerName)

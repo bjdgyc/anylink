@@ -55,6 +55,19 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	base.Trace(fmt.Sprintf("%+v \n", cr))
+	// 用户活动日志
+	ua := &dbdata.UserActLog{
+		Username:        cr.Auth.Username,
+		GroupName:       cr.GroupSelect,
+		RemoteAddr:      r.RemoteAddr,
+		Status:          dbdata.UserAuthSuccess,
+		DeviceType:      cr.DeviceId.DeviceType,
+		PlatformVersion: cr.DeviceId.PlatformVersion,
+	}
+	sessionData := &AuthSession{
+		ClientRequest: cr,
+		UserActLog:    ua,
+	}
 	// setCommonHeader(w)
 	if cr.Type == "logout" {
 		// 退出删除session信息
@@ -63,6 +76,25 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 		}
 		w.WriteHeader(http.StatusOK)
 		return
+	}
+	// 检查客户端证书认证
+	if r.TLS != nil && len(r.TLS.PeerCertificates) > 0 {
+		clientCert := r.TLS.PeerCertificates[0]
+		username := clientCert.Subject.CommonName
+
+		// 验证证书有效性和用户状态
+		if dbdata.ValidateClientCert(clientCert, userAgent) {
+			// 证书认证成功，创建会话
+			base.Info("用户通过证书认证:", username)
+
+			ua.Username = username
+			ua.Info = "用户通过证书认证登录"
+			ua.Status = dbdata.UserConnected
+			dbdata.UserActLogIns.Add(*ua, userAgent)
+
+			CreateSession(w, r, sessionData)
+			return
+		}
 	}
 
 	if cr.Type == "init" {
@@ -84,22 +116,8 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 用户活动日志
-	ua := &dbdata.UserActLog{
-		Username:        cr.Auth.Username,
-		GroupName:       cr.GroupSelect,
-		RemoteAddr:      r.RemoteAddr,
-		Status:          dbdata.UserAuthSuccess,
-		DeviceType:      cr.DeviceId.DeviceType,
-		PlatformVersion: cr.DeviceId.PlatformVersion,
-	}
-
-	sessionData := &AuthSession{
-		ClientRequest: cr,
-		UserActLog:    ua,
-	}
 	// TODO 用户密码校验
-	ext := map[string]interface{}{"mac_addr": cr.MacAddressList.MacAddress}
+	ext := map[string]any{"mac_addr": cr.MacAddressList.MacAddress}
 	err = dbdata.CheckUser(cr.Auth.Username, cr.Auth.Password, cr.GroupSelect, ext)
 	if err != nil {
 		lockManager.UpdateLoginStatus(cr.Auth.Username, r.RemoteAddr, false) // 记录登录失败状态
