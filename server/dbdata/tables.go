@@ -120,7 +120,8 @@ type StatsMem struct {
 }
 
 type PasswordReset struct {
-	Token     string `json:"token" xorm:"varchar(60) not null unique"`
-	UserId    int    `json:"id" xorm:"not null"`
-	ExpiresAt int    `json:"expires_at" xorm:"not null"`
+	Token           string `json:"token" xorm:"varchar(60) not null unique"`
+	UserId          int    `json:"id" xorm:"not null"`
+	ExpiresAt       int    `json:"expires_at" xorm:"not null"`
+	LastRequestTime int    `json:"last_request_time" xorm:"int default 0"`
 }
