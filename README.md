@@ -364,9 +364,18 @@ ipv4_end = "10.1.2.200"
 |    支持设备/平台    |       DockerHub       |                             阿里云镜像仓库                             |
 |:-------------:|:---------------------:|:---------------------------------------------------------------:|
 | x86_64/amd64  | bjdgyc/anylink:latest |     registry.cn-hangzhou.aliyuncs.com/bjdgyc/anylink:latest     |
-| x86_64/amd64  | bjdgyc/anylink:0.13.1 |     registry.cn-hangzhou.aliyuncs.com/bjdgyc/anylink:0.13.1     |
-| armv8/aarch64 | bjdgyc/anylink:latest | registry.cn-hangzhou.aliyuncs.com/bjdgyc/anylink:arm64v8-latest |
-| armv8/aarch64 | bjdgyc/anylink:0.13.1 | registry.cn-hangzhou.aliyuncs.com/bjdgyc/anylink:arm64v8-0.13.1 |
+| x86_64/amd64  | bjdgyc/anylink:0.13.1 |     registry.cn-hangzhou.aliyuncs.com/bjdgyc/anylink:0.13.1     | 
+| armv8/aarch64 | bjdgyc/anylink:latest | registry.cn-hangzhou.aliyuncs.com/bjdgyc/anylink:arm64v8-latest | 
+| armv8/aarch64 | bjdgyc/anylink:0.13.1 | registry.cn-hangzhou.aliyuncs.com/bjdgyc/anylink:arm64v8-0.13.1 | 
+
+### docker 镜像源地址
+
+> docker.1ms.run/bjdgyc/anylink:latest
+>
+> dockerhub.yydy.link:2023/bjdgyc/anylink:latest
+
+
+### 操作步骤
 
 1. 获取镜像
    ```bash

@@ -51,6 +51,9 @@ admin_addr = ":8800"
 #开启tcp proxy protocol协议
 proxy_protocol = false
 
+#开启go标准库http.Server的日志
+http_server_log=false
+
 #虚拟网络类型[tun macvtap tap]
 link_mode = "tun"
 

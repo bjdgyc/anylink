@@ -118,3 +118,9 @@ type StatsMem struct {
 	Percent   float64   `json:"percent" xorm:"Float"`
 	CreatedAt time.Time `json:"created_at" xorm:"DateTime created index"`
 }
+
+type PasswordReset struct {
+	Token     string `json:"token" xorm:"varchar(60) not null unique"`
+	UserId    int    `json:"id" xorm:"not null"`
+	ExpiresAt int    `json:"expires_at" xorm:"not null"`
+}

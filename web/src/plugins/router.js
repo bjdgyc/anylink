@@ -7,6 +7,8 @@ Vue.use(VueRouter)
 
 const routes = [
     { path: '/login', component: () => import('@/pages/Login') },
+    {path: '/forgotPassword', component: () => import('@/pages/reset/ForgotPassword')},
+    {path: '/resetPassword', component: () => import('@/pages/reset/ResetPassword')},
     {
         path: '/admin',
         component: () => import('@/layout/Layout'),
@@ -47,6 +49,11 @@ router.beforeEach((to, from, next) => {
 
     console.log("beforeEach", from.path, to.path, token)
     // console.log(from)
+    // 无论认证状态都允许访问重置页
+    if (to.path === '/forgotPassword' || to.path === '/resetPassword') {
+        next();
+        return;
+    }
 
     // 没有token,全都跳转到login
     if (!token) {

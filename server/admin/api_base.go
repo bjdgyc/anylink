@@ -3,6 +3,7 @@ package admin
 import (
 	"fmt"
 	"net/http"
+	"runtime/debug"
 	"time"
 
 	"github.com/bjdgyc/anylink/base"
@@ -93,7 +94,7 @@ func authMiddleware(next http.Handler) http.Handler {
 		route := mux.CurrentRoute(r)
 		name := route.GetName()
 		// fmt.Println("bb", r.URL.Path, name)
-		if utils.InArrStr([]string{"login", "index", "static"}, name) {
+		if utils.InArrStr([]string{"login", "index", "static", "reset_password", "forgot_password"}, name) {
 			// 不进行鉴权
 			next.ServeHTTP(w, r)
 			return
@@ -119,4 +120,18 @@ func authMiddleware(next http.Handler) http.Handler {
 	}
 
 	return http.HandlerFunc(fn)
+}
+
+func recoverHttp(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			if err := recover(); err != nil {
+				stack := debug.Stack()
+				base.Error(err, string(stack))
+				// http.Error(w, "Internal Server Error", 500)
+				RespError(w, 500, "Internal Server Error")
+			}
+		}()
+		next.ServeHTTP(w, r)
+	})
 }

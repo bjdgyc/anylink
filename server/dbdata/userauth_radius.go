@@ -75,8 +75,11 @@ func (auth AuthRadius) checkUser(name, pwd string, g *Group, ext map[string]inte
 			return fmt.Errorf("%s %s", name, "Radius set nasip 出现错误")
 		}
 	}
-	macAddr := ext["mac_addr"].(string)
-	base.Trace("AuthRadius", ext, macAddr)
+	macAddr := ""
+	if ext["mac_addr"] != nil {
+		macAddr = ext["mac_addr"].(string)
+		base.Trace("AuthRadius", ext, macAddr)
+	}
 	if macAddr != "" {
 		err = rfc2865.CallingStationID_AddString(packet, macAddr)
 		if err != nil {
@@ -94,5 +97,4 @@ func (auth AuthRadius) checkUser(name, pwd string, g *Group, ext map[string]inte
 		return fmt.Errorf("%s %s", name, "Radius：用户名或密码错误")
 	}
 	return nil
-
 }
