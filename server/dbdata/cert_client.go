@@ -66,6 +66,9 @@ func (c *ClientCertData) GetStatus() int {
 
 // 保存客户端证书
 func (c *ClientCertData) Save() error {
+	if c.Id > 0 {
+		return Set(c) // 更新现有记录
+	}
 	return Add(c)
 }
 
@@ -178,8 +181,22 @@ func GenerateClientCA() error {
 
 // 生成客户端证书并保存到数据库
 func GenerateClientCert(username, groupname string) (*ClientCertData, error) {
+	// 检查用户是否存在并验证组成员资格
+	user := &User{}
+	err := One("Username", username, user)
+	if err != nil {
+		if errors.Is(err, ErrNotFound) {
+			return nil, fmt.Errorf("用户不存在: %s", username)
+		}
+		return nil, fmt.Errorf("获取用户信息失败: %v", err)
+	}
+
+	// 检查用户是否属于指定组
+	if !slices.Contains(user.Groups, groupname) {
+		return nil, fmt.Errorf("用户 %s 不属于组 %s", username, groupname)
+	}
 	// 检查是否已存在证书记录
-	_, err := GetClientCert(username)
+	_, err = GetClientCert(username)
 	if err != nil {
 		if !errors.Is(err, ErrNotFound) {
 			return nil, fmt.Errorf("获取用户证书失败: %v", err)
