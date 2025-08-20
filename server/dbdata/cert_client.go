@@ -24,11 +24,11 @@ type ClientCertData struct {
 	Id           int       `json:"id" xorm:"pk autoincr not null"`
 	Username     string    `json:"username" xorm:"varchar(60) not null"`
 	GroupName    string    `json:"groupname" xorm:"varchar(60)"`
+	Status       int       `json:"status" xorm:"int default 0"`
 	Certificate  string    `json:"certificate" xorm:"text not null"`
 	PrivateKey   string    `json:"private_key" xorm:"text not null"`
 	SerialNumber string    `json:"serial_number" xorm:"varchar(100) not null"`
 	NotAfter     time.Time `json:"not_after" xorm:"datetime not null"`
-	Status       int       `json:"status" xorm:"int default 0"`
 	CreatedAt    time.Time `json:"created_at" xorm:"datetime created"`
 }
 

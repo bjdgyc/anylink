@@ -134,8 +134,9 @@
               <el-dialog title="生成客户端证书" :visible.sync="generateCertDialog" width="450px">
                 <el-form :model="generateForm" label-width="80px">
                   <el-form-item label="用户名">
-                    <el-select v-model="generateForm.username" placeholder="请输入或选择用户名" filterable allow-create
-                      default-first-option style="width: 100%;" @change="onUserChange">
+                    <el-select v-model="generateForm.username" placeholder="请输入或选择用户名" filterable clearable allow-create
+                      default-first-option style="width: 100%;" @change="onUserChange"
+                      popper-class="custom-select-dropdown">
                       <el-option v-for="user in userList" :key="user.username" :label="user.username"
                         :value="user.username">
                       </el-option>
@@ -784,5 +785,15 @@ export default {
 .input_tip {
   line-height: 1.428;
   margin: 2px 0 0 0;
+}
+
+/* 自定义下拉框样式 */
+.custom-select-dropdown .el-select-dropdown__wrap {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.custom-select-dropdown .el-select-dropdown__list {
+  padding: 0;
 }
 </style>
