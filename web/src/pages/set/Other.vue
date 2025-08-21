@@ -561,6 +561,20 @@ export default {
           url: '/set/client_cert/download?' + params.toString(),
           responseType: 'blob'
         }).then(response => {
+          const contentType = response.headers['content-type'];
+          if (contentType && contentType.includes('application/json')) {
+            const reader = new FileReader();
+            reader.onload = () => {
+              try {
+                const errorData = JSON.parse(reader.result);
+                this.$message.error(errorData.msg || '证书下载失败');
+              } catch (e) {
+                this.$message.error('证书下载失败');
+              }
+            };
+            reader.readAsText(response.data);
+            return;
+          }
           const blob = new Blob([response.data], { type: 'application/x-pkcs12' });
           const url = window.URL.createObjectURL(blob);
           const link = document.createElement('a');
@@ -572,8 +586,8 @@ export default {
           window.URL.revokeObjectURL(url);
           this.$message.success('证书下载成功');
         }).catch(error => {
-          if (error.response && error.response.data && error.response.data.msg) {
-            this.$message.error(error.response.data.msg);
+          if (error.response && error.response.data) {
+            this.$message.error(error.response.data.msg || '证书下载失败');
           } else {
             this.$message.error('证书下载失败');
           }

@@ -11,11 +11,6 @@ cert_file = "./conf/vpn_cert.pem"
 cert_key = "./conf/vpn_cert.key"
 files_path = "./conf/files"
 
-#客户端证书CA证书
-client_cert_ca_file = "./conf/client_ca.pem"
-#客户端证书CA密钥
-client_cert_ca_key_file = "./conf/client_ca.key"
-
 #日志目录,默认为空写入标准输出
 #log_path = "./log"
 log_level = "debug"
