@@ -75,6 +75,7 @@ func startTls() {
 	if base.Cfg.AuthAloneCert {
 		tlsConfig.ClientAuth = tls.VerifyClientCertIfGiven // 验证客户端证书
 		tlsConfig.ClientCAs = dbdata.LoadClientCAPool()    // 加载客户端CA证书
+		base.Info("已启用独立证书验证")
 	}
 	srv := &http.Server{
 		Addr:         addr,

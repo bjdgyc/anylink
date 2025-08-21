@@ -345,7 +345,7 @@ func ValidateClientCert(cert *x509.Certificate, userAgent string) bool {
 
 	// 检查证书状态
 	if clientCertData.GetStatus() != CertStatusActive {
-		base.Error("证书验证失败：证书状态为", clientCertData.GetStatusText())
+		base.Error("证书验证失败：", user.Username, "证书状态为", clientCertData.GetStatusText())
 		return false
 	}
 

@@ -108,7 +108,6 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 				ua.Status = dbdata.UserAuthFail
 				dbdata.UserActLogIns.Add(*ua, userAgent)
 
-				w.WriteHeader(http.StatusForbidden)
 				return
 			}
 		}
