@@ -13,6 +13,8 @@
         <WindowsVPNEstablishment>AllowRemoteUsers</WindowsVPNEstablishment>
         <LinuxVPNEstablishment>AllowRemoteUsers</LinuxVPNEstablishment>
         <CertEnrollmentPin>pinAllowed</CertEnrollmentPin>
+        <CertificateStore>User</CertificateStore>
+        <AutomaticCertSelection UserControllable="true">true</AutomaticCertSelection>
         <CertificateMatch>
             <KeyUsage>
                 <MatchKey>Digital_Signature</MatchKey>
@@ -20,7 +22,6 @@
             <ExtendedKeyUsage>
                 <ExtendedMatchKey>ClientAuth</ExtendedMatchKey>
             </ExtendedKeyUsage>
-        <CertificateStore>User</CertificateStore>
         </CertificateMatch>
 
     </ClientInitialization>

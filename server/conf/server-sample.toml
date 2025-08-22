@@ -10,10 +10,10 @@ db_source = "./conf/anylink.db"
 cert_file = "./conf/vpn_cert.pem"
 cert_key = "./conf/vpn_cert.key"
 
-#是否启用独立证书验证,开启后客户端连接需要携带证书
-#如果不开启则使用用户名密码验证
-auth_alone_cert = false
-
+# 开启后支持证书验证，客户端未提供证书或证书验证失败，则回退到用户名密码验证
+auth_cert = false
+# 开启后仅支持证书验证，客户端只能使用证书验证，不开启则回退用户名密码验证
+auth_only_cert = false
 #客户端证书CA证书
 client_cert_ca_file = "./conf/client_ca.pem"
 #客户端证书CA密钥

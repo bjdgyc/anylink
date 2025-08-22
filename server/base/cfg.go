@@ -47,7 +47,8 @@ type ServerConfig struct {
 	DbSource            string `json:"db_source"`
 	CertFile            string `json:"cert_file"`
 	CertKey             string `json:"cert_key"`
-	AuthAloneCert       bool   `json:"auth_alone_cert"`
+	AuthCert            bool   `json:"auth_cert"`
+	AuthOnlyCert        bool   `json:"auth_only_cert"`
 	ClientCertCAFile    string `json:"client_ca_file"`
 	ClientCertCAKeyFile string `json:"client_ca_key_file"`
 	FilesPath           string `json:"files_path"`
