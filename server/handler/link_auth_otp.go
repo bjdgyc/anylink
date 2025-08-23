@@ -149,10 +149,13 @@ func CreateSession(w http.ResponseWriter, r *http.Request, authSession *AuthSess
 	rd := RequestData{
 		SessionId:    sess.Sid,
 		SessionToken: sess.Sid + "@" + sess.Token,
-		Banner:       other.Banner,
-		ProfileName:  base.Cfg.ProfileName,
-		ProfileHash:  profileHash,
-		CertHash:     certHash,
+		// Banner:       other.Banner,
+		ProfileName: base.Cfg.ProfileName,
+		ProfileHash: profileHash,
+		CertHash:    certHash,
+	}
+	if base.Cfg.EnableBanner {
+		rd.Banner = other.Banner
 	}
 
 	w.WriteHeader(http.StatusOK)

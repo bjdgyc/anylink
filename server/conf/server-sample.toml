@@ -38,6 +38,8 @@ pprof = true
 
 #系统名称
 issuer = "XX公司VPN"
+#登录横幅
+enable_banner = true
 #后台管理用户
 admin_user = "admin"
 #pass 123456

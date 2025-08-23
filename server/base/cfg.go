@@ -57,6 +57,7 @@ type ServerConfig struct {
 	HttpServerLog       bool   `json:"http_server_log"`
 	Pprof               bool   `json:"pprof"`
 	Issuer              string `json:"issuer"`
+	EnableBanner        bool   `json:"enable_banner"`
 	AdminUser           string `json:"admin_user"`
 	AdminPass           string `json:"admin_pass"`
 	AdminOtp            string `json:"admin_otp"`
