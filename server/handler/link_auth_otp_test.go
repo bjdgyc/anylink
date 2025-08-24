@@ -259,13 +259,19 @@ func TestCreateSession(t *testing.T) {
 	preIpData()
 	defer closeIpdata()
 
+	base.Cfg.EnableBanner = true
+
+	other := &dbdata.SettingOther{Banner: "测试横幅内容"}
+	err := dbdata.SettingSet(other)
+	ast.Nil(err)
+
 	// 创建测试数据
 	group := "session-test-group"
 	username := "session-test-user"
 
 	dns := []dbdata.ValData{{Val: "8.8.8.8"}}
 	g := dbdata.Group{Name: group, Status: 1, ClientDns: dns}
-	err := dbdata.SetGroup(&g)
+	err = dbdata.SetGroup(&g)
 	ast.Nil(err)
 
 	u := dbdata.User{Username: username, Groups: []string{group}, Status: 1}
@@ -306,6 +312,15 @@ func TestCreateSession(t *testing.T) {
 	ast.Equal(http.StatusOK, w.Code)
 	// 验证响应包含会话信息
 	ast.Contains(w.Body.String(), "session-token")
+	ast.Contains(w.Body.String(), "测试横幅内容")
+
+	base.Cfg.EnableBanner = false
+
+	w2 := httptest.NewRecorder()
+	CreateSession(w2, req, authSession)
+
+	ast.Equal(http.StatusOK, w2.Code)
+	ast.NotContains(w2.Body.String(), "测试横幅内容")
 }
 
 func preIpData() {
