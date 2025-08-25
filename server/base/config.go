@@ -82,6 +82,7 @@ var configs = []config{
 
 	{Typ: cfgBool, Name: "anti_brute_force", Usage: "是否开启防爆功能", ValBool: true},
 	{Typ: cfgStr, Name: "ip_whitelist", Usage: "全局IP白名单,多个用逗号分隔，支持单IP和CIDR范围", ValStr: "192.168.90.1,172.16.0.0/24"},
+	{Typ: cfgStr, Name: "ip_blacklist", Usage: "全局IP黑名单,多个用逗号分隔，支持单IP和CIDR范围", ValStr: ""},
 
 	{Typ: cfgInt, Name: "max_ban_score", Usage: "单位时间内最大尝试次数，0为关闭该功能", ValInt: 5},
 	{Typ: cfgInt, Name: "ban_reset_time", Usage: "设置单位时间(秒)，超过则重置计数", ValInt: 10},

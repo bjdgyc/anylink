@@ -68,6 +68,11 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 		ClientRequest: cr,
 		UserActLog:    ua,
 	}
+	// 锁定状态判断
+	if !lockManager.CheckLocked(cr.Auth.Username, r.RemoteAddr) {
+		w.WriteHeader(http.StatusTooManyRequests)
+		return
+	}
 	// setCommonHeader(w)
 	if cr.Type == "logout" {
 		// 退出删除session信息
@@ -133,12 +138,6 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	// 登陆参数判断
 	if cr.Type != "auth-reply" {
 		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	// 锁定状态判断
-	if !lockManager.CheckLocked(cr.Auth.Username, r.RemoteAddr) {
-		w.WriteHeader(http.StatusTooManyRequests)
 		return
 	}
 

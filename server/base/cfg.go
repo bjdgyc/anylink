@@ -97,7 +97,8 @@ type ServerConfig struct {
 	EncryptionPassword bool `json:"encryption_password"`
 
 	AntiBruteForce bool   `json:"anti_brute_force"`
-	IPWhitelist    string `json:"ip_whitelist"`
+	IPWhiteList    string `json:"ip_whitelist"`
+	IPBlackList    string `json:"ip_blacklist"`
 
 	MaxBanCount  int `json:"max_ban_score"`
 	BanResetTime int `json:"ban_reset_time"`
