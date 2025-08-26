@@ -163,7 +163,27 @@
                 <el-button type="primary" @click="generateClientCert" style="margin-left: 10px;">生成证书</el-button>
               </el-form-item>
             </el-form>
-
+            <!-- 搜索表单 -->
+            <el-form :inline="true" :model="searchForm" class="search-form" size="small">
+              <el-form-item label="用户名">
+                <el-input v-model="searchForm.username" placeholder="请输入用户名" clearable style="width: 200px;"></el-input>
+              </el-form-item>
+              <el-form-item label="用户组">
+                <el-input v-model="searchForm.groupname" placeholder="请输入用户组" clearable
+                  style="width: 200px;"></el-input>
+              </el-form-item>
+              <el-form-item label="状态">
+                <el-select v-model="searchForm.status" placeholder="请选择状态" clearable style="width: 120px;">
+                  <el-option label="启用" :value="0"></el-option>
+                  <el-option label="禁用" :value="1"></el-option>
+                  <el-option label="过期" :value="2"></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" @click="handleSearch">搜索</el-button>
+                <el-button @click="resetSearch">重置</el-button>
+              </el-form-item>
+            </el-form>
             <el-table :data="clientCertList" style="width: 100%" border>
               <el-table-column prop="username" label="用户名"></el-table-column>
               <el-table-column prop="groupname" label="用户组"></el-table-column>
@@ -374,6 +394,11 @@ export default {
       userGroups: [],
       allGroups: [],
       clientCertList: [],
+      searchForm: {
+        username: '',
+        groupname: '',
+        status: ''
+      },
       pagination: {
         current: 1,
         size: 10,
@@ -554,6 +579,7 @@ export default {
       }).then(({ value }) => {
         const params = new URLSearchParams();
         params.append('username', row.username);
+        params.append('groupname', row.groupname);
         params.append('password', value || '');
 
         axios({
@@ -603,12 +629,40 @@ export default {
         page_index: this.pagination.current
       };
 
+      // 添加搜索参数  
+      if (this.searchForm.username) {
+        params.username = this.searchForm.username;
+      }
+      if (this.searchForm.groupname) {
+        params.groupname = this.searchForm.groupname;
+      }
+      if (this.searchForm.status !== '') {
+        params.status = this.searchForm.status;
+      }
+
       axios.get('/set/client_cert/list', { params }).then(resp => {
         if (resp.data.code === 0) {
           this.clientCertList = resp.data.data.list;
           this.pagination.total = resp.data.data.total;
         }
       });
+    },
+
+    // 搜索处理  
+    handleSearch() {
+      this.pagination.current = 1; // 重置到第一页  
+      this.loadClientCertList();
+    },
+
+    // 重置搜索  
+    resetSearch() {
+      this.searchForm = {
+        username: '',
+        groupname: '',
+        status: ''
+      };
+      this.pagination.current = 1;
+      this.loadClientCertList();
     },
 
     // 分页处理  
@@ -627,7 +681,16 @@ export default {
     },
     // 日期格式化  
     dateFormat(row, column, cellValue) {
-      return new Date(cellValue).toLocaleString();
+      const date = new Date(cellValue);
+      return new Intl.DateTimeFormat('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      }).format(date);
     },
     // 获取状态文本  
     getStatusText(status) {
@@ -658,6 +721,7 @@ export default {
       }).then(() => {
         const formData = new FormData();
         formData.append('username', row.username);
+        formData.append('groupname', row.groupname);
 
         axios.post('/set/client_cert/changecertstatus', formData).then(resp => {
           if (resp.data.code === 0) {
@@ -678,6 +742,7 @@ export default {
       }).then(() => {
         const formData = new FormData();
         formData.append('username', row.username);
+        formData.append('groupname', row.groupname);
 
         axios.post('/set/client_cert/delete', formData).then(resp => {
           if (resp.data.code === 0) {

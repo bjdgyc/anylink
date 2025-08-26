@@ -158,10 +158,15 @@ func GenerateClientCert(w http.ResponseWriter, r *http.Request) {
 // 下载客户端 P12 证书
 func DownloadClientP12(w http.ResponseWriter, r *http.Request) {
 	username := r.FormValue("username")
+	groupname := r.FormValue("groupname")
 	password := r.FormValue("password")
 
 	if username == "" {
 		RespError(w, RespInternalErr, "用户名不能为空")
+		return
+	}
+	if groupname == "" {
+		RespError(w, RespInternalErr, "用户组不能为空")
 		return
 	}
 
@@ -170,7 +175,7 @@ func DownloadClientP12(w http.ResponseWriter, r *http.Request) {
 	// }
 
 	// 生成 P12 证书
-	p12Data, err := dbdata.GenerateClientP12FromDB(username, password)
+	p12Data, err := dbdata.GenerateClientP12FromDB(username, groupname, password)
 	if err != nil {
 		RespError(w, RespInternalErr, fmt.Sprintf("证书下载失败: %v", err))
 		return
@@ -190,8 +195,13 @@ func ChangeClientCertStatus(w http.ResponseWriter, r *http.Request) {
 		RespError(w, RespInternalErr, "用户名不能为空")
 		return
 	}
+	groupname := r.FormValue("groupname")
+	if groupname == "" {
+		RespError(w, RespInternalErr, "用户组不能为空")
+		return
+	}
 
-	clientCert, err := dbdata.GetClientCert(username)
+	clientCert, err := dbdata.GetClientCert(username, groupname)
 	if err != nil {
 		RespError(w, RespInternalErr, "证书不存在")
 		return
@@ -211,30 +221,6 @@ func ChangeClientCertStatus(w http.ResponseWriter, r *http.Request) {
 	RespSucess(w, fmt.Sprintf("证书%s成功", statusText))
 }
 
-// // 禁用客户端证书
-// func DisableClientCert(w http.ResponseWriter, r *http.Request) {
-// 	username := r.FormValue("username")
-// 	if username == "" {
-// 		RespError(w, RespInternalErr, "用户名不能为空")
-// 		return
-// 	}
-
-// 	// 获取证书并禁用
-// 	clientCert, err := dbdata.GetClientCert(username)
-// 	if err != nil {
-// 		RespError(w, RespInternalErr, "证书不存在")
-// 		return
-// 	}
-
-// 	err = clientCert.Disable()
-// 	if err != nil {
-// 		RespError(w, RespInternalErr, fmt.Sprintf("证书禁用失败: %v", err))
-// 		return
-// 	}
-
-// 	RespSucess(w, "证书禁用成功")
-// }
-
 // 删除客户端证书
 func DeleteClientCert(w http.ResponseWriter, r *http.Request) {
 	username := r.FormValue("username")
@@ -242,8 +228,13 @@ func DeleteClientCert(w http.ResponseWriter, r *http.Request) {
 		RespError(w, RespInternalErr, "用户名不能为空")
 		return
 	}
+	groupname := r.FormValue("groupname")
+	if groupname == "" {
+		RespError(w, RespInternalErr, "用户组不能为空")
+		return
+	}
 
-	clientCert, err := dbdata.GetClientCert(username)
+	clientCert, err := dbdata.GetClientCert(username, groupname)
 	if err != nil {
 		RespError(w, RespInternalErr, "证书不存在")
 		return
@@ -257,28 +248,6 @@ func DeleteClientCert(w http.ResponseWriter, r *http.Request) {
 
 	RespSucess(w, "证书删除成功")
 }
-
-// // 启用客户端证书
-// func EnableClientCert(w http.ResponseWriter, r *http.Request) {
-// 	username := r.FormValue("username")
-// 	if username == "" {
-// 		RespError(w, RespInternalErr, "用户名不能为空")
-// 		return
-// 	}
-
-// 	clientCert, err := dbdata.GetClientCert(username)
-// 	if err != nil {
-// 		RespError(w, RespInternalErr, "证书不存在")
-// 		return
-// 	}
-
-// 	if err := clientCert.Enable(); err != nil {
-// 		RespError(w, RespInternalErr, fmt.Sprintf("证书启用失败: %v", err))
-// 		return
-// 	}
-
-// 	RespSucess(w, nil)
-// }
 
 // 获取客户端证书列表
 func GetClientCertList(w http.ResponseWriter, r *http.Request) {
@@ -297,7 +266,12 @@ func GetClientCertList(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	certs, total, err := dbdata.GetClientCertList(pageSize, pageIndex)
+	// 添加搜索参数
+	username := r.FormValue("username")
+	groupname := r.FormValue("groupname")
+	status := r.FormValue("status")
+
+	certs, total, err := dbdata.GetClientCertList(pageSize, pageIndex, username, groupname, status)
 	if err != nil {
 		RespError(w, RespInternalErr, fmt.Sprintf("获取证书列表失败: %v", err))
 		return

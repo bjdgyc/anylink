@@ -44,7 +44,7 @@ func TestGenerateClientCert(t *testing.T) {
 	ast.Nil(err)
 	ast.NotNil(certData)
 	ast.Equal(username, certData.Username)
-	ast.Equal(group, certData.GroupName)
+	ast.Equal(group, certData.Groupname)
 	ast.Equal(CertStatusActive, certData.Status)
 	ast.NotEmpty(certData.Certificate)
 	ast.NotEmpty(certData.PrivateKey)
@@ -141,7 +141,7 @@ func TestValidateClientCert(t *testing.T) {
 	ast.Nil(err)
 	ast.NotNil(certData)
 	ast.Equal(username, certData.Username)
-	ast.Equal(group, certData.GroupName)
+	ast.Equal(group, certData.Groupname)
 
 	// 解析生成的证书
 	cert, err := parseCertFromPEM(certData.Certificate)
