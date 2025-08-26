@@ -266,7 +266,7 @@ https://cloud.tencent.com/document/product/216/62007
 
 1. 设置配置文件
 
-> macvtap 设置相对比较简单，只需要配置相应的参数即可。
+> arp_proxy 性能较高，设置相对比较简单，只需要配置相应的参数即可。
 >
 > 网络要求：需要网络支持 ARP 传输，可通过 ARP 宣告普通内网 IP。
 >
