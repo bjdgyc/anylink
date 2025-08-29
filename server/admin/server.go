@@ -87,6 +87,8 @@ func StartAdmin() {
 	r.HandleFunc("/user/policy/del", PolicyDel)
 	r.HandleFunc("/user/reset/forgotPassword", ForgotPassword).Name("forgot_password")
 	r.HandleFunc("/user/reset/resetPassword", ResetPassword).Name("reset_password")
+	r.HandleFunc("/user/batch/send_email", UserBatchSendEmail).Methods(http.MethodPost)
+	r.HandleFunc("/user/batch/delete", UserBatchDelete).Methods(http.MethodPost)
 
 	r.HandleFunc("/group/list", GroupList)
 	r.HandleFunc("/group/names", GroupNames)
@@ -95,6 +97,7 @@ func StartAdmin() {
 	r.HandleFunc("/group/set", GroupSet)
 	r.HandleFunc("/group/del", GroupDel)
 	r.HandleFunc("/group/auth_login", GroupAuthLogin)
+	r.HandleFunc("/group/saveldapusers", SaveLdapUsers)
 
 	r.HandleFunc("/statsinfo/list", StatsInfoList)
 	r.HandleFunc("/locksinfo/list", GetLocksInfo)

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -41,10 +42,10 @@ func UserList(w http.ResponseWriter, r *http.Request) {
 	// 查询前缀匹配
 	if len(prefix) > 0 {
 		fuzzy := "%" + prefix + "%"
-		where := "username LIKE ? OR nickname LIKE ? OR email LIKE ?"
+		where := "username LIKE ? OR nickname LIKE ? OR email LIKE ? OR type LIKE ?"
 
-		count = dbdata.FindWhereCount(&dbdata.User{}, where, fuzzy, fuzzy, fuzzy)
-		err = dbdata.FindWhere(&datas, pageSize, page, where, fuzzy, fuzzy, fuzzy)
+		count = dbdata.FindWhereCount(&dbdata.User{}, where, fuzzy, fuzzy, fuzzy, fuzzy)
+		err = dbdata.FindWhere(&datas, pageSize, page, where, fuzzy, fuzzy, fuzzy, fuzzy)
 	} else {
 		count = dbdata.CountAll(&dbdata.User{})
 		err = dbdata.Find(&datas, pageSize, page)
@@ -220,6 +221,97 @@ func UserReline(w http.ResponseWriter, r *http.Request) {
 	RespSucess(w, nil)
 }
 
+// 批量发送邮件
+func UserBatchSendEmail(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		UserIds []int `json:"user_ids"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		RespError(w, RespInternalErr, err)
+		return
+	}
+
+	if len(req.UserIds) == 0 {
+		RespError(w, RespInternalErr, errors.New("用户ID列表不能为空"))
+		return
+	}
+
+	successCount := 0
+	failCount := 0
+
+	for _, userId := range req.UserIds {
+		user := &dbdata.User{}
+		err := dbdata.One("Id", userId, user)
+		if err != nil {
+			failCount++
+			continue
+		}
+
+		// 发送邮件
+		err = userAccountMail(user)
+		if err != nil {
+			base.Error("批量发送邮件失败:", user.Username, err)
+			failCount++
+		} else {
+			successCount++
+		}
+	}
+
+	msg := fmt.Sprintf("批量发送邮件完成，成功：%d，失败：%d", successCount, failCount)
+
+	if successCount > 0 {
+		RespSucess(w, msg)
+	} else {
+		RespError(w, RespInternalErr, errors.New(msg))
+	}
+}
+
+// 批量删除用户
+func UserBatchDelete(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		UserIds []int `json:"user_ids"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		RespError(w, RespInternalErr, err)
+		return
+	}
+
+	if len(req.UserIds) == 0 {
+		RespError(w, RespInternalErr, errors.New("用户ID列表不能为空"))
+		return
+	}
+
+	successCount := 0
+	failCount := 0
+
+	for _, userId := range req.UserIds {
+		user := &dbdata.User{}
+		err := dbdata.One("Id", userId, user)
+		if err != nil {
+			failCount++
+			continue
+		}
+
+		err = dbdata.Del(user)
+		if err != nil {
+			base.Error("批量删除用户失败:", user.Username, err)
+			failCount++
+		} else {
+			successCount++
+		}
+	}
+
+	msg := fmt.Sprintf("批量删除完成，成功：%d，失败：%d", successCount, failCount)
+
+	if successCount > 0 {
+		RespSucess(w, msg)
+	} else {
+		RespError(w, RespInternalErr, errors.New(msg))
+	}
+}
+
 type userAccountMailData struct {
 	Issuer       string
 	LinkAddr     string
@@ -283,6 +375,10 @@ func userAccountMail(user *dbdata.User) error {
 		OtpImg:       fmt.Sprintf("https://%s/otp_qr?id=%d&jwt=%s", setting.LinkAddr, user.Id, tokenString),
 		OtpImgBase64: "data:image/png;base64," + otpData,
 		DisableOtp:   user.DisableOtp,
+	}
+
+	if user.Type == "ldap" {
+		data.PinCode = "同ldap密码"
 	}
 
 	if user.LimitTime == nil {

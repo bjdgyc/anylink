@@ -114,6 +114,9 @@ func checkLocalUser(name, pwd, group string, ext map[string]interface{}) error {
 			return fmt.Errorf("%s %s", name, "用户已过期")
 		}
 	}
+	if v.Type == "ldap" {
+		return fmt.Errorf("%s %s", name, "LDAP用户不能使用本地认证")
+	}
 	// 判断用户组信息
 	if !utils.InArrStr(v.Groups, group) {
 		return fmt.Errorf("%s %s", name, "用户组错误")

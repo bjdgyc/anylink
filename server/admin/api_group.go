@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/dbdata"
 )
 
@@ -148,4 +149,36 @@ func GroupAuthLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	RespSucess(w, "ok")
+}
+func SaveLdapUsers(w http.ResponseWriter, r *http.Request) {
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		RespError(w, RespInternalErr, err)
+		return
+	}
+	defer r.Body.Close()
+
+	v := &dbdata.Group{}
+	err = json.Unmarshal(body, v)
+	if err != nil {
+		RespError(w, RespParamErr, "参数错误")
+		return
+	}
+
+	// 保存LDAP用户
+	if v.Auth["type"] == "ldap" {
+		authLdap := dbdata.AuthLdap{}
+		if err := authLdap.ParseGroup(v); err != nil {
+			RespError(w, RespInternalErr, err)
+			return
+		}
+		go func() {
+			if err := authLdap.SaveUsers(v); err != nil {
+				base.Error("LDAP用户同步失败:", err)
+			} else {
+				base.Info("LDAP用户同步成功")
+			}
+		}()
+	}
+	RespSucess(w, "LDAP用户同步成功")
 }
