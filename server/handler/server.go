@@ -118,11 +118,16 @@ func initRoute() http.Handler {
 
 	r.HandleFunc("/", LinkHome).Methods(http.MethodGet)
 	r.HandleFunc("/", LinkAuth).Methods(http.MethodPost)
-	// r.Handle("/", antiBruteForce(http.HandlerFunc(LinkAuth))).Methods(http.MethodPost)
 	r.HandleFunc("/CSCOSSLC/tunnel", LinkTunnel).Methods(http.MethodConnect)
 	r.HandleFunc("/otp_qr", LinkOtpQr).Methods(http.MethodGet)
 	r.HandleFunc("/otp-verification", LinkAuth_otp).Methods(http.MethodPost)
-	// r.Handle("/otp-verification", antiBruteForce(http.HandlerFunc(LinkAuth_otp))).Methods(http.MethodPost)
+	// 添加Cisco AnyConnect兼容的SAML端点
+	r.HandleFunc("/+CSCOE+/saml/sp/login", SAMLSPLogin).Methods(http.MethodGet, http.MethodPost)
+	r.HandleFunc("/+CSCOE+/saml_ac_login.html", SAMLACLogin).Methods(http.MethodGet, http.MethodPost)
+	// 添加企业微信回调路由
+	r.HandleFunc("/WXAuth/callback", WXAuthCallback).Methods("GET")
+	r.HandleFunc("/WW_verify_8lmahgBycwtHwwIN.txt", SAMLTest).Methods(http.MethodGet)
+
 	r.HandleFunc(fmt.Sprintf("/profile_%s.xml", base.Cfg.ProfileName), func(w http.ResponseWriter, r *http.Request) {
 		b, _ := os.ReadFile(base.Cfg.Profile)
 		w.Write(b)

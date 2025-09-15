@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/bjdgyc/anylink/admin"
 	"github.com/bjdgyc/anylink/base"
@@ -24,6 +25,7 @@ var lockManager = admin.GetLockManager()
 type AuthSession struct {
 	ClientRequest *ClientRequest
 	UserActLog    *dbdata.UserActLog
+	CreatedAt     time.Time
 	// OtpErrCount   atomic.Uint32 // otp错误次数
 }
 
@@ -40,6 +42,7 @@ func NewSessionStore() *SessionStore {
 }
 
 func (s *SessionStore) SaveAuthSession(sessionID string, session *AuthSession) {
+	session.CreatedAt = time.Now() // 记录创建时间
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.session[sessionID] = session
@@ -53,7 +56,11 @@ func (s *SessionStore) GetAuthSession(sessionID string) (*AuthSession, error) {
 	if !exists {
 		return nil, fmt.Errorf("auth session not found")
 	}
-
+	// 检查是否过期
+	if time.Since(session.CreatedAt) > 5*time.Minute {
+		delete(s.session, sessionID) // 清理过期会话
+		return nil, fmt.Errorf("会话过期")
+	}
 	return session, nil
 }
 

@@ -31,6 +31,7 @@ type auth struct {
 	Password          string `xml:"password"`
 	OtpSecret         string `xml:"otp_secret"`
 	SecondaryPassword string `xml:"secondary_password"`
+	SsoToken          string `xml:"sso-token"`
 }
 
 type deviceId struct {

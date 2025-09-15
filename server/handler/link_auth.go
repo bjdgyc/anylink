@@ -129,8 +129,25 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if cr.Type == "init" {
-		w.WriteHeader(http.StatusOK)
+		// 获取组配置信息
+		groupData := &dbdata.Group{}
+		err := dbdata.One("Name", cr.GroupSelect, groupData)
+		if err == nil && len(groupData.Auth) > 0 {
+			authType := groupData.Auth["type"].(string)
+			if authType == "wxwork" {
+				// 使用企微认证模板
+				data := RequestData{
+					Group:      cr.GroupSelect,
+					Groups:     dbdata.GetGroupNamesNormal(),
+					ServerAddr: getServerAddr(r),
+				}
+				w.WriteHeader(http.StatusOK)
+				tplRequest(tpl_request_saml, w, data)
+				return
+			}
+		}
 		data := RequestData{Group: cr.GroupSelect, Groups: dbdata.GetGroupNamesNormal()}
+		w.WriteHeader(http.StatusOK)
 		tplRequest(tpl_request, w, data)
 		return
 	}
@@ -138,6 +155,36 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 	// 登陆参数判断
 	if cr.Type != "auth-reply" {
 		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if cr.Auth.SsoToken != "" {
+		base.Info("处理SSO认证请求")
+		// 获取saml会话
+		samlSession, err := SessStore.GetAuthSession(cr.Auth.SsoToken)
+		if err != nil {
+			base.Error("会话不存在")
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		// 修改客户端请求中的用户信息
+		cr.Auth.Username = samlSession.ClientRequest.Auth.Username
+		cr.GroupSelect = samlSession.ClientRequest.GroupSelect
+
+		// 更新用户活动日志
+		ua.Username = samlSession.ClientRequest.Auth.Username
+		ua.GroupName = samlSession.ClientRequest.GroupSelect
+		ua.Info = "用户通过企微认证登录"
+
+		sessionData.ClientRequest = cr
+		sessionData.UserActLog = ua
+
+		dbdata.UserActLogIns.Add(*ua, userAgent)
+		// 创建会话
+		CreateSession(w, r, sessionData)
+		// 删除saml会话
+		SessStore.DeleteAuthSession(cr.Auth.SsoToken)
 		return
 	}
 
@@ -198,6 +245,7 @@ const (
 	tpl_request = iota
 	tpl_complete
 	tpl_otp
+	tpl_request_saml
 )
 
 func tplRequest(typ int, w io.Writer, data RequestData) {
@@ -216,6 +264,9 @@ func tplRequest(typ int, w io.Writer, data RequestData) {
 	case tpl_otp:
 		t, _ := template.New("auth_otp").Parse(auth_otp)
 		_ = t.Execute(w, data)
+	case tpl_request_saml:
+		t, _ := template.New("auth_request_saml").Parse(auth_request_saml)
+		_ = t.Execute(w, data)
 	}
 }
 
@@ -232,6 +283,9 @@ type RequestData struct {
 	ProfileName  string
 	ProfileHash  string
 	CertHash     string
+
+	// saml
+	ServerAddr string
 }
 
 var auth_request = `<?xml version="1.0" encoding="UTF-8"?>
