@@ -7,6 +7,7 @@ import (
 
 	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/dbdata"
+	"github.com/bjdgyc/anylink/pkg/utils"
 )
 
 func getServerAddr(r *http.Request) string {
@@ -18,23 +19,6 @@ func SAMLSPLogin(w http.ResponseWriter, r *http.Request) {
 		base.Error("缺少组名参数")
 		return
 	}
-
-	// 生成临时会话 ID
-	sessionID, err := GenerateSessionID()
-	if err != nil {
-		base.Error("临时会话创建失败", err)
-		return
-	}
-
-	// 创建临时会话（用于传递组名）
-	tempSession := &AuthSession{
-		ClientRequest: &ClientRequest{
-			GroupSelect: tgname,
-		},
-	}
-
-	// 保存临时会话
-	SessStore.SaveAuthSession(sessionID, tempSession)
 	// 获取企微配置
 	wxworkConfig, err := dbdata.GetAuthWework(tgname)
 	if err != nil {
@@ -47,29 +31,22 @@ func SAMLSPLogin(w http.ResponseWriter, r *http.Request) {
 	// 企微认证回调地址
 	redirectUri := fmt.Sprintf("%s/WXAuth/callback", getServerAddr(r))
 
-	weworkUrl := fmt.Sprintf("https://login.work.weixin.qq.com/wwlogin/sso/login?login_type=CorpApp&appid=%s&agentid=%s&redirect_uri=%s&state=%s",
-		corpId, agentId, url.QueryEscape(redirectUri), url.QueryEscape(sessionID), // 使用state传递临时sessionID
+	wxWorkUrl := fmt.Sprintf("https://login.work.weixin.qq.com/wwlogin/sso/login?login_type=CorpApp&appid=%s&agentid=%s&redirect_uri=%s&state=%s",
+		corpId, agentId, url.QueryEscape(redirectUri), url.QueryEscape(utils.RandomRunes(32)+tgname), // 使用state传递组名,添加随机字符防止CSRF 攻击
 	)
 	// 重定向到企业微信扫码页面
-	http.Redirect(w, r, weworkUrl, http.StatusFound)
+	http.Redirect(w, r, wxWorkUrl, http.StatusFound)
 }
 
 func WXAuthCallback(w http.ResponseWriter, r *http.Request) {
 	code := r.URL.Query().Get("code")
-	tempSessionID := r.URL.Query().Get("state") // 通过state参数获取临时会话ID
+	state := r.URL.Query().Get("state") // 通过state参数获取组名
 
-	if code == "" || tempSessionID == "" {
+	if code == "" || state == "" {
 		base.Error("企微认证回调缺少参数")
 		return
 	}
-
-	// 获取临时会话
-	tempSession, err := SessStore.GetAuthSession(tempSessionID)
-	if err != nil {
-		base.Error("无效或过期的会话")
-		return
-	}
-	groupname := tempSession.ClientRequest.GroupSelect
+	groupname := state[32:]
 	// 获取企微配置
 	wxworkConfig, err := dbdata.GetAuthWework(groupname)
 	if err != nil {
@@ -88,7 +65,7 @@ func WXAuthCallback(w http.ResponseWriter, r *http.Request) {
 	// 创建SAML会话 用于传递组名和用户名
 	samlSession := &AuthSession{
 		ClientRequest: &ClientRequest{
-			GroupSelect: tempSession.ClientRequest.GroupSelect,
+			GroupSelect: groupname,
 			Auth: auth{
 				Username: username,
 			},
@@ -96,8 +73,6 @@ func WXAuthCallback(w http.ResponseWriter, r *http.Request) {
 	}
 	// 保存saml会话
 	SessStore.SaveAuthSession(code, samlSession)
-	// 删除临时会话
-	SessStore.DeleteAuthSession(tempSessionID)
 
 	// 设置 Cookie
 	SetCookie(w, "acSamlv2Token", code, 0)
@@ -115,15 +90,23 @@ func SAMLACLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	html := `
-			<!DOCTYPE html>
-			<html>
-			<head><title>认证成功</title></head>
-			<body>
-				<p>身份验证成功，正在建立 VPN 连接...</p>
-				<p>请稍候，窗口即将关闭。</p>
-			</body>
-			</html>
-		`
+<!DOCTYPE html>
+<html>
+<head>
+	<title>认证成功</title>
+	<style>
+		body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+		.success { color: green; font-size: 24px; }
+	</style>
+</head>
+<body>
+	<div class="success">
+		<h1>认证成功</h1>
+		<p>您已成功通过认证，请关闭此浏览器窗口并返回VPN客户端。</p>
+		<p>VPN客户端将自动完成连接过程。</p>
+	</div>
+</body>
+</html>`
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(html))
@@ -133,6 +116,23 @@ func SAMLTest(w http.ResponseWriter, r *http.Request) {
 	var test = "8lmahgBycwtHwwIN"
 	w.Write([]byte(test))
 }
+
+// var auth_reply_saml = `<?xml version='1.0' encoding='UTF-8'?>
+// <config-auth client="vpn" type="auth-reply" aggregate-auth-version="2">
+//   <version who="vpn">4.7.00136</version>
+//   <device-id>linux-64</device-id>
+//   <session-token/>
+//   <session-id/>
+//   <opaque is-for="sg">
+//     <tunnel-group>DefaultWEBVPNGroup</tunnel-group>
+//     <auth-method>single-sign-on-v2</auth-method>
+//     <config-hash>1646156124329</config-hash>
+//   </opaque>
+//   <auth>
+//     <sso-token>71D2D28F0744FDEE74C74F6</sso-token>
+//   </auth>
+// </config-auth>
+// `
 
 var auth_request_saml = `<?xml version="1.0" encoding="UTF-8"?>
 <config-auth client="vpn" type="auth-request" aggregate-auth-version="2">
@@ -153,11 +153,12 @@ var auth_request_saml = `<?xml version="1.0" encoding="UTF-8"?>
         <sso-v2-login>{{.ServerAddr}}/+CSCOE+/saml/sp/login?tgname={{.Group}}&#x26;acsamlcap=v2</sso-v2-login>
         <sso-v2-login-final>{{.ServerAddr}}/+CSCOE+/saml_ac_login.html</sso-v2-login-final>
         <sso-v2-token-cookie-name>acSamlv2Token</sso-v2-token-cookie-name>
-        <sso-v2-error-cookie-name>acSamlv2Error</sso-v2-error-cookie-name>
         <form>
             <input type="sso" name="sso-token"></input>
         </form>
     </auth>
 </config-auth>`
 
+// <sso-v2-error-cookie-name>acSamlv2Error</sso-v2-error-cookie-name>
 // <sso-v2-browser-mode>external</sso-v2-browser-mode>
+// <sso-token>{{.SsoToken}}</sso-token>

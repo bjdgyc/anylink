@@ -122,10 +122,10 @@ func initRoute() http.Handler {
 	r.HandleFunc("/otp_qr", LinkOtpQr).Methods(http.MethodGet)
 	r.HandleFunc("/otp-verification", LinkAuth_otp).Methods(http.MethodPost)
 	// 添加Cisco AnyConnect兼容的SAML端点
-	r.HandleFunc("/+CSCOE+/saml/sp/login", SAMLSPLogin).Methods(http.MethodGet, http.MethodPost)
-	r.HandleFunc("/+CSCOE+/saml_ac_login.html", SAMLACLogin).Methods(http.MethodGet, http.MethodPost)
+	r.HandleFunc("/+CSCOE+/saml/sp/login", SAMLSPLogin).Methods(http.MethodGet)
+	r.HandleFunc("/+CSCOE+/saml_ac_login.html", SAMLACLogin).Methods(http.MethodGet)
 	// 添加企业微信回调路由
-	r.HandleFunc("/WXAuth/callback", WXAuthCallback).Methods("GET")
+	r.HandleFunc("/WXAuth/callback", WXAuthCallback).Methods(http.MethodGet)
 	r.HandleFunc("/WW_verify_8lmahgBycwtHwwIN.txt", SAMLTest).Methods(http.MethodGet)
 
 	r.HandleFunc(fmt.Sprintf("/profile_%s.xml", base.Cfg.ProfileName), func(w http.ResponseWriter, r *http.Request) {
