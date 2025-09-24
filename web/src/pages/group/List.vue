@@ -44,13 +44,13 @@
           <template slot-scope="scope">
             <el-row v-for="(item, inx) in scope.row.route_include.slice(0, readMinRows)" :key="inx">{{
               item.val
-            }}
+              }}
             </el-row>
             <div v-if="scope.row.route_include.length > readMinRows">
               <div v-if="readMore[`ri_${scope.row.id}`]">
                 <el-row v-for="(item, inx) in scope.row.route_include.slice(readMinRows)" :key="inx">{{
                   item.val
-                }}
+                  }}
                 </el-row>
               </div>
               <el-button size="mini" type="text" @click="toggleMore(`ri_${scope.row.id}`)">
@@ -64,13 +64,13 @@
           <template slot-scope="scope">
             <el-row v-for="(item, inx) in scope.row.route_exclude.slice(0, readMinRows)" :key="inx">{{
               item.val
-            }}
+              }}
             </el-row>
             <div v-if="scope.row.route_exclude.length > readMinRows">
               <div v-if="readMore[`re_${scope.row.id}`]">
                 <el-row v-for="(item, inx) in scope.row.route_exclude.slice(readMinRows)" :key="inx">{{
                   item.val
-                }}
+                  }}
                 </el-row>
               </div>
               <el-button size="mini" type="text" @click="toggleMore(`re_${scope.row.id}`)">
@@ -425,7 +425,8 @@
             </el-form-item>
           </el-tab-pane>
           <el-form-item>
-            <templete v-if="activeTab == 'authtype' && ruleForm.auth.type != 'local'">
+            <templete
+              v-if="activeTab == 'authtype' && (ruleForm.auth.type == 'ldap' || ruleForm.auth.type == 'radius')">
               <el-button @click="openAuthLoginDialog()" style="margin-right:10px">测试登录</el-button>
             </templete>
             <el-button type="primary" @click="submitForm('ruleForm')">保存</el-button>
