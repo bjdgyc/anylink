@@ -524,8 +524,4 @@ ipv4_end = "10.1.2.200"
 
 本项目采用 AGPL-3.0 开源授权许可证，完整的授权说明已放置在 LICENSE 文件中。
 
-## Thank
 
-<a href="https://www.jetbrains.com">
-    <img src="doc/screenshot/jetbrains.png" width="200" alt="jetbrains.png" />
-</a>
