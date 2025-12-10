@@ -30,7 +30,7 @@ AnyLink 基于 [ietf-openconnect](https://tools.ietf.org/html/draft-mavrogiannop
 AnyLink 使用 TLS/DTLS 进行数据加密，因此需要 RSA 或 ECC 证书，可以使用私有自签证书，可以通过 Let's Encrypt 和 TrustAsia
 申请免费的 SSL 证书。
 
-AnyLink 服务端仅在 CentOS7、CentOS8、Ubuntu18、Ubuntu20、Ubuntu22、Ubuntu24、AnolisOS8、OpenCloudOS8、Debian10、Debian11、Debian12 测试通过，如需要安装在其他系统，需要服务端支持
+AnyLink 服务端仅在 CentOS7、CentOS8、Ubuntu18、Ubuntu20、Ubuntu22、Ubuntu24、AnolisOS8、OpenCloudOS8、Debian10、Debian11、Debian12、Debian13 测试通过，如需要安装在其他系统，需要服务端支持
 tun/tap
 功能、ip 设置命令、iptables命令。
 
