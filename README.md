@@ -489,6 +489,7 @@ ipv4_end = "10.1.2.200"
 
 - [三方文档-男孩的天职](https://note.youdao.com/s/X4AxyWfL)
 - [三方文档-issues](https://github.com/bjdgyc/anylink/issues)
+- [openwrt 安装 openconnect 配置客户端教程](https://gitee.com/bjdgyc/anylink/wikis/pages?sort_id=16384148&doc_id=6261997)
 - [三方文档-思有云](https://www.ioiox.com/archives/128.html)
 - [三方文档-杨杨得亿](https://yangpin.link/archives/1897.html)  [Windows电脑连接步骤-杨杨得亿](https://yangpin.link/archives/1697.html)
 
