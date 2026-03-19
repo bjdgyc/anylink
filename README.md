@@ -143,6 +143,10 @@ sudo ./anylink
 - [x] 支持内网域名解析(指定的域名走内网dns)
 - [x] 增加用户验证防爆功能(IP BAN)
 - [x] 支持 docker 非特权模式
+- [x] 支持自定义证书登录验证
+- [x] 支持微信扫码登录
+- [x] 支持客户端证书绑定设备的功能
+- [x] 支持自动同步LDAP用户
 - [ ] 基于 ipvtap 设备的桥接访问模式
 
 ## Config
@@ -200,7 +204,7 @@ sudo ./anylink
 
 > 以下参数必须设置其中之一
 
-网络模式选择，需要配置 `link_mode` 参数，如 `link_mode="tun"`,`link_mode="macvtap"`,`link_mode="tap"(不推荐)` 等参数。
+网络模式选择，需要配置 `link_mode` 参数，如 `link_mode="tun"`,`link_mode="macvtap"` 等参数。
 不同的参数需要对服务器做相应的设置。
 
 建议优先选择 tun 模式，其次选择 macvtap 模式，因客户端传输的是 IP 层数据，无须进行数据转换。 tap 模式是在用户态做的链路层到
@@ -333,16 +337,16 @@ ipv4_end = "10.1.2.200"
 ### Systemd
 
 1. 添加 anylink 程序
-    - 首先把 `anylink-deploy` 文件夹放入 `/usr/local/anylink-deploy`
-    - 添加执行权限 `chmod +x /usr/local/anylink-deploy/anylink`
+   - 首先把 `anylink-deploy` 文件夹放入 `/usr/local/anylink-deploy`
+   - 添加执行权限 `chmod +x /usr/local/anylink-deploy/anylink`
 2. 把 `anylink.service` 脚本放入：
-    - centos: `/usr/lib/systemd/system/`
-    - ubuntu: `/lib/systemd/system/`
+   - centos: `/usr/lib/systemd/system/`
+   - ubuntu: `/lib/systemd/system/`
 3. 操作命令:
-    - 加载配置: `systemctl daemon-reload`
-    - 启动: `systemctl start anylink`
-    - 停止: `systemctl stop anylink`
-    - 开机自启: `systemctl enable anylink`
+   - 加载配置: `systemctl daemon-reload`
+   - 启动: `systemctl start anylink`
+   - 停止: `systemctl stop anylink`
+   - 开机自启: `systemctl enable anylink`
 
 ### Docker Compose
 
@@ -364,9 +368,9 @@ ipv4_end = "10.1.2.200"
 |    支持设备/平台    |       DockerHub       |                             阿里云镜像仓库                             |
 |:-------------:|:---------------------:|:---------------------------------------------------------------:|
 | x86_64/amd64  | bjdgyc/anylink:latest |     registry.cn-hangzhou.aliyuncs.com/bjdgyc/anylink:latest     |
-| x86_64/amd64  | bjdgyc/anylink:0.13.1 |     registry.cn-hangzhou.aliyuncs.com/bjdgyc/anylink:0.13.1     | 
+| x86_64/amd64  | bjdgyc/anylink:0.14.2 |     registry.cn-hangzhou.aliyuncs.com/bjdgyc/anylink:0.14.2     | 
 | armv8/aarch64 | bjdgyc/anylink:latest | registry.cn-hangzhou.aliyuncs.com/bjdgyc/anylink:arm64v8-latest | 
-| armv8/aarch64 | bjdgyc/anylink:0.13.1 | registry.cn-hangzhou.aliyuncs.com/bjdgyc/anylink:arm64v8-0.13.1 | 
+| armv8/aarch64 | bjdgyc/anylink:0.14.2 | registry.cn-hangzhou.aliyuncs.com/bjdgyc/anylink:arm64v8-0.14.2 | 
 
 ### docker 镜像源地址
 
@@ -407,17 +411,7 @@ ipv4_end = "10.1.2.200"
    docker run -it --rm bjdgyc/anylink tool -d
    ```
 
-6. iptables兼容设置
-   ```bash
-   # 默认 iptables 使用 nf_tables 设置转发规则,如果内核低于 4.19 版本,需要特殊配置
-   docker run -itd --name anylink --privileged \
-      -e IPTABLES_LEGACY=on \
-      -p 443:443 -p 8800:8800 -p 443:443/udp \
-      --restart=always \
-      bjdgyc/anylink
-   ```
-
-7. 启动容器
+6. 启动容器
    ```bash
    # 默认启动
    docker run -itd --name anylink --privileged \
@@ -437,7 +431,7 @@ ipv4_end = "10.1.2.200"
    docker restart anylink
    ```
 
-8. 使用自定义参数启动容器
+7. 使用自定义参数启动容器
    ```bash
    # 参数可以参考 ./anylink tool -d
    # 可以使用命令行参数 或者 环境变量 配置
@@ -450,7 +444,7 @@ ipv4_end = "10.1.2.200"
        --ip_lease=1209600 # IP地址租约时长
    ```
 
-9. 使用非特权模式启动容器
+8. 使用非特权模式启动容器
    ```bash
    # 参数可以参考 ./anylink tool -d
    # 可以使用命令行参数 或者 环境变量 配置
@@ -461,7 +455,7 @@ ipv4_end = "10.1.2.200"
        bjdgyc/anylink
    ```
 
-10. 构建镜像 (非必需)
+9. 构建镜像 (非必需)
    ```bash
    #获取仓库源码
    git clone https://github.com/bjdgyc/anylink.git
@@ -524,5 +518,4 @@ ipv4_end = "10.1.2.200"
 ## License
 
 本项目采用 AGPL-3.0 开源授权许可证，完整的授权说明已放置在 LICENSE 文件中。
-
 
