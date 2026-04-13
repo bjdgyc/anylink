@@ -403,13 +403,15 @@
           <el-tab-pane label="权限控制" name="link_acl">
             <el-form-item label="权限控制" prop="link_acl">
               <el-row class="msg-info">
-                <el-col :span="22">输入CIDR格式如: 192.168.3.0/24
-                  协议支持 all,tcp,udp,icmp
-                  端口0表示所有端口,多个端口:80,443,连续端口:1234-5678
+                <el-col :span="20">输入CIDR格式如: 192.168.3.0/24，端口0表示所有端口,多个端口:80,443,连续端口:1234-5678
                 </el-col>
                 <el-col :span="2">
                   <el-button size="mini" type="success" icon="el-icon-plus" circle
                              @click.prevent="addDomain(ruleForm.link_acl)"></el-button>
+                </el-col>
+                <el-col :span="2">
+                  <el-button size="mini" type="info" icon="el-icon-edit" circle
+                             @click.prevent="openIpListDialog('link_acl')"></el-button>
                 </el-col>
               </el-row>
 
@@ -433,7 +435,12 @@
                 </el-col>
 
                 <el-col :span="3">
-                    <el-input placeholder="协议" v-model="item.protocol">
+                  <el-select v-model="item.protocol" placeholder="协议" class="protocol-select">
+                    <el-option label="ALL" value="all"></el-option>
+                    <el-option label="TCP" value="tcp"></el-option>
+                    <el-option label="UDP" value="udp"></el-option>
+                    <el-option label="ICMP" value="icmp"></el-option>
+                  </el-select>
                 </el-col>
 
                 <el-col :span="6">
@@ -500,18 +507,22 @@
     <!--编辑模式弹窗-->
     <el-dialog
         :close-on-click-modal="false"
-        title="编辑模式"
+        :title="ipEditForm.type === 'link_acl' ? '权限控制编辑' : '编辑模式'"
         :visible.sync="ipListDialog"
         width="650px"
         custom-class="valgin-dialog"
         center>
       <el-form ref="ipEditForm" label-width="80px">
-        <el-form-item label="路由表" prop="ip_list">
+        <el-form-item :label="ipEditForm.type === 'link_acl' ? '权限控制' : '路由表'" prop="ip_list">
           <el-input type="textarea" :rows="10" v-model="ipEditForm.ip_list"
-                    placeholder="每行一条路由，例：192.168.1.0/24,备注 或 192.168.1.0/24"></el-input>
-          <div class="msg-info">当前共
+                    :placeholder="ipEditForm.type === 'link_acl' ? '每行一条规则，格式：动作|CIDR|协议|端口|备注\n例：allow|192.168.1.0/24|tcp|80,443|允许访问Web\n例：deny|10.0.0.0/8|all|0|禁止内网访问' : '每行一条路由，例：192.168.1.0/24,备注 或 192.168.1.0/24'"></el-input>
+          <div class="msg-info" v-if="ipEditForm.type !== 'link_acl'">当前共
             {{ ipEditForm.ip_list.trim() === '' ? 0 : ipEditForm.ip_list.trim().split("\n").length }}
             条（注：AnyConnect客户端最多支持{{ this.maxRouteRows }}条路由）
+          </div>
+          <div class="msg-info" v-else>当前共
+            {{ ipEditForm.ip_list.trim() === '' ? 0 : ipEditForm.ip_list.trim().split("\n").length }}
+            条权限控制规则
           </div>
         </el-form-item>
         <el-form-item>
@@ -784,7 +795,27 @@ export default {
     openIpListDialog(type) {
       this.ipListDialog = true;
       this.ipEditForm.type = type;
-      this.ipEditForm.ip_list = this.ruleForm[type].map(item => item.val + (item.note ? "," + item.note : "")).join("\n");
+      if (type === 'link_acl') {
+        // Format: action|cidr|protocol|port|note
+        // 过滤掉 val 为空的条目
+        this.ipEditForm.ip_list = this.ruleForm[type]
+          .filter(item => item.val && item.val.trim() !== '')
+          .map(item => {
+            const parts = [
+              item.action || 'allow',
+              item.val || '',
+              item.protocol || 'all',
+              item.port || '0',
+              item.note || ''
+            ];
+            return parts.join('|');
+          }).join("\n");
+      } else {
+        this.ipEditForm.ip_list = this.ruleForm[type]
+          .filter(item => item.val && item.val.trim() !== '')
+          .map(item => item.val + (item.note ? "," + item.note : ""))
+          .join("\n");
+      }
     },
     ipEdit() {
       this.ipEditLoading = true;
@@ -793,31 +824,95 @@ export default {
         ipList = this.ipEditForm.ip_list.trim().split("\n");
       }
       let arr = [];
-      for (let i = 0; i < ipList.length; i++) {
-        let item = ipList[i];
-        if (item.trim() === "") {
-          continue;
+
+      // Handle link_acl format
+      if (this.ipEditForm.type === 'link_acl') {
+        for (let i = 0; i < ipList.length; i++) {
+          let item = ipList[i];
+          if (item.trim() === "") {
+            continue;
+          }
+          let parts = item.split("|").map(p => p.trim());
+          if (parts.length < 2) {
+            this.$message.error("错误：第 " + (i + 1) + " 行格式错误，至少需要：动作|CIDR");
+            this.ipEditLoading = false;
+            return;
+          }
+
+          let action = parts[0].toLowerCase();
+          if (action !== 'allow' && action !== 'deny') {
+            this.$message.error("错误：第 " + (i + 1) + " 行动作必须是 allow 或 deny");
+            this.ipEditLoading = false;
+            return;
+          }
+
+          let cidr = parts[1] ? parts[1].trim() : '';
+          if (!cidr) {
+            this.$message.error("错误：第 " + (i + 1) + " 行CIDR地址不能为空");
+            this.ipEditLoading = false;
+            return;
+          }
+
+          let valid = this.isValidCIDR(cidr);
+          if (!valid.valid) {
+            let errorMsg = "错误：第 " + (i + 1) + " 行CIDR格式错误 [" + cidr + "]";
+            if (valid.suggestion) {
+              errorMsg += "，建议改为 " + valid.suggestion;
+            } else {
+              errorMsg += "，正确格式如：192.168.1.0/24";
+            }
+            this.$message.error(errorMsg);
+            this.ipEditLoading = false;
+            return;
+          }
+
+          let protocol = parts[2] ? parts[2].toLowerCase() : 'all';
+          if (!['all', 'tcp', 'udp', 'icmp'].includes(protocol)) {
+            this.$message.error("错误：第 " + (i + 1) + " 行协议必须是 all, tcp, udp 或 icmp");
+            this.ipEditLoading = false;
+            return;
+          }
+
+          let port = parts[3] || '0';
+          let note = parts.length > 4 ? parts.slice(4).join('|') : '';
+
+          arr.push({
+            action: action,
+            val: cidr,
+            protocol: protocol,
+            port: port,
+            note: note
+          });
         }
-        let ip = item.split(",");
-        if (ip.length > 2) {
-          ip[1] = ip.slice(1).join(",");
-        }
-        let note = ip[1] ? ip[1] : "";
-        const pushToArr = () => {
-          arr.push({val: ip[0], note: note});
-        };
-        if (this.ipEditForm.type == "route_include" && ip[0] == "all") {
+      } else {
+        // Handle route format
+        for (let i = 0; i < ipList.length; i++) {
+          let item = ipList[i];
+          if (item.trim() === "") {
+            continue;
+          }
+          let ip = item.split(",");
+          if (ip.length > 2) {
+            ip[1] = ip.slice(1).join(",");
+          }
+          let note = ip[1] ? ip[1] : "";
+          const pushToArr = () => {
+            arr.push({val: ip[0], note: note});
+          };
+          if (this.ipEditForm.type == "route_include" && ip[0] == "all") {
+            pushToArr();
+            continue;
+          }
+          let valid = this.isValidCIDR(ip[0]);
+          if (!valid.valid) {
+            this.$message.error("错误：CIDR格式错误，建议 " + ip[0] + " 改为 " + valid.suggestion);
+            this.ipEditLoading = false;
+            return;
+          }
           pushToArr();
-          continue;
         }
-        let valid = this.isValidCIDR(ip[0]);
-        if (!valid.valid) {
-          this.$message.error("错误：CIDR格式错误，建议 " + ip[0] + " 改为 " + valid.suggestion);
-          this.ipEditLoading = false;
-          return;
-        }
-        pushToArr();
       }
+
       this.ruleForm[this.ipEditForm.type] = arr;
       this.ipEditLoading = false;
       this.ipListDialog = false;
@@ -905,6 +1000,10 @@ export default {
 
 .el-select {
   width: 80px;
+}
+
+.protocol-select {
+  width: 100%;
 }
 
 ::v-deep .valgin-dialog {
