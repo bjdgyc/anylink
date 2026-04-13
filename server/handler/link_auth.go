@@ -67,7 +67,29 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 
 	if cr.Type == "init" {
 		w.WriteHeader(http.StatusOK)
-		data := RequestData{Group: cr.GroupSelect, Groups: dbdata.GetGroupNamesNormal()}
+
+		// 获取所有可用组
+		groups := dbdata.GetGroupNamesNormal()
+
+		// 确定默认选择的组
+		selectedGroup := cr.GroupSelect
+		if selectedGroup == "" && base.Cfg.DefaultGroup != "" {
+			// 验证配置的默认组是否存在于可用组列表中
+			groupExists := false
+			for _, g := range groups {
+				if g == base.Cfg.DefaultGroup {
+					selectedGroup = base.Cfg.DefaultGroup
+					groupExists = true
+					break
+				}
+			}
+
+			if !groupExists {
+				base.Warn(fmt.Sprintf("Configuration warning: default_group '%s' does not exist or is disabled", base.Cfg.DefaultGroup))
+			}
+		}
+
+		data := RequestData{Group: selectedGroup, Groups: groups}
 		tplRequest(tpl_request, w, data)
 		return
 	}
