@@ -10,7 +10,7 @@
 [![Docker pulls)](https://img.shields.io/docker/pulls/bjdgyc/anylink.svg)](https://hub.docker.com/r/bjdgyc/anylink)
 ![LICENSE](https://img.shields.io/github/license/bjdgyc/anylink)
 
-AnyLink 是一个企业级远程办公 sslvpn 的软件，可以支持多人同时在线使用。
+AnyLink 是一个企业级远程接入办公软件，可以支持多人同时在线使用。
 
 使用 AnyLink，你可以随时随地安全的访问你的内部网络。
 
@@ -18,11 +18,11 @@ With AnyLink, you can securely access your internal network anytime and anywhere
 
 ## Sponsors
 
-<div align="center"><h2><img src="https://readme-typing-svg.demolab.com?font=Noto+Sans+SC&weight=900&size=28&duration=1&pause=999999&color=D32F2F&center=true&vCenter=true&repeat=false&width=660&lines=%E9%87%8D%E7%A3%85%E6%8E%A8%E8%8D%90%20%E9%A3%9E%E5%B0%86%E4%BC%81%E4%B8%9A%E7%BA%A7%20VPN" alt="重磅推荐 飞将企业级 VPN" /></h2></div>
+<div align="center"><h2><img src="https://readme-typing-svg.demolab.com?font=Noto+Sans+SC&weight=900&size=28&duration=1&pause=999999&color=D32F2F&center=true&vCenter=true&repeat=false&width=660&lines=%E9%87%8D%E7%A3%85%E6%8E%A8%E8%8D%90%20%E9%A3%9E%E5%B0%86%E4%BC%81%E4%B8%9A%E7%BA%A7%20软件" alt="重磅推荐 飞将企业级" /></h2></div>
 
 <div align="center"> 
   <a href="https://www.feijiangkeji.com">
-    <img src="https://www.feijiangkeji.com/assets/img/highlights/terminal.png" alt="飞将VPN 终端展示" width="900" />
+    <img src="https://www.feijiangkeji.com/assets/img/highlights/terminal.png" alt="飞将 终端展示" width="900" />
   </a>
 
   <br />
@@ -34,7 +34,7 @@ With AnyLink, you can securely access your internal network anytime and anywhere
   <br />
 
   <a href="https://www.feijiangkeji.com">
-    <img src="https://img.shields.io/badge/%E9%A3%9E%E5%B0%86VPN-%E4%BC%81%E4%B8%9A%E7%BA%A7%E8%BF%9C%E7%A8%8B%E5%8A%9E%E5%85%AC-red?style=for-the-badge" alt="飞将VPN｜企业级远程办公">
+    <img src="https://img.shields.io/badge/%E9%A3%9E%E5%B0%86VPN-%E4%BC%81%E4%B8%9A%E7%BA%A7%E8%BF%9C%E7%A8%8B%E5%8A%9E%E5%85%AC-red?style=for-the-badge" alt="飞将｜企业级远程办公">
   </a>
   <a href="https://www.feijiangkeji.com">
     <img src="https://img.shields.io/badge/%E8%AE%A2%E9%98%85-299%E5%85%83%2F%E5%B9%B4-orange?style=for-the-badge" alt="订阅 299元/年">
