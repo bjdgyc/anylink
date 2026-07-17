@@ -11,3 +11,6 @@ artifact-dist
 
 anylink_amd64
 anylink_arm64
+
+# macOS
+.DS_Store

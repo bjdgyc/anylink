@@ -123,6 +123,11 @@ auth_alone_otp = false
 #加密保存用户密码
 encryption_password = false
 
+#新建用户首次登录前强制修改密码(开启后, 新建用户须先通过自助改密页修改密码才能连接VPN)
+force_first_change_pwd = false
+#自助改密页地址, 用于首次登录被拒时的提示。内置改密页填 https://你的VPN地址/pwd (建议不含&参数)
+portal_url = ""
+
 #防爆破全局开关
 anti_brute_force = true
 #全局IP白名单,多个用逗号分隔，支持单IP和CIDR范围

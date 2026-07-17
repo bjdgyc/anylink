@@ -3,6 +3,7 @@ package dbdata
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 
@@ -145,6 +146,38 @@ func checkLocalUser(name, pwd, group string, ext map[string]interface{}) error {
 	}
 
 	return nil
+}
+
+// 用户自助修改密码: 校验旧密码(仅PIN码, 不含OTP动态码)后更新密码, 并清除首次登录改密标记。
+// 用户不存在与旧密码错误返回同一模糊提示, 防止用户名枚举。
+func UserChangePassword(username, oldPwd, newPwd string) error {
+	username = strings.TrimSpace(username)
+	if username == "" || oldPwd == "" {
+		return errors.New("用户名或旧密码错误")
+	}
+	if len(newPwd) < 6 {
+		return errors.New("新密码长度不能少于6位")
+	}
+	if newPwd == oldPwd {
+		return errors.New("新密码不能与旧密码相同")
+	}
+
+	v := &User{}
+	err := One("Username", username, v)
+	if err != nil {
+		return errors.New("用户名或旧密码错误")
+	}
+	if !utils.PasswordVerify(oldPwd, v.PinCode) {
+		return errors.New("用户名或旧密码错误")
+	}
+	// 旧密码校验通过后才提示账号状态, 避免枚举者探测账号状态
+	if v.Status != 1 {
+		return errors.New("账号已停用或已过期, 请联系管理员")
+	}
+
+	v.PinCode = newPwd
+	v.ChangePwd = false
+	return SetUser(v)
 }
 
 // 用户过期时间到达后，更新用户状态，并返回一个状态为过期的用户切片

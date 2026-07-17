@@ -116,6 +116,9 @@ func initRoute() http.Handler {
 	r.HandleFunc("/CSCOSSLC/tunnel", LinkTunnel).Methods(http.MethodConnect)
 	r.HandleFunc("/otp_qr", LinkOtpQr).Methods(http.MethodGet)
 	r.HandleFunc("/otp-verification", LinkAuth_otp).Methods(http.MethodPost)
+	// 用户自助修改密码页面(公开访问)
+	r.HandleFunc("/pwd", LinkPwd).Methods(http.MethodGet)
+	r.HandleFunc("/pwd", LinkPwdPost).Methods(http.MethodPost)
 	// r.Handle("/otp-verification", antiBruteForce(http.HandlerFunc(LinkAuth_otp))).Methods(http.MethodPost)
 	r.HandleFunc(fmt.Sprintf("/profile_%s.xml", base.Cfg.ProfileName), func(w http.ResponseWriter, r *http.Request) {
 		b, _ := os.ReadFile(base.Cfg.Profile)

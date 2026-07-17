@@ -37,6 +37,8 @@ type User struct {
 	Groups     []string   `json:"groups" xorm:"Text"`
 	Status     int8       `json:"status" xorm:"Int"` // 1正常
 	SendEmail  bool       `json:"send_email" xorm:"Bool"`
+	ChangePwd  bool       `json:"change_pwd" xorm:"Bool"` // 首次登录需修改密码
+
 	CreatedAt  time.Time  `json:"created_at" xorm:"DateTime created"`
 	UpdatedAt  time.Time  `json:"updated_at" xorm:"DateTime updated"`
 }

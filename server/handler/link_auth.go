@@ -117,15 +117,43 @@ func LinkAuth(w http.ResponseWriter, r *http.Request) {
 		tplRequest(tpl_request, w, data)
 		return
 	}
-	dbdata.UserActLogIns.Add(*ua, userAgent)
-
 	v := &dbdata.User{}
 	err = dbdata.One("Username", cr.Auth.Username, v)
 	if err != nil {
+		// 第三方认证方式, 无本地用户记录, 记录登录成功日志
+		dbdata.UserActLogIns.Add(*ua, userAgent)
 		base.Info("正在使用第三方认证方式登录")
 		CreateSession(w, r, sessionData)
 		return
 	}
+
+	// 首次登录强制修改密码: 密码校验已通过, 但用户尚未修改初始密码, 拒绝登录
+	// 注意: 不调用 lockManager.UpdateLoginStatus(false), 避免正常用户被防爆逻辑锁定
+	if v.ChangePwd {
+		base.Info(cr.Auth.Username, "首次登录需先修改密码")
+		ua.Info = "首次登录需修改密码"
+		ua.Status = dbdata.UserAuthFail
+		dbdata.UserActLogIns.Add(*ua, userAgent)
+
+		// portal_url 未配置时自动使用内置改密页地址
+		portal := base.Cfg.PortalUrl
+		if portal == "" {
+			portal = "https://" + r.Host + "/pwd"
+		}
+		msg := "首次登录请先访问 " + portal + " 修改初始密码后再连接"
+		// auth_request 为 text/template 不转义, 需手动转义防止 URL 特殊字符破坏 XML
+		buf := new(bytes.Buffer)
+		_ = xml.EscapeText(buf, []byte(msg))
+
+		w.WriteHeader(http.StatusOK)
+		data := RequestData{Group: cr.GroupSelect, Groups: dbdata.GetGroupNamesNormal(), Error: buf.String()}
+		tplRequest(tpl_request, w, data)
+		return
+	}
+
+	// 密码校验通过且无需改密, 记录登录成功日志
+	dbdata.UserActLogIns.Add(*ua, userAgent)
+
 	// 用户otp验证
 	if base.Cfg.AuthAloneOtp && !v.DisableOtp {
 		lockManager.UpdateLoginStatus(cr.Auth.Username, r.RemoteAddr, true) // 重置OTP验证计数

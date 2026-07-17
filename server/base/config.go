@@ -74,6 +74,8 @@ var configs = []config{
 	{Typ: cfgBool, Name: "exclude_export_ip", Usage: "排除出口ip路由(出口ip不加密传输)", ValBool: true},
 	{Typ: cfgBool, Name: "auth_alone_otp", Usage: "登录单独验证OTP窗口", ValBool: false},
 	{Typ: cfgBool, Name: "encryption_password", Usage: "用户密码是否加密保存", ValBool: false},
+	{Typ: cfgBool, Name: "force_first_change_pwd", Usage: "新建用户首次登录前强制修改密码", ValBool: false},
+	{Typ: cfgStr, Name: "portal_url", Usage: "自助改密门户地址(首次登录拒绝提示用),内置改密页填 https://vpn地址/pwd,留空则登录拒绝时自动使用内置/pwd路径", ValStr: ""},
 
 	{Typ: cfgBool, Name: "anti_brute_force", Usage: "是否开启防爆功能", ValBool: true},
 	{Typ: cfgStr, Name: "ip_whitelist", Usage: "全局IP白名单,多个用逗号分隔，支持单IP和CIDR范围", ValStr: "192.168.90.1,172.16.0.0/24"},

@@ -91,6 +91,9 @@ type ServerConfig struct {
 	AuthAloneOtp       bool `json:"auth_alone_otp"`
 	EncryptionPassword bool `json:"encryption_password"`
 
+	ForceFirstChangePwd bool   `json:"force_first_change_pwd"`
+	PortalUrl           string `json:"portal_url"`
+
 	AntiBruteForce bool   `json:"anti_brute_force"`
 	IPWhitelist    string `json:"ip_whitelist"`
 

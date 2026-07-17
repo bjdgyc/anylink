@@ -103,6 +103,10 @@ func UserSet(w http.ResponseWriter, r *http.Request) {
 		data.PinCode = utils.RandomRunes(8)
 		base.Info("用户", data.Username, "随机密码为:", data.PinCode)
 	}
+	// 新建用户时按全局开关标记首次登录需修改密码
+	if data.Id == 0 && base.Cfg.ForceFirstChangePwd {
+		data.ChangePwd = true
+	}
 	plainpwd := data.PinCode
 	err = dbdata.SetUser(data)
 	if err != nil {

@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bjdgyc/anylink/base"
 	"github.com/bjdgyc/anylink/dbdata"
 	"github.com/bjdgyc/anylink/pkg/utils"
 	mapset "github.com/deckarep/golang-set"
@@ -104,6 +105,7 @@ func UploadUser(file string) error {
 			Groups:     group,
 			Status:     status,
 			SendEmail:  sendmail,
+			ChangePwd:  base.Cfg.ForceFirstChangePwd,
 			// CreatedAt:  createdAt,
 			// UpdatedAt:  updatedAt,
 		}
