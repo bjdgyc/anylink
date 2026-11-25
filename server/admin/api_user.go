@@ -421,12 +421,10 @@ func userAccountMail(user *dbdata.User) error {
 	}
 	// fmt.Println(w.String())
 
-	var attach *mail.File
-	if user.DisableOtp {
-		attach = nil
-	} else {
+	var otpAttach *mail.File
+	if !user.DisableOtp {
 		imgData, _ := userOtpQr(user.Id, false)
-		attach = &mail.File{
+		otpAttach = &mail.File{
 			MimeType: "image/png",
 			Name:     "userOtpQr.png",
 			Data:     []byte(imgData),
@@ -434,5 +432,41 @@ func userAccountMail(user *dbdata.User) error {
 		}
 	}
 
-	return SendMail(base.Cfg.Issuer, user.Email, w.String(), attach)
+	// 自动生成客户端证书并作为附件发送(证书已存在则复用)
+	var p12Attach *mail.File
+	if len(user.Groups) > 0 {
+		groupname := user.Groups[0]
+		if _, err := dbdata.GetClientCert(user.Username, groupname); err != nil {
+			if _, err := dbdata.GenerateClientCert(user.Username, groupname, false, 0); err != nil {
+				base.Warn("自动生成客户端证书失败:", user.Username, err)
+			}
+		}
+		p12Pass := utils.RandomRunes(8)
+		if p12Data, err := dbdata.GenerateClientP12FromDB(user.Username, groupname, p12Pass); err == nil {
+			p12Name := fmt.Sprintf("vpn-%s.p12", user.Username)
+			p12Attach = &mail.File{
+				MimeType: "application/x-pkcs12",
+				Name:     p12Name,
+				Data:     p12Data,
+			}
+			// 邮件正文追加证书导入说明
+			certSection := fmt.Sprintf(`
+<hr/>
+<h3>证书登录信息</h3>
+<p>本邮件附件包含 VPN 客户端证书 <b>%s</b>，安装后无需账号密码即可登录。</p>
+<ul>
+<li>P12 导入密码：<b>%s</b></li>
+<li>所属用户组：%s</li>
+<li>证书有效期：1 年，到期请联系管理员</li>
+</ul>
+<p>导入方式：Cisco Secure Client 打开 首选项 → 证书 → 导入，选择附件并输入上面的密码；iOS/Android 设备直接点开附件安装，然后在 App 的证书设置中选中。</p>
+<p><b>请妥善保管此邮件，P12 文件等同于登录凭证。</b></p>
+`, p12Name, p12Pass, groupname)
+			w.WriteString(certSection)
+		} else {
+			base.Warn("生成客户端P12失败:", user.Username, err)
+		}
+	}
+
+	return SendMail(base.Cfg.Issuer, user.Email, w.String(), otpAttach, p12Attach)
 }
